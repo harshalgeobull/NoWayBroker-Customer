@@ -1,0 +1,219 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { Helmet } from "react-helmet";
+import RecommendedProperties from "../containers/RecommendedProperties";
+import OffersForYou from "../containers/OffersForYou";
+import Spotlight from "../containers/Spotlight";
+import Adviser from "./Adviser";
+import Cities from "./Cities";
+import ManyMore from "./ManyMore";
+import Search from "../containers/Search";
+import ExploreServices from "../containers/ExploreServices";
+import axios from "axios";
+import ShareModal from "../containers/ShareModal";
+
+const Home = () => {
+  const [cityName, setCityName] = useState("");
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [currentShareUrl, setCurrentShareUrl] = useState("");
+  const userId = sessionStorage.getItem("accessToken");
+
+  const [homeData, setHomeData] = useState({
+    recommendedProperties: [],
+    offersForYou: [],
+    spotlight: [],
+    manyMore: [],
+    cities: [],
+    adviser: {},
+  });
+
+  // Memoized fetchHomeData
+  const fetchHomeData = useCallback(async () => {
+    try {
+      const formData = new FormData();
+      formData.append("user_id", userId);
+      formData.append("city_name", cityName);
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/cust_api/get_home_data`,
+        formData,
+
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      if (response.data) {
+        setHomeData({
+          recommendedProperties: response.data.featured_properties || [],
+          offersForYou: response.data.offers || [],
+          spotlight: response.data.projects || [],
+          manyMore: response.data.recommended_properties || [],
+          cities: response.data.city_property_count || [],
+          adviser: response.data.user_type_property_count || {},
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching home data:", error);
+    }
+  }, [cityName, userId]);
+
+  // Geolocation useEffect
+  useEffect(() => {
+    const storedCityName = sessionStorage.getItem("cityName");
+    if (storedCityName) {
+      setCityName(storedCityName);
+      return;
+    }
+
+    if ("geolocation" in navigator) {
+      console.log("Geolocation supported");
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          console.log("Location permission granted");
+
+          const { latitude, longitude } = position.coords;
+
+          console.log("Latitude:", latitude);
+          console.log("Longitude:", longitude);
+
+sessionStorage.setItem(
+  "userLocation",
+  JSON.stringify({ latitude, longitude }),
+);
+
+// Reload page after saving location
+window.location.reload();
+
+          try {
+            const response = await axios.get(
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyAUCNwxnNo52kFWJNGhRVj-AnkoffmzYe0`,
+            );
+
+            console.log("Google API Response:", response.data);
+
+            if (response.data.status === "OK") {
+              const addressComponents =
+                response.data.results[0].address_components;
+
+              console.log("Address Components:", addressComponents);
+
+              const cityComponent = addressComponents.find((component) =>
+                component.types.includes("locality"),
+              );
+
+              console.log("Detected City:", cityComponent);
+
+              if (cityComponent) {
+                setCityName(cityComponent.long_name);
+
+                sessionStorage.setItem("cityName", cityComponent.long_name);
+
+                console.log("Saved city:", sessionStorage.getItem("cityName"));
+              }
+            }
+          } catch (error) {
+            console.error("Google API Error:", error);
+          }
+        },
+
+        (error) => {
+          console.error("Geolocation Error:", error);
+        },
+      );
+    } else {
+      console.log("Geolocation is not supported by this browser.");
+    }
+  }, []);
+
+  // Fetch home data with debounce
+  useEffect(() => {
+    // if (!cityName) return;
+
+    const debounceFetch = setTimeout(() => {
+      fetchHomeData();
+    }, 300);
+
+    return () => clearTimeout(debounceFetch);
+  }, [cityName, fetchHomeData]);
+
+  const openRecommendedShareModal = useCallback((propertyId) => {
+    const baseUrl = window.location.origin;
+    const fullUrl = `${baseUrl}/propertydetails/${propertyId}`;
+    setCurrentShareUrl(fullUrl);
+    setShowShareModal(true);
+  }, []);
+
+  const openSpotlightShareModal = useCallback((projectId) => {
+    const baseUrl = window.location.origin;
+    const fullUrl = `${baseUrl}/projectdetail/${projectId}`;
+    setCurrentShareUrl(fullUrl);
+    setShowShareModal(true);
+  }, []);
+
+  const closeShareModal = useCallback(() => {
+    setShowShareModal(false);
+  }, []);
+
+  const copyLink = useCallback(() => {
+    navigator.clipboard.writeText(currentShareUrl);
+    alert("Link copied: " + currentShareUrl);
+  }, [currentShareUrl]);
+
+  return (
+    <>
+      <Helmet>
+        <title>NOWAYBROKER - Home</title>
+        <meta name="description" content="sign up page" />
+      </Helmet>
+
+      <section className="">
+        <Search />
+        <div className="w-full mx-auto px-2 space-y-6 md:max-w-[97%]">
+          <Cities data={homeData?.cities || []} />
+          {/* <Shots /> */}
+          <ManyMore
+            data={homeData.manyMore}
+            openRecommendedShareModal={openRecommendedShareModal}
+            closeShareModal={closeShareModal}
+            copyLink={copyLink}
+            currentShareUrl={currentShareUrl}
+            fetchHomeData={fetchHomeData}
+          />
+          <Spotlight
+            data={homeData.spotlight}
+            openSpotlightShareModal={openSpotlightShareModal}
+            closeShareModal={closeShareModal}
+            copyLink={copyLink}
+            currentShareUrl={currentShareUrl}
+            fetchHomeData={fetchHomeData}
+          />
+          <OffersForYou data={homeData.offersForYou} />
+          <RecommendedProperties
+            data={homeData.recommendedProperties}
+            openRecommendedShareModal={openRecommendedShareModal}
+            closeShareModal={closeShareModal}
+            copyLink={copyLink}
+            currentShareUrl={currentShareUrl}
+            fetchHomeData={fetchHomeData}
+          />
+
+          <Adviser data={homeData.adviser} />
+          <ExploreServices />
+        </div>
+
+        {showShareModal && (
+          <ShareModal
+            currentShareUrl={currentShareUrl}
+            closeShareModal={closeShareModal}
+            copyLink={copyLink}
+          />
+        )}
+      </section>
+    </>
+  );
+};
+
+export default Home;

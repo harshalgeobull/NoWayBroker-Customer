@@ -1,0 +1,33 @@
+.heading-component {
+    background-color: #f0f0f0; /* Adjust the color as per your design */
+    padding: 20px; /* Add padding to create space around the text */
+    margin-bottom: 20px; /* Optional: Add margin bottom for separation */
+    color:black;
+}
+
+
+.link-bar {
+    background-color: #f0f0f0; /* Background color */
+    padding: 10px; /* Padding around the content */
+    border-radius: 5px; /* Rounded corners */
+    margin-bottom: 20px; /* Optional: Adds margin to separate from other sections */
+}
+
+
+
+.detail {
+    color: black; /* Set text color to black */
+}
+
+.detail ul {
+    list-style-type: none; /* Remove default list styles */
+    padding-left: 0; /* Remove left padding from the list */
+}
+
+.detail ul li {
+    margin-bottom: 10px; /* Add margin between list items */
+}
+
+.detail p {
+    margin: 0; /* Remove default margin for paragraphs */
+}

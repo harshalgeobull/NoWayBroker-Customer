@@ -1,0 +1,79 @@
+/* listingForm.css */
+
+.hr{
+    color: black;
+    border-top: 2px solid black;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    /* padding: 20px; */
+}
+
+.form-row {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.listingform__section {
+    background-color: #f0f0f0;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.listingform__label {
+    font-weight: bold;
+    color: #333;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+@media (min-width: 768px) {
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .form-group {
+        flex: 0 0 calc(50% - 10px);
+        margin-bottom: 0;
+    }
+}
+
+@media (min-width: 992px) {
+    .form-group {
+        flex: 0 0 calc(25% - 10px);
+    }
+}
+
+
+
+
+

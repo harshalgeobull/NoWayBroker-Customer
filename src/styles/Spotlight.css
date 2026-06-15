@@ -1,0 +1,17 @@
+.full-width-slider {
+    width: 100%;
+  }
+  
+  .card {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .card-left, .card-right {
+    flex: 1;
+    margin: 0 8px;
+  }
+  
+
+
+  
