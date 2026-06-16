@@ -1447,13 +1447,15 @@ export default function SearchDashboard() {
     <>
       <div className="flex flex-col p-1 space-y-4 sm:p-6 bg-rose-50 rounded-xl">
         {/* Search and Filter Section */}
-        <div className="flex flex-col flex-wrap items-center justify-center gap-4 md:flex-row md:items-center">
+        {/* <div className="flex flex-col flex-wrap items-center justify-center gap-4 md:flex-row md:items-center">
           {/* Left Side - Search Input (Optional Placeholder) */}
 
           {/* Right Side Fields */}
-          <div className="flex flex-wrap w-full gap-2 mt-2 md:w-auto">
+          {/* <div className="flex flex-wrap w-full gap-2 mt-2 md:w-auto"> */} 
+        <div className="relative">
+          <div className="flex gap-2 overflow-x-auto pb-2 whitespace-nowrap">
             {/* Property Category Dropdown */}
-            <div className="w-full sm:w-[200px]">
+            <div className="w-[200px] flex-shrink-0">
               <select
                 value={propertyType}
                 onChange={(e) => {
@@ -1492,7 +1494,7 @@ export default function SearchDashboard() {
             </div>
 
             {/* Building Type Dropdown */}
-            <div className="w-full sm:w-[180px]">
+            <div className="w-[200px] flex-shrink-0">
               <select
                 value={buildingType}
                 onChange={(e) => setBuildingType(e.target.value)}
@@ -1508,10 +1510,12 @@ export default function SearchDashboard() {
               </select>
             </div>
 
-            <div className="relative w-full sm:w-[260px]">
+            <div className="relative w-[260px] flex-shrink-0">
               <button
                 type="button"
-                onClick={() => setPropertyTypeOpen(!propertyTypeOpen)}
+                onClick={() => {
+                console.log("Property Type Clicked");
+                setPropertyTypeOpen(!propertyTypeOpen)}}
                 className="flex items-center justify-between w-full h-16 px-4 bg-white border-2 border-gray-300 rounded-md"
               >
                 <span className="truncate text-left">
@@ -1524,7 +1528,7 @@ export default function SearchDashboard() {
               </button>
 
               {propertyTypeOpen && (
-                <div className="absolute left-0 z-50 w-full mt-2 bg-white border rounded-md shadow-lg max-h-72 overflow-y-auto">
+                <div className="absolute left-0 z-[9999] w-full mt-2 bg-white border rounded-md shadow-lg max-h-72 overflow-y-auto">
                   {getFilteredPropertyTypes().map((type) => (
                     <label
                       key={type}
@@ -1566,7 +1570,7 @@ export default function SearchDashboard() {
             </div>
 
             {/* Budget Dropdown */}
-            <div className="relative w-full sm:w-48 md:w-60">
+            <div className="relative w-[260px] flex-shrink-0">
               <button
                 onClick={togglePriceDropdown}
                 className="flex items-center justify-between w-full h-16 px-4 bg-white border-2 border-gray-300 rounded-md focus:outline-none hover:bg-gray-300"
@@ -1624,7 +1628,7 @@ export default function SearchDashboard() {
             </div>
 
             {/* Furnished Status Dropdown */}
-            <div className="w-full sm:w-[200px]">
+            <div className="w-[200px] flex-shrink-0">
               <select
                 value={furnishedStatus}
                 onChange={(e) => setFurnishedStatus(e.target.value)}
@@ -1638,7 +1642,7 @@ export default function SearchDashboard() {
             </div>
 
             {/* BHK Type Dropdown */}
-            <div className="w-full sm:w-[150px]">
+            <div className="w-[200px] flex-shrink-0">
               <select
                 value={bhkType}
                 onChange={(e) => setBhkType(e.target.value)}
@@ -1660,7 +1664,7 @@ export default function SearchDashboard() {
             </div>
 
             {/* Posted By Dropdown */}
-            <div className="w-full sm:w-[180px]">
+            <div className="w-[200px] flex-shrink-0">
               <select
                 value={postedBy}
                 onChange={(e) => setPostedBy(e.target.value)}
@@ -1673,7 +1677,7 @@ export default function SearchDashboard() {
             </div>
 
             {/* Construction Status */}
-            <div className="relative w-full sm:w-[260px]">
+            <div className="relative w-[260px] flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setConstructionOpen(!constructionOpen)}
@@ -1725,7 +1729,7 @@ export default function SearchDashboard() {
               )}
             </div>
 
-            <div className="relative w-full sm:w-[260px]">
+            <div className="relative w-[260px] flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setAmenitiesOpen(!amenitiesOpen)}
@@ -1781,7 +1785,7 @@ export default function SearchDashboard() {
               )}
             </div>
 
-            <div className="w-full sm:w-[180px]">
+            <div className="w-[200px] flex-shrink-0">
               <div className="flex items-center h-16 overflow-hidden bg-white border-2 border-gray-300 rounded-md">
                 <button
                   type="button"
@@ -1812,7 +1816,7 @@ export default function SearchDashboard() {
             </div>
 
             {shouldShowFacingFilter() && (
-              <div className="w-full sm:w-[200px]">
+              <div className="w-[200px] flex-shrink-0">
                 <select
                   value={facing}
                   onChange={(e) => setFacing(e.target.value)}
@@ -1831,7 +1835,7 @@ export default function SearchDashboard() {
               </div>
             )}
 
-            <div className="w-full sm:w-[180px]">
+            <div className="w-[200px] flex-shrink-0">
               <select
                 value={withPhoto}
                 onChange={(e) => setWithPhoto(e.target.value)}
@@ -1843,7 +1847,7 @@ export default function SearchDashboard() {
               </select>
             </div>
 
-            <div className="w-full sm:w-[180px]">
+            <div className="w-[200px] flex-shrink-0">
               <select
                 value={withVideos}
                 onChange={(e) => setWithVideos(e.target.value)}
@@ -1856,7 +1860,7 @@ export default function SearchDashboard() {
             </div>
 
             {/* Sq. Ft Range Dropdown */}
-            <div className="relative w-full sm:w-[240px]">
+            <div className="relative w-[260px] flex-shrink-0">
               <button
                 onClick={toggleSquareFtDropdown}
                 className="flex items-center justify-between w-full h-16 p-2 bg-white border-2 border-gray-300 rounded-md focus:outline-none hover:bg-gray-300"
@@ -1911,7 +1915,7 @@ export default function SearchDashboard() {
             </div>
 
             {propertyType === "PG/Co-living" && (
-              <div className="relative w-full sm:w-[260px]">
+              <div className="relative w-[260px] flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => setSharingTypeOpen(!sharingTypeOpen)}
@@ -1967,7 +1971,7 @@ export default function SearchDashboard() {
             )}
 
             {propertyType === "Rent" && (
-              <div className="relative w-full sm:w-[260px]">
+              <div className="relative w-[260px] flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => setAvailableFromOpen(!availableFromOpen)}
@@ -2026,7 +2030,7 @@ export default function SearchDashboard() {
             )}
 
             {(propertyType === "Rent" || propertyType === "PG/Co-living") && (
-              <div className="relative w-full sm:w-[260px]">
+              <div className="relative w-[260px] flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => setAvailableForOpen(!availableForOpen)}
@@ -2078,7 +2082,7 @@ export default function SearchDashboard() {
             )}
 
             {propertyType === "PG/Co-living" && (
-              <div className="relative w-full sm:w-[260px]">
+              <div className="relative w-[260px] flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => setCapacityOpen(!capacityOpen)}
@@ -2132,7 +2136,7 @@ export default function SearchDashboard() {
             )}
 
             {propertyType === "Commercial Buy" && (
-              <div className="relative w-full sm:w-[260px]">
+              <div className="relative w-[260px] flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => setInvestmentOpen(!investmentOpen)}
@@ -2183,7 +2187,7 @@ export default function SearchDashboard() {
             )}
 
             {propertyType === "Commercial Buy" && (
-              <div className="w-full sm:w-[200px]">
+              <div className="w-[200px] flex-shrink-0">
                 <select
                   value={purchaseType}
                   onChange={(e) => setPurchaseType(e.target.value)}
@@ -2203,7 +2207,7 @@ export default function SearchDashboard() {
               propertyType === "Commercial Lease") &&
               buildingType === "Commercial" &&
               propertyType2.includes("Plot/Land") && (
-                <div className="relative w-full sm:w-[260px]">
+                <div className="relative w-[260px] flex-shrink-0">
                   <button
                     type="button"
                     onClick={() => setPlotLandOpen(!plotLandOpen)}
@@ -2256,7 +2260,7 @@ export default function SearchDashboard() {
             {propertyType === "Commercial Lease" &&
               buildingType === "Commercial" &&
               propertyType2.includes("Office Space") && (
-                <div className="relative w-full sm:w-[260px]">
+                <div className="relative w-[260px] flex-shrink-0">
                   <button
                     type="button"
                     onClick={() => setOfficeTypeOpen(!officeTypeOpen)}
@@ -2299,7 +2303,7 @@ export default function SearchDashboard() {
             {propertyType === "Commercial Lease" &&
               buildingType === "Commercial" &&
               propertyType2.includes("Retail Shops/Showrooms") && (
-                <div className="relative w-full sm:w-[260px]">
+                <div className="relative w-[260px] flex-shrink-0">
                   <button
                     type="button"
                     onClick={() => setRetailTypeOpen(!retailTypeOpen)}
@@ -2342,7 +2346,7 @@ export default function SearchDashboard() {
             {propertyType === "Commercial Lease" &&
               buildingType === "Commercial" &&
               propertyType2.includes("Other Commercial spaces") && (
-                <div className="relative w-full sm:w-[260px]">
+                <div className="relative w-[260px] flex-shrink-0">
                   <button
                     type="button"
                     onClick={() => setOtherCommercialOpen(!otherCommercialOpen)}
@@ -2381,9 +2385,10 @@ export default function SearchDashboard() {
                   )}
                 </div>
               )}
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4 ">
+          </div>
+        </div>
+              {/* Action Buttons */}
+            <div className="flex flex-col gap-4 mt-4 sm:flex-row sm:justify-end ">
               <button
                 onClick={handleButtonClick}
                 className="w-40 p-3 text-rose-700 my-border rounded-md hover:bg-gray-300 focus:outline-none"
@@ -2397,9 +2402,7 @@ export default function SearchDashboard() {
                 Save Search
               </button>
             </div>
-          </div>
         </div>
-      </div>
 
       {/* Main Content */}
       <div className="flex flex-col p-1 space-y-4 sm:p-6 bg-rose-50 rounded-xl">
