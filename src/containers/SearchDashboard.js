@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -114,6 +115,78 @@ export default function SearchDashboard() {
   const [buildingType, setBuildingType] = useState("");
   const [propertyType2, setPropertyType2] = useState([]);
   const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
+  const propertyTypeButtonRef = useRef(null);
+  //Property Portal
+  const [propertyTypeDropdownPos, setPropertyTypeDropdownPos] = useState({
+  top: 0,
+  left: 0,
+  width: 260,
+  });
+  // Budget Portal
+  const budgetButtonRef = useRef(null);
+
+  const [budgetDropdownPos, setBudgetDropdownPos] = useState({
+  top: 0,
+  left: 0,
+  width: 260,
+  });
+  //Construction Portal
+  const constructionButtonRef = useRef(null);
+
+  const [constructionDropdownPos, setConstructionDropdownPos] = useState({
+  top: 0,
+  left: 0,
+  width: 260,
+  });
+  //Amenities Portal
+  const amenitiesButtonRef = useRef(null);
+  const [amenitiesDropdownPos, setAmenitiesDropdownPos] = useState({
+  top: 0,
+  left: 0,
+  width: 260,
+  });
+  //Area Portal
+  const areaButtonRef = useRef(null);
+  const [areaDropdownPos, setAreaDropdownPos] = useState({
+  top: 0,
+  left: 0,
+  width: 260,
+  });
+  //Sharing Type Portal
+  const sharingTypeButtonRef = useRef(null);
+  const [sharingTypeDropdownPos, setSharingTypeDropdownPos] = useState({
+  top: 0,
+  left: 0,
+  width: 260,
+  });
+  //Available Portal
+  const availableFromButtonRef = useRef(null);
+  const [availableFromDropdownPos, setAvailableFromDropdownPos] = useState({
+  top: 0,
+  left: 0,
+  width: 260,
+  });
+  //Available for Portal
+  const availableForButtonRef = useRef(null);
+  const [availableForDropdownPos, setAvailableForDropdownPos] = useState({
+  top: 0,
+  left: 0,
+  width: 260,
+  });
+  //Capacity Portal
+  const capacityButtonRef = useRef(null);
+  const [capacityDropdownPos, setCapacityDropdownPos] = useState({
+  top: 0,
+  left: 0,
+  width: 260,
+  });
+  //Invesment Portal
+  const investmentButtonRef = useRef(null);
+  const [investmentDropdownPos, setInvestmentDropdownPos] = useState({
+  top: 0,
+  left: 0,
+  width: 260,
+  });
   const [freeViewCount, setFreeViewCount] = useState(0);
   const [paidViewCount, setPaidViewCount] = useState(0);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
@@ -1510,12 +1583,21 @@ export default function SearchDashboard() {
               </select>
             </div>
 
+            {/*Property Type*/}
             <div className="relative w-[260px] flex-shrink-0">
               <button
+                ref={propertyTypeButtonRef}
                 type="button"
                 onClick={() => {
-                console.log("Property Type Clicked");
-                setPropertyTypeOpen(!propertyTypeOpen)}}
+                   const rect = propertyTypeButtonRef.current.getBoundingClientRect();
+
+                   setPropertyTypeDropdownPos({
+                  top: rect.bottom + 4,
+                  left: rect.left,
+                  width: rect.width,
+                });
+                
+                  setPropertyTypeOpen(!propertyTypeOpen)}}
                 className="flex items-center justify-between w-full h-16 px-4 bg-white border-2 border-gray-300 rounded-md"
               >
                 <span className="truncate text-left">
@@ -1527,8 +1609,16 @@ export default function SearchDashboard() {
                 <RiArrowDropDownLine className="text-2xl" />
               </button>
 
-              {propertyTypeOpen && (
-                <div className="absolute left-0 z-[9999] w-full mt-2 bg-white border rounded-md shadow-lg max-h-72 overflow-y-auto">
+              {propertyTypeOpen && 
+                createPortal(
+                <div 
+                className="fixed z-[99999] bg-white border rounded-md shadow-lg max-h-72 overflow-y-auto"
+                style={{
+                  top: propertyTypeDropdownPos.top,
+                  left: propertyTypeDropdownPos.left,
+                  width: propertyTypeDropdownPos.width,
+                }}
+                >
                   {getFilteredPropertyTypes().map((type) => (
                     <label
                       key={type}
@@ -1565,14 +1655,24 @@ export default function SearchDashboard() {
                       Done
                     </button>
                   </div>
-                </div>
+                </div>,
+                document.body
               )}
             </div>
 
             {/* Budget Dropdown */}
             <div className="relative w-[260px] flex-shrink-0">
               <button
-                onClick={togglePriceDropdown}
+                ref={budgetButtonRef}
+                onClick={()=>{
+                  const rect = budgetButtonRef.current.getBoundingClientRect();
+                  setBudgetDropdownPos({
+                      top: rect.bottom + 4,
+                      left: rect.left,
+                      width: rect.width,
+                    });
+                togglePriceDropdown();
+                }}
                 className="flex items-center justify-between w-full h-16 px-4 bg-white border-2 border-gray-300 rounded-md focus:outline-none hover:bg-gray-300"
               >
                 <span>
@@ -1588,8 +1688,16 @@ export default function SearchDashboard() {
                 <RiArrowDropDownLine className="text-2xl" />
               </button>
 
-              {priceDropdownOpen && (
-                <div className="absolute left-0 mt-2 w-full p-4 bg-white border-2 border-gray-300 rounded-md shadow-lg z-[20]">
+              {priceDropdownOpen && 
+                createPortal(
+                <div 
+                  className="fixed p-4 bg-white border-2 border-gray-300 rounded-md shadow-lg z-[99999]"
+                   style={{
+                      top: budgetDropdownPos.top,
+                      left: budgetDropdownPos.left,
+                      width: budgetDropdownPos.width,
+                  }}
+                  >
                   <div className="flex flex-col gap-2">
                     <label className="text-sm text-gray-600">Min Price</label>
                     <select
@@ -1623,7 +1731,8 @@ export default function SearchDashboard() {
                         ))}
                     </select>
                   </div>
-                </div>
+                </div>,
+                document.body
               )}
             </div>
 
@@ -1679,8 +1788,16 @@ export default function SearchDashboard() {
             {/* Construction Status */}
             <div className="relative w-[260px] flex-shrink-0">
               <button
+                ref={constructionButtonRef}
                 type="button"
-                onClick={() => setConstructionOpen(!constructionOpen)}
+                onClick={() => {
+                  const rect = constructionButtonRef.current.getBoundingClientRect();
+                  setConstructionDropdownPos({
+                    top: rect.bottom + 4,
+                    left: rect.left,
+                    width: rect.width,
+                  });
+                  setConstructionOpen(!constructionOpen)}}
                 className="flex items-center justify-between w-full h-16 px-4 bg-white border-2 border-gray-300 rounded-md"
               >
                 <span className="truncate text-left">
@@ -1692,8 +1809,16 @@ export default function SearchDashboard() {
                 <RiArrowDropDownLine className="text-2xl" />
               </button>
 
-              {constructionOpen && (
-                <div className="absolute left-0 z-50 w-full mt-2 bg-white border rounded-md shadow-lg">
+              {constructionOpen && 
+                createPortal(
+                <div 
+                  className="fixed z-[99999] bg-white border rounded-md shadow-lg"
+                  style={{
+                    top: constructionDropdownPos.top,
+                    left: constructionDropdownPos.left,
+                    width: constructionDropdownPos.width,
+                  }}
+                  >
                   {["Ready To Move", "New Launch", "Under Construction"].map(
                     (option) => (
                       <label
@@ -1725,14 +1850,26 @@ export default function SearchDashboard() {
                       Done
                     </button>
                   </div>
-                </div>
+                </div>,
+                document.body
               )}
             </div>
 
+            {/*Amenities */}
             <div className="relative w-[260px] flex-shrink-0">
               <button
+                ref={amenitiesButtonRef}
                 type="button"
-                onClick={() => setAmenitiesOpen(!amenitiesOpen)}
+                onClick={() => {
+                  const rect = amenitiesButtonRef.current.getBoundingClientRect();
+
+                  setAmenitiesDropdownPos({
+                    top: rect.bottom + 4,
+                    left: rect.left,
+                    width: rect.width,
+                  });
+                  setAmenitiesOpen(!amenitiesOpen);
+                }}
                 className="flex items-center justify-between w-full h-16 px-4 bg-white border-2 border-gray-300 rounded-md"
               >
                 <span className="truncate text-left">
@@ -1749,8 +1886,16 @@ export default function SearchDashboard() {
                 <RiArrowDropDownLine className="text-2xl" />
               </button>
 
-              {amenitiesOpen && (
-                <div className="absolute left-0 z-50 w-full mt-2 bg-white border rounded-md shadow-lg max-h-72 overflow-y-auto">
+              {amenitiesOpen && 
+                createPortal(
+                <div 
+                  className="fixed z-[99999] bg-white border rounded-md shadow-lg max-h-72 overflow-y-auto"
+                  style={{
+                    top: amenitiesDropdownPos.top,
+                    left: amenitiesDropdownPos.left,
+                    width: amenitiesDropdownPos.width,
+                  }}
+                  >
                   {amenitiesList.map((item) => (
                     <label
                       key={item._id}
@@ -1781,10 +1926,12 @@ export default function SearchDashboard() {
                       Done
                     </button>
                   </div>
-                </div>
+                </div>,
+                document.body
               )}
             </div>
-
+            
+            {/*Bathroom*/}
             <div className="w-[200px] flex-shrink-0">
               <div className="flex items-center h-16 overflow-hidden bg-white border-2 border-gray-300 rounded-md">
                 <button
@@ -1834,7 +1981,7 @@ export default function SearchDashboard() {
                 </select>
               </div>
             )}
-
+            {/*Set Photos*/}
             <div className="w-[200px] flex-shrink-0">
               <select
                 value={withPhoto}
@@ -1847,6 +1994,7 @@ export default function SearchDashboard() {
               </select>
             </div>
 
+            {/*Set Video*/}
             <div className="w-[200px] flex-shrink-0">
               <select
                 value={withVideos}
@@ -1862,7 +2010,18 @@ export default function SearchDashboard() {
             {/* Sq. Ft Range Dropdown */}
             <div className="relative w-[260px] flex-shrink-0">
               <button
-                onClick={toggleSquareFtDropdown}
+                ref={areaButtonRef}
+                onClick={() => {
+                  const rect = areaButtonRef.current.getBoundingClientRect();
+
+                  setAreaDropdownPos({
+                  top: rect.bottom + 4,
+                  left: rect.left,
+                  width: rect.width,
+                  });
+
+                toggleSquareFtDropdown();
+                }}
                 className="flex items-center justify-between w-full h-16 p-2 bg-white border-2 border-gray-300 rounded-md focus:outline-none hover:bg-gray-300"
               >
                 <span>
@@ -1874,8 +2033,16 @@ export default function SearchDashboard() {
                 <RiArrowDropDownLine className="text-2xl" />
               </button>
 
-              {squareFtDropdownOpen && (
-                <div className="absolute left-0 mt-2 w-full p-4 bg-white border-2 border-gray-300 rounded-md shadow-lg z-[20]">
+              {squareFtDropdownOpen && 
+                createPortal(
+                <div 
+                  className="fixed p-4 bg-white border-2 border-gray-300 rounded-md shadow-lg z-[99999]"
+                  style={{
+                    top: areaDropdownPos.top,
+                    left: areaDropdownPos.left,
+                    width: areaDropdownPos.width,
+                }}
+                  >
                   {/* Area Unit */}
                   <label className="text-sm text-gray-600">Area Unit</label>
                   <select
@@ -1910,15 +2077,27 @@ export default function SearchDashboard() {
                     className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none"
                     placeholder="Max"
                   />
-                </div>
+                </div>,
+                document.body
               )}
             </div>
 
+            {/*Sharing Type */}
             {propertyType === "PG/Co-living" && (
               <div className="relative w-[260px] flex-shrink-0">
                 <button
+                  ref={sharingTypeButtonRef}
                   type="button"
-                  onClick={() => setSharingTypeOpen(!sharingTypeOpen)}
+                  onClick={() => {
+                    const rect = sharingTypeButtonRef.current.getBoundingClientRect();
+
+                    setSharingTypeDropdownPos({
+                      top: rect.bottom + 4,
+                      left: rect.left,
+                      width: rect.width,
+                    });
+                    setSharingTypeOpen(!sharingTypeOpen);
+                  }}
                   className="flex items-center justify-between w-full h-16 px-4 bg-white border-2 border-gray-300 rounded-md"
                 >
                   <span className="truncate text-left">
@@ -1930,8 +2109,16 @@ export default function SearchDashboard() {
                   <RiArrowDropDownLine className="text-2xl" />
                 </button>
 
-                {sharingTypeOpen && (
-                  <div className="absolute left-0 z-50 w-full mt-2 bg-white border rounded-md shadow-lg">
+                {sharingTypeOpen && 
+                  createPortal(
+                  <div 
+                    className="fixed z-[99999] bg-white border rounded-md shadow-lg"
+                    style={{
+                      top: sharingTypeDropdownPos.top,
+                      left: sharingTypeDropdownPos.left,
+                      width: sharingTypeDropdownPos.width,
+                    }}
+                    >
                     {[
                       "Private Rooms",
                       "2 Per Room",
@@ -1965,16 +2152,28 @@ export default function SearchDashboard() {
                         Done
                       </button>
                     </div>
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </div>
             )}
 
+            {/*Available Form*/}
             {propertyType === "Rent" && (
               <div className="relative w-[260px] flex-shrink-0">
                 <button
+                  ref={availableFromButtonRef}
                   type="button"
-                  onClick={() => setAvailableFromOpen(!availableFromOpen)}
+                  onClick={() => {
+                    const rect = availableFromButtonRef.current.getBoundingClientRect();
+
+                    setAvailableFromDropdownPos({
+                      top: rect.bottom + 4,
+                      left: rect.left,
+                      width: rect.width,
+                    });
+                    setAvailableFromOpen(!availableFromOpen);
+                  }}
                   className="flex items-center justify-between w-full h-16 px-4 bg-white border-2 border-gray-300 rounded-md"
                 >
                   <span className="truncate text-left">
@@ -1986,8 +2185,16 @@ export default function SearchDashboard() {
                   <RiArrowDropDownLine className="text-2xl" />
                 </button>
 
-                {availableFromOpen && (
-                  <div className="absolute left-0 z-50 w-full mt-2 bg-white border rounded-md shadow-lg">
+                {availableFromOpen && 
+                  createPortal(
+                  <div 
+                  className="fixed z-[99999] bg-white border rounded-md shadow-lg"
+                  style={{
+                    top: availableFromDropdownPos.top,
+                    left: availableFromDropdownPos.left,
+                    width: availableFromDropdownPos.width,
+                  }}
+                  >
                     {[
                       "Immediately",
                       "Any Time",
@@ -2024,16 +2231,29 @@ export default function SearchDashboard() {
                         Done
                       </button>
                     </div>
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </div>
             )}
 
+            {/*Available For*/}
             {(propertyType === "Rent" || propertyType === "PG/Co-living") && (
               <div className="relative w-[260px] flex-shrink-0">
                 <button
+                  ref={availableForButtonRef}
                   type="button"
-                  onClick={() => setAvailableForOpen(!availableForOpen)}
+                  onClick={() => {
+                    const rect = availableForButtonRef.current.getBoundingClientRect();
+
+                    setAvailableForDropdownPos({
+                      top: rect.bottom + 4,
+                      left: rect.left,
+                      width: rect.width,
+                    });
+
+                    setAvailableForOpen(!availableForOpen);
+                  }}
                   className="flex items-center justify-between w-full h-16 px-4 bg-white border-2 border-gray-300 rounded-md"
                 >
                   <span className="truncate text-left">
@@ -2045,8 +2265,16 @@ export default function SearchDashboard() {
                   <RiArrowDropDownLine className="text-2xl" />
                 </button>
 
-                {availableForOpen && (
-                  <div className="absolute left-0 z-50 w-full mt-2 bg-white border rounded-md shadow-lg max-h-72 overflow-y-auto">
+                {availableForOpen && 
+                  createPortal(
+                  <div 
+                    className="absolute left-0 z-50 w-full mt-2 bg-white border rounded-md shadow-lg max-h-72 overflow-y-auto"
+                    style={{
+                      top: availableForDropdownPos.top,
+                      left: availableForDropdownPos.left,
+                      width: availableForDropdownPos.width,
+                    }}
+                    >
                     {getAvailableForOptions().map((option) => (
                       <label
                         key={option}
@@ -2076,16 +2304,28 @@ export default function SearchDashboard() {
                         Done
                       </button>
                     </div>
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </div>
             )}
 
+            {/*Set Capacity */}
             {propertyType === "PG/Co-living" && (
               <div className="relative w-[260px] flex-shrink-0">
                 <button
+                  ref={capacityButtonRef}
                   type="button"
-                  onClick={() => setCapacityOpen(!capacityOpen)}
+                  onClick={() => {
+                    const rect = capacityButtonRef.current.getBoundingClientRect();
+
+                    setCapacityDropdownPos({
+                      top: rect.bottom + 4,
+                      left: rect.left,
+                      width: rect.width,
+                    });
+                    setCapacityOpen(!capacityOpen);
+                  }}
                   className="flex items-center justify-between w-full h-16 px-4 bg-white border-2 border-gray-300 rounded-md"
                 >
                   <span className="truncate text-left">
@@ -2097,8 +2337,16 @@ export default function SearchDashboard() {
                   <RiArrowDropDownLine className="text-2xl" />
                 </button>
 
-                {capacityOpen && (
-                  <div className="absolute left-0 z-50 w-full mt-2 bg-white border rounded-md shadow-lg">
+                {capacityOpen && 
+                  createPortal(
+                  <div 
+                  className="fixed z-[99999] bg-white border rounded-md shadow-lg"
+                  style={{
+                    top: capacityDropdownPos.top,
+                    left: capacityDropdownPos.left,
+                    width: capacityDropdownPos.width,
+                  }}
+                  >
                     {["1-2 guest", "2-4 guest", "4-10 guest", "10+ guest"].map(
                       (option) => (
                         <label
@@ -2130,16 +2378,28 @@ export default function SearchDashboard() {
                         Done
                       </button>
                     </div>
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </div>
             )}
 
+            {/*Investment Option */}
             {propertyType === "Commercial Buy" && (
               <div className="relative w-[260px] flex-shrink-0">
                 <button
+                  ref={investmentButtonRef}
                   type="button"
-                  onClick={() => setInvestmentOpen(!investmentOpen)}
+                  onClick={() => {
+                    const rect = investmentButtonRef.current.getBoundingClientRect();
+
+                    setInvestmentDropdownPos({
+                      top: rect.bottom + 4,
+                      left: rect.left,
+                      width: rect.width,
+                    });
+                    setInvestmentOpen(!investmentOpen);
+                  }}
                   className="flex items-center justify-between w-full h-16 px-4 bg-white border-2 border-gray-300 rounded-md"
                 >
                   <span className="truncate text-left">
@@ -2150,8 +2410,16 @@ export default function SearchDashboard() {
                   <RiArrowDropDownLine className="text-2xl" />
                 </button>
 
-                {investmentOpen && (
-                  <div className="absolute left-0 z-50 w-full mt-2 bg-white border rounded-md shadow-lg">
+                {investmentOpen && 
+                  createPortal(
+                  <div 
+                    className="fixed z-[99999] bg-white border rounded-md shadow-lg"
+                    style={{
+                      top: investmentDropdownPos.top,
+                      left: investmentDropdownPos.left,
+                      width: investmentDropdownPos.width,
+                    }}
+                    >
                     {investmentOptionsList.map((option) => (
                       <label
                         key={option}
@@ -2181,11 +2449,12 @@ export default function SearchDashboard() {
                         Done
                       </button>
                     </div>
-                  </div>
+                  </div>,
+                  document.body
                 )}
               </div>
             )}
-
+            {/*Resale*/}
             {propertyType === "Commercial Buy" && (
               <div className="w-[200px] flex-shrink-0">
                 <select
