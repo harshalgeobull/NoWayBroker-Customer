@@ -5,6 +5,7 @@ import OffersForYou from "../containers/OffersForYou";
 import Spotlight from "../containers/Spotlight";
 import Adviser from "./Adviser";
 import Cities from "./Cities";
+import OwnerProperty from "./OwnerProperty";
 import ManyMore from "./ManyMore";
 import Search from "../containers/Search";
 import ExploreServices from "../containers/ExploreServices";
@@ -25,6 +26,8 @@ const Home = () => {
     cities: [],
     adviser: {},
   });
+
+  const [ownerProperties, setOwnerProperties] = useState([]);
 
   // Memoized fetchHomeData
   const fetchHomeData = useCallback(async () => {
@@ -59,6 +62,32 @@ const Home = () => {
     }
   }, [cityName, userId]);
 
+  const fetchOwnerProperties = async () => {
+  try {
+    const formData = new FormData();
+
+    formData.append("page", 1);
+    formData.append("page_size", 10);
+    formData.append("user_type", "Owner");
+
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/cust_api/filter_property`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    if (response.data.status === 1) {
+      console.log("OWNER API DATA:", response.data.data);
+      setOwnerProperties(response.data.data || []);
+    }
+  } catch (error) {
+    console.error("Owner API Error:", error);
+  }
+};
   // Geolocation useEffect
   useEffect(() => {
     const storedCityName = sessionStorage.getItem("cityName");
@@ -134,10 +163,11 @@ window.location.reload();
 
     const debounceFetch = setTimeout(() => {
       fetchHomeData();
+      fetchOwnerProperties();
     }, 300);
 
     return () => clearTimeout(debounceFetch);
-  }, [cityName, fetchHomeData]);
+  }, [cityName, fetchHomeData]); //fetchOwnerProperties]);
 
   const openRecommendedShareModal = useCallback((propertyId) => {
     const baseUrl = window.location.origin;
@@ -161,6 +191,7 @@ window.location.reload();
     navigator.clipboard.writeText(currentShareUrl);
     alert("Link copied: " + currentShareUrl);
   }, [currentShareUrl]);
+  //console.log("ownerProperties", ownerProperties);
 
   return (
     <>
@@ -174,6 +205,17 @@ window.location.reload();
         <div className="w-full mx-auto px-2 space-y-6 md:max-w-[97%]">
           <Cities data={homeData?.cities || []} />
           {/* <Shots /> */}
+          <OwnerProperty
+            data={{
+              status: 1,
+              data: ownerProperties,
+            }}
+            openRecommendedShareModal={openRecommendedShareModal}
+            closeShareModal={closeShareModal}
+            copyLink={copyLink}
+            currentShareUrl={currentShareUrl}
+            fetchHomeData={fetchHomeData}
+          />
           <ManyMore
             data={homeData.manyMore}
             openRecommendedShareModal={openRecommendedShareModal}
