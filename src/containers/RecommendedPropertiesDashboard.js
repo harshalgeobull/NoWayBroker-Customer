@@ -1964,7 +1964,7 @@ const FeaturedDashboard = () => {
                 className="w-full h-16 p-2 border-2 border-gray-300 rounded-md focus:outline-none hover:bg-gray-300 appearance-none"
               >
                 <option value="">Select BHK</option>
-                <option value="Studio">Studio</option>
+                <option value="Studio">Studio/Single Room</option>
                 <option value="1 RK">1 RK</option>
                 <option value="1 BHK">1 BHK</option>
                 <option value="1.5 BHK">1.5 BHK</option>
