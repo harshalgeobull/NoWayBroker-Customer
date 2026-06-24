@@ -31,6 +31,8 @@ const Editproject = () => {
   const [address, setAddress] = useState("");
   const [addressArea, setAddressArea] = useState("");
   const [city, setCity] = useState("");
+  const [locality, setLocality] = useState("");
+  const [subLocality, setSubLocality] = useState("");
   const [state, setState] = useState("");
   const [country, setCountry] = useState("");
   const [zipCode, setZipCode] = useState("");
@@ -169,7 +171,7 @@ Make it engaging, attractive, and human-like.
         },
         {
           headers: {
-           Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+            Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
             "Content-Type": "application/json",
           },
         },
@@ -1171,6 +1173,10 @@ Make it engaging, attractive, and human-like.
 
       setZipCode(data.zip_code || "");
 
+      // setLocality(data.locality || "");
+
+      // setSubLocality(data.sub_locality || "");
+
       setOfficeSubType(data.office_type || "");
 
       setLandType(data.land_type || "");
@@ -2130,7 +2136,7 @@ Make it engaging, attractive, and human-like.
                       >
                         <option value="">Select BHK Type</option>
                         {[
-                          "Studio",
+                          "Studio/Single Room",
                           "1 BHK",
                           "1.5 BHK",
                           "2 BHK",
@@ -2157,40 +2163,6 @@ Make it engaging, attractive, and human-like.
                     </div>
                   )}
 
-                  {/* Built-up Area */}
-                  <div>
-                    <label className="font-medium text-gray-700">
-                      Built-up Area <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.area || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d{0,10}$/.test(value)) {
-                          handleInputChange("area", value);
-                        }
-                      }}
-                      className="w-full mt-1 p-3 border rounded-lg"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-medium text-gray-700">Unit</label>
-                    <select
-                      value={formData.area_in || ""}
-                      onChange={(e) =>
-                        handleInputChange("area_in", e.target.value)
-                      }
-                      className="w-full mt-1 p-3 border rounded-lg"
-                    >
-                      <option value="">Select</option>
-                      <option value="sq.ft">sq.ft</option>
-                      <option value="sq.yards">sq.yards</option>
-                      <option value="sq.m">sq.m</option>
-                    </select>
-                  </div>
-
                   {/* Carpet Area */}
                   <div>
                     <label className="font-medium text-gray-700">
@@ -2215,6 +2187,40 @@ Make it engaging, attractive, and human-like.
                       value={formData.carpet_area_unit || ""}
                       onChange={(e) =>
                         handleInputChange("carpet_area_unit", e.target.value)
+                      }
+                      className="w-full mt-1 p-3 border rounded-lg"
+                    >
+                      <option value="">Select</option>
+                      <option value="sq.ft">sq.ft</option>
+                      <option value="sq.yards">sq.yards</option>
+                      <option value="sq.m">sq.m</option>
+                    </select>
+                  </div>
+
+                  {/* Built-up Area */}
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      Built-up Area <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.area || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d{0,10}$/.test(value)) {
+                          handleInputChange("area", value);
+                        }
+                      }}
+                      className="w-full mt-1 p-3 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-medium text-gray-700">Unit</label>
+                    <select
+                      value={formData.area_in || ""}
+                      onChange={(e) =>
+                        handleInputChange("area_in", e.target.value)
                       }
                       className="w-full mt-1 p-3 border rounded-lg"
                     >
@@ -2545,7 +2551,7 @@ Make it engaging, attractive, and human-like.
                 ) && (
                   <div>
                     <label className="font-medium text-gray-700">
-                      Floor Number
+                      Flat on the floor
                     </label>
 
                     <select
@@ -2934,6 +2940,38 @@ Make it engaging, attractive, and human-like.
                     </select>
                   </div>
                 )}
+                                {!(
+                  (buildingType === "Residential" && propertyType === "Plot") ||
+                  (buildingType === "Commercial" &&
+                    [
+                      "Land",
+                      "Plot/Land",
+                      "Industry",
+                      "Storage",
+                      "Hospitality",
+                    ].includes(propertyType))
+                ) && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      Age of Property
+                    </label>
+
+                    <select
+                      value={formData.age_of_property || ""}
+                      onChange={(e) =>
+                        handleInputChange("age_of_property", e.target.value)
+                      }
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select Age of Property</option>
+                      <option value="0-1">0-1</option>
+                      <option value="2-4">2-4</option>
+                      <option value="5-7">5-7</option>
+                      <option value="8-10">8-10</option>
+                      <option value="10+">10+</option>
+                    </select>
+                  </div>
+                )}
                 {!(
                   (buildingType === "Residential" && propertyType === "Plot") ||
                   (buildingType === "Commercial" &&
@@ -2969,40 +3007,9 @@ Make it engaging, attractive, and human-like.
                     )}
                   </div>
                 )}
-                {!(
-                  (buildingType === "Residential" && propertyType === "Plot") ||
-                  (buildingType === "Commercial" &&
-                    [
-                      "Land",
-                      "Plot/Land",
-                      "Industry",
-                      "Storage",
-                      "Hospitality",
-                    ].includes(propertyType))
-                ) && (
-                  <div>
-                    <label className="font-medium text-gray-700">
-                      Age of Property
-                    </label>
 
-                    <select
-                      value={formData.age_of_property || ""}
-                      onChange={(e) =>
-                        handleInputChange("age_of_property", e.target.value)
-                      }
-                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                    >
-                      <option value="">Select Age of Property</option>
-                      <option value="0-1">0-1</option>
-                      <option value="2-4">2-4</option>
-                      <option value="5-7">5-7</option>
-                      <option value="8-10">8-10</option>
-                      <option value="10+">10+</option>
-                    </select>
-                  </div>
-                )}
 
-                {!(
+                {/* {!(
                   (buildingType === "Residential" && propertyType === "Plot") ||
                   (buildingType === "Commercial" &&
                     [
@@ -3014,6 +3021,25 @@ Make it engaging, attractive, and human-like.
                       "Hospitality",
                     ].includes(propertyType))
                 ) && (
+                  <div>
+                    <label className="font-medium text-gray-700">Balcony</label>
+
+                    <select
+                      name="balcony"
+                      value={formData.balcony || ""}
+                      onChange={handleInputChange}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select No. of Balconies</option>
+                      <option value="0">0</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="more than 3">More than 3</option>
+                    </select>
+                  </div>
+                )} */}
+                {buildingType === "Residential" && propertyType !== "Plot" && (
                   <div>
                     <label className="font-medium text-gray-700">Balcony</label>
 
@@ -3132,7 +3158,7 @@ Make it engaging, attractive, and human-like.
                   </div>
                 )}
 
-                {buildingType === "Commercial" &&
+                {/* {buildingType === "Commercial" &&
                   [
                     "Office Space",
                     "Retail",
@@ -3188,7 +3214,7 @@ Make it engaging, attractive, and human-like.
                         <option value="New Bookings">New Bookings</option>
                       </select>
                     </div>
-                  )}
+                  )} */}
                 {buildingType === "Commercial" &&
                   ["Office Space", "Retail"].includes(propertyType) && (
                     <div>
@@ -3434,7 +3460,7 @@ Make it engaging, attractive, and human-like.
                   formData.parking_availability === "Yes" && (
                     <div>
                       <label className="font-medium text-gray-700">
-                        Covered Parking
+                        Covered Car Parking
                       </label>
 
                       <select
@@ -3447,7 +3473,7 @@ Make it engaging, attractive, and human-like.
                         }}
                         className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                       >
-                        <option value="">Select Covered Parking</option>
+                        <option value="">Select Covered Car Parking</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
                         <option value="3">3</option>
@@ -3473,7 +3499,7 @@ Make it engaging, attractive, and human-like.
                   formData.parking_availability === "Yes" && (
                     <div>
                       <label className="font-medium text-gray-700">
-                        Uncovered Parking
+                        Open Car Parking
                       </label>
 
                       <select
@@ -3486,7 +3512,7 @@ Make it engaging, attractive, and human-like.
                         }}
                         className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                       >
-                        <option value="">Select Uncovered Parking</option>
+                        <option value="">Select Open Car Parking</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
                         <option value="3">3</option>
