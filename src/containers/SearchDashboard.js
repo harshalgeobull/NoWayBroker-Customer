@@ -2196,8 +2196,7 @@ export default function SearchDashboard() {
                     >
                       {areaUnits.map((unit) => (
                         <option key={unit} value={unit}>
-                          {unit.charAt(0).toUpperCase() +
-                            unit.slice(1).toLowerCase()}
+                          {unit}
                         </option>
                       ))}
                     </select>
