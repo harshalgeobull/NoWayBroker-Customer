@@ -333,7 +333,7 @@ const ManyMore = ({
 
               return (
                 <div key={property._id} className="box-border p-2">
-                  <div className="flex flex-col h-[420px] sm:h-[440px] md:h-[460px] lg:h-[470px] overflow-hidden bg-white shadow-lg rounded-2xl">
+                  <div className="flex flex-col min-h-[500px] bg-white shadow-lg rounded-2xl">
                     <div className="w-full overflow-hidden rounded-xl">
                       <div className="relative">
                         <Link
@@ -520,12 +520,12 @@ const ManyMore = ({
                       </div>
                       {/* Property Details */}
                       {/* Property Details - Refined 99acres Style */}
-                      <div className="flex flex-col flex-1 p-3 text-black bg-white">
+                      <div className="flex flex-col justify-between flex-1 px-5 py-4 text-black bg-white">
                         {/* Price Section */}
-                        <h4 className="min-h-[48px] text-lg font-semibold leading-6 line-clamp-2">
+                        <h4 className="h-[52px] overflow-hidden text-lg font-semibold leading-6 line-clamp-2">
                           {property.property_name}
                         </h4>
-                        <div className="flex items-center mb-1">
+                        <div className="h-[38px] flex items-center mb-2">
                           <h3 className="flex items-center text-lg font-bold">
                             <FaRupeeSign className="mr-0.5 text-sm" />
                             {property.property_category_type === "Rent"
@@ -541,7 +541,7 @@ const ManyMore = ({
                         </div>
 
                         {/* BHK and Property Type */}
-                        <div className="min-h-[48px] mb-1">
+                        <div className="h-[48px] overflow-hidden mb-2">
                           <p className="text-sm font-semibold text-gray-800">
                             {property.bhk_type} {property.property_type},{" "}
                             {property.bathrooms || "2"} Baths
@@ -549,7 +549,7 @@ const ManyMore = ({
                         </div>
 
                         {/* Address / Locality */}
-                        <div className="flex items-start mb-2">
+                        <div className="h-[30px] flex items-start overflow-hidden">
                           <p className="text-xs text-gray-500 line-clamp-1">
                             In{" "}
                             <span className="font-medium text-gray-700">
