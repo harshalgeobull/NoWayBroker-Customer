@@ -8,63 +8,12 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IoAlertCircleOutline } from "react-icons/io5";
 
-import { useGoogleLogin } from "@react-oauth/google";
-
-
-
 const Login1 = ({ onClose, isOpen, defaultMobile }) => {
   const [mobile, setMobile] = useState(defaultMobile || "");
   const [countryCode, setCountryCode] = useState("+91");
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [showSignUpModal, setShowSignUpModal] = useState(false);
   const history = useHistory();
-  const googleLogin = useGoogleLogin({
-    flow: "implicit",
-
-    onSuccess: async (tokenResponse) => {
-      try {
-        const response = await fetch(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          {
-            headers: {
-              Authorization: `Bearer ${tokenResponse.access_token}`,
-            },
-          }
-        );
-
-        const user = await response.json();
-
-        console.log("Google User:", user);
-
-        sessionStorage.setItem("accessToken", user.sub);
-        sessionStorage.setItem("user_name", user.name);
-        sessionStorage.setItem("user_email", user.email);
-        sessionStorage.setItem("user_type", "customer");
-        sessionStorage.setItem("profile_pic", user.picture);
-
-        localStorage.setItem("googleUser", JSON.stringify(user));
-
-        toast.success(`Welcome ${user.name}`);
-
-        onClose();
-
-        window.location.reload();
-
-        toast.success(`Welcome ${user.name}`);
-
-        onClose();
-
-        // history.push("/");
-      } catch (error) {
-        console.log(error);
-        toast.error("Google Login Failed");
-      }
-    },
-
-    onError: () => {
-      toast.error("Google Login Failed");
-    },
-  });
   // Inside your component
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({
@@ -249,33 +198,9 @@ const Login1 = ({ onClose, isOpen, defaultMobile }) => {
             </>
 
             {/* Login Button */}
-            {/* Google Login Button */}
-            <button
-              type="button"
-              onClick={() => googleLogin()}
-              className="w-full flex items-center justify-center gap-3 py-3 mt-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition"
-            >
-              <img
-                src="https://developers.google.com/identity/images/g-logo.png"
-                alt="Google"
-                className="w-5 h-5"
-              />
-              <span className="font-medium text-gray-700">
-                Continue with Google
-              </span>
-            </button>
-
-            {/* OR Divider */}
-            <div className="flex items-center my-4">
-              <div className="flex-1 border-t border-gray-300"></div>
-              <span className="px-3 text-gray-500 text-sm">OR</span>
-              <div className="flex-1 border-t border-gray-300"></div>
-            </div>
-
-            {/* Login Button */}
             <button
               onClick={handleLogin}
-              className={`w-full py-3 rounded-lg text-lg font-medium transition ${isSubmitting
+              className={`w-full py-3 mt-3 rounded-lg text-lg font-medium transition ${isSubmitting
                 ? "bg-gray-400 text-white cursor-not-allowed"
                 : "my-bg text-white hover:my-bg"
                 }`}
@@ -283,6 +208,7 @@ const Login1 = ({ onClose, isOpen, defaultMobile }) => {
             >
               {isSubmitting ? "Sending OTP..." : "Login"}
             </button>
+
             {/* Signup Link */}
             <p className="text-center text-gray-500 text-sm mt-4">
               Don't have an account?{" "}
