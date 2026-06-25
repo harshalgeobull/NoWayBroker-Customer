@@ -645,9 +645,9 @@ const Detail = ({ propertyData }) => {
     [
       "Address",
       propertyDetails?.address &&
-        propertyDetails?.city_name &&
-        propertyDetails?.state &&
-        propertyDetails?.zip_code
+      propertyDetails?.city_name &&
+      propertyDetails?.state &&
+      propertyDetails?.zip_code
         ? `${propertyDetails.address}, ${propertyDetails.city_name}, ${propertyDetails.state}, ${propertyDetails.zip_code}`
         : null,
     ],
@@ -678,7 +678,12 @@ const Detail = ({ propertyData }) => {
     // ["Developer", propertyDetails?.developer || null],
     ["Building Type", propertyDetails?.building_type || null],
     ["Property Type", propertyDetails?.property_type || null],
-    ["Bhk Type", propertyDetails?.bhk_type || null],
+    [
+      "Bhk Type",
+      propertyDetails?.bhk_type === "Studio"
+        ? "Studio/Single Room"
+        : propertyDetails?.bhk_type || null,
+    ],
     ["Furnishing", propertyDetails?.furnished_type || null],
     // ["Plot No.", propertyDetails?.plot_no || null],
     ["Operating Since", propertyDetails?.operating_since || null],
@@ -774,7 +779,7 @@ const Detail = ({ propertyData }) => {
       "Built-up Area Unit",
       propertyDetails?.area_in
         ? propertyDetails.area_in.charAt(0).toUpperCase() +
-        propertyDetails.area_in.slice(1).toLowerCase()
+          propertyDetails.area_in.slice(1).toLowerCase()
         : null,
     ],
     ["Carpet Area", propertyDetails?.carpet_area || null],
@@ -782,7 +787,7 @@ const Detail = ({ propertyData }) => {
       "Carpet Area Unit",
       propertyDetails?.carpet_area_unit
         ? propertyDetails.carpet_area_unit.charAt(0).toUpperCase() +
-        propertyDetails.carpet_area_unit.slice(1).toLowerCase()
+          propertyDetails.carpet_area_unit.slice(1).toLowerCase()
         : null,
     ],
     ["Available Status", propertyDetails?.available_status || null],
@@ -1008,12 +1013,13 @@ const Detail = ({ propertyData }) => {
             {propertyDetails.virtual_tour_availability === "Yes" && (
               <button
                 className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
-      ${tourSchedule?.[0]?.status === "Accepted"
-                    ? "bg-green-500 text-white rounded-full"
-                    : scheduledDateLabel === "Virtual Tour"
-                      ? "bg-white border my-text rounded-lg"
-                      : "bg-[#FFD700] text-black rounded-full"
-                  }`}
+      ${
+        tourSchedule?.[0]?.status === "Accepted"
+          ? "bg-green-500 text-white rounded-full"
+          : scheduledDateLabel === "Virtual Tour"
+            ? "bg-white border my-text rounded-lg"
+            : "bg-[#FFD700] text-black rounded-full"
+      }`}
                 onClick={() => {
                   const token = sessionStorage.getItem("accessToken");
 
@@ -1117,10 +1123,11 @@ const Detail = ({ propertyData }) => {
               }}
             >
               <FiHeart
-                className={`text-2xl ${propertyDetails.is_favorite
-                  ? "text-red-600 fill-red-600"
-                  : "text-gray-600"
-                  }`}
+                className={`text-2xl ${
+                  propertyDetails.is_favorite
+                    ? "text-red-600 fill-red-600"
+                    : "text-gray-600"
+                }`}
               />
             </div>
 
@@ -1147,7 +1154,6 @@ const Detail = ({ propertyData }) => {
                     src={propertyDetails?.cover_image}
                     alt="Main"
                     className="rounded-2xl w-full h-64 md:h-[400px] object-cover"
-
                   />
                   {/* Watermark */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -1222,7 +1228,6 @@ const Detail = ({ propertyData }) => {
                               onClick={() => setShowAllImages(true)}
                             >
                               <div className="relative">
-
                                 <img
                                   src={filteredImages[1]?.image}
                                   alt="Preview"
@@ -1301,12 +1306,18 @@ const Detail = ({ propertyData }) => {
 
             {moreDetailsFields.length > 0 && (
               <div className="w-full p-4 mt-4 bg-white rounded-lg shadow-sm">
-                <h3 className="mb-4 text-xl font-semibold text-gray-800">More Details</h3>
+                <h3 className="mb-4 text-xl font-semibold text-gray-800">
+                  More Details
+                </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
                   {moreDetailsFields.map(([label, value], index) => (
                     <div key={index} className="flex flex-col">
-                      <span className="text-xs text-gray-500 uppercase tracking-wide">{label}</span>
-                      <span className="text-sm font-semibold text-gray-800 mt-0.5">{value}</span>
+                      <span className="text-xs text-gray-500 uppercase tracking-wide">
+                        {label}
+                      </span>
+                      <span className="text-sm font-semibold text-gray-800 mt-0.5">
+                        {value}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -1440,10 +1451,11 @@ const Detail = ({ propertyData }) => {
 
               {enquiryStatus && (
                 <div
-                  className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
-                    ? "text-green-600"
-                    : "text-red-600"
-                    }`}
+                  className={`text-center mt-4 text-lg ${
+                    enquiryStatus.type === "success"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
                 >
                   {enquiryStatus.message}
                 </div>
@@ -1466,7 +1478,6 @@ const Detail = ({ propertyData }) => {
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
                 {propertyImages.map((img, index) => (
                   <div className="relative">
-
                     <img
                       key={index}
                       src={img.image}
@@ -1678,12 +1689,13 @@ const Detail = ({ propertyData }) => {
                         {/* FOR BUY & FEATURED Tags (Bottom of the Image) */}
                         <div className="absolute bottom-0 left-0">
                           <span
-                            className={`${property.property_category_type === "Rent"
-                              ? "bg-blue-500"
-                              : property.property_category_type === "Buy"
-                                ? "bg-green-500"
-                                : "bg-gray-500"
-                              } text-white text-xs px-3 py-1 rounded-se-lg`}
+                            className={`${
+                              property.property_category_type === "Rent"
+                                ? "bg-blue-500"
+                                : property.property_category_type === "Buy"
+                                  ? "bg-green-500"
+                                  : "bg-gray-500"
+                            } text-white text-xs px-3 py-1 rounded-se-lg`}
                           >
                             {property.property_category_type === "Rent"
                               ? "FOR RENT"
@@ -1778,11 +1790,12 @@ const Detail = ({ propertyData }) => {
 
                               <p className="m-0 text-sm font-medium text-gray-700">
                                 Deposit ₹
-                                {Number(property.custom_deposit_amount).toLocaleString("en-IN")}
+                                {Number(
+                                  property.custom_deposit_amount,
+                                ).toLocaleString("en-IN")}
                               </p>
                             </div>
                           )}
-
 
                           <div className="flex items-center w-full mt-2">
                             {property.furnished_type ? (
@@ -1821,9 +1834,7 @@ const Detail = ({ propertyData }) => {
                               <AiOutlineUser
                                 className="text-xl text-gray-600"
                                 size={25}
-
                               />
-
                             )}
                           </div>
                           <div className="ml-2 flex flex-col">

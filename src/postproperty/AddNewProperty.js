@@ -3819,7 +3819,7 @@ Make it engaging, attractive, and human-like.
                         value={formData.block}
                         onChange={(e) => {
                           const value = e.target.value;
-                          if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
+                          if (/^[a-zA-Z0-9\s\-_/().,#@&]{0,20}$/.test(value)) {
                             handleInputChange(e);
                           }
                         }}
