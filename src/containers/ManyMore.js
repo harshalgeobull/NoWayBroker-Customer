@@ -43,9 +43,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -197,37 +197,39 @@ const ManyMore = ({
   // Slider settings
   const [activeIndexes, setActiveIndexes] = useState({});
   const BASE_URL = process.env.REACT_APP_API_URL;
-
   const settings = {
-    infinite: true,
+    dots: false,
+    infinite: properties.length > 4,
+    speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
     arrows: false,
-    cssEase: "linear",
-    centerMode: false,
-    centerPadding: "0px",
+
     responsive: [
+      {
+        breakpoint: 1280,
+        settings: {
+          slidesToShow: 4,
+        },
+      },
       {
         breakpoint: 1024,
         settings: {
           slidesToShow: 3,
-          slidesToScroll: 1,
         },
       },
       {
         breakpoint: 768,
         settings: {
           slidesToShow: 2,
-          slidesToScroll: 1,
         },
       },
       {
-        breakpoint: 480,
+        breakpoint: 640,
         settings: {
           slidesToShow: 1,
-          slidesToScroll: 1,
         },
       },
     ],
@@ -265,10 +267,10 @@ const ManyMore = ({
   }, []);
 
   return (
-    <div className="px-10 py-4 bg-white ">
-      <div className="bg-slate-50 rounded-2xl">
-        <div className="w-full sm:px-6 lg:px-4">
-          <div className="flex flex-col items-start justify-between px-4 pt-3 mb-3 sm:flex-row sm:items-center">
+    <div className="w-full px-0 py-4 bg-white">
+      <div className="w-full bg-slate-50 rounded-2xl">
+        <div className="w-full">
+          <div className="flex flex-col gap-4 px-6 pt-6 mb-4 lg:px-8 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col">
               <h2 className="mb-2 text-2xl font-bold tracking-wide text-gray-800 sm:text-3xl">
                 Exclusive Recommended Properties
@@ -331,7 +333,7 @@ const ManyMore = ({
 
               return (
                 <div key={property._id} className="box-border p-2">
-                  <div className="h-full overflow-hidden shadow rounded-2xl bg-slate-100">
+                  <div className="flex flex-col h-[420px] sm:h-[440px] md:h-[460px] lg:h-[470px] overflow-hidden bg-white shadow-lg rounded-2xl">
                     <div className="w-full overflow-hidden rounded-xl">
                       <div className="relative">
                         <Link
@@ -399,7 +401,7 @@ const ManyMore = ({
                                   <img
                                     src={imgUrl}
                                     alt="Property"
-                                    className="object-cover w-full h-48 rounded-t-2xl"
+                                    className="object-cover w-full h-[180px] sm:h-[220px] md:h-[240px] lg:h-[220px] rounded-t-2xl"
                                   />
                                 </div>
                               ))}
@@ -408,7 +410,7 @@ const ManyMore = ({
                             <img
                               src={allImages[0] || "/image/app.png"}
                               alt="Property"
-                              className="object-cover w-full h-48 rounded-t-2xl"
+                              className="object-cover w-full h-[180px] sm:h-[220px] md:h-[240px] lg:h-[220px] rounded-t-2xl"
                             />
                           )}
                         </Link>
@@ -518,9 +520,11 @@ const ManyMore = ({
                       </div>
                       {/* Property Details */}
                       {/* Property Details - Refined 99acres Style */}
-                      <div className="p-3 text-black bg-white">
+                      <div className="flex flex-col flex-1 p-3 text-black bg-white">
                         {/* Price Section */}
-                        <h4>{property.property_name}</h4>
+                        <h4 className="min-h-[48px] text-lg font-semibold leading-6 line-clamp-2">
+                          {property.property_name}
+                        </h4>
                         <div className="flex items-center mb-1">
                           <h3 className="flex items-center text-lg font-bold">
                             <FaRupeeSign className="mr-0.5 text-sm" />
@@ -537,7 +541,7 @@ const ManyMore = ({
                         </div>
 
                         {/* BHK and Property Type */}
-                        <div className="mb-1">
+                        <div className="min-h-[48px] mb-1">
                           <p className="text-sm font-semibold text-gray-800">
                             {property.bhk_type} {property.property_type},{" "}
                             {property.bathrooms || "2"} Baths
@@ -555,10 +559,12 @@ const ManyMore = ({
                         </div>
 
                         {/* Divider */}
+                        <div className="flex-grow"></div>
+                        <div className="mt-auto"></div>
                         <hr className="my-2 border-gray-100" />
 
                         {/* Footer: Posted by & Share */}
-                        <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center justify-between pt-2">
                           <div className="flex flex-col">
                             <span className="text-[11px] text-gray-400 uppercase tracking-wide">
                               Posted by {property.user_type || "Owner"}
@@ -599,7 +605,7 @@ const ManyMore = ({
             })}
           </Slider>
         </div>
-      </div>
+      </div >
       <div
         id="shareModal"
         className="fixed bottom-0 right-0 z-50 items-center justify-center hidden bg-black bg-opacity-50"
@@ -679,7 +685,7 @@ const ManyMore = ({
           setIsLoginModalOpen(true);
         }}
       />
-    </div>
+    </div >
   );
 };
 

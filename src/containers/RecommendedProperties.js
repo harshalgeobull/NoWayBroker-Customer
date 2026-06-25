@@ -161,35 +161,36 @@ const RecommendedProperties = ({
   // Slider settings
   const [activeIndexes, setActiveIndexes] = useState({});
   const BASE_URL = process.env.REACT_APP_API_URL;
-
   const settings = {
     infinite: true,
-    slidesToShow: 3,
+    slidesToShow: 4,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
     arrows: false,
     cssEase: "linear",
     centerMode: false,
-    centerPadding: "0px",
     responsive: [
+      {
+        breakpoint: 1280,
+        settings: {
+          slidesToShow: 3,
+        },
+      },
       {
         breakpoint: 1024,
         settings: {
           slidesToShow: 2,
-          slidesToScroll: 1,
         },
       },
       {
         breakpoint: 768,
         settings: {
           slidesToShow: 1,
-          slidesToScroll: 1,
         },
       },
     ],
   };
-
   const formatPrice = (price) => {
     if (!price) return "";
 
@@ -248,10 +249,10 @@ const RecommendedProperties = ({
   }, [isLoginModalOpen, isContactModalOpen, openContactModalAfterLogin]);
 
   return (
-    <div className="px-10 py-4 bg-white ">
-      <div className="bg-slate-50 rounded-2xl">
+    <div className="w-full px-3 py-8 bg-white sm:px-5 md:px-8 lg:px-10 xl:px-12">
+      <div className="w-full bg-slate-50 rounded">
         <div className="w-full sm:px-6 lg:px-4">
-          <div className="flex flex-col items-start justify-between px-4 pt-3 mb-3 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-4 px-5 pt-6 pb-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col">
               <h2 className="mb-2 text-2xl font-bold tracking-wide text-gray-800 sm:text-3xl">
                 Featured Properties
@@ -259,16 +260,16 @@ const RecommendedProperties = ({
               <p className="text-gray-500">Go from browsing to buying</p>
             </div>
 
-            <div className="flex items-center mt-4 space-x-3 sm:space-x-5 sm:mt-0">
+            <div className="flex items-center gap-3 mt-2 lg:mt-0">
               <button
-                className="px-4 py-2 text-sm bg-white rounded-lg my-text my-border sm:px-6"
+                className="px-5 py-2.5 text-sm font-medium bg-white border rounded-lg transition hover:bg-gray-50"
                 onClick={handleClick}
               >
                 View All Properties
               </button>
 
               <button
-                className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg"
+                className="flex items-center justify-center w-11 h-11 bg-white rounded-full shadow-md transition hover:shadow-xl"
                 onClick={() => sliderRef.current.slickPrev()}
               >
                 <GoArrowLeft className="text-3xl text-black" />
@@ -300,9 +301,12 @@ const RecommendedProperties = ({
               ];
 
               return (
-                <div key={property._id} className="box-border p-4">
-                  <div className="h-full overflow-hidden shadow rounded-2xl bg-slate-100">
-                    <div className="w-full overflow-hidden rounded-xl">
+                <div
+                  key={property._id}
+                  className="px-2 py-4"
+                >
+                  <div className="property-card flex flex-col h-full min-h-[520px] bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                    <div className="flex flex-col h-full w-full overflow-hidden rounded-xl">
                       <div className="relative">
                         <Link
                           to={`/propertydetails/${property._id}`}
@@ -366,7 +370,7 @@ const RecommendedProperties = ({
                                   <img
                                     src={imgUrl}
                                     alt="Property"
-                                    className="object-cover w-full h-48 rounded-t-2xl"
+                                    className="w-full h-[220px] object-cover rounded-t-2xl"
                                   />
                                 </div>
                               ))}
@@ -375,7 +379,7 @@ const RecommendedProperties = ({
                             <img
                               src={allImages[0] || "/image/app.png"}
                               alt="Property"
-                              className="object-cover w-full h-48 rounded-t-2xl"
+                              className="w-full h-[220px] object-cover rounded-t-2xl"
                               loading="lazy"
                               onError={(e) => (e.target.style.display = "none")}
                             />
@@ -395,7 +399,7 @@ const RecommendedProperties = ({
                             </span>
                           )}
                           <button
-                            className="p-2 rounded-full shadow bg-gray-800/60 backdrop-blur-sm"
+                            className="flex items-center justify-center w-10 h-10 rounded-full shadow bg-gray-900/60 backdrop-blur-md"
                             onClick={() => {
                               if (!accessToken) {
                                 setIsLoginModalOpen(true);
@@ -487,12 +491,14 @@ const RecommendedProperties = ({
 
                       {/* Property Details */}
                       {/* Property Details Wrapper */}
-                      <div className="p-3 text-black bg-white">
-                        <h4>{property.property_name}</h4>
+                      <div className="flex flex-col flex-1 justify-between p-4 bg-white">
+                        <h4 className="h-[56px] flex items-start text-lg font-semibold leading-7 text-gray-900 line-clamp-2">
+                          {property.property_name}
+                        </h4>
 
                         {/* Price - Isko aap Image wale div ke andar 'absolute' position pe bhi daal sakte hain */}
-                        <div className="flex items-center mb-1">
-                          <h3 className="flex items-center text-lg font-bold">
+                        <div className="flex items-center h-10 mb-2">
+                          <h3 className="flex items-center text-2xl font-bold text-gray-900">
                             <FaRupeeSign className="mr-0.5 text-sm" />
                             {property.property_category_type === "Rent"
                               ? formatPrice(property.rent)
@@ -507,16 +513,16 @@ const RecommendedProperties = ({
                         </div>
 
                         {/* BHK and Property Type */}
-                        <div className="mb-1">
-                          <p className="text-sm font-semibold text-gray-800">
+                        <div className="h-[32px] mb-2">
+                          <p className="text-sm font-semibold text-gray-800 line-clamp-1">
                             {property.bhk_type} {property.property_type},{" "}
                             {property.bathrooms || "2"} Baths
                           </p>
                         </div>
 
                         {/* Address / Locality */}
-                        <div className="flex items-start mb-2">
-                          <p className="text-xs text-gray-500 line-clamp-1">
+                        <div className="h-[46px] mb-3">
+                          <p className="text-xs text-gray-500 truncate sm:text-sm">
                             In{" "}
                             <span className="font-medium text-gray-700">
                               {property.property_name || property.address_area}
@@ -526,12 +532,12 @@ const RecommendedProperties = ({
                         </div>
 
                         {/* Divider (Optional) */}
-                        <hr className="my-2 border-gray-100" />
+                        <hr className="my-4 border-gray-100" />
 
                         {/* Footer: Posted by & Time */}
-                        <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center justify-between pt-4 mt-auto border-t border-gray-100">
                           <div className="flex flex-col">
-                            <span className="text-[11px] text-gray-400 uppercase tracking-wide">
+                            <span className="text-[10px] sm:text-[11px] text-gray-400 uppercase tracking-wide">
                               Posted by {property.user_type || "Owner"}
                             </span>
                             {/* Time Ago - Static example like image */}
@@ -544,7 +550,7 @@ const RecommendedProperties = ({
                           <div className="flex space-x-2">
                             <FontAwesomeIcon
                               icon={faShareNodes}
-                              className="text-gray-400 cursor-pointer hover:text-blue-500"
+                              className="text-xl text-gray-400 transition cursor-pointer hover:text-blue-600"
                               onClick={(e) => {
                                 e.preventDefault();
                                 openRecommendedShareModal(property._id);
@@ -560,7 +566,7 @@ const RecommendedProperties = ({
             })}
           </Slider>
         </div>
-      </div>
+      </div >
       <div
         id="shareModal"
         className="fixed bottom-0 right-0 z-50 items-center justify-center hidden bg-black bg-opacity-50"
@@ -641,7 +647,7 @@ const RecommendedProperties = ({
           fetchHomeData();
         }}
       />
-    </div>
+    </div >
   );
 };
 
