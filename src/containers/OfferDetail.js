@@ -193,11 +193,11 @@ const OfferDetail = () => {
                     <div className="absolute top-2 right-2 flex items-center space-x-2">
                       {offer.property_data.virtual_tour_availability ===
                         "Yes" && (
-                        <span className="bg-gray-800/60 text-white text-xs py-1 px-2 rounded-full flex items-center gap-1">
-                          <PiCubeFocus className="text-white text-sm" />
-                          Virtual Tour
-                        </span>
-                      )}
+                          <span className="bg-gray-800/60 text-white text-xs py-1 px-2 rounded-full flex items-center gap-1">
+                            <PiCubeFocus className="text-white text-sm" />
+                            Virtual Tour
+                          </span>
+                        )}
                       {/* Heart Icon */}
                       {/* <button
                         className="bg-gray-800/60 backdrop-blur-sm p-2 rounded-full shadow"
