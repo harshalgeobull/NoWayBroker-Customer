@@ -699,12 +699,13 @@ const AdvisorDashboard = () => {
       formData.append("page", currentPage);
       formData.append("page_size", itemsPerPage);
 
-      if (postedBy || label) {
-        formData.append("user_type", postedBy || label);
-      }
 
-      if (accessToken) {
-        formData.append("customer_id", accessToken);
+      const categoryValues = ["Buy", "Rent", "Commercial Buy", "Commercial Lease", "PG/Co-living"];
+
+      if (categoryValues.includes(label)) {
+        formData.append("property_category_type", label);
+      } else if (postedBy || label) {
+        formData.append("user_type", postedBy || label);
       }
 
       // =========================
@@ -1785,7 +1786,7 @@ const AdvisorDashboard = () => {
                         <input
                           type={
                             propertyType === "Commercial Lease" &&
-                            buildingType === "Commercial"
+                              buildingType === "Commercial"
                               ? "radio"
                               : "checkbox"
                           }
@@ -2067,11 +2068,11 @@ const AdvisorDashboard = () => {
                 <span className="block pr-8 truncate text-left">
                   {selectedAmenities.length > 0
                     ? amenitiesList
-                        .filter((item) =>
-                          selectedAmenities.includes(String(item._id)),
-                        )
-                        .map((item) => item.amenity_name)
-                        .join(", ")
+                      .filter((item) =>
+                        selectedAmenities.includes(String(item._id)),
+                      )
+                      .map((item) => item.amenity_name)
+                      .join(", ")
                     : "Amenities"}
                 </span>
 
@@ -3253,9 +3254,8 @@ const AdvisorDashboard = () => {
                   properties.map((property) => (
                     <div
                       key={property._id}
-                      className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${
-                        hoveredPropertyId === property._id ? "bg-green-200" : ""
-                      }`}
+                      className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${hoveredPropertyId === property._id ? "bg-green-200" : ""
+                        }`}
                       onMouseEnter={() => setHoveredPropertyId(property._id)}
                       onMouseLeave={() => setHoveredPropertyId(null)}
                     >
@@ -3500,19 +3500,19 @@ const AdvisorDashboard = () => {
                               <span>
                                 {Number(property.rent) >= 10000000
                                   ? (Number(property.rent) / 10000000)
-                                      .toFixed(1)
-                                      .replace(/\.0$/, "") + " Cr"
+                                    .toFixed(1)
+                                    .replace(/\.0$/, "") + " Cr"
                                   : Number(property.rent) >= 100000
                                     ? (Number(property.rent) / 100000)
-                                        .toFixed(1)
-                                        .replace(/\.0$/, "") + " L"
+                                      .toFixed(1)
+                                      .replace(/\.0$/, "") + " L"
                                     : Number(property.rent) >= 1000
                                       ? (Number(property.rent) / 1000)
-                                          .toFixed(1)
-                                          .replace(/\.0$/, "") + " K"
+                                        .toFixed(1)
+                                        .replace(/\.0$/, "") + " K"
                                       : property.rent || "N/A"}
                                 {property.rent_duration &&
-                                property.rent_duration !== "N/A"
+                                  property.rent_duration !== "N/A"
                                   ? ` / ${property.rent_duration}`
                                   : ""}
                               </span>
@@ -3520,16 +3520,16 @@ const AdvisorDashboard = () => {
                               <span>
                                 {Number(property.property_price) >= 10000000
                                   ? (Number(property.property_price) / 10000000)
-                                      .toFixed(1)
-                                      .replace(/\.0$/, "") + " Cr"
+                                    .toFixed(1)
+                                    .replace(/\.0$/, "") + " Cr"
                                   : Number(property.property_price) >= 100000
                                     ? (Number(property.property_price) / 100000)
-                                        .toFixed(1)
-                                        .replace(/\.0$/, "") + " L"
+                                      .toFixed(1)
+                                      .replace(/\.0$/, "") + " L"
                                     : Number(property.property_price) >= 1000
                                       ? (Number(property.property_price) / 1000)
-                                          .toFixed(1)
-                                          .replace(/\.0$/, "") + " K"
+                                        .toFixed(1)
+                                        .replace(/\.0$/, "") + " K"
                                       : property.property_price || "N/A"}
                               </span>
                             )}
@@ -3729,7 +3729,7 @@ const AdvisorDashboard = () => {
                       icon={createCustomIcon(
                         property,
                         property._id === activePropertyId ||
-                          property._id === hoveredPropertyId,
+                        property._id === hoveredPropertyId,
                       )}
                       eventHandlers={{
                         mouseover: () => setHoveredPropertyId(property._id),

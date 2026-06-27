@@ -11,7 +11,8 @@ import Search from "../containers/Search";
 import ExploreServices from "../containers/ExploreServices";
 import axios from "axios";
 import ShareModal from "../containers/ShareModal";
-
+import BuyProperty from "./BuyProperty";
+import Commercial from "./Commercial";
 const Home = () => {
   const [cityName, setCityName] = useState("");
   const [showShareModal, setShowShareModal] = useState(false);
@@ -29,12 +30,90 @@ const Home = () => {
 
   const [ownerProperties, setOwnerProperties] = useState([]);
 
+  const [buyData, setBuyProperty] = useState({
+    status: 0,
+    data: [],
+  });
+  const fetchBuyData = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("page", 1);
+      formData.append("page_size", 10);
+      formData.append("property_category_type", "Buy");
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/cust_api/filter_property`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("BUY API DATA:", response.data);
+
+      if (response.data.status === 1) {
+        setBuyProperty({
+          status: 1,
+          data: response.data.data || [],
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching buy properties:", error);
+    }
+  };
+
+
+  const [commercialData, setCommercialData] = useState({
+    status: 0,
+    data: [],
+  });
+
+  const fetchCommercialData = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("page", 1);
+      formData.append("page_size", 10);
+      formData.append("property_category_type", "Commercial Buy");
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/cust_api/filter_property`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("COMMERCIAL API DATA:", response.data);
+
+      if (response.data.status === 1) {
+        setCommercialData({
+          status: 1,
+          data: response.data.data || [],
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching commercial properties:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCommercialData();
+  }, []);
+  useEffect(() => {
+    fetchBuyData();
+  }, []);
   // Memoized fetchHomeData
   const fetchHomeData = useCallback(async () => {
     try {
       const formData = new FormData();
       formData.append("user_id", userId);
       formData.append("city_name", cityName);
+
+
 
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/get_home_data`,
@@ -63,31 +142,31 @@ const Home = () => {
   }, [cityName, userId]);
 
   const fetchOwnerProperties = async () => {
-  try {
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
 
-    formData.append("page", 1);
-    formData.append("page_size", 10);
-    formData.append("user_type", "Owner");
+      formData.append("page", 1);
+      formData.append("page_size", 10);
+      formData.append("user_type", "Owner");
 
-    const response = await axios.post(
-      `${process.env.REACT_APP_API_URL}/cust_api/filter_property`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/cust_api/filter_property`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.status === 1) {
+        console.log("OWNER API DATA:", response.data.data);
+        setOwnerProperties(response.data.data || []);
       }
-    );
-
-    if (response.data.status === 1) {
-      console.log("OWNER API DATA:", response.data.data);
-      setOwnerProperties(response.data.data || []);
+    } catch (error) {
+      console.error("Owner API Error:", error);
     }
-  } catch (error) {
-    console.error("Owner API Error:", error);
-  }
-};
+  };
   // Geolocation useEffect
   useEffect(() => {
     const storedCityName = sessionStorage.getItem("cityName");
@@ -108,13 +187,13 @@ const Home = () => {
           console.log("Latitude:", latitude);
           console.log("Longitude:", longitude);
 
-sessionStorage.setItem(
-  "userLocation",
-  JSON.stringify({ latitude, longitude }),
-);
+          sessionStorage.setItem(
+            "userLocation",
+            JSON.stringify({ latitude, longitude }),
+          );
 
-// Reload page after saving location
-window.location.reload();
+          // Reload page after saving location
+          window.location.reload();
 
           try {
             const response = await axios.get(
@@ -205,6 +284,22 @@ window.location.reload();
         <div className="w-full mx-auto px-2 space-y-6 md:max-w-[97%]">
           <Cities data={homeData?.cities || []} />
           {/* <Shots /> */}
+          <BuyProperty
+            data={buyData}
+            fetchHomeData={fetchHomeData}
+            openRecommendedShareModal={openRecommendedShareModal}
+            closeShareModal={closeShareModal}
+            copyLink={copyLink}
+            currentShareUrl={currentShareUrl}
+          />
+          <Commercial
+            data={commercialData}
+            fetchHomeData={fetchHomeData}
+            openRecommendedShareModal={openRecommendedShareModal}
+            closeShareModal={closeShareModal}
+            copyLink={copyLink}
+            currentShareUrl={currentShareUrl}
+          />
           <OwnerProperty
             data={{
               status: 1,
