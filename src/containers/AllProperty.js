@@ -475,7 +475,7 @@ const AllProperty = () => {
               onClick={toggleSquareFtDropdown}
               className="w-[150px] h-16 p-2 border-2 border-gray-300 rounded-md bg-white flex items-center text-end justify-center gap-2 focus:outline-none hover:bg-gray-300"
             >
-              <span>Sq.Ft</span>
+              <span>sq.Ft</span>
               <RiArrowDropDownLine className="text-2xl " />
             </button>
             {squareFtDropdownOpen && (
