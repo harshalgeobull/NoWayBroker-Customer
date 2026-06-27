@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { IoIosInformationCircle } from "react-icons/io";
+import { ToWords } from "to-words";
 import { Plus } from "lucide-react"; // Using Lucide Icons for delete button
 import { MdOutlineDriveFolderUpload } from "react-icons/md";
 import axios from "axios";
@@ -908,6 +909,9 @@ Make it engaging, attractive, and human-like.
       </div>
     );
   }
+  const toWords = new ToWords({
+    localeCode: "en-IN",
+  });
 
   return (
     <>
@@ -1466,7 +1470,35 @@ Make it engaging, attractive, and human-like.
                         </p>
                       )}
                     </div>
+                    {/* Locality */}
+<div>
+  <label className="font-medium text-gray-700">
+    Locality{" "}
+  <span className="invisible text-xl font-bold">*</span>
+  </label>
+  <input
+    type="text"
+    value={locality}
+    onChange={(e) => setLocality(e.target.value)}
+    placeholder="Enter Locality"
+    className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
+  />
+</div>
 
+{/* Sub Locality */}
+<div>
+  <label className="font-medium text-gray-700">
+    Sub Locality{" "}
+  <span className="invisible text-xl font-bold">*</span>
+  </label>
+  <input
+    type="text"
+    value={subLocality}
+    onChange={(e) => setSubLocality(e.target.value)}
+    placeholder="Enter Sub Locality"
+    className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
+  />
+</div>
                     {/* Zip Code */}
                     <div>
                       <label className="font-medium text-gray-700">
@@ -1523,16 +1555,30 @@ Make it engaging, attractive, and human-like.
                     </label>
                     <input
                       type="text"
-                      value={formData.average_project_price || ""}
+                      value={
+                        formData.average_project_price
+                          ? Number(
+                              formData.average_project_price,
+                            ).toLocaleString("en-IN")
+                          : ""
+                      }
                       onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d{0,20}$/.test(value)) {
-                          handleInputChange("average_project_price", value);
+                        const rawValue = e.target.value.replace(/,/g, "");
+
+                        if (/^\d{0,20}$/.test(rawValue)) {
+                          handleInputChange("average_project_price", rawValue);
                         }
                       }}
                       placeholder="₹"
                       className="w-full mt-1 p-3 border rounded-lg text-gray-700 outline-none focus:ring-2 focus:ring-rose-500"
                     />
+                    {formData.average_project_price && (
+                      <p className="mt-2 text-sm font-medium text-gray-600">
+                        {toWords.convert(
+                          Number(formData.average_project_price),
+                        )}
+                      </p>
+                    )}
                     {errors.average_project_price && (
                       <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
                         <MdErrorOutline className="text-lg" />
@@ -2526,6 +2572,12 @@ Make it engaging, attractive, and human-like.
                       <option value="5-7">5-7</option>
                       <option value="8-10">8-10</option>
                       <option value="10+">10+</option>
+                      {/* <option value="0-1">1 to 5 Years</option>
+                      <option value="2-4">5 to 10 Years</option>
+                      <option value="5-7">10 to 15 Years</option>
+                      <option value="8-10">15 to 20 Years</option>
+                      <option value="10+">Above 20 Years</option>
+                      <option value="10+">New Construction</option> */}
                     </select>
                   </div>
                 )}

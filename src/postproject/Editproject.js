@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { IoIosInformationCircle } from "react-icons/io";
-
+import { ToWords } from "to-words";
 import { MdOutlineDriveFolderUpload } from "react-icons/md";
 import axios from "axios";
 import { Trash } from "@phosphor-icons/react";
@@ -1429,6 +1429,9 @@ Make it engaging, attractive, and human-like.
       isProjectValid
     );
   };
+  const toWords = new ToWords({
+    localeCode: "en-IN",
+  });
 
   return (
     <>
@@ -2036,7 +2039,35 @@ Make it engaging, attractive, and human-like.
                         </p>
                       )}
                     </div>
+                      {/* Locality */}
+<div>
+  <label className="font-medium text-gray-700">
+    Locality{" "}
+    <span className="invisible text-xl font-bold">*</span>
+  </label>
+  <input
+    type="text"
+    value={locality}
+    onChange={(e) => setLocality(e.target.value)}
+    placeholder="Enter Locality"
+    className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
+  />
+</div>
 
+{/* Sub Locality */}
+<div>
+  <label className="font-medium text-gray-700">
+    Sub Locality{" "}
+    <span className="invisible text-xl font-bold">*</span>
+  </label>
+  <input
+    type="text"
+    value={subLocality}
+    onChange={(e) => setSubLocality(e.target.value)}
+    placeholder="Enter Sub Locality"
+    className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
+  />
+</div>
                     {/* Zip Code */}
                     <div>
                       <label className="font-medium text-gray-700">
@@ -2096,16 +2127,30 @@ Make it engaging, attractive, and human-like.
                     </label>
                     <input
                       type="text"
-                      value={formData.average_project_price || ""}
+                      value={
+                        formData.average_project_price
+                          ? Number(
+                              formData.average_project_price,
+                            ).toLocaleString("en-IN")
+                          : ""
+                      }
                       onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d{0,20}$/.test(value)) {
-                          handleInputChange("average_project_price", value);
+                        const rawValue = e.target.value.replace(/,/g, "");
+
+                        if (/^\d{0,20}$/.test(rawValue)) {
+                          handleInputChange("average_project_price", rawValue);
                         }
                       }}
                       placeholder="₹"
                       className="w-full mt-1 p-3 border rounded-lg text-gray-700 outline-none focus:ring-2 focus:ring-rose-500"
                     />
+                    {formData.average_project_price && (
+                      <p className="mt-2 text-sm font-medium text-gray-600">
+                        {toWords.convert(
+                          Number(formData.average_project_price),
+                        )}
+                      </p>
+                    )}
                     {errors.price && (
                       <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
                         <MdErrorOutline className="text-lg" />
@@ -2408,14 +2453,20 @@ Make it engaging, attractive, and human-like.
                         type="text"
                         inputMode="numeric"
                         pattern="[0-9]*"
-                        value={formData.custom_deposit_amount || ""}
+                        value={
+                          formData.custom_deposit_amount
+                            ? Number(
+                                formData.custom_deposit_amount,
+                              ).toLocaleString("en-IN")
+                            : ""
+                        }
                         onChange={(e) => {
-                          const value = e.target.value;
+                          const rawValue = e.target.value.replace(/,/g, "");
 
-                          if (/^\d*$/.test(value)) {
+                          if (/^\d*$/.test(rawValue)) {
                             setFormData((prev) => ({
                               ...prev,
-                              custom_deposit_amount: value,
+                              custom_deposit_amount: rawValue,
                             }));
                           }
                         }}
@@ -2425,6 +2476,13 @@ Make it engaging, attractive, and human-like.
                             : "border-gray-300"
                         }`}
                       />
+                      {formData.custom_deposit_amount && (
+                        <p className="mt-2 text-sm font-medium text-gray-600">
+                          {toWords.convert(
+                            Number(formData.custom_deposit_amount),
+                          )}
+                        </p>
+                      )}
 
                       {errors?.custom_deposit_amount && (
                         <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -2940,7 +2998,7 @@ Make it engaging, attractive, and human-like.
                     </select>
                   </div>
                 )}
-                                {!(
+                {!(
                   (buildingType === "Residential" && propertyType === "Plot") ||
                   (buildingType === "Commercial" &&
                     [
@@ -3007,7 +3065,6 @@ Make it engaging, attractive, and human-like.
                     )}
                   </div>
                 )}
-
 
                 {/* {!(
                   (buildingType === "Residential" && propertyType === "Plot") ||

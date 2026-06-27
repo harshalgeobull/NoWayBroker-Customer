@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { IoIosInformationCircle } from "react-icons/io";
+import { ToWords } from "to-words";
 import { Trash } from "lucide-react"; // Using Lucide Icons for delete button
 import { MdOutlineDriveFolderUpload } from "react-icons/md";
 import axios from "axios";
@@ -580,7 +581,6 @@ Make it engaging, attractive, and human-like.
 
   // Toggle logic for multiple selection
   const toggleAmenity = (amenity) => {
-
     setSelectedAmenities((prev) => {
       const current = Array.isArray(prev)
         ? prev
@@ -1652,12 +1652,15 @@ Make it engaging, attractive, and human-like.
     return type;
   };
 
+  const toWords = new ToWords({
+    localeCode: "en-IN",
+  });
   return (
     <>
       <div className="flex flex-col items-center min-h-screen bg-white">
         {/* Navbar */}
         <nav className="flex items-center justify-center w-full p-4 text-black bg-gray-200">
-          <h1 className="text-xl">Edit Building Name/Society Name/Project Name</h1>
+          <h1 className="text-xl">Edit Your Property</h1>
         </nav>
 
         {/* Stepper Navigation */}
@@ -1695,7 +1698,7 @@ Make it engaging, attractive, and human-like.
               {/* Property Name */}
               <div className="mb-4">
                 <label className="block mb-1 font-medium text-gray-700">
-                  Property Name{" "}
+                  Building/Society/Project Name{" "}
                   <span className="text-xl font-bold text-red-500">*</span>
                 </label>
 
@@ -2298,11 +2301,22 @@ Make it engaging, attractive, and human-like.
                           type="text"
                           placeholder="� Expected Price"
                           name="property_price"
-                          value={formData.property_price}
+                          value={
+                            formData.property_price
+                              ? Number(formData.property_price).toLocaleString(
+                                  "en-IN",
+                                )
+                              : ""
+                          }
                           onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^\d*$/.test(value)) {
-                              handleInputChange(e);
+                            const rawValue = e.target.value.replace(/,/g, "");
+                            if (/^\d*$/.test(rawValue)) {
+                              handleInputChange({
+                                target: {
+                                  name: "property_price",
+                                  value: rawValue,
+                                },
+                              });
                             }
                           }}
                           className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
@@ -2320,10 +2334,14 @@ Make it engaging, attractive, and human-like.
 
                         {/* Suggested Price Card */}
                         <div className="flex items-center p-1 mt-4 space-x-1 bg-pink-100 rounded-lg">
-                          <span className="my-text">(</span>
+                          <span className="my-text"></span>
                           <div>
                             <p className="font-semibold text-gray-800">
-                              {formData.property_price}
+                              {formData.property_price
+                                ? toWords.convert(
+                                    Number(formData.property_price),
+                                  )
+                                : ""}
                             </p>
                             <p className="text-sm text-gray-600">
                               Suggested price for your area
@@ -2734,14 +2752,29 @@ Make it engaging, attractive, and human-like.
                               ? "border-red-600"
                               : "border-gray-300"
                           }`}
-                          value={formData.rent}
+                          value={
+                            formData.rent
+                              ? Number(formData.rent).toLocaleString("en-IN")
+                              : ""
+                          }
                           onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
-                              handleInputChange(e);
+                            const rawValue = e.target.value.replace(/,/g, "");
+
+                            if (/^\d*$/.test(rawValue)) {
+                              handleInputChange({
+                                target: {
+                                  name: "rent",
+                                  value: rawValue,
+                                },
+                              });
                             }
                           }}
                         />
+                        {formData.rent && (
+                          <p className="mt-2 text-sm font-medium text-gray-600">
+                            {toWords.convert(Number(formData.rent))}
+                          </p>
+                        )}
                         {formErrors.rent && (
                           <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
                             <MdErrorOutline className="text-lg" />
@@ -2915,14 +2948,21 @@ Make it engaging, attractive, and human-like.
                           type="text"
                           inputMode="numeric"
                           pattern="[0-9]*"
-                          value={formData.custom_deposit_amount || ""}
+                          value={
+                            formData.custom_deposit_amount
+                              ? Number(
+                                  formData.custom_deposit_amount,
+                                ).toLocaleString("en-IN")
+                              : ""
+                          }
                           onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^\d*$/.test(value)) {
-                              setFormData({
-                                ...formData,
-                                custom_deposit_amount: value,
-                              });
+                            const rawValue = e.target.value.replace(/,/g, "");
+
+                            if (/^\d*$/.test(rawValue)) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                custom_deposit_amount: rawValue,
+                              }));
                             }
                           }}
                           className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
@@ -2931,6 +2971,13 @@ Make it engaging, attractive, and human-like.
                               : "border-gray-300"
                           }`}
                         />
+                        {formData.custom_deposit_amount && (
+                          <p className="mt-2 text-sm font-medium text-gray-600">
+                            {toWords.convert(
+                              Number(formData.custom_deposit_amount),
+                            )}
+                          </p>
+                        )}
 
                         {formErrors.custom_deposit_amount && (
                           <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -3902,7 +3949,6 @@ Make it engaging, attractive, and human-like.
                         </select>
                       </div>
                     )}
-                  
 
                   {propertyType === "Hospitality" && (
                     <div>
@@ -5553,7 +5599,7 @@ Make it engaging, attractive, and human-like.
                         </select>
                       </div>
                     )}
-                  {/* {(propertyType === "Office Space" ||
+                  {(propertyType === "Office Space" ||
                     propertyType === "Retail" ||
                     propertyType === "Storage" ||
                     propertyType === "Industry" ||
@@ -5604,7 +5650,7 @@ Make it engaging, attractive, and human-like.
                         <option value="New Bookings">New Bookings</option>
                       </select>
                     </div>
-                  )} */}
+                  )}
 
                   {!(
                     (propertyCategory === "Buy" &&
