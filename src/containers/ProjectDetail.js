@@ -22,6 +22,8 @@ import ShareModal from "../containers/ShareModal";
 import ContactDetails from "../containers/ContactDetails";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
 
 const ProjectDetail = () => {
   // const [showAllImages, setShowAllImages] = useState(false);
@@ -353,22 +355,21 @@ const ProjectDetail = () => {
   useEffect(() => {
     fetchProjects();
   }, [projectId]);
-
   const settings = {
     dots: false,
     infinite: true,
     speed: 800,
-    slidesToShow: 3,
+    slidesToShow: 4,
     slidesToScroll: 1,
     arrows: false,
     autoplay: true,
     autoplaySpeed: 3000,
     responsive: [
+      { breakpoint: 1280, settings: { slidesToShow: 3 } },
       { breakpoint: 1024, settings: { slidesToShow: 2 } },
       { breakpoint: 768, settings: { slidesToShow: 1 } },
     ],
   };
-
   // for send Enquiry 'add_property_enquiry' api
 
   const [name, setName] = useState("");
@@ -1237,7 +1238,7 @@ const ProjectDetail = () => {
             </div>
           )}
 
-          
+
           {/* About Property Section */}
           {projects[0]?.project_details?.project_description && (
             <div className="p-4 mt-4 bg-white shadow-md rounded-2xl">
@@ -1594,8 +1595,8 @@ const ProjectDetail = () => {
             {enquiryStatus && (
               <div
                 className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
-                    ? "text-green-600"
-                    : "text-red-600"
+                  ? "text-green-600"
+                  : "text-red-600"
                   }`}
               >
                 {enquiryStatus.message}
@@ -1666,7 +1667,7 @@ const ProjectDetail = () => {
           </div>
         </div>
 
-        <Slider ref={sliderRef} {...settings} className="mx-auto mt-4">
+        {/* <Slider ref={sliderRef} {...settings} className="mx-auto mt-4">
           {projectList
             .filter(
               (project) =>
@@ -1713,6 +1714,114 @@ const ProjectDetail = () => {
                           project.average_project_price,
                         )}
                       </h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+        </Slider> */}
+        <Slider ref={sliderRef} {...settings} className="mx-auto mt-4">
+          {projectList
+            .filter(
+              (project) =>
+                project?.cover_image &&
+                project?.project_name &&
+                project?.average_project_price,
+            )
+            .map((project, index) => (
+              <div key={index} className="px-2 md:px-3">
+                <div className="w-full overflow-hidden bg-white shadow-lg rounded-3xl hover:shadow-xl transition-all duration-300">
+                  <div className="relative">
+                    <img
+                      src={project.cover_image}
+                      alt={project.project_name}
+                      className="w-full h-[220px] sm:h-[260px] md:h-[300px] lg:h-[320px] object-cover rounded-t-3xl cursor-pointer"
+                      onClick={() => history.push(`/projectdetail/${project._id}`)}
+                    />
+
+                    {/* Heart + Share Icons */}
+                    <div className="absolute top-2 right-2 flex items-center space-x-2">
+                      <button
+                        className="bg-gray-800/60 backdrop-blur-sm p-2 rounded-full shadow"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (project.is_favorite) {
+                            removeFromFavoritesRecommendedProperty(
+                              project.favorite_id,
+                            );
+                          } else {
+                            addToFavoritesRecommendedProperty(project._id);
+                          }
+                        }}
+                      >
+                        <Heart
+                          size={20}
+                          stroke={project.is_favorite ? "none" : "white"}
+                          color={
+                            project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"
+                          }
+                          fill={
+                            project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"
+                          }
+                          strokeWidth={2}
+                        />
+                      </button>
+
+                      <FontAwesomeIcon
+                        icon={faShareNodes}
+                        className="text-gray-500 bg-white p-2 rounded shadow cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsShareModalOpen(true);
+                        }}
+                      />
+                    </div>
+
+                    {/* Project Name + Logo overlay */}
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[90%] sm:w-[85%] md:w-[80%] h-[90px] md:h-[100px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
+                      <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[50px] h-[50px] md:w-[60px] md:h-[60px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
+                        <img
+                          src={project.logo}
+                          alt="Project Logo"
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+
+                      <h3 className="text-center text-white text-base md:text-lg font-semibold line-clamp-2 min-h-[48px]">
+                        {project.project_name || "No Project Name Available"}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div
+                    className="p-4 bg-white rounded-b-3xl cursor-pointer"
+                    onClick={() => history.push(`/projectdetail/${project._id}`)}
+                  >
+                    <p className="text-base md:text-lg font-semibold text-gray-800 line-clamp-2">
+                      {project.congfigurations
+                        ? project.congfigurations.includes("BHK")
+                          ? project.congfigurations
+                          : project.congfigurations
+                            .split(",")
+                            .map((c) => `${c.trim()} BHK`)
+                            .join(", ")
+                        : "No Configurations"}
+                    </p>
+
+                    <p className="text-xs uppercase tracking-wider text-gray-400 mt-2">
+                      {project.project_type}
+                    </p>
+
+                    <p className="text-sm md:text-base font-semibold text-slate-800 mt-2 flex items-center gap-2 line-clamp-1">
+                      {project.address_area || "No Address Provided"}
+                    </p>
+
+                    <div className="flex-1 mt-3">
+                      {project.average_project_price && (
+                        <h4 className="text-xl md:text-2xl font-bold text-slate-800 mt-3">
+                          {formatAverageProjectPrice(project.average_project_price)}
+                        </h4>
+                      )}
                     </div>
                   </div>
                 </div>
