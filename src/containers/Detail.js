@@ -304,10 +304,9 @@ const Detail = ({ propertyData }) => {
   // Slider settings
   const [activeIndexes, setActiveIndexes] = useState({});
   const BASE_URL = process.env.REACT_APP_API_URL;
-
   const settings = {
     infinite: true,
-    slidesToShow: 3,
+    slidesToShow: 4,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
@@ -317,14 +316,28 @@ const Detail = ({ propertyData }) => {
     centerPadding: "0px",
     responsive: [
       {
-        breakpoint: 1024,
+        breakpoint: 1400,
+        settings: {
+          slidesToShow: 4,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 1200,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 992,
         settings: {
           slidesToShow: 2,
           slidesToScroll: 1,
         },
       },
       {
-        breakpoint: 768,
+        breakpoint: 576,
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
@@ -332,7 +345,6 @@ const Detail = ({ propertyData }) => {
       },
     ],
   };
-
   const openShareModal1 = (url) => {
     setcurrentShareUrl1(url);
     const modal = document.getElementById("shareModal1");
@@ -645,9 +657,9 @@ const Detail = ({ propertyData }) => {
     [
       "Address",
       propertyDetails?.address &&
-      propertyDetails?.city_name &&
-      propertyDetails?.state &&
-      propertyDetails?.zip_code
+        propertyDetails?.city_name &&
+        propertyDetails?.state &&
+        propertyDetails?.zip_code
         ? `${propertyDetails.address}, ${propertyDetails.city_name}, ${propertyDetails.state}, ${propertyDetails.zip_code}`
         : null,
     ],
@@ -779,7 +791,7 @@ const Detail = ({ propertyData }) => {
       "Built-up Area Unit",
       propertyDetails?.area_in
         ? propertyDetails.area_in.charAt(0).toUpperCase() +
-          propertyDetails.area_in.slice(1).toLowerCase()
+        propertyDetails.area_in.slice(1).toLowerCase()
         : null,
     ],
     ["Carpet Area", propertyDetails?.carpet_area || null],
@@ -787,7 +799,7 @@ const Detail = ({ propertyData }) => {
       "Carpet Area Unit",
       propertyDetails?.carpet_area_unit
         ? propertyDetails.carpet_area_unit.charAt(0).toUpperCase() +
-          propertyDetails.carpet_area_unit.slice(1).toLowerCase()
+        propertyDetails.carpet_area_unit.slice(1).toLowerCase()
         : null,
     ],
     ["Available Status", propertyDetails?.available_status || null],
@@ -1013,13 +1025,12 @@ const Detail = ({ propertyData }) => {
             {propertyDetails.virtual_tour_availability === "Yes" && (
               <button
                 className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
-      ${
-        tourSchedule?.[0]?.status === "Accepted"
-          ? "bg-green-500 text-white rounded-full"
-          : scheduledDateLabel === "Virtual Tour"
-            ? "bg-white border my-text rounded-lg"
-            : "bg-[#FFD700] text-black rounded-full"
-      }`}
+      ${tourSchedule?.[0]?.status === "Accepted"
+                    ? "bg-green-500 text-white rounded-full"
+                    : scheduledDateLabel === "Virtual Tour"
+                      ? "bg-white border my-text rounded-lg"
+                      : "bg-[#FFD700] text-black rounded-full"
+                  }`}
                 onClick={() => {
                   const token = sessionStorage.getItem("accessToken");
 
@@ -1123,11 +1134,10 @@ const Detail = ({ propertyData }) => {
               }}
             >
               <FiHeart
-                className={`text-2xl ${
-                  propertyDetails.is_favorite
-                    ? "text-red-600 fill-red-600"
-                    : "text-gray-600"
-                }`}
+                className={`text-2xl ${propertyDetails.is_favorite
+                  ? "text-red-600 fill-red-600"
+                  : "text-gray-600"
+                  }`}
               />
             </div>
 
@@ -1451,11 +1461,10 @@ const Detail = ({ propertyData }) => {
 
               {enquiryStatus && (
                 <div
-                  className={`text-center mt-4 text-lg ${
-                    enquiryStatus.type === "success"
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
+                  className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
+                    ? "text-green-600"
+                    : "text-red-600"
+                    }`}
                 >
                   {enquiryStatus.message}
                 </div>
@@ -1689,13 +1698,12 @@ const Detail = ({ propertyData }) => {
                         {/* FOR BUY & FEATURED Tags (Bottom of the Image) */}
                         <div className="absolute bottom-0 left-0">
                           <span
-                            className={`${
-                              property.property_category_type === "Rent"
-                                ? "bg-blue-500"
-                                : property.property_category_type === "Buy"
-                                  ? "bg-green-500"
-                                  : "bg-gray-500"
-                            } text-white text-xs px-3 py-1 rounded-se-lg`}
+                            className={`${property.property_category_type === "Rent"
+                              ? "bg-blue-500"
+                              : property.property_category_type === "Buy"
+                                ? "bg-green-500"
+                                : "bg-gray-500"
+                              } text-white text-xs px-3 py-1 rounded-se-lg`}
                           >
                             {property.property_category_type === "Rent"
                               ? "FOR RENT"
