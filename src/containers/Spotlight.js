@@ -221,12 +221,12 @@ const Spotlights = ({
           >
             View All Projects
           </button>
-          <button
+          {/* <button
             className="hidden px-4 py-2 text-sm my-text bg-white my-border rounded-lg sm:px-6 sm:block"
             onClick={handleClick}
           >
             View All Projects
-          </button>
+          </button> */}
           <button
             className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg"
             onClick={() => sliderRef.current.slickPrev()}

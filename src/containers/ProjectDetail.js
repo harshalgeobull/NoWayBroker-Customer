@@ -29,6 +29,18 @@ const ProjectDetail = () => {
   // const [showAllImages, setShowAllImages] = useState(false);
   const sliderRef = useRef(null);
   const history = useHistory();
+  const projectLocationSectionRef = useRef(null);
+  const overviewRef = useRef(null);
+  const amenitiesRef = useRef(null);
+  const aboutPropertyRef = useRef(null);
+  const locationRef = useRef(null);
+
+  const scrollToSection = (ref) => {
+    ref.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
 
   const handleViewAll = () => {
     history.push("/projectlist");
@@ -615,6 +627,20 @@ const ProjectDetail = () => {
     };
   }, [isModalOpen]);
 
+  // Tabs shown right below the image gallery (Overview / Amenities / About Property / Location)
+  const detailTabs = [
+    { key: "project_location", label: "Project Location", ref: projectLocationSectionRef },
+    { key: "overview", label: "Overview", ref: overviewRef },
+    { key: "amenities", label: "Amenities", ref: amenitiesRef },
+    { key: "about", label: "About Property", ref: aboutPropertyRef },
+    { key: "location", label: "Location", ref: locationRef },
+  ];
+  const [activeDetailTab, setActiveDetailTab] = useState("project_location");
+
+  const handleDetailTabClick = (tab) => {
+    setActiveDetailTab(tab.key);
+    scrollToSection(tab.ref);
+  };
   return (
     <div className="max-w-full px-4 mx-auto md:px-16">
       {/* Property Details Section */}
@@ -1196,6 +1222,24 @@ const ProjectDetail = () => {
               </>
             )}
           </div>
+          {/* Sticky Tabs Section: Overview | Amenities | About Property | Location */}
+          <div className="sticky top-0 z-30 mt-4 bg-white border rounded-lg shadow-sm">
+            <div className="flex overflow-x-auto">
+              {detailTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => handleDetailTabClick(tab)}
+                  className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeDetailTab === tab.key
+                    ? "border-rose-600 text-rose-600"
+                    : "border-transparent text-gray-600 hover:text-rose-600"
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {showAllImages && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
@@ -1204,8 +1248,56 @@ const ProjectDetail = () => {
                   className="absolute text-3xl text-black top-4 right-4"
                   onClick={() => setShowAllImages(false)}
                 >
-                  ×
+
                 </button>
+
+                <div className="sticky top-0 z-50 bg-white border rounded-lg shadow mt-4">
+                  <div className="flex">
+                    <button
+                      onClick={() =>
+                        document
+                          .getElementById("project-location")
+                          ?.scrollIntoView({ behavior: "smooth" })
+                      }
+                      className="px-5 py-3 text-sm font-medium hover:text-red-600"
+                    >
+                      Project Location
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        document
+                          .getElementById("overview")
+                          ?.scrollIntoView({ behavior: "smooth" })
+                      }
+                      className="px-5 py-3 text-sm font-medium hover:text-red-600"
+                    >
+                      Overview
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        document
+                          .getElementById("amenities")
+                          ?.scrollIntoView({ behavior: "smooth" })
+                      }
+                      className="px-5 py-3 text-sm font-medium hover:text-red-600"
+                    >
+                      Amenities
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        document
+                          .getElementById("location")
+                          ?.scrollIntoView({ behavior: "smooth" })
+                      }
+                      className="px-5 py-3 text-sm font-medium hover:text-red-600"
+                    >
+                      Location
+                    </button>
+                  </div>
+                </div>
                 <h2 className="mb-4 text-2xl font-semibold">Gallery</h2>
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
                   {/* All Images */}
@@ -1225,6 +1317,7 @@ const ProjectDetail = () => {
                     </div>
                   ))}
 
+
                   {/* Video inside gallery if available */}
                   {projects[0]?.project_details?.property_video && (
                     <video
@@ -1241,7 +1334,10 @@ const ProjectDetail = () => {
 
           {/* About Property Section */}
           {projects[0]?.project_details?.project_description && (
-            <div className="p-4 mt-4 bg-white shadow-md rounded-2xl">
+            <div
+              ref={aboutPropertyRef}
+              className="p-4 mt-4 bg-white shadow-md rounded-2xl"
+            >
               <h3 className="text-xl font-bold text-gray-700">
                 About{" "}
                 {projects[0]?.project_details?.project_name || "the Property"}
@@ -1255,7 +1351,10 @@ const ProjectDetail = () => {
 
           {/* Property Location Section */}
           {projects[0]?.project_details?.address && (
-            <div className="p-3 mt-6 bg-white rounded-lg shadow-sm">
+            <div
+              ref={projectLocationSectionRef}   // 👈 NEW (purvi projectLocationRef hota, to already top-level var sobat conflict karat hota)
+              className="p-3 mt-6 bg-white rounded-lg shadow-sm"
+            >
               <h3 className="text-xl font-bold">Project Location</h3>
               <p className="mt-1 text-lg text-black">
                 <img
@@ -1269,9 +1368,12 @@ const ProjectDetail = () => {
           )}
 
           {/* Overview Section */}
-          <div className="p-4 mt-4 bg-white rounded-lg shadow-sm">
-            <h3 className="mb-4 text-2xl font-bold">Overview</h3>
 
+          <h3 className="mb-4 text-2xl font-bold">Overview</h3>
+          <div
+            ref={overviewRef}
+            className="p-4 mt-4 bg-white rounded-lg shadow-sm"
+          >
             {(() => {
               const project = projects[0]?.project_details || {};
 
@@ -1436,7 +1538,10 @@ const ProjectDetail = () => {
 
           {/* Amenities Section */}
           {amenitiesList.length > 0 && (
-            <div className="p-4 mt-4 bg-white rounded-lg shadow-sm">
+            <div
+              ref={amenitiesRef}
+              className="p-4 mt-4 bg-white rounded-lg shadow-sm"
+            >
               <h3 className="text-xl font-bold">Amenities</h3>
               <div className="grid grid-cols-1 gap-4 mt-4 text-lg md:grid-cols-2 lg:grid-cols-4">
                 {displayedAmenities.map((amenity, index) => (
@@ -1509,7 +1614,10 @@ const ProjectDetail = () => {
           })}
 
           {/* Location Section with Map */}
-          <div className="p-4 mt-4 bg-white shadow-sm rounded-2xl">
+          <div
+            ref={locationRef}
+            className="p-4 mt-4 bg-white shadow-sm rounded-2xl"
+          >
             <h2 className="text-xl font-bold text-gray-900">Location</h2>
             <div className="mt-4 overflow-hidden rounded-lg">
               <iframe
@@ -1830,7 +1938,7 @@ const ProjectDetail = () => {
         </Slider>
       </div>
       {/* Other Projects Section End */}
-    </div>
+    </div >
   );
 };
 
