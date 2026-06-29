@@ -1,5 +1,6 @@
 import { React, useState, useRef, useEffect } from "react";
 import { FaBed, FaBath, FaRupeeSign } from "react-icons/fa";
+import { ToWords } from "to-words";
 import { MdLocationOn } from "react-icons/md";
 import { FiShare2, FiHeart } from "react-icons/fi";
 import { FaHome } from "react-icons/fa";
@@ -43,11 +44,24 @@ import { Heart } from "lucide-react";
 const defaultImage = "/image/appstore.png";
 
 const Detail = ({ propertyData }) => {
+  const toWords = new ToWords({
+    localeCode: "en-IN",
+    converterOptions: {
+      currency: false,
+      ignoreDecimal: true,
+      ignoreZeroCurrency: true,
+    },
+  });
   // const [showAllImages, setShowAllImages] = useState(false);
   const [savedProperties, setSavedProperties] = useState([]);
   const [properties, setProperties] = useState([]);
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
   const sliderRef = useRef(null);
+  const overviewRef = useRef(null);
+const moreDetailsRef = useRef(null);
+const amenitiesRef = useRef(null);
+const aboutRef = useRef(null);
+const locationRef = useRef(null);
   const [currentShareUrl1, setcurrentShareUrl1] = useState("");
   const [propertyDetails, setPropertyDetails] = useState({});
   const userId = sessionStorage.getItem("accessToken");
@@ -62,12 +76,17 @@ const Detail = ({ propertyData }) => {
   const formatArea = (area, unit) => {
     if (!area) return null;
 
-    const formattedUnit = unit
-      ? unit.charAt(0).toUpperCase() + unit.slice(1).toLowerCase()
-      : "";
+    const formattedUnit = unit ? unit.trim().toLowerCase() : "";
 
     return `${area} ${formattedUnit}`;
   };
+
+  const scrollToSection = (ref) => {
+  ref.current?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+};
 
   const checkPostLimits = async () => {
     try {
@@ -657,9 +676,9 @@ const Detail = ({ propertyData }) => {
     [
       "Address",
       propertyDetails?.address &&
-        propertyDetails?.city_name &&
-        propertyDetails?.state &&
-        propertyDetails?.zip_code
+      propertyDetails?.city_name &&
+      propertyDetails?.state &&
+      propertyDetails?.zip_code
         ? `${propertyDetails.address}, ${propertyDetails.city_name}, ${propertyDetails.state}, ${propertyDetails.zip_code}`
         : null,
     ],
@@ -789,17 +808,13 @@ const Detail = ({ propertyData }) => {
     ["Built up Area", propertyDetails?.area || null],
     [
       "Built-up Area Unit",
-      propertyDetails?.area_in
-        ? propertyDetails.area_in.charAt(0).toUpperCase() +
-        propertyDetails.area_in.slice(1).toLowerCase()
-        : null,
+      propertyDetails?.area_in ? propertyDetails.area_in.toLowerCase() : null,
     ],
     ["Carpet Area", propertyDetails?.carpet_area || null],
     [
       "Carpet Area Unit",
       propertyDetails?.carpet_area_unit
-        ? propertyDetails.carpet_area_unit.charAt(0).toUpperCase() +
-        propertyDetails.carpet_area_unit.slice(1).toLowerCase()
+        ? propertyDetails.carpet_area_unit.toLowerCase()
         : null,
     ],
     ["Available Status", propertyDetails?.available_status || null],
@@ -948,7 +963,7 @@ const Detail = ({ propertyData }) => {
         {/* Property Details Section */}
         <div className="relative w-full h-auto p-2 mb-4 rounded-lg shadow-sm bg-rose-50">
           {(propertyDetails?.property_price || propertyDetails?.rent) && (
-            <div className="absolute flex items-center space-x-4 top-4 right-4">
+            <div className="absolute top-4 right-4 flex flex-col items-end">
               <p className="flex items-center mt-5 text-3xl font-bold my-text">
                 <FaRupeeSign className="mr-2" />
                 {propertyDetails?.property_category_type === "Rent" ? (
@@ -963,6 +978,11 @@ const Detail = ({ propertyData }) => {
                 ) : (
                   formatPrice(propertyDetails?.property_price)
                 )}
+              </p>
+              <p className="mt-1 text-sm font-medium text-gray-500">
+                {propertyDetails?.property_category_type === "Rent"
+                  ? `${toWords.convert(Number(propertyDetails?.rent))} Only`
+                  : `${toWords.convert(Number(propertyDetails?.property_price))} Only`}
               </p>
             </div>
           )}
@@ -1025,12 +1045,13 @@ const Detail = ({ propertyData }) => {
             {propertyDetails.virtual_tour_availability === "Yes" && (
               <button
                 className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
-      ${tourSchedule?.[0]?.status === "Accepted"
-                    ? "bg-green-500 text-white rounded-full"
-                    : scheduledDateLabel === "Virtual Tour"
-                      ? "bg-white border my-text rounded-lg"
-                      : "bg-[#FFD700] text-black rounded-full"
-                  }`}
+      ${
+        tourSchedule?.[0]?.status === "Accepted"
+          ? "bg-green-500 text-white rounded-full"
+          : scheduledDateLabel === "Virtual Tour"
+            ? "bg-white border my-text rounded-lg"
+            : "bg-[#FFD700] text-black rounded-full"
+      }`}
                 onClick={() => {
                   const token = sessionStorage.getItem("accessToken");
 
@@ -1134,10 +1155,11 @@ const Detail = ({ propertyData }) => {
               }}
             >
               <FiHeart
-                className={`text-2xl ${propertyDetails.is_favorite
-                  ? "text-red-600 fill-red-600"
-                  : "text-gray-600"
-                  }`}
+                className={`text-2xl ${
+                  propertyDetails.is_favorite
+                    ? "text-red-600 fill-red-600"
+                    : "text-gray-600"
+                }`}
               />
             </div>
 
@@ -1274,10 +1296,48 @@ const Detail = ({ propertyData }) => {
                 </>
               )}
             </div>
+{/* Navigation Tabs */}
+<div className="sticky top-0 z-20 flex items-center gap-8 px-6 py-4 mb-4 bg-white rounded-lg shadow-sm">
+  <button
+    onClick={() => scrollToSection(overviewRef)}
+    className="font-medium hover:text-[#8A2432]"
+  >
+    Overview
+  </button>
 
+  <button
+    onClick={() => scrollToSection(moreDetailsRef)}
+    className="font-medium hover:text-[#8A2432]"
+  >
+    More Details
+  </button>
+
+  <button
+    onClick={() => scrollToSection(amenitiesRef)}
+    className="font-medium hover:text-[#8A2432]"
+  >
+    Amenities
+  </button>
+
+  <button
+    onClick={() => scrollToSection(aboutRef)}
+    className="font-medium hover:text-[#8A2432]"
+  >
+    About Property
+  </button>
+
+  <button
+    onClick={() => scrollToSection(locationRef)}
+    className="font-medium hover:text-[#8A2432]"
+  >
+    Location
+  </button>
+</div>
             {/* Add the Overview Component Below */}
             {overviewFields.length > 0 && (
-              <div className="w-full p-4 bg-white rounded-lg shadow-sm">
+              <div 
+              ref={overviewRef}
+              className="w-full p-4 bg-white rounded-lg shadow-sm scroll-mt-20">
                 <h3 className="mb-4 text-3xl font-semibold">Overview</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 text-[18px]">
                   {overviewFields.map(([key, value], index) => (
@@ -1315,7 +1375,9 @@ const Detail = ({ propertyData }) => {
             )} */}
 
             {moreDetailsFields.length > 0 && (
-              <div className="w-full p-4 mt-4 bg-white rounded-lg shadow-sm">
+              <div 
+              ref={moreDetailsRef}
+              className="w-full p-4 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20">
                 <h3 className="mb-4 text-xl font-semibold text-gray-800">
                   More Details
                 </h3>
@@ -1335,7 +1397,9 @@ const Detail = ({ propertyData }) => {
             )}
 
             {/* Amenities Section */}
-            <div className="w-full p-3 mt-4 bg-white rounded-lg shadow-sm">
+            <div 
+            ref={amenitiesRef}
+            className="w-full p-3 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20">
               <h3 className="ml-4 font-semibold text-lm">Amenities</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1 mt-4 ml-4 text-[18px]">
                 {visibleAmenities.map((amenity, index) => (
@@ -1364,7 +1428,9 @@ const Detail = ({ propertyData }) => {
             </div>
 
             {/* About Property Section */}
-            <div className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[250px] w-full">
+            <div 
+            ref={aboutRef}
+            className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[250px] w-full scroll-mt-20">
               <h2 className="justify-center ml-4 font-bold text-gray-700 text-ml">
                 About property
               </h2>
@@ -1374,7 +1440,9 @@ const Detail = ({ propertyData }) => {
             </div>
 
             {/* Location Section with Map */}
-            <div className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[600px] w-full">
+            <div 
+            ref={locationRef}
+            className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[600px] w-full scroll-mt-20">
               <h2 className="ml-4 text-3xl font-bold text-gray-900">
                 Location
               </h2>
@@ -1461,10 +1529,11 @@ const Detail = ({ propertyData }) => {
 
               {enquiryStatus && (
                 <div
-                  className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
-                    ? "text-green-600"
-                    : "text-red-600"
-                    }`}
+                  className={`text-center mt-4 text-lg ${
+                    enquiryStatus.type === "success"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
                 >
                   {enquiryStatus.message}
                 </div>
@@ -1698,12 +1767,13 @@ const Detail = ({ propertyData }) => {
                         {/* FOR BUY & FEATURED Tags (Bottom of the Image) */}
                         <div className="absolute bottom-0 left-0">
                           <span
-                            className={`${property.property_category_type === "Rent"
-                              ? "bg-blue-500"
-                              : property.property_category_type === "Buy"
-                                ? "bg-green-500"
-                                : "bg-gray-500"
-                              } text-white text-xs px-3 py-1 rounded-se-lg`}
+                            className={`${
+                              property.property_category_type === "Rent"
+                                ? "bg-blue-500"
+                                : property.property_category_type === "Buy"
+                                  ? "bg-green-500"
+                                  : "bg-gray-500"
+                            } text-white text-xs px-3 py-1 rounded-se-lg`}
                           >
                             {property.property_category_type === "Rent"
                               ? "FOR RENT"

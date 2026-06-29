@@ -6,11 +6,6 @@ import { GoArrowLeft, GoArrowRight } from "react-icons/go";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-
-import Offer1 from "../assets/image/offer2.png";
-import Offer2 from "../assets/image/offer3.png";
-
-
 const OffersForYou = ({ data }) => {
   const sliderRef = useRef(null);
   const history = useHistory();
