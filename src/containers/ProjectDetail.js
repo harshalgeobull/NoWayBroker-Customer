@@ -25,6 +25,9 @@ import { Heart } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
 
+import { Building2, Ruler } from "lucide-react";
+import { FaMapMarkerAlt } from "react-icons/fa";
+
 const ProjectDetail = () => {
   // const [showAllImages, setShowAllImages] = useState(false);
   const sliderRef = useRef(null);
@@ -35,13 +38,14 @@ const ProjectDetail = () => {
   const aboutPropertyRef = useRef(null);
   const locationRef = useRef(null);
 
-  const scrollToSection = (ref) => {
-    ref.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  };
 
+  // NEW
+  const scrollToSection = (ref) => {
+    if (!ref.current) return;
+    const OFFSET = 60;
+    const top = ref.current.getBoundingClientRect().top + window.pageYOffset - OFFSET;
+    window.scrollTo({ top, behavior: "smooth" });
+  };
   const handleViewAll = () => {
     history.push("/projectlist");
   };
@@ -1369,173 +1373,171 @@ const ProjectDetail = () => {
 
           {/* Overview Section */}
 
-          <h3 className="mb-4 text-2xl font-bold">Overview</h3>
-          <div
-            ref={overviewRef}
-            className="p-4 mt-4 bg-white rounded-lg shadow-sm"
-          >
-            {(() => {
-              const project = projects[0]?.project_details || {};
+          <div ref={overviewRef}>
+            <h3 className="mb-4 text-2xl font-bold">Overview</h3>
+            <div className="p-4 mt-4 bg-white rounded-lg shadow-sm">
+              {(() => {
+                const project = projects[0]?.project_details || {};
 
-              // 🔥 Add / Remove anything from here manually
-              // Whatever is here will show in UI
-              const overviewFields = {
-                mark_as_featured: "Featured",
-                project_type: "Project Type",
-                furnished_type: "Furnishing",
-                total_floor: "Total Floors",
-                project_floor: "Project Floor",
-                bathroom: "Bathrooms",
-                balcony: "Balconies",
-                additional_rooms: "Additional Rooms",
-                number_of_minimum_bathrooms: "Minimum Bathrooms",
-                parking_availability: "Parking Availability",
-                total_number_parking: "Total Parking",
-                covered_parking: "Covered Parking",
-                uncovered_parking: "Open Parking",
-                pantry_option: "Pantry Option",
-                possession_status: "Possession Status",
-                possession_date: "Possession Date",
-                possession_start: "Possession Start",
-                age_of_property: "Property Age",
-                available_status: "Availability",
-                all_inclusive_price: "All Inclusive Price",
-                price_negotiable: "Price Negotiable",
-                tax_and_goverment_charges: "Tax & Government Charges",
-                maintenance_cost: "Maintenance Cost",
-                maintenance_frequency: "Maintenance Frequency",
-                maintenance_included: "Maintenance Included",
-                facing: "Facing",
-                view: "View",
-                flooring: "Flooring",
-                lift_availability: "Lift Availability",
-                water_source: "Water Source",
-                power_backup: "Power Backup",
-                security_system: "Security System",
-                construction_status: "Construction Status",
-                constructionOnLand: "Construction On Land",
-                launch_date: "Launch Date",
-                near_landmark: "Nearby Landmark",
-                property_no: "Property Number",
-                plot_no: "Plot Number",
-                block: "Block",
-                land_type: "Land Type",
-                breadthOfLand: "Land Breadth",
-                length_of_land: "Land Length",
-                area_type: "Area Type",
-                type_of_construction: "Construction ",
-                quality_rating: "Quality Rating",
-                central_AC: "Central AC",
-                office_type: "Office Type",
-                office_space_type: "Office Space ",
-                washroom_Check: "Washroom Available",
-                washroom: "Washroom",
-                commercial_washroom: "Commercial Washroom",
-                personal_washroom: "Personal Washroom",
-                selectedConstructionOnLand: "Construction On Land",
-                openSidesOfLand: "Open Sides Of Land",
-                no_of_open_sides: "Number Of Open Sides",
-                property_dimensions_breadth: "Property Breadth",
-                property_dimensions_length: "Property Length",
-                room_type: "Room Type",
-                attached_bathroom: "AttachedBathroom",
-                attached_balcony: "Attached Balcony",
-                transaction_type: "Transaction Type",
-                suited_for: "Suited For",
-                available_for: "Available For",
-                available_from: "Available From",
-                available_on: "Available On",
-                rent_duration: "Rent Duration",
-                available_for_company_lease: "Company Lease",
-                loan_availability: "Loan Availability",
-                virtual_tour_availability: "Virtual Tour",
-                video_url: "Video URL",
-                ups: "UPS",
-                oxygenDuct: "Oxygen Duct",
-                pantry: "Pantry",
-                conferenceRoom: "Conference Room",
-              };
+                // 🔥 Add / Remove anything from here manually
+                // Whatever is here will show in UI
+                const overviewFields = {
+                  mark_as_featured: "Featured",
+                  project_type: "Project Type",
+                  furnished_type: "Furnishing",
+                  total_floor: "Total Floors",
+                  project_floor: "Project Floor",
+                  bathroom: "Bathrooms",
+                  balcony: "Balconies",
+                  additional_rooms: "Additional Rooms",
+                  number_of_minimum_bathrooms: "Minimum Bathrooms",
+                  parking_availability: "Parking Availability",
+                  total_number_parking: "Total Parking",
+                  covered_parking: "Covered Parking",
+                  uncovered_parking: "Open Parking",
+                  pantry_option: "Pantry Option",
+                  possession_status: "Possession Status",
+                  possession_date: "Possession Date",
+                  possession_start: "Possession Start",
+                  age_of_property: "Property Age",
+                  available_status: "Availability",
+                  all_inclusive_price: "All Inclusive Price",
+                  price_negotiable: "Price Negotiable",
+                  tax_and_goverment_charges: "Tax & Government Charges",
+                  maintenance_cost: "Maintenance Cost",
+                  maintenance_frequency: "Maintenance Frequency",
+                  maintenance_included: "Maintenance Included",
+                  facing: "Facing",
+                  view: "View",
+                  flooring: "Flooring",
+                  lift_availability: "Lift Availability",
+                  water_source: "Water Source",
+                  power_backup: "Power Backup",
+                  security_system: "Security System",
+                  construction_status: "Construction Status",
+                  constructionOnLand: "Construction On Land",
+                  launch_date: "Launch Date",
+                  near_landmark: "Nearby Landmark",
+                  property_no: "Property Number",
+                  plot_no: "Plot Number",
+                  block: "Block",
+                  land_type: "Land Type",
+                  breadthOfLand: "Land Breadth",
+                  length_of_land: "Land Length",
+                  area_type: "Area Type",
+                  type_of_construction: "Construction ",
+                  quality_rating: "Quality Rating",
+                  central_AC: "Central AC",
+                  office_type: "Office Type",
+                  office_space_type: "Office Space ",
+                  washroom_Check: "Washroom Available",
+                  washroom: "Washroom",
+                  commercial_washroom: "Commercial Washroom",
+                  personal_washroom: "Personal Washroom",
+                  selectedConstructionOnLand: "Construction On Land",
+                  openSidesOfLand: "Open Sides Of Land",
+                  no_of_open_sides: "Number Of Open Sides",
+                  property_dimensions_breadth: "Property Breadth",
+                  property_dimensions_length: "Property Length",
+                  room_type: "Room Type",
+                  attached_bathroom: "AttachedBathroom",
+                  attached_balcony: "Attached Balcony",
+                  transaction_type: "Transaction Type",
+                  suited_for: "Suited For",
+                  available_for: "Available For",
+                  available_from: "Available From",
+                  available_on: "Available On",
+                  rent_duration: "Rent Duration",
+                  available_for_company_lease: "Company Lease",
+                  loan_availability: "Loan Availability",
+                  virtual_tour_availability: "Virtual Tour",
+                  video_url: "Video URL",
+                  ups: "UPS",
+                  oxygenDuct: "Oxygen Duct",
+                  pantry: "Pantry",
+                  conferenceRoom: "Conference Room",
+                };
 
-              //  THESE WILL NEVER SHOW
-              const hiddenFields = [
-                "_id",
-                "favorite_id",
-                "is_favorite",
-                "user_id",
-                "cover_image",
-                "logo",
-                "brochure_doc",
-                "property_video",
-                "latitude",
-                "longitude",
-                "deleted_at",
-                "property_owner_image",
-              ];
+                //  THESE WILL NEVER SHOW
+                const hiddenFields = [
+                  "_id",
+                  "favorite_id",
+                  "is_favorite",
+                  "user_id",
+                  "cover_image",
+                  "logo",
+                  "brochure_doc",
+                  "property_video",
+                  "latitude",
+                  "longitude",
+                  "deleted_at",
+                  "property_owner_image",
+                ];
 
-              return (
-                <div className="grid grid-cols-1 text-lg text-gray-700 md:grid-cols-2 gap-y-2 gap-x-4">
-                  {Object.entries(overviewFields).map(([key, label], index) => {
-                    // skip hidden fields
-                    if (hiddenFields.includes(key)) return null;
+                return (
+                  <div className="grid grid-cols-1 text-lg text-gray-700 md:grid-cols-2 gap-y-2 gap-x-4">
+                    {Object.entries(overviewFields).map(([key, label], index) => {
+                      // skip hidden fields
+                      if (hiddenFields.includes(key)) return null;
 
-                    const value = project[key];
+                      const value = project[key];
 
-                    // skip empty values
-                    if (
-                      value === null ||
-                      value === undefined ||
-                      value === "" ||
-                      value === "NA" ||
-                      value === "N/A" ||
-                      value === false
-                    ) {
-                      return null;
-                    }
+                      // skip empty values
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === "" ||
+                        value === "NA" ||
+                        value === "N/A" ||
+                        value === false
+                      ) {
+                        return null;
+                      }
 
-                    // format date
-                    let formattedValue = value;
+                      // format date
+                      let formattedValue = value;
 
-                    if (
-                      key.includes("date") ||
-                      key.includes("_at") ||
-                      key === "available_from" ||
-                      key === "available_on"
-                    ) {
-                      try {
-                        formattedValue = new Date(value).toLocaleDateString(
-                          "en-GB",
-                          {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          },
-                        );
-                      } catch (e) { }
-                    }
+                      if (
+                        key.includes("date") ||
+                        key.includes("_at") ||
+                        key === "available_from" ||
+                        key === "available_on"
+                      ) {
+                        try {
+                          formattedValue = new Date(value).toLocaleDateString(
+                            "en-GB",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          );
+                        } catch (e) { }
+                      }
 
-                    // boolean handling
-                    if (typeof value === "boolean") {
-                      formattedValue = value ? "Yes" : "No";
-                    }
+                      // boolean handling
+                      if (typeof value === "boolean") {
+                        formattedValue = value ? "Yes" : "No";
+                      }
 
-                    return (
-                      <div
-                        key={index}
-                        className="flex justify-between gap-4 p-3 border-b border-gray-100"
-                      >
-                        <span className="w-1/2 text-gray-500">{label}</span>
+                      return (
+                        <div
+                          key={index}
+                          className="flex justify-between gap-4 p-3 border-b border-gray-100"
+                        >
+                          <span className="w-1/2 text-gray-500">{label}</span>
 
-                        <span className="w-1/2 font-semibold text-black break-words text-right">
-                          {formattedValue}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })()}
+                          <span className="w-1/2 font-semibold text-black break-words text-right">
+                            {formattedValue}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
           </div>
-
           {/* Amenities Section */}
           {amenitiesList.length > 0 && (
             <div
@@ -1838,25 +1840,27 @@ const ProjectDetail = () => {
             )
             .map((project, index) => (
               <div key={index} className="px-2 md:px-3">
-                <div className="w-full overflow-hidden bg-white shadow-lg rounded-3xl hover:shadow-xl transition-all duration-300">
+                <div className="w-full overflow-hidden bg-white shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300">
                   <div className="relative">
                     <img
                       src={project.cover_image}
                       alt={project.project_name}
-                      className="w-full h-[220px] sm:h-[260px] md:h-[300px] lg:h-[320px] object-cover rounded-t-3xl cursor-pointer"
+                      className="w-full h-[220px] sm:h-[260px] md:h-[300px] lg:h-[320px] object-cover rounded-t-2xl cursor-pointer"
                       onClick={() => history.push(`/projectdetail/${project._id}`)}
                     />
 
-                    {/* Heart + Share Icons */}
+                    {/* Heart + Share */}
                     <div className="absolute top-2 right-2 flex items-center space-x-2">
                       <button
                         className="bg-gray-800/60 backdrop-blur-sm p-2 rounded-full shadow"
                         onClick={(e) => {
                           e.stopPropagation();
+                          if (!userId) {
+                            setIsLoginModalOpen(true);
+                            return;
+                          }
                           if (project.is_favorite) {
-                            removeFromFavoritesRecommendedProperty(
-                              project.favorite_id,
-                            );
+                            removeFromFavoritesRecommendedProperty(project.favorite_id);
                           } else {
                             addToFavoritesRecommendedProperty(project._id);
                           }
@@ -1865,16 +1869,11 @@ const ProjectDetail = () => {
                         <Heart
                           size={20}
                           stroke={project.is_favorite ? "none" : "white"}
-                          color={
-                            project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"
-                          }
-                          fill={
-                            project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"
-                          }
+                          color={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"}
+                          fill={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"}
                           strokeWidth={2}
                         />
                       </button>
-
                       <FontAwesomeIcon
                         icon={faShareNodes}
                         className="text-gray-500 bg-white p-2 rounded shadow cursor-pointer"
@@ -1885,51 +1884,138 @@ const ProjectDetail = () => {
                       />
                     </div>
 
-                    {/* Project Name + Logo overlay */}
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[90%] sm:w-[85%] md:w-[80%] h-[90px] md:h-[100px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
-                      <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[50px] h-[50px] md:w-[60px] md:h-[60px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
-                        <img
-                          src={project.logo}
-                          alt="Project Logo"
-                          className="object-cover w-full h-full"
-                        />
+                    {/* Logo + Project Name overlay */}
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[90%] sm:w-[85%] md:w-[80%] h-[110px] md:h-[120px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
+                      <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
+                        <img src={project.logo} alt="Project Logo" className="object-cover w-full h-full" />
                       </div>
-
-                      <h3 className="text-center text-white text-base md:text-lg font-semibold line-clamp-2 min-h-[48px]">
+                      <h3 className="text-center text-white text-lg md:text-2xl font-bold line-clamp-2 min-h-[48px] mt-4">
                         {project.project_name || "No Project Name Available"}
                       </h3>
                     </div>
                   </div>
 
+                  {/* Card Body */}
                   <div
-                    className="p-4 bg-white rounded-b-3xl cursor-pointer"
+                    className="p-4 bg-white rounded-b-2xl cursor-pointer"
                     onClick={() => history.push(`/projectdetail/${project._id}`)}
                   >
-                    <p className="text-base md:text-lg font-semibold text-gray-800 line-clamp-2">
+                    {/* Row 1: Project Name + Furnished Type */}
+                    <div className="flex items-start justify-between gap-3 mb-0">
+                      <h3 className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate">
+                        {project.project_name || "N/A"}
+                      </h3>
+                      {project.furnished_type && (
+                        <span className="flex-shrink-0 text-sm font-medium leading-6 text-[#E85B6B] whitespace-nowrap">
+                          {project.furnished_type}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Row 2: Subtitle */}
+                    <p className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate">
                       {project.congfigurations
                         ? project.congfigurations.includes("BHK")
                           ? project.congfigurations
-                          : project.congfigurations
-                            .split(",")
-                            .map((c) => `${c.trim()} BHK`)
-                            .join(", ")
-                        : "No Configurations"}
+                          : project.congfigurations.split(",").map((c) => `${c.trim()} BHK`).join(", ")
+                        : ""}{" "}
+                      {project.project_type} in {project.address_area || ""},{" "}
+                      {project.city_name || ""}
                     </p>
 
-                    <p className="text-xs uppercase tracking-wider text-gray-400 mt-2">
-                      {project.project_type}
-                    </p>
+                    {/* Row 3: Price */}
+                    <div className="flex items-center mb-1">
+                      <span className="text-2xl font-bold">
+                        {formatAverageProjectPrice(project.average_project_price)}
+                      </span>
+                    </div>
 
-                    <p className="text-sm md:text-base font-semibold text-slate-800 mt-2 flex items-center gap-2 line-clamp-1">
-                      {project.address_area || "No Address Provided"}
-                    </p>
+                    {/* Row 4: Features Grid */}
+                    <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+                      <div className="flex items-center gap-2 px-1 min-w-0">
+                        <Building2 size={20} className="text-gray-700 flex-shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <p className="m-0 text-sm font-semibold leading-4 truncate">
+                            {project.project_type || "N/A"}
+                          </p>
+                          <p className="m-0 text-xs leading-4 text-gray-500">Type</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
+                        <Ruler size={20} className="text-gray-700 flex-shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <p className="m-0 text-sm font-semibold leading-4 truncate">
+                            {project.congfigurations
+                              ? project.congfigurations.includes("BHK")
+                                ? project.congfigurations.split(",")[0].trim()
+                                : `${project.congfigurations.split(",")[0].trim()} BHK`
+                              : "N/A"}
+                          </p>
+                          <p className="m-0 text-xs leading-4 text-gray-500">Config</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
+                        <FaMapMarkerAlt size={16} className="text-gray-700 flex-shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <p className="m-0 text-sm font-semibold leading-4 truncate">
+                            {project.address_area || "N/A"}
+                          </p>
+                          <p className="m-0 text-xs leading-4 text-gray-500">Location</p>
+                        </div>
+                      </div>
+                    </div>
 
-                    <div className="flex-1 mt-3">
-                      {project.average_project_price && (
-                        <h4 className="text-xl md:text-2xl font-bold text-slate-800 mt-3">
-                          {formatAverageProjectPrice(project.average_project_price)}
-                        </h4>
-                      )}
+                    <hr className="my-1 border-gray-100" />
+
+                    {/* Row 5: Posted By + Share */}
+                    <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
+                      <div className="flex items-center flex-wrap min-w-0">
+                        <span>Posted by {project.user_type || "Builder"}</span>
+                        {project.days_since_created && (
+                          <>
+                            <span className="mx-2 text-gray-400">•</span>
+                            <span className="whitespace-nowrap">
+                              {project.days_since_created} days ago
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <FontAwesomeIcon
+                        icon={faShareNodes}
+                        className="ml-2 text-[17px] text-gray-500 cursor-pointer hover:text-blue-500"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsShareModalOpen(true);
+                        }}
+                      />
+                    </div>
+
+                    {/* Row 6: Owner Details */}
+                    <div className="flex items-center pt-2">
+                      <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+                        {project.property_owner_image &&
+                          !project.property_owner_image.includes("default_profile") ? (
+                          <img
+                            src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
+                            alt={project.connect_to_name || "Owner"}
+                            className="object-cover w-full h-full rounded-full"
+                          />
+                        ) : (
+                          <span className="text-2xl text-blue-600 font-bold">
+                            {(project.connect_to_name || "B")[0].toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center ml-3">
+                        <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                          {project.connect_to_name || "Builder"}
+                        </span>
+                        <div className="w-px h-4 mx-3 bg-gray-300"></div>
+                        <span className="text-sm text-gray-500 whitespace-nowrap">
+                          {project.user_type || "Builder"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

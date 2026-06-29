@@ -9,7 +9,8 @@ import { Heart } from "lucide-react";
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
-import { FaRupeeSign } from "react-icons/fa";
+import { FaRupeeSign, FaMapMarkerAlt } from "react-icons/fa";
+import { Building2, Ruler } from "lucide-react";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 
@@ -44,6 +45,52 @@ const Spotlights = ({
   const handleProjectClick = (projectId) => {
     history.push(`/projectdetail/${encodeURIComponent(projectId)}`);
   };
+  // const settings = {
+  //   infinite: true,
+  //   speed: 500,
+  //   slidesToShow: 4,
+  //   slidesToScroll: 1,
+  //   autoplay: true,
+  //   autoplaySpeed: 3000,
+  //   arrows: false,
+  //   dots: false,
+  //   adaptiveHeight: false,
+
+  //   responsive: [
+  //     {
+  //       breakpoint: 1536,
+  //       settings: {
+  //         slidesToShow: 4,
+  //       },
+  //     },
+  //     {
+  //       breakpoint: 1280,
+  //       settings: {
+  //         slidesToShow: 3,
+  //       },
+  //     },
+  //     {
+  //       breakpoint: 1024,
+  //       settings: {
+  //         slidesToShow: 2,
+  //       },
+  //     },
+  //     {
+  //       breakpoint: 768,
+  //       settings: {
+  //         slidesToShow: 2,
+  //       },
+  //     },
+  //     {
+  //       breakpoint: 640,
+  //       settings: {
+  //         slidesToShow: 1,
+  //       },
+  //     },
+  //   ],
+  // };
+
+
   const settings = {
     infinite: true,
     speed: 500,
@@ -56,36 +103,11 @@ const Spotlights = ({
     adaptiveHeight: false,
 
     responsive: [
-      {
-        breakpoint: 1536,
-        settings: {
-          slidesToShow: 4,
-        },
-      },
-      {
-        breakpoint: 1280,
-        settings: {
-          slidesToShow: 3,
-        },
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-      {
-        breakpoint: 640,
-        settings: {
-          slidesToShow: 1,
-        },
-      },
+      { breakpoint: 1536, settings: { slidesToShow: 4 } },
+      { breakpoint: 1280, settings: { slidesToShow: 3 } },
+      { breakpoint: 1024, settings: { slidesToShow: 2 } },
+      { breakpoint: 768, settings: { slidesToShow: 2 } },
+      { breakpoint: 640, settings: { slidesToShow: 1 } },
     ],
   };
   const formatPrice = (price) => {
@@ -245,14 +267,16 @@ const Spotlights = ({
       <Slider ref={sliderRef} {...settings} className="mx-auto">
         {projectList.map((project, index) => (
           <div key={index} className="px-2 md:px-3">
-            <div className="w-full overflow-hidden bg-white shadow-lg rounded-3xl hover:shadow-xl transition-all duration-300">
+            <div className="w-full overflow-hidden bg-white shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300">
               <div className="relative">
                 <img
                   src={project.cover_image}
-                  alt={project.name}
-                  className="w-full h-[220px] sm:h-[260px] md:h-[300px] lg:h-[320px] object-cover rounded-t-3xl cursor-pointer"
+                  alt={project.project_name}
+                  className="w-full h-[220px] sm:h-[260px] md:h-[300px] lg:h-[320px] object-cover rounded-t-2xl cursor-pointer"
                   onClick={() => handleProjectClick(project._id)}
                 />
+
+                {/* Heart + Share */}
                 <div className="absolute top-2 right-2 flex items-center space-x-2">
                   <button
                     className="bg-gray-800/60 backdrop-blur-sm p-2 rounded-full shadow"
@@ -262,10 +286,7 @@ const Spotlights = ({
                         return;
                       }
                       if (project.is_favorite) {
-                        removeFromFavoritesRecommendedProperty(
-                          project.favorite_id,
-                          project._id,
-                        );
+                        removeFromFavoritesRecommendedProperty(project.favorite_id, project._id);
                       } else {
                         addToFavoritesRecommendedProperty(project._id);
                       }
@@ -274,105 +295,153 @@ const Spotlights = ({
                     <Heart
                       size={20}
                       stroke={project.is_favorite ? "none" : "white"}
-                      color={
-                        project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4) "
-                      }
-                      fill={
-                        project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4) "
-                      }
+                      color={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"}
+                      fill={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"}
                       strokeWidth={2}
                     />
                   </button>
-
                   <FontAwesomeIcon
                     icon={faShareNodes}
                     className="text-gray-500 bg-white p-2 rounded shadow cursor-pointer"
                     onClick={(e) => {
                       e.preventDefault();
+                      e.stopPropagation();
                       openSpotlightShareModal(project._id);
                     }}
                   />
                 </div>
 
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[90%] sm:w-[85%] md:w-[80%] h-[90px] md:h-[100px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
-                  <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200w-[50px] h-[50px] md:w-[60px] md:h-[60px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
-                    <img
-                      src={project.logo}
-                      alt="Project Logo"
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
 
-                  <h3 className="text-center text-white text-base md:text-lg font-semibold line-clamp-2 min-h-[48px]">
+                {/* Logo + Project Name overlay */}
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[90%] sm:w-[85%] md:w-[80%] h-[110px] md:h-[120px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
+                  <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
+                    <img src={project.logo} alt="Project Logo" className="object-cover w-full h-full" />
+                  </div>
+                  <h3 className="text-center text-white text-lg md:text-2xl font-bold line-clamp-2 min-h-[48px] mt-4">
                     {project.project_name || "No Project Name Available"}
                   </h3>
                 </div>
               </div>
 
-              <div className="px-0">
-                <div className="p-4 bg-white rounded-b-3xl">
-                  <p className="text-base md:text-lg font-semibold text-gray-800 line-clamp-2">
-                    {project.congfigurations
-                      ? project.congfigurations.includes("BHK")
-                        ? project.congfigurations
-                        : project.congfigurations
-                          .split(",")
-                          .map((c) => `${c.trim()} BHK`)
-                          .join(", ")
-                      : "No Configurations"}
-                  </p>
+              {/* Card Body */}
+              <div
+                className="p-4 bg-white rounded-b-2xl cursor-pointer"
+                onClick={() => handleProjectClick(project._id)}
+              >
+                {/* Row 1: Project Name + Furnished Type */}
+                <div className="flex items-start justify-between gap-3 mb-0">
+                  <h3 className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate">
+                    {project.project_name || "N/A"}
+                  </h3>
+                  {project.furnished_type && (
+                    <span className="flex-shrink-0 text-sm font-medium leading-6 text-[#E85B6B] whitespace-nowrap">
+                      {project.furnished_type}
+                    </span>
+                  )}
+                </div>
 
-                  <p className="text-xs uppercase tracking-wider text-gray-400 mt-2">
-                    {project.project_type}
-                  </p>
-                  <p className="text-sm md:text-base font-semibold text-slate-800 mt-2 flex items-center gap-2 line-clamp-1">
-                    {/* <img
-                      src="/image/address_icon.png"
-                      alt="Location Icon"
-                      className="w-5 h-5 object-contain"
-                    /> */}
-                    {project.address_area || "No Address Provided"}
-                  </p>
+                {/* Row 2: Subtitle */}
+                <p className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate">
+                  {project.congfigurations
+                    ? project.congfigurations.includes("BHK")
+                      ? project.congfigurations
+                      : project.congfigurations.split(",").map((c) => `${c.trim()} BHK`).join(", ")
+                    : ""}{" "}
+                  {project.project_type} in {project.address_area || ""}, {project.city_name || ""}
+                </p>
 
-                  {/* <div className="flex-1">
-                    {project.project_properties &&
-                      project.project_properties.length > 0 &&
-                      (() => {
-                        const prices = project.project_properties.map((p) =>
-                          Number(p.price),
-                        );
-                        const minPrice = Math.min(...prices);
-                        const maxPrice = Math.max(...prices);
+                {/* Row 3: Price */}
+                <div className="flex items-center mb-1">
+                  <span className="text-2xl font-bold">
+                    {formatAverageProjectPrice(project.average_project_price)}
+                  </span>
+                </div>
 
-                        return (
-                          <h4 className="flex items-center text-xl font-bold my-text mb-0 sm:text-2xl">
-                            {minPrice === maxPrice ? (
-                              formatAverageProjectPrice(minPrice)
-                            ) : (
-                              <>
-                                {formatAverageProjectPrice(minPrice)}
-                                <span className="mx-1">-</span>
-                                {formatAverageProjectPrice(maxPrice)}
-                              </>
-                            )}
-                          </h4>
-                        );
-                      })()}
-                  </div> */}
-                  <div className="flex-1 mt-3">
-                    {project.average_project_price && (
-                      <h4 className="text-xl md:text-2xl font-bold text-slate-800 mt-3">
-                        {" "}
-                        {formatAverageProjectPrice(
-                          Number(project.average_project_price),
-                        )}
-                      </h4>
+                {/* Row 4: Features Grid */}
+                <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+                  <div className="flex items-center gap-2 px-1 min-w-0">
+                    <Building2 size={20} className="text-gray-700 flex-shrink-0" />
+                    <div className="flex flex-col min-w-0">
+                      <p className="m-0 text-sm font-semibold leading-4 truncate">{project.project_type || "N/A"}</p>
+                      <p className="m-0 text-xs leading-4 text-gray-500">Type</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
+                    <Ruler size={20} className="text-gray-700 flex-shrink-0" />
+                    <div className="flex flex-col min-w-0">
+                      <p className="m-0 text-sm font-semibold leading-4 truncate">
+                        {project.congfigurations
+                          ? project.congfigurations.includes("BHK")
+                            ? project.congfigurations.split(",")[0].trim()
+                            : `${project.congfigurations.split(",")[0].trim()} BHK`
+                          : "N/A"}
+                      </p>
+                      <p className="m-0 text-xs leading-4 text-gray-500">Config</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
+                    <FaMapMarkerAlt size={16} className="text-gray-700 flex-shrink-0" />
+                    <div className="flex flex-col min-w-0">
+                      <p className="m-0 text-sm font-semibold leading-4 truncate">{project.address_area || "N/A"}</p>
+                      <p className="m-0 text-xs leading-4 text-gray-500">Location</p>
+                    </div>
+                  </div>
+                </div>
+
+                <hr className="my-1 border-gray-100" />
+
+                {/* Row 5: Posted By + Share */}
+                <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
+                  <div className="flex items-center flex-wrap min-w-0">
+                    <span>Posted by {project.user_type || "Builder"}</span>
+                    {project.days_since_created && (
+                      <>
+                        <span className="mx-2 text-gray-400">•</span>
+                        <span className="whitespace-nowrap">{project.days_since_created} days ago</span>
+                      </>
                     )}
+                  </div>
+                  <FontAwesomeIcon
+                    icon={faShareNodes}
+                    className="ml-2 text-[17px] text-gray-500 cursor-pointer hover:text-blue-500"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openSpotlightShareModal(project._id);
+                    }}
+                  />
+                </div>
+
+                {/* Row 6: Owner Details */}
+                <div className="flex items-center pt-2">
+                  <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+                    {project.property_owner_image &&
+                      !project.property_owner_image.includes("default_profile") ? (
+                      <img
+                        src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
+                        alt={project.connect_to_name || "Owner"}
+                        className="object-cover w-full h-full rounded-full"
+                      />
+                    ) : (
+                      <span className="text-2xl text-blue-600 font-bold">
+                        {(project.connect_to_name || "B")[0].toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center ml-3">
+                    <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                      {project.connect_to_name || "Builder"}
+                    </span>
+                    <div className="w-px h-4 mx-3 bg-gray-300"></div>
+                    <span className="text-sm text-gray-500 whitespace-nowrap">
+                      {project.user_type || "Builder"}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
         ))
         }
       </Slider >
