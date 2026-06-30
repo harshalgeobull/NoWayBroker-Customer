@@ -11,6 +11,8 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 
 import { FiUser, FiMenu, FiHeadphones, FiPhoneCall } from "react-icons/fi";
 const HorizontalNav = () => {
+  console.log("HorizontalNav rendered");
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
@@ -29,7 +31,8 @@ const HorizontalNav = () => {
   const [profileImage, setProfileImage] = useState("");
   const [showLogoPreview, setShowLogoPreview] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
-  
+  const inputRef = useRef(null);
+  const GOOGLE_MAPS_API_KEY = "AIzaSyAt8bj4UACvakZfiSy-0c1o_ivfplm7jEU";
 
   const searchBarRoutes = [
     "/property",
@@ -57,7 +60,45 @@ const HorizontalNav = () => {
       setInputValue("");
     }
   }, [location.pathname]);
+useEffect(() => {
+   console.log("Autocomplete useEffect running");
+  const initAutocomplete = () => {
+    if (!inputRef.current || !window.google){
+      console.log("inputRef or google missing"); 
+      return;
+    } 
+console.log("Creating autocomplete");
+    const autocomplete = new window.google.maps.places.Autocomplete(
+      inputRef.current,
+      {
+        types: ["(cities)"],
+        componentRestrictions: { country: "in" },
+      }
+    );
 
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+
+      if (place && place.name) {
+         console.log("Selected City:", place.name);
+        setInputValue(place.name);
+        setSearchCity(place.name);
+      }
+    });
+  };
+
+  if (window.google && window.google.maps) {
+    initAutocomplete();
+  } else {
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = initAutocomplete;
+
+    document.body.appendChild(script);
+  }
+}, []);
   const checkLoginStatus = () => {
     const userId = sessionStorage.getItem("accessToken");
     setIsLoggedIn(!!userId);
@@ -196,31 +237,21 @@ const HorizontalNav = () => {
                 </span>
               )}
 
-              {searchQuery && (
-                <span className="flex items-center px-3 py-1 text-sm text-black bg-gray-200 rounded-full">
-                  {searchQuery}
-                  <button
-                    className="ml-2 text-black hover:text-gray-600 focus:outline-none"
-                    onClick={() => setSearchQuery("")}
-                  >
-                    ✕
-                  </button>
-                </span>
-              )}
-
-              <input
-                type="text"
-                className="bg-transparent border-none outline-none"
-                placeholder="Search Location..."
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && inputValue.trim() !== "") {
-                    setSearchCity(inputValue.trim());
-                    setInputValue("");
-                  }
-                }}
-              />
+              
+<input
+  ref={inputRef}
+  type="text"
+  className="flex-1 bg-transparent border-none outline-none"
+  placeholder="Search Location..."
+  value={inputValue}
+  onChange={(e) => setInputValue(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" && inputValue.trim()) {
+      setSearchCity(inputValue.trim());
+      setInputValue("");
+    }
+  }}
+/>
             </div>
           )}
 
