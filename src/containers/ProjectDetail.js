@@ -24,9 +24,10 @@ import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
-
-import { Building2, Ruler } from "lucide-react";
+import { Building2, Ruler, Bath } from "lucide-react";
 import { FaMapMarkerAlt } from "react-icons/fa";
+import { MdApartment } from "react-icons/md";
+import { RiRuler2Line } from "react-icons/ri";
 
 const ProjectDetail = () => {
   // const [showAllImages, setShowAllImages] = useState(false);
@@ -1895,6 +1896,7 @@ const ProjectDetail = () => {
                     </div>
                   </div>
 
+
                   {/* Card Body */}
                   <div
                     className="p-4 bg-white rounded-b-2xl cursor-pointer"
@@ -1902,71 +1904,83 @@ const ProjectDetail = () => {
                   >
                     {/* Row 1: Project Name + Furnished Type */}
                     <div className="flex items-start justify-between gap-3 mb-0">
-                      <h3 className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate">
-                        {project.project_name || "N/A"}
+                      <h3 className="flex-1 m-0 text-base font-bold leading-6 text-gray-900 truncate">
+                        {project.project_name || ""}
                       </h3>
                       {project.furnished_type && (
-                        <span className="flex-shrink-0 text-sm font-medium leading-6 text-[#E85B6B] whitespace-nowrap">
+                        <span className="flex-shrink-0 text-sm font-medium leading-6 text-black whitespace-nowrap">
                           {project.furnished_type}
                         </span>
                       )}
                     </div>
 
                     {/* Row 2: Subtitle */}
-                    <p className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate">
+                    <p className="mt-0 mb-2 text-sm leading-5 text-gray-500 truncate">
                       {project.congfigurations
                         ? project.congfigurations.includes("BHK")
                           ? project.congfigurations
                           : project.congfigurations.split(",").map((c) => `${c.trim()} BHK`).join(", ")
                         : ""}{" "}
-                      {project.project_type} in {project.address_area || ""},{" "}
-                      {project.city_name || ""}
+                      {project.project_type} for Sale in {project.address_area || ""}
+                      {project.city_name ? `, ${project.city_name}` : ""}
                     </p>
 
-                    {/* Row 3: Price */}
-                    <div className="flex items-center mb-1">
-                      <span className="text-2xl font-bold">
+                    {/* Row 3: Price + Status */}
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-xl font-bold">
                         {formatAverageProjectPrice(project.average_project_price)}
                       </span>
+                      {project.possession_status === "Ready To Move" && (
+                        <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
+                          <MdApartment className="text-base text-green-700" />
+                          <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                            Ready to Move
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Row 4: Features Grid */}
                     <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+                      {/* Configuration / Type */}
                       <div className="flex items-center gap-2 px-1 min-w-0">
                         <Building2 size={20} className="text-gray-700 flex-shrink-0" />
-                        <div className="flex flex-col min-w-0">
-                          <p className="m-0 text-sm font-semibold leading-4 truncate">
-                            {project.project_type || "N/A"}
-                          </p>
-                          <p className="m-0 text-xs leading-4 text-gray-500">Type</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
-                        <Ruler size={20} className="text-gray-700 flex-shrink-0" />
-                        <div className="flex flex-col min-w-0">
+                        <div className="flex flex-col min-w-0 leading-tight">
                           <p className="m-0 text-sm font-semibold leading-4 truncate">
                             {project.congfigurations
                               ? project.congfigurations.includes("BHK")
                                 ? project.congfigurations.split(",")[0].trim()
                                 : `${project.congfigurations.split(",")[0].trim()} BHK`
-                              : "N/A"}
+                              : ""}
                           </p>
-                          <p className="m-0 text-xs leading-4 text-gray-500">Config</p>
+                          <p className="m-0 text-xs leading-4 text-gray-500">
+                            {project.project_type || "Apartment"}
+                          </p>
                         </div>
                       </div>
+
+                      {/* Bathrooms */}
                       <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
-                        <FaMapMarkerAlt size={16} className="text-gray-700 flex-shrink-0" />
-                        <div className="flex flex-col min-w-0">
+                        <Bath size={20} className="text-gray-700 flex-shrink-0" />
+                        <div className="flex flex-col min-w-0 leading-tight">
                           <p className="m-0 text-sm font-semibold leading-4 truncate">
-                            {project.address_area || "N/A"}
+                            {project.bathroom || 0} Baths
                           </p>
-                          <p className="m-0 text-xs leading-4 text-gray-500">Location</p>
+                          <p className="m-0 text-xs leading-4 text-gray-500">Bathrooms</p>
+                        </div>
+                      </div>
+
+                      {/* Built Up Area */}
+                      <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
+                        <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
+                        <div className="flex flex-col min-w-0 leading-tight">
+                          <p className="m-0 text-sm font-semibold leading-4 truncate">
+                            {project.area ? `${project.area} sq.ft` : "N/A"}
+                          </p>
+                          <p className="m-0 text-xs leading-4 text-gray-500">Built Up Ar...</p>
                         </div>
                       </div>
                     </div>
-
-                    <hr className="my-1 border-gray-100" />
-
                     {/* Row 5: Posted By + Share */}
                     <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
                       <div className="flex items-center flex-wrap min-w-0">
@@ -1974,9 +1988,7 @@ const ProjectDetail = () => {
                         {project.days_since_created && (
                           <>
                             <span className="mx-2 text-gray-400">•</span>
-                            <span className="whitespace-nowrap">
-                              {project.days_since_created} days ago
-                            </span>
+                            <span className="whitespace-nowrap">{project.days_since_created} days ago</span>
                           </>
                         )}
                       </div>
@@ -1993,7 +2005,7 @@ const ProjectDetail = () => {
 
                     {/* Row 6: Owner Details */}
                     <div className="flex items-center pt-2">
-                      <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+                      <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
                         {project.property_owner_image &&
                           !project.property_owner_image.includes("default_profile") ? (
                           <img
@@ -2002,7 +2014,7 @@ const ProjectDetail = () => {
                             className="object-cover w-full h-full rounded-full"
                           />
                         ) : (
-                          <span className="text-2xl text-blue-600 font-bold">
+                          <span className="text-base text-blue-600 font-bold">
                             {(project.connect_to_name || "B")[0].toUpperCase()}
                           </span>
                         )}
@@ -2019,7 +2031,7 @@ const ProjectDetail = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div >
             ))}
         </Slider>
       </div>

@@ -47,9 +47,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -301,9 +301,8 @@ const Commercial = ({
                   category === "Commercial Buy" ||
                   category === "Commercial Lease"
                 ) {
-                  return `${type} for ${
-                    category === "Commercial Buy" ? "Sale" : "Lease"
-                  } in ${location}`;
+                  return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
+                    } in ${location}`;
                 }
 
                 // PG / Co-Living
@@ -546,13 +545,12 @@ const Commercial = ({
 
                           {/* Furnishing */}
                           <span
-                            className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-[#E85B6B] sm:text-base whitespace-nowrap"
+                            className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-black sm:text-base whitespace-nowrap"
                             title={property.furnished_type}
                           >
                             {property.furnished_type || "Un-Furnished"}
                           </span>
                         </div>
-
                         <p
                           className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate"
                           title={subtitle}
@@ -578,7 +576,7 @@ const Commercial = ({
                             {/* Ready to Move - Keep close to price */}
                             {property.property_category_type?.includes("Buy") &&
                               property.possession_status ===
-                                "Ready To Move" && (
+                              "Ready To Move" && (
                                 <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
                                   <MdApartment className="text-base text-green-700" />
                                   <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
@@ -667,8 +665,8 @@ const Commercial = ({
                                       ? "Retail Space"
                                       : property.property_type
                                   : property.property_category_type?.includes(
-                                        "PG",
-                                      )
+                                    "PG",
+                                  )
                                     ? `${property.bathroom || 0} Bathrooms`
                                     : property.bhk_type}
                               </p>
@@ -677,8 +675,8 @@ const Commercial = ({
                                 {property.building_type === "Commercial"
                                   ? "Property Type"
                                   : property.property_category_type?.includes(
-                                        "PG",
-                                      )
+                                    "PG",
+                                  )
                                     ? "Bathrooms"
                                     : property.property_type}
                               </p>
@@ -781,9 +779,9 @@ const Commercial = ({
                           {/* Avatar */}
                           <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
                             {property.property_owner_image &&
-                            !property.property_owner_image.includes(
-                              "default_profile",
-                            ) ? (
+                              !property.property_owner_image.includes(
+                                "default_profile",
+                              ) ? (
                               <>
                                 <img
                                   src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
