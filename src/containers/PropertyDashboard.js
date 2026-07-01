@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { createPortal } from "react-dom";
 import { IoClose } from "react-icons/io5";
 import { MdApartment } from "react-icons/md";
@@ -65,7 +65,7 @@ const PropertyDashboard = () => {
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [propertyType, setPropertyType] = useState("");
-  const { searchCity } = useCity();
+  const { searchCity, setSearchCity } = useCity();
   const [bhkType, setBhkType] = useState("");
   const [furnishedStatus, setFurnishedStatus] = useState("");
   const [minPrice, setMinPrice] = useState("");
@@ -421,6 +421,9 @@ const PropertyDashboard = () => {
     }
   }, [propertytype]);
 
+  useEffect(() => {
+  console.log("searchCity changed:", searchCity);
+}, [searchCity]);
   const formatPriceMinMax = (value) => {
     const num = Number(value);
     if (num >= 10000000)
@@ -594,7 +597,9 @@ const PropertyDashboard = () => {
   };
 
   const fetchProperties = async (propertytype) => {
+   
     try {
+
       const payloadKey =
         propertytype === "Commercial" || propertytype === "Residential"
           ? "building_type"
@@ -609,8 +614,9 @@ const PropertyDashboard = () => {
       formData.append("page_size", itemsPerPage);
       formData.append("city_name", searchCity);
 
+
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/cust_api/search_location`,
+        `${process.env.REACT_APP_API_URL}/cust_api/search_properties`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -626,6 +632,7 @@ const PropertyDashboard = () => {
         setTotalPages(0);
       }
     } catch (error) {
+
       setError("Failed to load properties.");
       setProperties([]);
       setTotalPages(0);
@@ -651,7 +658,6 @@ const PropertyDashboard = () => {
       return price.toString();
     }
   };
-
   useEffect(() => {
     setError(null);
     const style = document.createElement("style");
@@ -730,7 +736,7 @@ const PropertyDashboard = () => {
     text-align: center;
     white-space: nowrap;
     z-index: 10;
-  }
+   }
 
         .price-tooltip:hover {
           background-color: gray; /* Change to gray on hover */
@@ -784,11 +790,17 @@ const PropertyDashboard = () => {
       `;
     document.head.appendChild(style);
 
-    if (filtersApplied) {
-      fetchFilteredProperties(currentPage);
-    } else {
-      fetchProperties(propertytype);
-    }
+    console.log("=== FETCH useEffect ===");
+console.log("searchCity:", searchCity);
+
+if (filtersApplied) {
+  fetchFilteredProperties(currentPage);
+} else {
+  console.log("Calling fetchProperties");
+  if (searchCity) {
+  fetchProperties(propertytype);
+}
+}
   }, [propertytype, currentPage, accessToken, searchCity, filtersApplied]);
 
   const createCustomIcon = (price, isActive = false) =>
@@ -808,6 +820,7 @@ const PropertyDashboard = () => {
 
   const fetchFilteredProperties = async (page) => {
     try {
+      
       const formData = new FormData();
 
       const cityToSend =
