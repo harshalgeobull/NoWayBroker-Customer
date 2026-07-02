@@ -9,6 +9,8 @@ import ShareModal from "../containers/ShareModal";
 import { Link } from "react-router-dom";
 import Slider from "react-slick";
 import { AiOutlineUser } from "react-icons/ai";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
 
 const MyFavourite = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -409,7 +411,7 @@ const MyFavourite = () => {
 
                   {/* Row 3: Price + Status */}
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="flex items-center text-xl font-bold">
+                    <span className="flex items-center text-xl font-bold text-black">
                       <FaRupeeSign className="mr-1 text-base" />
                       {property.property_category_type === "Rent"
                         ? `${formatPrice(property.rent).replace("₹ ", "")}${property.rent_duration && property.rent_duration !== "N/A"
@@ -435,7 +437,7 @@ const MyFavourite = () => {
                     <div className="flex items-center gap-2 px-1 min-w-0">
                       <Building2 size={20} className="text-gray-700 flex-shrink-0" />
                       <div className="flex flex-col min-w-0 leading-tight">
-                        <p className="m-0 text-sm font-semibold leading-4 truncate">
+                        <p className="m-0 text-sm font-semibold leading-4 truncate text-black">
                           {property.bhk_type || "-"}
                         </p>
                         <p className="m-0 text-xs leading-4 text-gray-500">
@@ -447,7 +449,7 @@ const MyFavourite = () => {
                     <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
                       <FaBath size={18} className="text-gray-700 flex-shrink-0" />
                       <div className="flex flex-col min-w-0 leading-tight">
-                        <p className="m-0 text-sm font-semibold text-gray-900 truncate">
+                        <p className="m-0 text-sm font-semibold text-black truncate">
                           {property.bathroom || 0} Baths
                         </p>
                         <p className="m-0 text-xs text-gray-500 truncate">
@@ -459,7 +461,7 @@ const MyFavourite = () => {
                     <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
                       <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
                       <div className="flex flex-col justify-center min-w-0">
-                        <p className="m-0 text-sm font-semibold leading-4 truncate">
+                        <p className="m-0 text-sm font-semibold leading-4 truncate text-black">
                           {property.area} {property.area_in}
                         </p>
                         <p className="m-0 text-xs leading-4 text-gray-500 truncate">
@@ -565,134 +567,262 @@ const MyFavourite = () => {
 
         {/* Project Cards */}
         {activeTab === "project" &&
-          projects.map((project) => (
-            <div
-              key={project._id}
-              className="max-w-[500px] w-full bg-transparent relative overflow-hidden"
-            >
-              <div className="relative">
-                <img
-                  src={project.cover_image || "/image/app.png"}
-                  alt="Cover"
-                  className="w-full h-[400px] object-cover rounded-3xl"
-                />
-
-                <div className="absolute left-1/2 transform -translate-x-1/2 bottom-0 w-[90%] sm:w-80 h-[130px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
-                  <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[100px] h-[100px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
+          (projects.length > 0 ? (
+            projects.map((project) => (
+              <div
+                key={project._id}
+                className="w-full overflow-hidden bg-white shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300"
+              >
+                <div className="relative">
+                  <Link to={`/projectdetail/${project._id}`} className="block">
                     <img
-                      src={project.cover_image || "/image/app.png"}
-                      alt="Project Logo"
-                      className="object-cover w-full h-full"
+                      src={project.cover_image}
+                      alt={project.project_name}
+                      className="w-full h-[220px] sm:h-[260px] md:h-[300px] lg:h-[320px] object-cover rounded-t-2xl cursor-pointer"
+                    />
+                  </Link>
+
+                  {/* Heart + Share */}
+                  <div className="absolute top-2 right-2 flex items-center space-x-2">
+                    <button
+                      className="bg-gray-800/60 backdrop-blur-sm p-2 rounded-full shadow"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUnfavoriteProject(project.favorite_id);
+                      }}
+                    >
+                      <Heart
+                        size={20}
+                        stroke={project.is_favorite ? "none" : "white"}
+                        color={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"}
+                        fill={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"}
+                        strokeWidth={2}
+                      />
+                    </button>
+                    <FontAwesomeIcon
+                      icon={faShareNodes}
+                      className="text-gray-500 bg-white p-2 rounded shadow cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openShareModal1(
+                          `${window.location.origin}/projectdetail/${project._id}`,
+                          project._id,
+                        );
+                      }}
                     />
                   </div>
 
-                  <h3 className="text-center text-white text-lg font-semibold min-h-[14px]">
-                    {project.project_name || "No Project Name Available"}
-                  </h3>
+                  {/* Logo + Project Name overlay */}
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[90%] sm:w-[85%] md:w-[80%] h-[110px] md:h-[120px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
+                    <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
+                      <img
+                        src={project.logo || project.cover_image}
+                        alt="Project Logo"
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                    <h3 className="text-center text-white text-lg md:text-2xl font-bold line-clamp-2 min-h-[48px] mt-4">
+                      {project.project_name || "No Project Name Available"}
+                    </h3>
+                  </div>
                 </div>
 
-                <div className="absolute flex space-x-2 top-2 right-2">
-                  <button
-                    className="p-2 bg-white rounded-full shadow"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleUnfavoriteProject(project.favorite_id);
-                    }}
-                  >
-                    <Heart
-                      size={22}
-                      stroke={project.is_favorite ? "none" : "white"}
-                      color={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4) "}
-                      fill={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4) "}
-                      strokeWidth={2}
-                    />
-                  </button>
-                </div>
+                {/* Card Body */}
+                <Link
+                  to={`/projectdetail/${project._id}`}
+                  className="block p-4 bg-white rounded-b-2xl cursor-pointer no-underline hover:no-underline"
+                >
+                  {/* Row 1: Project Name + Furnished Type */}
+                  <div className="flex items-start justify-between gap-3 mb-0">
+                    <h3 className="flex-1 m-0 text-base font-bold leading-6 text-gray-900 truncate">
+                      {project.project_name || ""}
+                    </h3>
+                    {project.furnished_type && (
+                      <span className="flex-shrink-0 text-sm font-medium leading-6 text-black whitespace-nowrap">
+                        {project.furnished_type}
+                      </span>
+                    )}
+                  </div>
 
-                <div className="absolute bottom-0 right-0">
-                  {project.mark_as_featured === "Yes" && (
-                    <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
-                      FEATURED
+                  {/* Row 2: Subtitle */}
+                  <p className="mt-0 mb-2 text-sm leading-5 text-gray-500 truncate">
+                    {project.congfigurations
+                      ? project.congfigurations.includes("BHK")
+                        ? project.congfigurations
+                        : project.congfigurations.split(",").map((c) => `${c.trim()} BHK`).join(", ")
+                      : ""}{" "}
+                    {project.project_type} for Sale in {project.address_area || ""}
+                    {project.city_name ? `, ${project.city_name}` : ""}
+                  </p>
+
+                  {/* Row 3: Price + Status */}
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-xl font-bold text-black">
+                      {project.project_properties && project.project_properties.length > 0
+                        ? (() => {
+                          const prices = project.project_properties.map((p) => Number(p.price));
+                          const minPrice = Math.min(...prices);
+                          const maxPrice = Math.max(...prices);
+                          return minPrice === maxPrice ? (
+                            formatAverageProjectPrice(minPrice)
+                          ) : (
+                            <>
+                              {formatAverageProjectPrice(minPrice)}
+                              <span className="mx-1">-</span>
+                              {formatAverageProjectPrice(maxPrice)}
+                            </>
+                          );
+                        })()
+                        : formatAverageProjectPrice(project.average_project_price)}
                     </span>
-                  )}
-                </div>
-              </div>
+                    {project.possession_status === "Ready To Move" && (
+                      <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
+                        <MdApartment className="text-base text-green-700" />
+                        <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                          Ready to Move
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
-              <div className="p-3 text-start shadow-sm rounded-b-3xl relative bg-white w-[90%] sm:w-80 m-auto border">
-                <p className="p-0 mt-1 text-lg text-gray-600">
-                  {project.congfigurations || "No Configurations"}
-                </p>
+                  {/* Row 4: Features Grid */}
+                  <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+                    <div className="flex items-center gap-2 px-1 min-w-0">
+                      <Building2 size={20} className="text-gray-700 flex-shrink-0" />
+                      <div className="flex flex-col min-w-0 leading-tight">
+                        <p className="m-0 text-sm font-semibold leading-4 truncate text-black">
+                          {project.congfigurations
+                            ? project.congfigurations.includes("BHK")
+                              ? project.congfigurations.split(",")[0].trim()
+                              : `${project.congfigurations.split(",")[0].trim()} BHK`
+                            : ""}
+                        </p>
+                        <p className="m-0 text-xs leading-4 text-gray-500">{project.project_type || "Apartment"}</p>
+                      </div>
+                    </div>
 
-                <p className="flex items-start justify-start gap-2 mt-1 text-sm font-bold text-gray-500 truncate">
-                  <img
-                    src="/image/address_icon.png"
-                    alt="Location Icon"
-                    className="object-contain w-4 h-4"
-                  />
-                  {project.address_area || "No Address Provided"}
-                </p>
+                    <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
+                      <FaBath size={18} className="text-gray-700 flex-shrink-0" />
+                      <div className="flex flex-col min-w-0 leading-tight">
+                        <p className="m-0 text-sm font-semibold text-black truncate">
+                          {project.bathroom || 0} Baths
+                        </p>
+                        <p className="m-0 text-xs text-gray-500 truncate">Bathrooms</p>
+                      </div>
+                    </div>
 
-                {project.project_properties &&
-                  project.project_properties.length > 0 &&
-                  (() => {
-                    const prices = project.project_properties.map((p) =>
-                      Number(p.price),
-                    );
-                    const minPrice = Math.min(...prices);
-                    const maxPrice = Math.max(...prices);
+                    <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
+                      <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
+                      <div className="flex flex-col min-w-0 leading-tight">
+                        <p className="m-0 text-sm font-semibold leading-4 truncate text-black">
+                          {project.area ? `${project.area} Sq.ft` : "N/A"}
+                        </p>
+                        <p className="m-0 text-xs leading-4 text-gray-500">Built Up Area</p>
+                      </div>
+                    </div>
+                  </div>
 
-                    return (
-                      <h4 className="flex items-center mb-0 text-xl font-bold my-text sm:text-2xl">
-                        {minPrice === maxPrice ? (
-                          formatAverageProjectPrice(minPrice)
+                  <hr className="my-1 border-gray-100" />
+
+                  {/* Row 5: Owner Details + Share */}
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center">
+                      <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
+                        {project.property_owner_image &&
+                          !project.property_owner_image.includes("default_profile") ? (
+                          <img
+                            src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
+                            alt={project.connect_to_name || "Builder"}
+                            className="object-cover w-full h-full rounded-full"
+                          />
                         ) : (
-                          <>
-                            {formatAverageProjectPrice(minPrice)}
-                            <span className="mx-1">-</span>
-                            {formatAverageProjectPrice(maxPrice)}
-                          </>
+                          <span className="text-base font-bold text-blue-600">
+                            {(project.connect_to_name || "B")[0].toUpperCase()}
+                          </span>
                         )}
-                      </h4>
-                    );
-                  })()}
+                      </div>
+
+                      <span className="ml-3 text-sm font-semibold text-gray-900">
+                        {project.connect_to_name || "Builder"}
+                      </span>
+
+                      <div className="w-px h-4 mx-3 bg-gray-300"></div>
+
+                      <span className="text-sm text-gray-500">
+                        Posted by {project.user_type || "Builder"}
+                      </span>
+                    </div>
+
+                    <FontAwesomeIcon
+                      icon={faShareNodes}
+                      className="text-[17px] text-gray-500 cursor-pointer hover:text-blue-500"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openShareModal1(
+                          `${window.location.origin}/projectdetail/${project._id}`,
+                          project._id,
+                        );
+                      }}
+                    />
+                  </div>
+                </Link>
+
+                {isShareModalOpen && activeShareId === project._id && (
+                  <div className="absolute right-0 z-50">
+                    <ShareModal
+                      currentShareUrl={currentShareUrl}
+                      closeShareModal={handleCloseShareModal}
+                      copyLink={() => {
+                        navigator.clipboard.writeText(currentShareUrl);
+                        alert("Link copied!");
+                      }}
+                    />
+                  </div>
+                )}
               </div>
+            ))
+          ) : (
+            <div className="text-center text-black col-span-full">
+              <p>No favorite projects available.</p>
             </div>
           ))}
-      </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center mt-8 space-x-2">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="flex items-center justify-center w-10 h-10 text-gray-600 border border-gray-400 rounded-full disabled:opacity-50"
-          >
-            {"<"}
-          </button>
-          {Array.from({ length: totalPages }, (_, index) => (
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center mt-8 space-x-2">
             <button
-              key={index + 1}
-              onClick={() => setCurrentPage(index + 1)}
-              className={`w-10 h-10 flex items-center justify-center rounded-full border transition-all duration-200 ${currentPage === index + 1
-                ? "border-rose-600 my-text font-semibold"
-                : "border-gray-400 text-gray-600"
-                }`}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="flex items-center justify-center w-10 h-10 text-gray-600 border border-gray-400 rounded-full disabled:opacity-50"
             >
-              {index + 1}
+              {"<"}
             </button>
-          ))}
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className="flex items-center justify-center w-10 h-10 text-gray-600 border border-gray-400 rounded-full disabled:opacity-50"
-          >
-            {">"}
-          </button>
-        </div>
-      )}
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index + 1}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`w-10 h-10 flex items-center justify-center rounded-full border transition-all duration-200 ${currentPage === index + 1
+                  ? "border-rose-600 my-text font-semibold"
+                  : "border-gray-400 text-gray-600"
+                  }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="flex items-center justify-center w-10 h-10 text-gray-600 border border-gray-400 rounded-full disabled:opacity-50"
+            >
+              {">"}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

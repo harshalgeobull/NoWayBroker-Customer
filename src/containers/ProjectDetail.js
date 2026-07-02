@@ -372,19 +372,25 @@ const ProjectDetail = () => {
   useEffect(() => {
     fetchProjects();
   }, [projectId]);
+
+  // Slider settings - matched to Spotlights.js card slider
   const settings = {
-    dots: false,
     infinite: true,
-    speed: 800,
+    speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
-    arrows: false,
     autoplay: true,
     autoplaySpeed: 3000,
+    arrows: false,
+    dots: false,
+    adaptiveHeight: false,
+
     responsive: [
+      { breakpoint: 1536, settings: { slidesToShow: 4 } },
       { breakpoint: 1280, settings: { slidesToShow: 3 } },
       { breakpoint: 1024, settings: { slidesToShow: 2 } },
-      { breakpoint: 768, settings: { slidesToShow: 1 } },
+      { breakpoint: 768, settings: { slidesToShow: 2 } },
+      { breakpoint: 640, settings: { slidesToShow: 1 } },
     ],
   };
   // for send Enquiry 'add_property_enquiry' api
@@ -1240,8 +1246,8 @@ const ProjectDetail = () => {
                   type="button"
                   onClick={() => handleDetailTabClick(tab)}
                   className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeDetailTab === tab.key
-                      ? "border-rose-600 text-rose-600"
-                      : "border-transparent text-gray-600 hover:text-rose-600"
+                    ? "border-rose-600 text-rose-600"
+                    : "border-transparent text-gray-600 hover:text-rose-600"
                     }`}
                 >
                   {tab.label}
@@ -1709,8 +1715,8 @@ const ProjectDetail = () => {
             {enquiryStatus && (
               <div
                 className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
-                    ? "text-green-600"
-                    : "text-red-600"
+                  ? "text-green-600"
+                  : "text-red-600"
                   }`}
               >
                 {enquiryStatus.message}
@@ -1769,7 +1775,7 @@ const ProjectDetail = () => {
               className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg"
               onClick={() => sliderRef.current.slickPrev()}
             >
-              <GoArrowLeft className="text-3xl text-black" />
+              <GoArrowLeft className="text-xl text-black md:text-2xl" />
             </button>
 
             <button
@@ -1781,59 +1787,6 @@ const ProjectDetail = () => {
           </div>
         </div>
 
-        {/* <Slider ref={sliderRef} {...settings} className="mx-auto mt-4">
-          {projectList
-            .filter(
-              (project) =>
-                project?.cover_image &&
-                project?.project_name &&
-                project?.average_project_price,
-            )
-            .map((project, index) => (
-              <div
-                key={index}
-                className="px-4 cursor-pointer"
-                onClick={() => history.push(`/projectdetail/${project._id}`)}
-              >
-                <div className="max-w-[500px] w-full bg-white rounded-3xl">
-                  <div className="relative">
-                    <img
-                      src={project.cover_image}
-                      alt={project.project_name}
-                      className="object-cover w-full h-64 md:h-96 rounded-3xl"
-                    />
-
-                    <div className="absolute bottom-0 flex flex-col justify-end h-24 p-4 transform -translate-x-1/2 left-1/2 w-80 bg-gray-800/60 backdrop-blur-md rounded-t-3xl">
-                      <div className="absolute flex items-center justify-center overflow-hidden transform -translate-x-1/2 bg-white border-2 border-gray-200 rounded-full shadow-lg -top-7 left-1/2 w-14 h-14">
-                        <img
-                          src={project.logo}
-                          alt="Project Logo"
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-
-                      <h3 className="text-xl font-semibold text-center text-white">
-                        {project.project_name}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="px-4">
-                    <div className="p-3 text-center bg-white shadow-sm rounded-b-3xl">
-                      <p className="text-lg text-gray-500 sm:text-base truncate">
-                        {project.project_description || "No description"}
-                      </p>
-                      <h4 className="mt-2 text-lg font-bold text-gray-800 sm:text-md">
-                        {formatAverageProjectPrice(
-                          project.average_project_price,
-                        )}
-                      </h4>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-        </Slider> */}
         <Slider ref={sliderRef} {...settings} className="mx-auto mt-4">
           {projectList
             .filter(
@@ -2009,65 +1962,57 @@ const ProjectDetail = () => {
                         <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
                         <div className="flex flex-col min-w-0 leading-tight">
                           <p className="m-0 text-sm font-semibold leading-4 truncate">
-                            {project.area ? `${project.area} sq.ft` : "N/A"}
+                            {project.area ? `${project.area} Sq.ft` : "N/A"}
                           </p>
                           <p className="m-0 text-xs leading-4 text-gray-500">
-                            Built Up Ar...
+                            Built Up Area
                           </p>
                         </div>
                       </div>
                     </div>
-                    {/* Row 5: Posted By + Share */}
-                    <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
-                      <div className="flex items-center flex-wrap min-w-0">
-                        <span>Posted by {project.user_type || "Builder"}</span>
-                        {project.days_since_created && (
-                          <>
-                            <span className="mx-2 text-gray-400">•</span>
-                            <span className="whitespace-nowrap">
-                              {project.days_since_created} days ago
+
+                    <hr className="my-1 border-gray-100" />
+
+                    {/* Row 5: Owner Details + Share */}
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex items-center">
+                        <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
+                          {project.property_owner_image &&
+                            !project.property_owner_image.includes(
+                              "default_profile",
+                            ) ? (
+                            <img
+                              src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
+                              alt={project.connect_to_name || "Builder"}
+                              className="object-cover w-full h-full rounded-full"
+                            />
+                          ) : (
+                            <span className="text-base font-bold text-blue-600">
+                              {(project.connect_to_name || "B")[0].toUpperCase()}
                             </span>
-                          </>
-                        )}
+                          )}
+                        </div>
+
+                        <span className="ml-3 text-sm font-semibold text-gray-900">
+                          {project.connect_to_name || "Builder"}
+                        </span>
+
+                        <div className="w-px h-4 mx-3 bg-gray-300"></div>
+
+                        <span className="text-sm text-gray-500">
+                          Posted by {project.user_type || "Builder"}
+                        </span>
                       </div>
+
                       <FontAwesomeIcon
                         icon={faShareNodes}
-                        className="ml-2 text-[17px] text-gray-500 cursor-pointer hover:text-blue-500"
+                        className="text-[17px] text-gray-500 cursor-pointer hover:text-blue-500"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           setIsShareModalOpen(true);
                         }}
                       />
-                    </div>
-
-                    {/* Row 6: Owner Details */}
-                    <div className="flex items-center pt-2">
-                      <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
-                        {project.property_owner_image &&
-                          !project.property_owner_image.includes(
-                            "default_profile",
-                          ) ? (
-                          <img
-                            src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
-                            alt={project.connect_to_name || "Owner"}
-                            className="object-cover w-full h-full rounded-full"
-                          />
-                        ) : (
-                          <span className="text-base text-blue-600 font-bold">
-                            {(project.connect_to_name || "B")[0].toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center ml-3">
-                        <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                          {project.connect_to_name || "Builder"}
-                        </span>
-                        <div className="w-px h-4 mx-3 bg-gray-300"></div>
-                        <span className="text-sm text-gray-500 whitespace-nowrap">
-                          {project.user_type || "Builder"}
-                        </span>
-                      </div>
                     </div>
                   </div>
                 </div>
