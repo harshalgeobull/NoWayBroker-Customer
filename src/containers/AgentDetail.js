@@ -2,18 +2,20 @@ import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AiFillHome, AiOutlineUser } from "react-icons/ai";
-import { FaRupeeSign, FaCube } from "react-icons/fa";
+import { FaRupeeSign, FaCube, FaBath, FaWhatsapp, FaPhone } from "react-icons/fa";
 import {
   MdOutlineBedroomParent,
   MdOutlineNavigateBefore,
   MdOutlineNavigateNext,
+  MdApartment,
 } from "react-icons/md";
-import { Heart, Camera, Home, Ruler } from "lucide-react";
+import { Heart, Camera, Home, Ruler, Building2 } from "lucide-react";
 import { PiShareNetworkLight } from "react-icons/pi";
 import { UserCheck2 } from "lucide-react";
 import { BiArea } from "react-icons/bi";
 import { faChair } from "@fortawesome/free-solid-svg-icons";
 import { PiCubeFocus } from "react-icons/pi";
+import { RiRuler2Line } from "react-icons/ri";
 import axios from "axios";
 import ContactDetails from "../containers/ContactDetails";
 import { toast } from "react-toastify";
@@ -193,6 +195,36 @@ const AgentDetail = () => {
     setActiveShareId(null);
   };
 
+  const formatPrice = (price) => {
+    if (!price) return "";
+
+    price = parseInt(price);
+
+    const formatNumber = (num) => {
+      return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2); // no decimals if whole number
+    };
+
+    if (price >= 10000000) {
+      return `₹ ${formatNumber(price / 10000000)} Cr`; // Crores
+    } else if (price >= 100000) {
+      return `₹ ${formatNumber(price / 100000)} L`; // Lakhs
+    } else if (price >= 1000) {
+      return `₹ ${formatNumber(price / 1000)} K`; // Thousands
+    } else {
+      return `₹ ${price}`;
+    }
+  };
+
+  const handleContactClick = (property) => {
+    const token = sessionStorage.getItem("accessToken");
+    if (token) {
+      setIsContactModalOpen(true);
+    } else {
+      setOpenContactModalAfterLogin(true);
+      setIsLoginModalOpen(true);
+    }
+  };
+
   return (
     <>
       <div className="min-h-screen ">
@@ -289,11 +321,10 @@ const AgentDetail = () => {
               <button
                 key={category}
                 onClick={() => handleTabClick(category)}
-                className={`pb-1 ${
-                  activeTab === category
-                    ? "my-text border-b-2 border-rose-600"
-                    : "text-gray-600"
-                }`}
+                className={`pb-1 ${activeTab === category
+                  ? "my-text border-b-2 border-rose-600"
+                  : "text-gray-600"
+                  }`}
               >
                 {category}{" "}
                 <span className="px-2 py-1 text-xs text-white bg-green-500 rounded-full">
@@ -409,9 +440,9 @@ const AgentDetail = () => {
                         />
                       )}
                     </Link>
-                    {/* 10 Days NoWayBroker Tag (Top Left) */}
+                    {/* Days on NoWayBroker Tag (Top Left) */}
                     <span className="absolute px-2 py-1 text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm">
-                      {property.days_since_created} days on NoWayBroker
+                      {property.days_since_created} days ago
                     </span>
 
                     {/* Virtual Tour & Heart Icon (Top Right) */}
@@ -424,7 +455,7 @@ const AgentDetail = () => {
                       )}
                       {/* <div className="absolute top-0 right-0 flex space-x-2"> */}
                       <button
-                        className="p-2 rounded-full shadow bg-gray-800/60 backdrop-blur-sm"
+                        className="p-1.5 rounded-full shadow bg-gray-800/60 backdrop-blur-sm"
                         onClick={() => {
                           if (!accessToken) {
                             setIsLoginModalOpen(true);
@@ -438,7 +469,7 @@ const AgentDetail = () => {
                         }}
                       >
                         <Heart
-                          size={22}
+                          size={20}
                           stroke={property.is_favorite ? "none" : "white"}
                           color={
                             property.is_favorite
@@ -459,13 +490,12 @@ const AgentDetail = () => {
                     {/* FOR BUY & FEATURED Tags (Bottom of the Image) */}
                     <div className="absolute bottom-0 left-0">
                       <span
-                        className={`text-white text-xs px-3 py-1 rounded-se-lg ${
-                          property.property_category_type === "Buy"
-                            ? "bg-green-500"
-                            : property.property_category_type === "Rent"
-                              ? "bg-blue-500"
-                              : "bg-gray-500"
-                        }`}
+                        className={`text-white text-xs px-3 py-1 rounded-se-lg ${property.property_category_type === "Buy"
+                          ? "bg-green-500"
+                          : property.property_category_type === "Rent"
+                            ? "bg-blue-500"
+                            : "bg-gray-500"
+                          }`}
                       >
                         {property.property_category_type === "Buy"
                           ? "FOR BUY"
@@ -475,29 +505,26 @@ const AgentDetail = () => {
                       </span>
                     </div>
                     <div className="absolute bottom-0 right-0">
-                      <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
-                        FEATURED
-                      </span>
+                      {property.mark_as_featured === "Yes" && (
+                        <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
+                          FEATURED
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  {/* Property Description */}
-                  <div className="p-1">
-                    {/* Property Name & Share Button */}
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xl font-semibold text-gray-800 truncate">
+                  {/* Property Description (Spotlight style) */}
+                  <div className="p-4 bg-white">
+                    {/* Row 1: Name + Furnished Type */}
+                    <div className="flex items-start justify-between gap-3 mb-0">
+                      <h3 className="flex-1 m-0 text-base font-bold leading-6 truncate">
                         {property.property_name}
                       </h3>
-                      <PiShareNetworkLight
-                        className="p-2 text-gray-600 bg-white rounded shadow cursor-pointer"
-                        size={32}
-                        onClick={() =>
-                          openShareModal1(
-                            `${window.location.origin}/propertydetails/${property._id}`,
-                            property._id,
-                          )
-                        }
-                      />
+                      {property.furnished_type && (
+                        <span className="flex-shrink-0 text-sm font-medium leading-6 text-red-500 whitespace-nowrap">
+                          {property.furnished_type}
+                        </span>
+                      )}
                     </div>
 
                     {isShareModalOpen && activeShareId === property._id && (
@@ -549,81 +576,180 @@ const AgentDetail = () => {
                       </div>
                     )}
 
-                    {/* Property Details (Only 3 elements on top) */}
-                    <div className="flex flex-wrap items-center gap-4 mt-1 text-gray-700">
-                      {/* Price */}
-                      <div className="flex items-center gap-1 text-lg font-semibold">
-                        <FaRupeeSign className="text-xl my-text" />
-                        <span>
-                          {property.property_category_type === "Rent"
-                            ? `${property.rent} / ${property.rent_duration}`
-                            : property.property_price}
-                        </span>
-                      </div>
+                    {/* Row 2: Subtitle */}
+                    <p className="mt-0 mb-2 text-sm leading-5 text-gray-500 truncate">
+                      {property.bhk_type ? `${property.bhk_type} ` : ""}
+                      {property.property_type ||
+                        property.building_type ||
+                        "Property"}{" "}
+                      for Sale in{" "}
+                      {property.address_area ||
+                        property.address ||
+                        "No Address Provided"}
+                    </p>
 
-                      {/* BHK Type */}
-                      {property.bhk_type && (
-                        <div className="flex items-center gap-1">
-                          <MdOutlineBedroomParent className="text-xl my-text" />
-                          <p className="m-0 font-semibold">
-                            {property.bhk_type}
-                          </p>
-                        </div>
-                      )}
+                    {/* Row 3: Price + Status */}
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="flex items-center text-xl font-bold">
+                        <FaRupeeSign className="mr-1 text-base" />
+                        {property.property_category_type === "Rent"
+                          ? `${formatPrice(property.rent).replace("₹ ", "")}${property.rent_duration
+                            ? ` / ${property.rent_duration}`
+                            : ""
+                          }`
+                          : formatPrice(property.property_price).replace(
+                            "₹ ",
+                            "",
+                          )}
+                      </span>
+                      {/* Ready to Move - Keep close to price */}
+                      {property.property_category_type?.includes("Buy") &&
+                        property.possession_status === "Ready To Move" && (
+                          <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
+                            <MdApartment className="text-base text-green-700" />
+                            <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                              Ready to Move
+                            </span>
+                          </div>
+                        )}
 
-                      {/* Area in Sq Ft */}
-                      {property.area_sq && (
-                        <div className="flex items-center gap-1">
-                          <BiArea className="text-xl my-text" />
-                          <p className="m-0 font-semibold">
-                            {property.area_sq} sq ft
-                          </p>
+                      {property.construction_status === "Ready To Move" && (
+                        <div className="flex items-center gap-2 px-3 py-1 bg-green-100 border border-green-200 rounded-full">
+                          <MdApartment className="text-base text-green-700" />
+                          <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                            Ready to Move
+                          </span>
                         </div>
                       )}
                     </div>
 
-                    {/* Furnished/Semi-Furnished */}
-                    {property.furnished_type && (
-                      <div className="flex items-center mt-2">
-                        <FontAwesomeIcon
-                          icon={faChair}
-                          className="mr-1 my-text"
+                    {/* Row 4: Features Grid */}
+                    <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+                      <div className="flex items-center gap-2 px-1 min-w-0">
+                        <Building2
+                          size={20}
+                          className="text-gray-700 flex-shrink-0"
                         />
-                        <p className="m-0 font-semibold text-black">
-                          {property.furnished_type}
-                        </p>
+                        <div className="flex flex-col min-w-0 leading-tight">
+                          <p className="m-0 text-sm font-semibold leading-4 truncate">
+                            {property.bhk_type || "-"}
+                          </p>
+                          <p className="m-0 text-xs leading-4 text-gray-500">
+                            {property.building_type || "Apartment"}
+                          </p>
+                        </div>
                       </div>
-                    )}
 
-                    {/* Address */}
-                    <p className="mt-2 text-sm text-gray-400 truncate">
-                      <b>{property.address}</b>
-                    </p>
+                      <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
+                        <FaBath
+                          size={18}
+                          className="text-gray-700 flex-shrink-0"
+                        />
+                        <div className="flex flex-col min-w-0 leading-tight">
+                          <p className="m-0 text-sm font-semibold text-gray-900 truncate">
+                            {property.bathroom || 0} Baths
+                          </p>
+                          <p className="m-0 text-xs text-gray-500 truncate">
+                            Bathrooms
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                        <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
 
-                    {/* Owner Section */}
-                    <div className="flex items-center text-gray-700">
-                      {/* Owner Info */}
-                      <div className="flex items-center mt-1 mb-0 text-sm truncate">
-                        <div className="p-2 rounded-full bg-slate-100">
+                        <div className="flex flex-col justify-center min-w-0">
+                          <p className="m-0 text-sm font-semibold leading-4 truncate">
+                            {property.area_sq || property.area}{" "}
+                            {property.area_in || "sq.ft"}
+                          </p>
+
+                          <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                            Built Up Area
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row 5: Posted By + Share */}
+                    <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
+                      <div className="flex items-center flex-wrap min-w-0">
+                        <span>Posted by {property.user_type || "Owner"}</span>
+                        {property.days_since_created && (
+                          <>
+                            <span className="mx-2 text-gray-400">•</span>
+                            <span className="whitespace-nowrap">
+                              {property.days_since_created} days ago
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <PiShareNetworkLight
+                        className="ml-2 text-[20px] text-gray-500 cursor-pointer hover:text-blue-500"
+                        onClick={() =>
+                          openShareModal1(
+                            `${window.location.origin}/propertydetails/${property._id}`,
+                            property._id,
+                          )
+                        }
+                      />
+                    </div>
+
+                    {/* Row 6: Owner + Contact Buttons */}
+                    <div className="flex items-center justify-between pt-2 gap-2">
+                      <div className="flex items-center min-w-0">
+                        <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
                           {property.property_owner_image ? (
                             <img
                               src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
                               alt="Owner"
-                              className="object-cover w-6 h-6 rounded-full"
+                              className="object-cover w-full h-full rounded-full"
                             />
                           ) : (
                             <AiOutlineUser
-                              className="text-xl text-gray-600"
-                              size={25}
+                              className="text-gray-600"
+                              size={20}
                             />
                           )}
                         </div>
-                        <div className="flex flex-col ml-2">
-                          <span className="text-sm font-semibold">
+                        <div className="flex flex-col ml-2 min-w-0">
+                          <span className="text-sm font-semibold truncate">
                             {property.connect_to_name}
                           </span>
-                          <span>{property.user_type}</span>
+                          <span className="text-xs text-gray-500 truncate">
+                            {property.user_type}
+                          </span>
                         </div>
+                      </div>
+
+                      {/* RIGHT SIDE - Buttons */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {/* Contact */}
+                        <div
+                          className="flex items-center justify-center px-4 h-9 text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap"
+                          onClick={() => handleContactClick(property)}
+                        >
+                          Contact
+                        </div>
+
+                        {/* WhatsApp */}
+                        <a
+                          href={`https://wa.me/91${property.connect_to_no}?text=Hello, I am interested in your property`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center justify-center w-9 h-9 text-white bg-green-500 rounded-md hover:bg-green-600"
+                        >
+                          <FaWhatsapp />
+                        </a>
+
+                        {/* Call */}
+                        <a
+                          href={`tel:${property.connect_to_no}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center justify-center w-9 h-9 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                        >
+                          <FaPhone />
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -648,11 +774,10 @@ const AgentDetail = () => {
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
                     className={`w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors 
-            ${
-              currentPage === i + 1
-                ? "my-border text-black font-normal"
-                : "text-gray-700"
-            }`}
+            ${currentPage === i + 1
+                        ? "my-border text-black font-normal"
+                        : "text-gray-700"
+                      }`}
                   >
                     {i + 1}
                   </button>
