@@ -7,7 +7,14 @@ import "slick-carousel/slick/slick-theme.css";
 import { AiFillHome, AiOutlineUser } from "react-icons/ai";
 import { Link, useParams } from "react-router-dom";
 import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
+import { MdApartment } from "react-icons/md";
+import { RiRuler2Line } from "react-icons/ri";
+import { FaBath, FaRupeeSign } from "react-icons/fa";
+import { Building2, Heart } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
 import ContactDetails from "../containers/ContactDetails";
+import ShareModal from "../containers/ShareModal";
 
 const ProjectBuilder = () => {
   const { id } = useParams();
@@ -27,13 +34,16 @@ const ProjectBuilder = () => {
   const [openContactModalAfterLogin, setOpenContactModalAfterLogin] =
     useState(false);
 
+  const [currentShareUrl, setCurrentShareUrl] = useState("");
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [activeShareId, setActiveShareId] = useState(null);
+
   useEffect(() => {
     if (id) {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [currentPage, id, userId]);
 
-  // useState(false);
   useEffect(() => {
     if (sessionStorage.getItem("accessToken") && openContactModalAfterLogin) {
       setIsContactModalOpen(true);
@@ -72,13 +82,80 @@ const ProjectBuilder = () => {
     }
   };
 
-  console.log("userdetails", userDetails);
-
   useEffect(() => {
     if (id) {
       fetchProjects();
     }
   }, [id, currentPage]);
+
+  const openShareModal1 = (url, projectId) => {
+    setCurrentShareUrl(url);
+    setActiveShareId(projectId);
+    setIsShareModalOpen(true);
+  };
+
+  const handleCloseShareModal = () => {
+    setIsShareModalOpen(false);
+    setActiveShareId(null);
+  };
+
+  const formatPrice = (price) => {
+    if (!price) return "";
+    price = parseInt(price);
+
+    const formatNumber = (num) => {
+      return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2);
+    };
+
+    if (price >= 10000000) {
+      return `₹ ${formatNumber(price / 10000000)} Cr`;
+    } else if (price >= 100000) {
+      return `₹ ${formatNumber(price / 100000)} L`;
+    } else if (price >= 1000) {
+      return `₹ ${formatNumber(price / 1000)} K`;
+    } else {
+      return `₹ ${price}`;
+    }
+  };
+
+  const formatAverageProjectPrice = (price) => {
+    if (!price) return "";
+
+    if (typeof price === "string" && price.includes("-")) {
+      const parts = price.split("-").map((p) => p.trim());
+      return (
+        <>
+          {parts.map((p, idx) => (
+            <span key={idx} className="inline-flex items-center">
+              <FaRupeeSign className="inline-block mr-1" />
+              {formatPrice(p).replace("₹ ", "")}
+              {idx === 0 && " - "}
+            </span>
+          ))}
+        </>
+      );
+    }
+
+    price = parseInt(price);
+    if (isNaN(price)) return "";
+
+    let formatted;
+    if (price >= 10000000) {
+      formatted = parseFloat((price / 10000000).toFixed(1)) + " Cr";
+    } else if (price >= 100000) {
+      formatted = parseFloat((price / 100000).toFixed(1)) + " L";
+    } else if (price >= 1000) {
+      formatted = parseFloat((price / 1000).toFixed(1)) + " K";
+    } else {
+      formatted = price.toString();
+    }
+    return (
+      <span className="inline-flex items-center">
+        <FaRupeeSign className="inline-block mr-1" />
+        {formatted}
+      </span>
+    );
+  };
 
   if (loading) return <p>Loading projects...</p>;
 
@@ -178,55 +255,241 @@ const ProjectBuilder = () => {
             <p className="text-2xl font-medium text-black">Projects</p>
           </div>
 
-          {/* Property List 2 */}
-          <div className="py-4 ml-10 mr-10 bg-white rounded-2xl">
-            <div className="flex items-center justify-between px-3 py-2">
-              {/* Title and Subtitle */}
-              {/* Navigation Buttons */}
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 px-6 sm:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project, index) => (
-                <div key={index} className="bg-white shadow-md rounded-3xl">
-                  {/* Image Section */}
+          {/* Project List - smaller / slim card design */}
+          <div className="py-4 px-4 sm:px-6 lg:px-10 bg-white rounded-2xl">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {projects.map((project) => (
+                <div
+                  key={project._id}
+                  className="w-full overflow-hidden bg-white shadow-md rounded-xl hover:shadow-lg transition-all duration-300"
+                >
                   <div className="relative">
-                    <Link
-                      to={`/projectdetail/${project._id}`}
-                      className="block"
-                    >
+                    <Link to={`/projectdetail/${project._id}`} className="block">
                       <img
                         src={project.cover_image}
                         alt={project.project_name}
-                        className="w-full h-[350px] object-cover rounded-3xl"
+                        className="w-full h-[140px] sm:h-[150px] object-cover rounded-t-xl cursor-pointer"
                       />
                     </Link>
-                    {/* Gradient Overlay - Centered */}
-                    <div className="absolute left-1/2 transform -translate-x-1/2 bottom-0 w-[80%] sm:w-80 h-[100px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
-                      {/* Logo inside white circle */}
-                      <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[55px] h-[55px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
+
+                    {/* Heart + Share */}
+                    <div className="absolute top-1.5 right-1.5 flex items-center space-x-1.5">
+                      <button className="bg-gray-800/60 backdrop-blur-sm p-1.5 rounded-full shadow">
+                        <Heart
+                          size={14}
+                          stroke={project.is_favorite ? "none" : "white"}
+                          color={
+                            project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"
+                          }
+                          fill={
+                            project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"
+                          }
+                          strokeWidth={2}
+                        />
+                      </button>
+                      <FontAwesomeIcon
+                        icon={faShareNodes}
+                        className="text-[10px] text-gray-500 bg-white p-1.5 rounded shadow cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          openShareModal1(
+                            `${window.location.origin}/projectdetail/${project._id}`,
+                            project._id,
+                          );
+                        }}
+                      />
+                    </div>
+
+                    {/* Logo + Project Name overlay */}
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[85%] h-[60px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-2 rounded-t-2xl">
+                      <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[38px] h-[38px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
                         <img
-                          src={project.logo}
+                          src={project.logo || project.cover_image}
                           alt="Project Logo"
                           className="object-cover w-full h-full"
                         />
                       </div>
-
-                      {/* Project Title */}
-                      <h3 className="text-lg font-semibold text-center text-white">
-                        {project.project_name}
+                      <h3 className="text-center text-white text-xs font-bold line-clamp-1 mt-2">
+                        {project.project_name || "No Project Name Available"}
                       </h3>
                     </div>
                   </div>
 
-                  {/* Project Details */}
-                  <div className="px-6 py-4 text-center">
-                    <p className="text-xs text-gray-500 sm:text-sm">
-                      {project.project_description}
+                  {/* Card Body */}
+                  <Link
+                    to={`/projectdetail/${project._id}`}
+                    className="block p-3 bg-white rounded-b-xl cursor-pointer no-underline hover:no-underline"
+                  >
+                    {/* Row 1: Project Name + Furnished Type */}
+                    <div className="flex items-start justify-between gap-2 mb-0">
+                      <h3 className="flex-1 m-0 text-sm font-bold leading-5 text-gray-900 truncate">
+                        {project.project_name || ""}
+                      </h3>
+                      {project.furnished_type && (
+                        <span className="flex-shrink-0 text-[11px] font-medium leading-5 text-black whitespace-nowrap">
+                          {project.furnished_type}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Row 2: Subtitle */}
+                    <p className="mt-0 mb-1.5 text-xs leading-4 text-gray-500 truncate">
+                      {project.congfigurations
+                        ? project.congfigurations.includes("BHK")
+                          ? project.congfigurations
+                          : project.congfigurations
+                            .split(",")
+                            .map((c) => `${c.trim()} BHK`)
+                            .join(", ")
+                        : ""}{" "}
+                      {project.project_type} for Sale in{" "}
+                      {project.address_area || ""}
+                      {project.city_name ? `, ${project.city_name}` : ""}
                     </p>
-                    <h4 className="mt-2 text-lg font-bold text-gray-800 sm:text-md">
-                      {project.average_project_price}
-                    </h4>
-                  </div>
+
+                    {/* Row 3: Price + Status */}
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <span className="text-base font-bold text-black">
+                        {project.project_properties &&
+                          project.project_properties.length > 0
+                          ? (() => {
+                            const prices = project.project_properties.map(
+                              (p) => Number(p.price),
+                            );
+                            const minPrice = Math.min(...prices);
+                            const maxPrice = Math.max(...prices);
+                            return minPrice === maxPrice ? (
+                              formatAverageProjectPrice(minPrice)
+                            ) : (
+                              <>
+                                {formatAverageProjectPrice(minPrice)}
+                                <span className="mx-1">-</span>
+                                {formatAverageProjectPrice(maxPrice)}
+                              </>
+                            );
+                          })()
+                          : formatAverageProjectPrice(
+                            project.average_project_price,
+                          )}
+                      </span>
+                      {project.possession_status === "Ready To Move" && (
+                        <div className="flex items-center gap-1 px-2 py-0.5 bg-green-100 border border-green-200 rounded-full">
+                          <MdApartment className="text-xs text-green-700" />
+                          <span className="text-[10px] font-semibold text-green-700 whitespace-nowrap">
+                            Ready to Move
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Row 4: Features Grid */}
+                    <div className="grid grid-cols-3 py-2 border-t border-b border-gray-100">
+                      <div className="flex items-center gap-1 px-1 min-w-0">
+                        <Building2
+                          size={14}
+                          className="text-gray-700 flex-shrink-0"
+                        />
+                        <div className="flex flex-col min-w-0 leading-tight">
+                          <p className="m-0 text-[11px] font-semibold leading-3.5 truncate text-black">
+                            {project.congfigurations
+                              ? project.congfigurations.includes("BHK")
+                                ? project.congfigurations.split(",")[0].trim()
+                                : `${project.congfigurations.split(",")[0].trim()} BHK`
+                              : ""}
+                          </p>
+                          <p className="m-0 text-[10px] leading-3.5 text-gray-500 truncate">
+                            {project.project_type || "Apartment"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 px-1 border-l border-gray-200 min-w-0">
+                        <FaBath
+                          size={12}
+                          className="text-gray-700 flex-shrink-0"
+                        />
+                        <div className="flex flex-col min-w-0 leading-tight">
+                          <p className="m-0 text-[11px] font-semibold text-black truncate">
+                            {project.bathroom || 0} Baths
+                          </p>
+                          <p className="m-0 text-[10px] text-gray-500 truncate">
+                            Bathrooms
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 px-1 border-l border-gray-200 min-w-0">
+                        <RiRuler2Line className="text-[16px] text-gray-700 flex-shrink-0" />
+                        <div className="flex flex-col min-w-0 leading-tight">
+                          <p className="m-0 text-[11px] font-semibold leading-3.5 truncate text-black">
+                            {project.area ? `${project.area} Sq.ft` : "N/A"}
+                          </p>
+                          <p className="m-0 text-[10px] leading-3.5 text-gray-500 truncate">
+                            Built Up Area
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row 5: Owner Details + Share */}
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex items-center min-w-0">
+                        <div className="flex items-center justify-center flex-shrink-0 w-6 h-6 overflow-hidden rounded-full bg-blue-100">
+                          {project.property_owner_image &&
+                            !project.property_owner_image.includes(
+                              "default_profile",
+                            ) ? (
+                            <img
+                              src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
+                              alt={project.connect_to_name || "Builder"}
+                              className="object-cover w-full h-full rounded-full"
+                            />
+                          ) : (
+                            <span className="text-[11px] font-bold text-blue-600">
+                              {(project.connect_to_name || "B")[0].toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+
+                        <span className="ml-2 text-xs font-semibold text-gray-900 truncate">
+                          {project.connect_to_name || "Builder"}
+                        </span>
+
+                        <div className="w-px h-3 mx-2 bg-gray-300 flex-shrink-0"></div>
+
+                        <span className="text-xs text-gray-500 truncate">
+                          Posted by {project.user_type || "Builder"}
+                        </span>
+                      </div>
+
+                      <FontAwesomeIcon
+                        icon={faShareNodes}
+                        className="text-[13px] text-gray-500 cursor-pointer hover:text-blue-500 flex-shrink-0 ml-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          openShareModal1(
+                            `${window.location.origin}/projectdetail/${project._id}`,
+                            project._id,
+                          );
+                        }}
+                      />
+                    </div>
+                  </Link>
+
+                  {isShareModalOpen && activeShareId === project._id && (
+                    <div className="absolute right-0 z-50">
+                      <ShareModal
+                        currentShareUrl={currentShareUrl}
+                        closeShareModal={handleCloseShareModal}
+                        copyLink={() => {
+                          navigator.clipboard.writeText(currentShareUrl);
+                          alert("Link copied!");
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -234,7 +497,7 @@ const ProjectBuilder = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-4">
+            <div className="flex items-center justify-center gap-2 mt-4 pb-4">
               <button
                 onClick={handlePrev}
                 disabled={currentPage === 1}
@@ -249,10 +512,9 @@ const ProjectBuilder = () => {
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
                   className={`w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors 
-                    ${
-                      currentPage === i + 1
-                        ? "my-border text-black font-normal"
-                        : "text-gray-700"
+                    ${currentPage === i + 1
+                      ? "my-border text-black font-normal"
+                      : "text-gray-700"
                     }`}
                 >
                   {i + 1}
