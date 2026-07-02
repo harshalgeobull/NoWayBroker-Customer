@@ -12,6 +12,7 @@ import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
 import { FaRupeeSign, FaMapMarkerAlt, FaBath } from "react-icons/fa";
 import { Building2, Ruler } from "lucide-react";
 import { RiRuler2Line } from "react-icons/ri";
+import { AiOutlineClockCircle } from "react-icons/ai";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 import { MdApartment } from "react-icons/md";
@@ -43,6 +44,12 @@ const Spotlights = ({
   const handleClick = () => {
     history.push("/ProjectList");
   };
+  useEffect(() => {
+    console.log("Spotlight API Response:", data);
+  }, [data]);
+  useEffect(() => {
+    console.log("Project List:", projectList);
+  }, [projectList]);
 
   const handleProjectClick = (projectId) => {
     history.push(`/projectdetail/${encodeURIComponent(projectId)}`);
@@ -412,30 +419,59 @@ const Spotlights = ({
 
                 <hr className="my-1 border-gray-100" />
 
-                {/* Row 5: Posted By + Share */}
-                <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
-                  <div className="flex items-center flex-wrap min-w-0">
-                    <span>Posted by {project.user_type || "Builder"}</span>
-                    {project.days_since_created && (
-                      <>
-                        <span className="mx-2 text-gray-400">•</span>
-                        <span className="whitespace-nowrap">{project.days_since_created} days ago</span>
-                      </>
-                    )}
-                  </div>
-                  <FontAwesomeIcon
-                    icon={faShareNodes}
-                    className="ml-2 text-[17px] text-gray-500 cursor-pointer hover:text-blue-500"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      openSpotlightShareModal(project._id);
-                    }}
-                  />
-                </div>
+                {/* Row 5 : Posted By | Days | Distance | Share */}
+                {/* <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600"> */}
+                {/* Left */}
+                {/* <div className="flex items-center flex-wrap min-w-0"> */}
+                {/* Posted By */}
+                {/* <div className="flex items-center">
+                                             <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
+                                             <span className="truncate">
+                                               Posted by {project.user_type || "Owner"}
+                                             </span>
+                                           </div> */}
+
+                {/* Dot */}
+                {/* <span className="mx-2 text-gray-400">•</span>
+                */}
+                {/* Days */}
+                {/* <span className="whitespace-nowrap">
+                                             {project.days_since_created
+                                               ? `${project.days_since_created} days ago`
+                                               : "Recently"}
+                                           </span> */}
+
+                {/* Distance */}
+                {/* {project.distance && (
+                                             <>
+                                               <span className="mx-2 text-gray-400">•</span>
+               
+                                               <div className="flex items-center whitespace-nowrap">
+                                                 <FaMapMarkerAlt className="mr-1 text-red-500" />
+                                                 {project.distance} km from you
+                                               </div>
+                                             </>
+                                           )}
+                                         </div> */}
+
+                {/* Share */}
+                {/* <FontAwesomeIcon
+                                           icon={faShareNodes}
+                                           className="ml-2 text-[17px] text-gray-500 transition-colors cursor-pointer hover:text-blue-500"
+                                           onClick={(e) => {
+                                             e.preventDefault();
+                                             e.stopPropagation();
+                                             openSpotlightShareModal(project._id);
+                                           }}
+                                         />
+                                       </div> */}
+                {/* {console.log(
+                                         project.connect_to_name,
+                                         project.property_owner_image,
+                                       )} */}
 
                 {/* Row 6: Owner Details */}
-                <div className="flex items-center pt-2">
+                {/* <div className="flex items-center pt-2">
                   <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
                     {project.property_owner_image &&
                       !project.property_owner_image.includes("default_profile") ? (
@@ -459,7 +495,49 @@ const Spotlights = ({
                       {project.user_type || "Builder"}
                     </span>
                   </div>
+                </div> */}
+                {/* new ROw */}
+                <div className="flex items-center justify-between pt-2">
+                  {/* Left */}
+                  <div className="flex items-center">
+                    <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
+                      {project.property_owner_image &&
+                        !project.property_owner_image.includes("default_profile") ? (
+                        <img
+                          src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
+                          alt={project.connect_to_name || "Builder"}
+                          className="object-cover w-full h-full rounded-full"
+                        />
+                      ) : (
+                        <span className="text-base font-bold text-blue-600">
+                          {(project.connect_to_name || "B")[0].toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+
+                    <span className="ml-3 text-sm font-semibold text-gray-900">
+                      {project.connect_to_name || "Builder"}
+                    </span>
+
+                    <div className="w-px h-4 mx-3 bg-gray-300"></div>
+
+                    <span className="text-sm text-gray-500">
+                      Posted by {project.user_type || "Builder"}
+                    </span>
+                  </div>
+
+                  {/* Share */}
+                  <FontAwesomeIcon
+                    icon={faShareNodes}
+                    className="text-[17px] text-gray-500 cursor-pointer hover:text-blue-500"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openSpotlightShareModal(project._id);
+                    }}
+                  />
                 </div>
+                {/* end */}
               </div>
             </div>
           </div >

@@ -71,7 +71,6 @@ const Detail = ({ propertyData }) => {
   const [activeShareId, setActiveShareId] = useState(null);
   const [tourSchedule, setTourSchedule] = useState([]);
 
-
   const [freeViewCount, setFreeViewCount] = useState(0);
   const [paidViewCount, setPaidViewCount] = useState(0);
 
@@ -821,6 +820,7 @@ const Detail = ({ propertyData }) => {
     ["Available Status", propertyDetails?.available_status || null],
     ["Investment Options", propertyDetails?.investment_options || null],
     ["All Inclusive Price", propertyDetails?.all_inclusive_price || null],
+    ["Price Onwards", propertyDetails?.price_onwards || null],
     ["Price Negotiable", propertyDetails?.price_negotiable || null],
     [
       "Tax And Goverment Charges",
@@ -1156,8 +1156,8 @@ const Detail = ({ propertyData }) => {
             >
               <FiHeart
                 className={`text-2xl ${propertyDetails.is_favorite
-                  ? "text-red-600 fill-red-600"
-                  : "text-gray-600"
+                    ? "text-red-600 fill-red-600"
+                    : "text-gray-600"
                   }`}
               />
             </div>
@@ -1299,7 +1299,9 @@ const Detail = ({ propertyData }) => {
             <div className="sticky top-0 z-20 flex items-center gap-8 px-6 py-4 mb-4 bg-white rounded-lg shadow-sm">
               <button
                 onClick={() => scrollToSection(overviewRef, "overview")}
-                className={`relative font-medium pb-1 ${activeSection === "overview" ? "text-red-600" : "hover:text-[#8A2432]"
+                className={`relative font-medium pb-1 ${activeSection === "overview"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
                   }`}
               >
                 Overview
@@ -1310,7 +1312,9 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(moreDetailsRef, "moreDetails")}
-                className={`relative font-medium pb-1 ${activeSection === "moreDetails" ? "text-red-600" : "hover:text-[#8A2432]"
+                className={`relative font-medium pb-1 ${activeSection === "moreDetails"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
                   }`}
               >
                 More Details
@@ -1321,7 +1325,9 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(amenitiesRef, "amenities")}
-                className={`relative font-medium pb-1 ${activeSection === "amenities" ? "text-red-600" : "hover:text-[#8A2432]"
+                className={`relative font-medium pb-1 ${activeSection === "amenities"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
                   }`}
               >
                 Amenities
@@ -1332,7 +1338,9 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(aboutRef, "about")}
-                className={`relative font-medium pb-1 ${activeSection === "about" ? "text-red-600" : "hover:text-[#8A2432]"
+                className={`relative font-medium pb-1 ${activeSection === "about"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
                   }`}
               >
                 About Property
@@ -1343,7 +1351,9 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(locationRef, "location")}
-                className={`relative font-medium pb-1 ${activeSection === "location" ? "text-red-600" : "hover:text-[#8A2432]"
+                className={`relative font-medium pb-1 ${activeSection === "location"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
                   }`}
               >
                 Location
@@ -1356,7 +1366,8 @@ const Detail = ({ propertyData }) => {
             {overviewFields.length > 0 && (
               <div
                 ref={overviewRef}
-                className="w-full p-4 bg-white rounded-lg shadow-sm scroll-mt-20">
+                className="w-full p-4 bg-white rounded-lg shadow-sm scroll-mt-20"
+              >
                 <h3 className="mb-4 text-3xl font-semibold">Overview</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 text-[18px]">
                   {overviewFields.map(([key, value], index) => (
@@ -1396,7 +1407,8 @@ const Detail = ({ propertyData }) => {
             {moreDetailsFields.length > 0 && (
               <div
                 ref={moreDetailsRef}
-                className="w-full p-4 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20">
+                className="w-full p-4 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20"
+              >
                 <h3 className="mb-4 text-xl font-semibold text-gray-800">
                   More Details
                 </h3>
@@ -1418,7 +1430,8 @@ const Detail = ({ propertyData }) => {
             {/* Amenities Section */}
             <div
               ref={amenitiesRef}
-              className="w-full p-3 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20">
+              className="w-full p-3 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20"
+            >
               <h3 className="ml-4 font-semibold text-lm">Amenities</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1 mt-4 ml-4 text-[18px]">
                 {visibleAmenities.map((amenity, index) => (
@@ -1449,7 +1462,8 @@ const Detail = ({ propertyData }) => {
             {/* About Property Section */}
             <div
               ref={aboutRef}
-              className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[250px] w-full scroll-mt-20">
+              className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[250px] w-full scroll-mt-20"
+            >
               <h2 className="justify-center ml-4 font-bold text-gray-700 text-ml">
                 About property
               </h2>
@@ -1461,7 +1475,8 @@ const Detail = ({ propertyData }) => {
             {/* Location Section with Map */}
             <div
               ref={locationRef}
-              className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[600px] w-full scroll-mt-20">
+              className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[600px] w-full scroll-mt-20"
+            >
               <h2 className="ml-4 text-3xl font-bold text-gray-900">
                 Location
               </h2>
@@ -1549,8 +1564,8 @@ const Detail = ({ propertyData }) => {
               {enquiryStatus && (
                 <div
                   className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
-                    ? "text-green-600"
-                    : "text-red-600"
+                      ? "text-green-600"
+                      : "text-red-600"
                     }`}
                 >
                   {enquiryStatus.message}
@@ -1786,10 +1801,10 @@ const Detail = ({ propertyData }) => {
                         <div className="absolute bottom-0 left-0">
                           <span
                             className={`${property.property_category_type === "Rent"
-                              ? "bg-blue-500"
-                              : property.property_category_type === "Buy"
-                                ? "bg-green-500"
-                                : "bg-gray-500"
+                                ? "bg-blue-500"
+                                : property.property_category_type === "Buy"
+                                  ? "bg-green-500"
+                                  : "bg-gray-500"
                               } text-white text-xs px-3 py-1 rounded-se-lg`}
                           >
                             {property.property_category_type === "Rent"

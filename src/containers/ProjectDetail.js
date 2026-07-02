@@ -39,12 +39,12 @@ const ProjectDetail = () => {
   const aboutPropertyRef = useRef(null);
   const locationRef = useRef(null);
 
-
   // NEW
   const scrollToSection = (ref) => {
     if (!ref.current) return;
     const OFFSET = 60;
-    const top = ref.current.getBoundingClientRect().top + window.pageYOffset - OFFSET;
+    const top =
+      ref.current.getBoundingClientRect().top + window.pageYOffset - OFFSET;
     window.scrollTo({ top, behavior: "smooth" });
   };
   const handleViewAll = () => {
@@ -634,7 +634,11 @@ const ProjectDetail = () => {
 
   // Tabs shown right below the image gallery (Overview / Amenities / About Property / Location)
   const detailTabs = [
-    { key: "project_location", label: "Project Location", ref: projectLocationSectionRef },
+    {
+      key: "project_location",
+      label: "Project Location",
+      ref: projectLocationSectionRef,
+    },
     { key: "overview", label: "Overview", ref: overviewRef },
     { key: "amenities", label: "Amenities", ref: amenitiesRef },
     { key: "about", label: "About Property", ref: aboutPropertyRef },
@@ -1236,8 +1240,8 @@ const ProjectDetail = () => {
                   type="button"
                   onClick={() => handleDetailTabClick(tab)}
                   className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeDetailTab === tab.key
-                    ? "border-rose-600 text-rose-600"
-                    : "border-transparent text-gray-600 hover:text-rose-600"
+                      ? "border-rose-600 text-rose-600"
+                      : "border-transparent text-gray-600 hover:text-rose-600"
                     }`}
                 >
                   {tab.label}
@@ -1252,9 +1256,7 @@ const ProjectDetail = () => {
                 <button
                   className="absolute text-3xl text-black top-4 right-4"
                   onClick={() => setShowAllImages(false)}
-                >
-
-                </button>
+                ></button>
 
                 <div className="sticky top-0 z-50 bg-white border rounded-lg shadow mt-4">
                   <div className="flex">
@@ -1322,7 +1324,6 @@ const ProjectDetail = () => {
                     </div>
                   ))}
 
-
                   {/* Video inside gallery if available */}
                   {projects[0]?.project_details?.property_video && (
                     <video
@@ -1335,7 +1336,6 @@ const ProjectDetail = () => {
               </div>
             </div>
           )}
-
 
           {/* About Property Section */}
           {projects[0]?.project_details?.project_description && (
@@ -1357,7 +1357,7 @@ const ProjectDetail = () => {
           {/* Property Location Section */}
           {projects[0]?.project_details?.address && (
             <div
-              ref={projectLocationSectionRef}   // 👈 NEW (purvi projectLocationRef hota, to already top-level var sobat conflict karat hota)
+              ref={projectLocationSectionRef} // 👈 NEW (purvi projectLocationRef hota, to already top-level var sobat conflict karat hota)
               className="p-3 mt-6 bg-white rounded-lg shadow-sm"
             >
               <h3 className="text-xl font-bold">Project Location</h3>
@@ -1403,6 +1403,7 @@ const ProjectDetail = () => {
                   age_of_property: "Property Age",
                   available_status: "Availability",
                   all_inclusive_price: "All Inclusive Price",
+                  price_onwards: "Price Onwards",
                   price_negotiable: "Price Negotiable",
                   tax_and_goverment_charges: "Tax & Government Charges",
                   maintenance_cost: "Maintenance Cost",
@@ -1477,63 +1478,65 @@ const ProjectDetail = () => {
 
                 return (
                   <div className="grid grid-cols-1 text-lg text-gray-700 md:grid-cols-2 gap-y-2 gap-x-4">
-                    {Object.entries(overviewFields).map(([key, label], index) => {
-                      // skip hidden fields
-                      if (hiddenFields.includes(key)) return null;
+                    {Object.entries(overviewFields).map(
+                      ([key, label], index) => {
+                        // skip hidden fields
+                        if (hiddenFields.includes(key)) return null;
 
-                      const value = project[key];
+                        const value = project[key];
 
-                      // skip empty values
-                      if (
-                        value === null ||
-                        value === undefined ||
-                        value === "" ||
-                        value === "NA" ||
-                        value === "N/A" ||
-                        value === false
-                      ) {
-                        return null;
-                      }
+                        // skip empty values
+                        if (
+                          value === null ||
+                          value === undefined ||
+                          value === "" ||
+                          value === "NA" ||
+                          value === "N/A" ||
+                          value === false
+                        ) {
+                          return null;
+                        }
 
-                      // format date
-                      let formattedValue = value;
+                        // format date
+                        let formattedValue = value;
 
-                      if (
-                        key.includes("date") ||
-                        key.includes("_at") ||
-                        key === "available_from" ||
-                        key === "available_on"
-                      ) {
-                        try {
-                          formattedValue = new Date(value).toLocaleDateString(
-                            "en-GB",
-                            {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            },
-                          );
-                        } catch (e) { }
-                      }
+                        if (
+                          key.includes("date") ||
+                          key.includes("_at") ||
+                          key === "available_from" ||
+                          key === "available_on"
+                        ) {
+                          try {
+                            formattedValue = new Date(value).toLocaleDateString(
+                              "en-GB",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            );
+                          } catch (e) { }
+                        }
 
-                      // boolean handling
-                      if (typeof value === "boolean") {
-                        formattedValue = value ? "Yes" : "No";
-                      }
+                        // boolean handling
+                        if (typeof value === "boolean") {
+                          formattedValue = value ? "Yes" : "No";
+                        }
 
-                      return (
-                        <div
-                          key={index}
-                          className="flex justify-between gap-4 p-3 border-b border-gray-100"
-                        >
-                          <span className="w-1/2 text-gray-500">{label}</span>
+                        return (
+                          <div
+                            key={index}
+                            className="flex justify-between gap-4 p-3 border-b border-gray-100"
+                          >
+                            <span className="w-1/2 text-gray-500">{label}</span>
 
-                          <span className="w-1/2 font-semibold text-black break-words text-right">
-                            {formattedValue}
-                          </span>
-                        </div>
-                      );
-                    })}
+                            <span className="w-1/2 font-semibold text-black break-words text-right">
+                              {formattedValue}
+                            </span>
+                          </div>
+                        );
+                      },
+                    )}
                   </div>
                 );
               })()}
@@ -1706,8 +1709,8 @@ const ProjectDetail = () => {
             {enquiryStatus && (
               <div
                 className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
-                  ? "text-green-600"
-                  : "text-red-600"
+                    ? "text-green-600"
+                    : "text-red-600"
                   }`}
               >
                 {enquiryStatus.message}
@@ -1847,7 +1850,9 @@ const ProjectDetail = () => {
                       src={project.cover_image}
                       alt={project.project_name}
                       className="w-full h-[220px] sm:h-[260px] md:h-[300px] lg:h-[320px] object-cover rounded-t-2xl cursor-pointer"
-                      onClick={() => history.push(`/projectdetail/${project._id}`)}
+                      onClick={() =>
+                        history.push(`/projectdetail/${project._id}`)
+                      }
                     />
 
                     {/* Heart + Share */}
@@ -1861,7 +1866,9 @@ const ProjectDetail = () => {
                             return;
                           }
                           if (project.is_favorite) {
-                            removeFromFavoritesRecommendedProperty(project.favorite_id);
+                            removeFromFavoritesRecommendedProperty(
+                              project.favorite_id,
+                            );
                           } else {
                             addToFavoritesRecommendedProperty(project._id);
                           }
@@ -1870,8 +1877,16 @@ const ProjectDetail = () => {
                         <Heart
                           size={20}
                           stroke={project.is_favorite ? "none" : "white"}
-                          color={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"}
-                          fill={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"}
+                          color={
+                            project.is_favorite
+                              ? "red"
+                              : "rgba(75, 85, 99, 0.4)"
+                          }
+                          fill={
+                            project.is_favorite
+                              ? "red"
+                              : "rgba(75, 85, 99, 0.4)"
+                          }
                           strokeWidth={2}
                         />
                       </button>
@@ -1888,7 +1903,11 @@ const ProjectDetail = () => {
                     {/* Logo + Project Name overlay */}
                     <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[90%] sm:w-[85%] md:w-[80%] h-[110px] md:h-[120px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
                       <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
-                        <img src={project.logo} alt="Project Logo" className="object-cover w-full h-full" />
+                        <img
+                          src={project.logo}
+                          alt="Project Logo"
+                          className="object-cover w-full h-full"
+                        />
                       </div>
                       <h3 className="text-center text-white text-lg md:text-2xl font-bold line-clamp-2 min-h-[48px] mt-4">
                         {project.project_name || "No Project Name Available"}
@@ -1896,11 +1915,12 @@ const ProjectDetail = () => {
                     </div>
                   </div>
 
-
                   {/* Card Body */}
                   <div
                     className="p-4 bg-white rounded-b-2xl cursor-pointer"
-                    onClick={() => history.push(`/projectdetail/${project._id}`)}
+                    onClick={() =>
+                      history.push(`/projectdetail/${project._id}`)
+                    }
                   >
                     {/* Row 1: Project Name + Furnished Type */}
                     <div className="flex items-start justify-between gap-3 mb-0">
@@ -1919,16 +1939,22 @@ const ProjectDetail = () => {
                       {project.congfigurations
                         ? project.congfigurations.includes("BHK")
                           ? project.congfigurations
-                          : project.congfigurations.split(",").map((c) => `${c.trim()} BHK`).join(", ")
+                          : project.congfigurations
+                            .split(",")
+                            .map((c) => `${c.trim()} BHK`)
+                            .join(", ")
                         : ""}{" "}
-                      {project.project_type} for Sale in {project.address_area || ""}
+                      {project.project_type} for Sale in{" "}
+                      {project.address_area || ""}
                       {project.city_name ? `, ${project.city_name}` : ""}
                     </p>
 
                     {/* Row 3: Price + Status */}
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-xl font-bold">
-                        {formatAverageProjectPrice(project.average_project_price)}
+                        {formatAverageProjectPrice(
+                          project.average_project_price,
+                        )}
                       </span>
                       {project.possession_status === "Ready To Move" && (
                         <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
@@ -1944,7 +1970,10 @@ const ProjectDetail = () => {
                     <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
                       {/* Configuration / Type */}
                       <div className="flex items-center gap-2 px-1 min-w-0">
-                        <Building2 size={20} className="text-gray-700 flex-shrink-0" />
+                        <Building2
+                          size={20}
+                          className="text-gray-700 flex-shrink-0"
+                        />
                         <div className="flex flex-col min-w-0 leading-tight">
                           <p className="m-0 text-sm font-semibold leading-4 truncate">
                             {project.congfigurations
@@ -1961,12 +1990,17 @@ const ProjectDetail = () => {
 
                       {/* Bathrooms */}
                       <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
-                        <Bath size={20} className="text-gray-700 flex-shrink-0" />
+                        <Bath
+                          size={20}
+                          className="text-gray-700 flex-shrink-0"
+                        />
                         <div className="flex flex-col min-w-0 leading-tight">
                           <p className="m-0 text-sm font-semibold leading-4 truncate">
                             {project.bathroom || 0} Baths
                           </p>
-                          <p className="m-0 text-xs leading-4 text-gray-500">Bathrooms</p>
+                          <p className="m-0 text-xs leading-4 text-gray-500">
+                            Bathrooms
+                          </p>
                         </div>
                       </div>
 
@@ -1977,7 +2011,9 @@ const ProjectDetail = () => {
                           <p className="m-0 text-sm font-semibold leading-4 truncate">
                             {project.area ? `${project.area} sq.ft` : "N/A"}
                           </p>
-                          <p className="m-0 text-xs leading-4 text-gray-500">Built Up Ar...</p>
+                          <p className="m-0 text-xs leading-4 text-gray-500">
+                            Built Up Ar...
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1988,7 +2024,9 @@ const ProjectDetail = () => {
                         {project.days_since_created && (
                           <>
                             <span className="mx-2 text-gray-400">•</span>
-                            <span className="whitespace-nowrap">{project.days_since_created} days ago</span>
+                            <span className="whitespace-nowrap">
+                              {project.days_since_created} days ago
+                            </span>
                           </>
                         )}
                       </div>
@@ -2007,7 +2045,9 @@ const ProjectDetail = () => {
                     <div className="flex items-center pt-2">
                       <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
                         {project.property_owner_image &&
-                          !project.property_owner_image.includes("default_profile") ? (
+                          !project.property_owner_image.includes(
+                            "default_profile",
+                          ) ? (
                           <img
                             src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
                             alt={project.connect_to_name || "Owner"}
@@ -2031,15 +2071,13 @@ const ProjectDetail = () => {
                     </div>
                   </div>
                 </div>
-              </div >
+              </div>
             ))}
         </Slider>
       </div>
       {/* Other Projects Section End */}
-    </div >
+    </div>
   );
 };
-
-
 
 export default ProjectDetail;
