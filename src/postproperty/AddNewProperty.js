@@ -41,6 +41,7 @@ const AddNewProperty = () => {
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     libraries: ["places"],
   });
+
   const userId = sessionStorage.getItem("accessToken");
   const userType = sessionStorage.getItem("user_type");
   const user_name = sessionStorage.getItem("user_name");
@@ -155,6 +156,7 @@ const AddNewProperty = () => {
   const [totalNumberOfRooms, setTotalNumberOfRooms] = useState("");
   const [qualityRating, setQualityRating] = useState("");
   const [totalNumberParking, setTotalNumberParking] = useState("");
+  //const [priceOnwards, setPriceOnwards] = useState(false);
   const [priceNegotiable, setPriceNegotiable] = useState(false);
   const [electricityAndWaterCharges, setElectricityAndWaterCharges] =
     useState(false);
@@ -771,6 +773,7 @@ Make it engaging, attractive, and human-like.
     property_type: propertyType,
     ownership: "",
     all_inclusive_price: "No",
+    price_onwards: "No",
     price_negotiable: "No",
     tax_and_goverment_charges: "No",
     property_dimensions_length: lengthOfLand,
@@ -1567,6 +1570,9 @@ Make it engaging, attractive, and human-like.
   const toWords = new ToWords({
     localeCode: "en-IN",
   });
+  if (!isLoaded) {
+    return <div>Loading Google Maps...</div>;
+  }
 
   return (
     <>
@@ -1974,28 +1980,36 @@ Make it engaging, attractive, and human-like.
                           *
                         </span>
                       </label>
-
-                      <Autocomplete
-                        onLoad={(ac) => (autoCompleteRef.current = ac)}
-                        onPlaceChanged={handlePlaceChanged}
-                      >
+                      {isLoaded ? (
+                        <Autocomplete
+                          onLoad={(ac) => (autoCompleteRef.current = ac)}
+                          onPlaceChanged={handlePlaceChanged}
+                        >
+                          <input
+                            type="text"
+                            value={address}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              const isValid = /^[a-zA-Z0-9\s]*$/.test(value);
+                              if (isValid) {
+                                setAddress(value);
+                              }
+                            }}
+                            className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
+                              formErrors.address
+                                ? "border-red-600"
+                                : "border-gray-300"
+                            }`}
+                          />
+                        </Autocomplete>
+                      ) : (
                         <input
                           type="text"
-                          value={address}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            const isValid = /^[a-zA-Z0-9\s]*$/.test(value);
-                            if (isValid) {
-                              setAddress(value);
-                            }
-                          }}
-                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                            formErrors.address
-                              ? "border-red-600"
-                              : "border-gray-300"
-                          }`}
+                          disabled
+                          placeholder="Loading Google Maps..."
+                          className={`w-full border rounded-md p-3 text-gray-700 border-gray-300`}
                         />
-                      </Autocomplete>
+                      )}
 
                       {formErrors.address && (
                         <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -2540,7 +2554,22 @@ Make it engaging, attractive, and human-like.
                             />
                             All Inclusive Price
                           </label>
-
+                          {/* Price Onwards */}
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.price_onwards === "Yes"}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  price_onwards: e.target.checked
+                                    ? "Yes"
+                                    : "No",
+                                })
+                              }
+                            />
+                            Price Onwards
+                          </label>
                           {/* Price Negotiable */}
                           <label className="flex items-center gap-2">
                             <input

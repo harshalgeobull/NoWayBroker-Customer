@@ -58,10 +58,11 @@ const Detail = ({ propertyData }) => {
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
   const sliderRef = useRef(null);
   const overviewRef = useRef(null);
-const moreDetailsRef = useRef(null);
-const amenitiesRef = useRef(null);
-const aboutRef = useRef(null);
-const locationRef = useRef(null);
+  const moreDetailsRef = useRef(null);
+  const amenitiesRef = useRef(null);
+  const aboutRef = useRef(null);
+  const locationRef = useRef(null);
+  const [activeSection, setActiveSection] = useState("overview");
   const [currentShareUrl1, setcurrentShareUrl1] = useState("");
   const [propertyDetails, setPropertyDetails] = useState({});
   const userId = sessionStorage.getItem("accessToken");
@@ -80,14 +81,13 @@ const locationRef = useRef(null);
 
     return `${area} ${formattedUnit}`;
   };
-
-  const scrollToSection = (ref) => {
-  ref.current?.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
-};
-
+  const scrollToSection = (ref, key) => {
+    setActiveSection(key);
+    ref.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
   const checkPostLimits = async () => {
     try {
       const profileForm = new FormData();
@@ -820,6 +820,7 @@ const locationRef = useRef(null);
     ["Available Status", propertyDetails?.available_status || null],
     ["Investment Options", propertyDetails?.investment_options || null],
     ["All Inclusive Price", propertyDetails?.all_inclusive_price || null],
+    ["Price Onwards", propertyDetails?.price_onwards || null],
     ["Price Negotiable", propertyDetails?.price_negotiable || null],
     [
       "Tax And Goverment Charges",
@@ -1296,48 +1297,84 @@ const locationRef = useRef(null);
                 </>
               )}
             </div>
-{/* Navigation Tabs */}
-<div className="sticky top-0 z-20 flex items-center gap-8 px-6 py-4 mb-4 bg-white rounded-lg shadow-sm">
-  <button
-    onClick={() => scrollToSection(overviewRef)}
-    className="font-medium hover:text-[#8A2432]"
-  >
-    Overview
-  </button>
+            {/* Navigation Tabs */}
+            <div className="sticky top-0 z-20 flex items-center gap-8 px-6 py-4 mb-4 bg-white rounded-lg shadow-sm">
+              <button
+                onClick={() => scrollToSection(overviewRef, "overview")}
+                className={`relative font-medium pb-1 ${
+                  activeSection === "overview"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
+                }`}
+              >
+                Overview
+                {activeSection === "overview" && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
+                )}
+              </button>
 
-  <button
-    onClick={() => scrollToSection(moreDetailsRef)}
-    className="font-medium hover:text-[#8A2432]"
-  >
-    More Details
-  </button>
+              <button
+                onClick={() => scrollToSection(moreDetailsRef, "moreDetails")}
+                className={`relative font-medium pb-1 ${
+                  activeSection === "moreDetails"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
+                }`}
+              >
+                More Details
+                {activeSection === "moreDetails" && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
+                )}
+              </button>
 
-  <button
-    onClick={() => scrollToSection(amenitiesRef)}
-    className="font-medium hover:text-[#8A2432]"
-  >
-    Amenities
-  </button>
+              <button
+                onClick={() => scrollToSection(amenitiesRef, "amenities")}
+                className={`relative font-medium pb-1 ${
+                  activeSection === "amenities"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
+                }`}
+              >
+                Amenities
+                {activeSection === "amenities" && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
+                )}
+              </button>
 
-  <button
-    onClick={() => scrollToSection(aboutRef)}
-    className="font-medium hover:text-[#8A2432]"
-  >
-    About Property
-  </button>
+              <button
+                onClick={() => scrollToSection(aboutRef, "about")}
+                className={`relative font-medium pb-1 ${
+                  activeSection === "about"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
+                }`}
+              >
+                About Property
+                {activeSection === "about" && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
+                )}
+              </button>
 
-  <button
-    onClick={() => scrollToSection(locationRef)}
-    className="font-medium hover:text-[#8A2432]"
-  >
-    Location
-  </button>
-</div>
+              <button
+                onClick={() => scrollToSection(locationRef, "location")}
+                className={`relative font-medium pb-1 ${
+                  activeSection === "location"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
+                }`}
+              >
+                Location
+                {activeSection === "location" && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
+                )}
+              </button>
+            </div>
             {/* Add the Overview Component Below */}
             {overviewFields.length > 0 && (
-              <div 
-              ref={overviewRef}
-              className="w-full p-4 bg-white rounded-lg shadow-sm scroll-mt-20">
+              <div
+                ref={overviewRef}
+                className="w-full p-4 bg-white rounded-lg shadow-sm scroll-mt-20"
+              >
                 <h3 className="mb-4 text-3xl font-semibold">Overview</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 text-[18px]">
                   {overviewFields.map(([key, value], index) => (
@@ -1346,7 +1383,7 @@ const locationRef = useRef(null);
                       className="flex justify-start p-2 border-gray-200"
                     >
                       <span className="w-1/2 text-gray-500">{key}</span>
-                      <span>{value}</span>
+                      <span className="text-black">{value}</span>
                     </div>
                   ))}
                 </div>
@@ -1375,9 +1412,10 @@ const locationRef = useRef(null);
             )} */}
 
             {moreDetailsFields.length > 0 && (
-              <div 
-              ref={moreDetailsRef}
-              className="w-full p-4 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20">
+              <div
+                ref={moreDetailsRef}
+                className="w-full p-4 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20"
+              >
                 <h3 className="mb-4 text-xl font-semibold text-gray-800">
                   More Details
                 </h3>
@@ -1397,9 +1435,10 @@ const locationRef = useRef(null);
             )}
 
             {/* Amenities Section */}
-            <div 
-            ref={amenitiesRef}
-            className="w-full p-3 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20">
+            <div
+              ref={amenitiesRef}
+              className="w-full p-3 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20"
+            >
               <h3 className="ml-4 font-semibold text-lm">Amenities</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1 mt-4 ml-4 text-[18px]">
                 {visibleAmenities.map((amenity, index) => (
@@ -1428,9 +1467,10 @@ const locationRef = useRef(null);
             </div>
 
             {/* About Property Section */}
-            <div 
-            ref={aboutRef}
-            className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[250px] w-full scroll-mt-20">
+            <div
+              ref={aboutRef}
+              className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[250px] w-full scroll-mt-20"
+            >
               <h2 className="justify-center ml-4 font-bold text-gray-700 text-ml">
                 About property
               </h2>
@@ -1440,9 +1480,10 @@ const locationRef = useRef(null);
             </div>
 
             {/* Location Section with Map */}
-            <div 
-            ref={locationRef}
-            className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[600px] w-full scroll-mt-20">
+            <div
+              ref={locationRef}
+              className="bg-white shadow-sm mt-4 rounded-2xl p-3 h-auto md:h-[600px] w-full scroll-mt-20"
+            >
               <h2 className="ml-4 text-3xl font-bold text-gray-900">
                 Location
               </h2>
@@ -1877,10 +1918,10 @@ const locationRef = useRef(null);
 
                           <div className="flex items-center w-full mt-2">
                             {property.furnished_type ? (
-                              <p className="flex items-center text-base">
+                              <p className="flex items-center text-base text-black">
                                 <FontAwesomeIcon
                                   icon={faChair}
-                                  className="mr-1 my-text"
+                                  className="mr-1 text-black"
                                 />
                                 {property.furnished_type}
                               </p>

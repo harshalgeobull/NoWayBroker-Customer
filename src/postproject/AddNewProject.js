@@ -459,6 +459,7 @@ Make it engaging, attractive, and human-like.
     custom_deposit_amount: "",
     total_beds: "",
     all_inclusive_price: "No",
+    price_onwards: "No",
     price_negotiable: "No",
     tax_and_goverment_charges: "No",
   });
@@ -912,7 +913,9 @@ Make it engaging, attractive, and human-like.
   const toWords = new ToWords({
     localeCode: "en-IN",
   });
-
+  if (!isLoaded) {
+    return <div>Loading Google Maps...</div>;
+  }
   return (
     <>
       <div className="flex flex-col items-center min-h-screen bg-white">
@@ -1343,28 +1346,36 @@ Make it engaging, attractive, and human-like.
                           *
                         </span>
                       </label>
-
-                      <Autocomplete
-                        onLoad={(ac) => (autoCompleteRef.current = ac)}
-                        onPlaceChanged={handlePlaceChanged}
-                      >
+                      {isLoaded ? (
+                        <Autocomplete
+                          onLoad={(ac) => (autoCompleteRef.current = ac)}
+                          onPlaceChanged={handlePlaceChanged}
+                        >
+                          <input
+                            type="text"
+                            value={address}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              const isValid = /^[a-zA-Z0-9\s]*$/.test(value);
+                              if (isValid) {
+                                setAddress(value);
+                              }
+                            }}
+                            className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
+                              formErrors.address
+                                ? "border-red-600"
+                                : "border-gray-300"
+                            }`}
+                          />
+                        </Autocomplete>
+                      ) : (
                         <input
                           type="text"
-                          value={address}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            const isValid = /^[a-zA-Z0-9\s]*$/.test(value);
-                            if (isValid) {
-                              setAddress(value);
-                            }
-                          }}
-                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                            formErrors.address
-                              ? "border-red-600"
-                              : "border-gray-300"
-                          }`}
+                          disabled
+                          placeholder="Loading Google Maps..."
+                          className={`w-full border rounded-md p-3 text-gray-700 border-gray-300`}
                         />
-                      </Autocomplete>
+                      )}
 
                       {formErrors.address && (
                         <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -1471,34 +1482,34 @@ Make it engaging, attractive, and human-like.
                       )}
                     </div>
                     {/* Locality */}
-<div>
-  <label className="font-medium text-gray-700">
-    Locality{" "}
-  <span className="invisible text-xl font-bold">*</span>
-  </label>
-  <input
-    type="text"
-    value={locality}
-    onChange={(e) => setLocality(e.target.value)}
-    placeholder="Enter Locality"
-    className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
-  />
-</div>
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Locality{" "}
+                        <span className="invisible text-xl font-bold">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={locality}
+                        onChange={(e) => setLocality(e.target.value)}
+                        placeholder="Enter Locality"
+                        className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
+                      />
+                    </div>
 
-{/* Sub Locality */}
-<div>
-  <label className="font-medium text-gray-700">
-    Sub Locality{" "}
-  <span className="invisible text-xl font-bold">*</span>
-  </label>
-  <input
-    type="text"
-    value={subLocality}
-    onChange={(e) => setSubLocality(e.target.value)}
-    placeholder="Enter Sub Locality"
-    className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
-  />
-</div>
+                    {/* Sub Locality */}
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Sub Locality{" "}
+                        <span className="invisible text-xl font-bold">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={subLocality}
+                        onChange={(e) => setSubLocality(e.target.value)}
+                        placeholder="Enter Sub Locality"
+                        className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
+                      />
+                    </div>
                     {/* Zip Code */}
                     <div>
                       <label className="font-medium text-gray-700">
@@ -1856,7 +1867,20 @@ Make it engaging, attractive, and human-like.
                         />
                         All Inclusive Price
                       </label>
-
+                      {/* Price Onwards */}
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.price_onwards === "Yes"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              price_onwards: e.target.checked ? "Yes" : "No",
+                            })
+                          }
+                        />
+                        Price Onwards
+                      </label>
                       {/* Price Negotiable */}
                       <label className="flex items-center gap-2">
                         <input
