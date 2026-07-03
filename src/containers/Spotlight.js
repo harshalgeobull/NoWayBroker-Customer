@@ -13,9 +13,24 @@ import { FaRupeeSign, FaMapMarkerAlt, FaBath } from "react-icons/fa";
 import { Building2, Ruler } from "lucide-react";
 import { RiRuler2Line } from "react-icons/ri";
 import { AiOutlineClockCircle } from "react-icons/ai";
+import { AiOutlineUser } from "react-icons/ai";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 import { MdApartment } from "react-icons/md";
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 const Spotlights = ({
   data,
@@ -32,6 +47,13 @@ const Spotlights = ({
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
 
+  let userLocation = null;
+  try {
+    userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
+  } catch (e) {
+    userLocation = null;
+  }
+
   useEffect(() => {
     if (data && data.status === 1 && Array.isArray(data.data)) {
       setProjectList(data.data);
@@ -44,61 +66,10 @@ const Spotlights = ({
   const handleClick = () => {
     history.push("/ProjectList");
   };
-  useEffect(() => {
-    console.log("Spotlight API Response:", data);
-  }, [data]);
-  useEffect(() => {
-    console.log("Project List:", projectList);
-  }, [projectList]);
 
   const handleProjectClick = (projectId) => {
     history.push(`/projectdetail/${encodeURIComponent(projectId)}`);
   };
-  // const settings = {
-  //   infinite: true,
-  //   speed: 500,
-  //   slidesToShow: 4,
-  //   slidesToScroll: 1,
-  //   autoplay: true,
-  //   autoplaySpeed: 3000,
-  //   arrows: false,
-  //   dots: false,
-  //   adaptiveHeight: false,
-
-  //   responsive: [
-  //     {
-  //       breakpoint: 1536,
-  //       settings: {
-  //         slidesToShow: 4,
-  //       },
-  //     },
-  //     {
-  //       breakpoint: 1280,
-  //       settings: {
-  //         slidesToShow: 3,
-  //       },
-  //     },
-  //     {
-  //       breakpoint: 1024,
-  //       settings: {
-  //         slidesToShow: 2,
-  //       },
-  //     },
-  //     {
-  //       breakpoint: 768,
-  //       settings: {
-  //         slidesToShow: 2,
-  //       },
-  //     },
-  //     {
-  //       breakpoint: 640,
-  //       settings: {
-  //         slidesToShow: 1,
-  //       },
-  //     },
-  //   ],
-  // };
-
 
   const settings = {
     infinite: true,
@@ -119,6 +90,7 @@ const Spotlights = ({
       { breakpoint: 640, settings: { slidesToShow: 1 } },
     ],
   };
+
   const formatPrice = (price) => {
     if (!price) return "";
     price = parseInt(price);
@@ -134,10 +106,47 @@ const Spotlights = ({
     }
   };
 
+  const getProjectDistance = (project) => {
+    const projLat =
+      project.latitude ??
+      project.lat ??
+      project.Latitude ??
+      project.project_latitude ??
+      project.location?.latitude ??
+      project.location?.lat;
+
+    const projLng =
+      project.longitude ??
+      project.lng ??
+      project.Longitude ??
+      project.project_longitude ??
+      project.location?.longitude ??
+      project.location?.lng;
+
+    if (
+      userLocation &&
+      userLocation.latitude &&
+      userLocation.longitude &&
+      projLat &&
+      projLng &&
+      !isNaN(Number(projLat)) &&
+      !isNaN(Number(projLng)) &&
+      Number(projLat) !== 0 &&
+      Number(projLng) !== 0
+    ) {
+      const dist = calculateDistance(
+        Number(userLocation.latitude),
+        Number(userLocation.longitude),
+        Number(projLat),
+        Number(projLng),
+      );
+      return dist.toFixed(1);
+    }
+    return null;
+  };
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
 
-    // If it's a range (contains "-"), split and format both
     if (typeof price === "string" && price.includes("-")) {
       const parts = price.split("-").map((p) => p.trim());
       return (
@@ -153,7 +162,6 @@ const Spotlights = ({
       );
     }
 
-    // Normal number formatting
     price = parseInt(price);
     if (isNaN(price)) return "";
 
@@ -175,7 +183,6 @@ const Spotlights = ({
     );
   };
 
-  // Add to favorites
   const addToFavoritesRecommendedProperty = async (projectId) => {
     if (!sessionStorage.getItem("accessToken")) {
       toast.error("Please login to add to favorites");
@@ -192,7 +199,7 @@ const Spotlights = ({
         formData,
       );
 
-      const favId = res.data?.favorite_id || projectId; // fallback to projectId
+      const favId = res.data?.favorite_id || projectId;
       setProjectList((prev) =>
         prev.map((proj) =>
           proj._id === projectId
@@ -206,7 +213,6 @@ const Spotlights = ({
     }
   };
 
-  // Remove from favorites
   const removeFromFavoritesRecommendedProperty = async (
     favoriteId,
     projectId,
@@ -252,12 +258,6 @@ const Spotlights = ({
           >
             View All Projects
           </button>
-          {/* <button
-            className="hidden px-4 py-2 text-sm my-text bg-white my-border rounded-lg sm:px-6 sm:block"
-            onClick={handleClick}
-          >
-            View All Projects
-          </button> */}
           <button
             className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg"
             onClick={() => sliderRef.current.slickPrev()}
@@ -309,17 +309,7 @@ const Spotlights = ({
                       strokeWidth={2}
                     />
                   </button>
-                  <FontAwesomeIcon
-                    icon={faShareNodes}
-                    className="text-gray-500 bg-white p-2 rounded shadow cursor-pointer"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      openSpotlightShareModal(project._id);
-                    }}
-                  />
                 </div>
-
 
                 {/* Logo + Project Name overlay */}
                 <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[90%] sm:w-[85%] md:w-[80%] h-[110px] md:h-[120px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
@@ -347,7 +337,6 @@ const Spotlights = ({
                     </span>
                   )}
                 </div>
-
 
                 {/* Row 2: Subtitle */}
                 <p className="mt-0 mb-2 text-sm leading-5 text-gray-500 truncate">
@@ -377,7 +366,6 @@ const Spotlights = ({
 
                 {/* Row 4: Features Grid */}
                 <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
-                  {/* Configuration / Type */}
                   <div className="flex items-center gap-2 px-1 min-w-0">
                     <Building2 size={20} className="text-gray-700 flex-shrink-0" />
                     <div className="flex flex-col min-w-0 leading-tight">
@@ -402,7 +390,6 @@ const Spotlights = ({
                     </div>
                   </div>
 
-                  {/* Built Up Area */}
                   <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
                     <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
                     <div className="flex flex-col min-w-0 leading-tight">
@@ -414,122 +401,57 @@ const Spotlights = ({
                   </div>
                 </div>
 
-
-
-
                 <hr className="my-1 border-gray-100" />
 
                 {/* Row 5 : Posted By | Days | Distance | Share */}
-                {/* <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600"> */}
-                {/* Left */}
-                {/* <div className="flex items-center flex-wrap min-w-0"> */}
-                {/* Posted By */}
-                {/* <div className="flex items-center">
-                                             <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
-                                             <span className="truncate">
-                                               Posted by {project.user_type || "Owner"}
-                                             </span>
-                                           </div> */}
-
-                {/* Dot */}
-                {/* <span className="mx-2 text-gray-400">•</span>
-                */}
-                {/* Days */}
-                {/* <span className="whitespace-nowrap">
-                                             {project.days_since_created
-                                               ? `${project.days_since_created} days ago`
-                                               : "Recently"}
-                                           </span> */}
-
-                {/* Distance */}
-                {/* {project.distance && (
-                                             <>
-                                               <span className="mx-2 text-gray-400">•</span>
-               
-                                               <div className="flex items-center whitespace-nowrap">
-                                                 <FaMapMarkerAlt className="mr-1 text-red-500" />
-                                                 {project.distance} km from you
-                                               </div>
-                                             </>
-                                           )}
-                                         </div> */}
-
-                {/* Share */}
-                {/* <FontAwesomeIcon
-                                           icon={faShareNodes}
-                                           className="ml-2 text-[17px] text-gray-500 transition-colors cursor-pointer hover:text-blue-500"
-                                           onClick={(e) => {
-                                             e.preventDefault();
-                                             e.stopPropagation();
-                                             openSpotlightShareModal(project._id);
-                                           }}
-                                         />
-                                       </div> */}
-                {/* {console.log(
-                                         project.connect_to_name,
-                                         project.property_owner_image,
-                                       )} */}
-
-                {/* Row 6: Owner Details */}
-                {/* <div className="flex items-center pt-2">
-                  <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
-                    {project.property_owner_image &&
-                      !project.property_owner_image.includes("default_profile") ? (
-                      <img
-                        src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
-                        alt={project.connect_to_name || "Owner"}
-                        className="object-cover w-full h-full rounded-full"
-                      />
-                    ) : (
-                      <span className="text-base text-blue-600 font-bold">
-                        {(project.connect_to_name || "B")[0].toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center ml-3">
-                    <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                      {project.connect_to_name || "Builder"}
-                    </span>
-                    <div className="w-px h-4 mx-3 bg-gray-300"></div>
-                    <span className="text-sm text-gray-500 whitespace-nowrap">
-                      {project.user_type || "Builder"}
-                    </span>
-                  </div>
-                </div> */}
-                {/* new ROw */}
-                <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
                   {/* Left */}
-                  <div className="flex items-center">
-                    <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
-                      {project.property_owner_image &&
-                        !project.property_owner_image.includes("default_profile") ? (
-                        <img
-                          src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
-                          alt={project.connect_to_name || "Builder"}
-                          className="object-cover w-full h-full rounded-full"
-                        />
-                      ) : (
-                        <span className="text-base font-bold text-blue-600">
-                          {(project.connect_to_name || "B")[0].toUpperCase()}
-                        </span>
-                      )}
+                  <div className="flex items-center flex-wrap min-w-0">
+                    {/* Posted By */}
+                    <div className="flex items-center">
+                      <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
+                      <span className="truncate">
+                        Posted by {project.user_type || "Builder"}
+                      </span>
                     </div>
 
-                    <span className="ml-3 text-sm font-semibold text-gray-900">
-                      {project.connect_to_name || "Builder"}
+                    {/* Dot */}
+                    <span className="mx-2 text-gray-400">•</span>
+
+                    {/* Days */}
+                    <span className="whitespace-nowrap">
+                      {project.days_since_created !== undefined &&
+                        project.days_since_created !== null
+                        ? project.days_since_created === 0
+                          ? "Today"
+                          : `${project.days_since_created} days ago`
+                        : project.created_at
+                          ? `${Math.max(
+                            0,
+                            Math.floor(
+                              (Date.now() - new Date(project.created_at).getTime()) /
+                              (1000 * 60 * 60 * 24),
+                            ),
+                          )} days ago`
+                          : "Recently"}
                     </span>
 
-                    <div className="w-px h-4 mx-3 bg-gray-300"></div>
-
-                    <span className="text-sm text-gray-500">
-                      Posted by {project.user_type || "Builder"}
-                    </span>
+                    {/* Distance */}
+                    {getProjectDistance(project) && (
+                      <>
+                        <span className="mx-2 text-gray-400">•</span>
+                        <div className="flex items-center whitespace-nowrap">
+                          <FaMapMarkerAlt className="mr-1 text-red-500" />
+                          {getProjectDistance(project)} km from you
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Share */}
                   <FontAwesomeIcon
                     icon={faShareNodes}
-                    className="text-[17px] text-gray-500 cursor-pointer hover:text-blue-500"
+                    className="ml-2 text-[17px] text-gray-500 transition-colors cursor-pointer hover:text-blue-500"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -537,13 +459,37 @@ const Spotlights = ({
                     }}
                   />
                 </div>
-                {/* end */}
+                {/* Row 6: Owner Details */}
+                <div className="flex items-center pt-2">
+                  <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+                    {project.property_owner_image &&
+                      !project.property_owner_image.includes("default_profile") ? (
+                      <img
+                        src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
+                        alt={project.connect_to_name || "Builder"}
+                        className="object-cover w-full h-full rounded-full"
+                      />
+                    ) : (
+                      <AiOutlineUser className="text-xl text-blue-600" />
+                    )}
+                  </div>
+
+                  <div className="flex items-center ml-4">
+                    <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                      {project.connect_to_name || "Builder"}
+                    </span>
+                    <div className="w-px h-4 mx-4 bg-gray-300"></div>
+                    <span className="text-sm text-gray-500 whitespace-nowrap">
+                      {project.user_type || "Builder"}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div >
-
+          </div>
         ))}
-      </Slider >
+      </Slider>
+
       <div
         id="shareModal"
         className="fixed bottom-0 right-0 items-center justify-center bg-black bg-opacity-50 z-50 hidden"
@@ -567,38 +513,45 @@ const Spotlights = ({
               Copy Link
             </button>
           </div>
-          <div className="flex justify-around">
+          <div className="flex justify-around flex-wrap gap-2">
             <a
-              href={`https://wa.me/?text=${encodeURIComponent(
-                currentShareUrl,
-              )}`}
+              href={`https://wa.me/?text=${encodeURIComponent(currentShareUrl)}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="btn btn-success"
             >
               WhatsApp
             </a>
+
             <a
-              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                currentShareUrl,
-              )}`}
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentShareUrl)}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="btn btn-primary"
             >
               Facebook
             </a>
-            <a href="https://www.instagram.com" className="btn btn-danger">
+
+            <a
+              href="https://www.instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-danger"
+            >
               Instagram
             </a>
+
             <a
-              href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
-                currentShareUrl,
-              )}`}
+              href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentShareUrl)}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="btn btn-info"
             >
               Twitter
             </a>
+
             <a
-              href={`mailto:?subject=Check out this page&body=${encodeURIComponent(
-                currentShareUrl,
-              )}`}
+              href={`mailto:?subject=Check out this page&body=${encodeURIComponent(currentShareUrl)}`}
               className="btn btn-secondary"
             >
               Email
@@ -606,6 +559,7 @@ const Spotlights = ({
           </div>
         </div>
       </div>
+
       <Login1
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
@@ -614,6 +568,7 @@ const Spotlights = ({
           setIsSignUpModalOpen(true);
         }}
       />
+
       <SignUp1
         isOpen={isSignUpModalOpen}
         onClose={() => setIsSignUpModalOpen(false)}
@@ -622,7 +577,7 @@ const Spotlights = ({
           setIsLoginModalOpen(true);
         }}
       />
-    </div >
+    </div>
   );
 };
 

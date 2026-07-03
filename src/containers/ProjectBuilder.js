@@ -4,17 +4,31 @@ import axios from "axios";
 import { GoArrowLeft, GoArrowRight } from "react-icons/go";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { AiFillHome, AiOutlineUser } from "react-icons/ai";
+import { AiFillHome, AiOutlineUser, AiOutlineClockCircle } from "react-icons/ai";
 import { Link, useParams } from "react-router-dom";
 import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
 import { MdApartment } from "react-icons/md";
 import { RiRuler2Line } from "react-icons/ri";
-import { FaBath, FaRupeeSign } from "react-icons/fa";
+import { FaBath, FaRupeeSign, FaMapMarkerAlt } from "react-icons/fa";
 import { Building2, Heart } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
 import ContactDetails from "../containers/ContactDetails";
 import ShareModal from "../containers/ShareModal";
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 const ProjectBuilder = () => {
   const { id } = useParams();
@@ -27,7 +41,7 @@ const ProjectBuilder = () => {
   const [totalCount, setTotalCount] = useState();
   const [nextPage, setNextPages] = useState(1);
   const [previousPage, setPreviousPage] = useState(1);
-  const propertiesPerPage = 6;
+  const propertiesPerPage = 8;
 
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -37,6 +51,52 @@ const ProjectBuilder = () => {
   const [currentShareUrl, setCurrentShareUrl] = useState("");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [activeShareId, setActiveShareId] = useState(null);
+
+  let userLocation = null;
+  try {
+    userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
+  } catch (e) {
+    userLocation = null;
+  }
+
+  const getProjectDistance = (project) => {
+    const projLat =
+      project.latitude ??
+      project.lat ??
+      project.Latitude ??
+      project.project_latitude ??
+      project.location?.latitude ??
+      project.location?.lat;
+
+    const projLng =
+      project.longitude ??
+      project.lng ??
+      project.Longitude ??
+      project.project_longitude ??
+      project.location?.longitude ??
+      project.location?.lng;
+
+    if (
+      userLocation &&
+      userLocation.latitude &&
+      userLocation.longitude &&
+      projLat &&
+      projLng &&
+      !isNaN(Number(projLat)) &&
+      !isNaN(Number(projLng)) &&
+      Number(projLat) !== 0 &&
+      Number(projLng) !== 0
+    ) {
+      const dist = calculateDistance(
+        Number(userLocation.latitude),
+        Number(userLocation.longitude),
+        Number(projLat),
+        Number(projLng),
+      );
+      return dist.toFixed(1);
+    }
+    return null;
+  };
 
   useEffect(() => {
     if (id) {
@@ -255,28 +315,28 @@ const ProjectBuilder = () => {
             <p className="text-2xl font-medium text-black">Projects</p>
           </div>
 
-          {/* Project List - smaller / slim card design */}
+          {/* Project List - full size card design (matches Spotlights) */}
           <div className="py-4 px-4 sm:px-6 lg:px-10 bg-white rounded-2xl">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {projects.map((project) => (
                 <div
                   key={project._id}
-                  className="w-full overflow-hidden bg-white shadow-md rounded-xl hover:shadow-lg transition-all duration-300"
+                  className="w-full overflow-hidden bg-white shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300"
                 >
                   <div className="relative">
                     <Link to={`/projectdetail/${project._id}`} className="block">
                       <img
                         src={project.cover_image}
                         alt={project.project_name}
-                        className="w-full h-[140px] sm:h-[150px] object-cover rounded-t-xl cursor-pointer"
+                        className="w-full h-[220px] sm:h-[260px] md:h-[280px] object-cover rounded-t-2xl cursor-pointer"
                       />
                     </Link>
 
-                    {/* Heart + Share */}
-                    <div className="absolute top-1.5 right-1.5 flex items-center space-x-1.5">
-                      <button className="bg-gray-800/60 backdrop-blur-sm p-1.5 rounded-full shadow">
+                    {/* Heart */}
+                    <div className="absolute top-2 right-2 flex items-center space-x-2">
+                      <button className="bg-gray-800/60 backdrop-blur-sm p-2 rounded-full shadow">
                         <Heart
-                          size={14}
+                          size={20}
                           stroke={project.is_favorite ? "none" : "white"}
                           color={
                             project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"
@@ -287,30 +347,18 @@ const ProjectBuilder = () => {
                           strokeWidth={2}
                         />
                       </button>
-                      <FontAwesomeIcon
-                        icon={faShareNodes}
-                        className="text-[10px] text-gray-500 bg-white p-1.5 rounded shadow cursor-pointer"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          openShareModal1(
-                            `${window.location.origin}/projectdetail/${project._id}`,
-                            project._id,
-                          );
-                        }}
-                      />
                     </div>
 
                     {/* Logo + Project Name overlay */}
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[85%] h-[60px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-2 rounded-t-2xl">
-                      <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[38px] h-[38px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[90%] sm:w-[85%] h-[110px] md:h-[120px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
+                      <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
                         <img
                           src={project.logo || project.cover_image}
                           alt="Project Logo"
                           className="object-cover w-full h-full"
                         />
                       </div>
-                      <h3 className="text-center text-white text-xs font-bold line-clamp-1 mt-2">
+                      <h3 className="text-center text-white text-lg md:text-2xl font-bold line-clamp-2 min-h-[48px] mt-4">
                         {project.project_name || "No Project Name Available"}
                       </h3>
                     </div>
@@ -319,22 +367,22 @@ const ProjectBuilder = () => {
                   {/* Card Body */}
                   <Link
                     to={`/projectdetail/${project._id}`}
-                    className="block p-3 bg-white rounded-b-xl cursor-pointer no-underline hover:no-underline"
+                    className="block p-4 bg-white rounded-b-2xl cursor-pointer no-underline hover:no-underline"
                   >
                     {/* Row 1: Project Name + Furnished Type */}
-                    <div className="flex items-start justify-between gap-2 mb-0">
-                      <h3 className="flex-1 m-0 text-sm font-bold leading-5 text-gray-900 truncate">
+                    <div className="flex items-start justify-between gap-3 mb-0">
+                      <h3 className="flex-1 m-0 text-base font-bold leading-6 text-gray-900 truncate">
                         {project.project_name || ""}
                       </h3>
                       {project.furnished_type && (
-                        <span className="flex-shrink-0 text-[11px] font-medium leading-5 text-black whitespace-nowrap">
+                        <span className="flex-shrink-0 text-sm font-medium leading-6 text-black whitespace-nowrap">
                           {project.furnished_type}
                         </span>
                       )}
                     </div>
 
                     {/* Row 2: Subtitle */}
-                    <p className="mt-0 mb-1.5 text-xs leading-4 text-gray-500 truncate">
+                    <p className="mt-0 mb-2 text-sm leading-5 text-gray-500 truncate">
                       {project.congfigurations
                         ? project.congfigurations.includes("BHK")
                           ? project.congfigurations
@@ -349,8 +397,8 @@ const ProjectBuilder = () => {
                     </p>
 
                     {/* Row 3: Price + Status */}
-                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      <span className="text-base font-bold text-black">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <span className="text-xl font-bold text-black">
                         {project.project_properties &&
                           project.project_properties.length > 0
                           ? (() => {
@@ -374,98 +422,100 @@ const ProjectBuilder = () => {
                           )}
                       </span>
                       {project.possession_status === "Ready To Move" && (
-                        <div className="flex items-center gap-1 px-2 py-0.5 bg-green-100 border border-green-200 rounded-full">
-                          <MdApartment className="text-xs text-green-700" />
-                          <span className="text-[10px] font-semibold text-green-700 whitespace-nowrap">
+                        <div className="flex items-center gap-2 px-3 py-1 bg-green-100 border border-green-200 rounded-full">
+                          <MdApartment className="text-base text-green-700" />
+                          <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
                             Ready to Move
                           </span>
                         </div>
                       )}
                     </div>
 
-                    {/* Row 4: Features Grid */}
-                    <div className="grid grid-cols-3 py-2 border-t border-b border-gray-100">
-                      <div className="flex items-center gap-1 px-1 min-w-0">
-                        <Building2
-                          size={14}
-                          className="text-gray-700 flex-shrink-0"
-                        />
-                        <div className="flex flex-col min-w-0 leading-tight">
-                          <p className="m-0 text-[11px] font-semibold leading-3.5 truncate text-black">
-                            {project.congfigurations
-                              ? project.congfigurations.includes("BHK")
-                                ? project.congfigurations.split(",")[0].trim()
-                                : `${project.congfigurations.split(",")[0].trim()} BHK`
-                              : ""}
-                          </p>
-                          <p className="m-0 text-[10px] leading-3.5 text-gray-500 truncate">
+                    {/* Row 4 : Features */}
+                    <div className="grid grid-cols-3 border-t border-b border-gray-200 py-3">
+                      {/* Property Type */}
+                      <div className="flex items-center gap-2 px-2">
+                        <Building2 size={18} className="text-gray-600" />
+                        <div>
+                          <p className="text-[13px] font-semibold text-black leading-4">
                             {project.project_type || "Apartment"}
+                          </p>
+                          <p className="text-[11px] text-gray-500">
+                            Property Type
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1 px-1 border-l border-gray-200 min-w-0">
-                        <FaBath
-                          size={12}
-                          className="text-gray-700 flex-shrink-0"
-                        />
-                        <div className="flex flex-col min-w-0 leading-tight">
-                          <p className="m-0 text-[11px] font-semibold text-black truncate">
+                      {/* Bathrooms */}
+                      <div className="flex items-center gap-2 px-2 border-l border-gray-200">
+                        <FaBath size={18} className="text-gray-600" />
+                        <div>
+                          <p className="text-[13px] font-semibold text-black leading-4">
                             {project.bathroom || 0} Baths
                           </p>
-                          <p className="m-0 text-[10px] text-gray-500 truncate">
+                          <p className="text-[11px] text-gray-500">
                             Bathrooms
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1 px-1 border-l border-gray-200 min-w-0">
-                        <RiRuler2Line className="text-[16px] text-gray-700 flex-shrink-0" />
-                        <div className="flex flex-col min-w-0 leading-tight">
-                          <p className="m-0 text-[11px] font-semibold leading-3.5 truncate text-black">
+                      {/* Area */}
+                      <div className="flex items-center gap-2 px-2 border-l border-gray-200">
+                        <RiRuler2Line size={18} className="text-gray-600" />
+                        <div>
+                          <p className="text-[13px] font-semibold text-black leading-4">
                             {project.area ? `${project.area} Sq.ft` : "N/A"}
                           </p>
-                          <p className="m-0 text-[10px] leading-3.5 text-gray-500 truncate">
+                          <p className="text-[11px] text-gray-500">
                             Built Up Area
                           </p>
                         </div>
                       </div>
                     </div>
-
-                    {/* Row 5: Owner Details + Share */}
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="flex items-center min-w-0">
-                        <div className="flex items-center justify-center flex-shrink-0 w-6 h-6 overflow-hidden rounded-full bg-blue-100">
-                          {project.property_owner_image &&
-                            !project.property_owner_image.includes(
-                              "default_profile",
-                            ) ? (
-                            <img
-                              src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
-                              alt={project.connect_to_name || "Builder"}
-                              className="object-cover w-full h-full rounded-full"
-                            />
-                          ) : (
-                            <span className="text-[11px] font-bold text-blue-600">
-                              {(project.connect_to_name || "B")[0].toUpperCase()}
-                            </span>
-                          )}
+                    {/* Row 5 : Posted By | Days | Distance | Share */}
+                    <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600 flex-wrap gap-y-1">
+                      <div className="flex items-center flex-wrap min-w-0">
+                        <div className="flex items-center">
+                          <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
+                          <span className="truncate">
+                            Posted by {project.user_type || "Builder"}
+                          </span>
                         </div>
 
-                        <span className="ml-2 text-xs font-semibold text-gray-900 truncate">
-                          {project.connect_to_name || "Builder"}
+                        <span className="mx-2 text-gray-400">•</span>
+
+                        <span className="whitespace-nowrap">
+                          {project.days_since_created !== undefined &&
+                            project.days_since_created !== null
+                            ? project.days_since_created === 0
+                              ? "Today"
+                              : `${project.days_since_created} days ago`
+                            : project.created_at
+                              ? `${Math.max(
+                                0,
+                                Math.floor(
+                                  (Date.now() -
+                                    new Date(project.created_at).getTime()) /
+                                  (1000 * 60 * 60 * 24),
+                                ),
+                              )} days ago`
+                              : "Recently"}
                         </span>
 
-                        <div className="w-px h-3 mx-2 bg-gray-300 flex-shrink-0"></div>
-
-                        <span className="text-xs text-gray-500 truncate">
-                          Posted by {project.user_type || "Builder"}
-                        </span>
+                        {getProjectDistance(project) && (
+                          <>
+                            <span className="mx-2 text-gray-400">•</span>
+                            <div className="flex items-center whitespace-nowrap">
+                              <FaMapMarkerAlt className="mr-1 text-red-500" />
+                              {getProjectDistance(project)} km from you
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       <FontAwesomeIcon
                         icon={faShareNodes}
-                        className="text-[13px] text-gray-500 cursor-pointer hover:text-blue-500 flex-shrink-0 ml-2"
+                        className="ml-2 text-[17px] text-gray-500 transition-colors cursor-pointer hover:text-blue-500 flex-shrink-0"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -475,6 +525,34 @@ const ProjectBuilder = () => {
                           );
                         }}
                       />
+                    </div>
+
+                    {/* Row 6: Owner Details */}
+                    <div className="flex items-center pt-2">
+                      <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+                        {project.property_owner_image &&
+                          !project.property_owner_image.includes(
+                            "default_profile",
+                          ) ? (
+                          <img
+                            src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
+                            alt={project.connect_to_name || "Builder"}
+                            className="object-cover w-full h-full rounded-full"
+                          />
+                        ) : (
+                          <AiOutlineUser className="text-xl text-blue-600" />
+                        )}
+                      </div>
+
+                      <div className="flex items-center ml-4">
+                        <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+                          {project.connect_to_name || "Builder"}
+                        </span>
+                        <div className="w-px h-4 mx-4 bg-gray-300"></div>
+                        <span className="text-sm text-gray-500 whitespace-nowrap">
+                          {project.user_type || "Builder"}
+                        </span>
+                      </div>
                     </div>
                   </Link>
 
