@@ -11,26 +11,41 @@ import axios from "axios";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Slider from "react-slick";
-import { RiArrowDropDownLine } from "react-icons/ri";
+import { RiArrowDropDownLine, RiRuler2Line } from "react-icons/ri";
 import { MdOutlineNavigateBefore, MdOutlineNavigateNext, MdApartment } from "react-icons/md";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareNodes, faUserCircle } from "@fortawesome/free-solid-svg-icons";
-import { AiOutlineUser } from "react-icons/ai";
+import { AiOutlineUser, AiOutlineClockCircle } from "react-icons/ai";
 import { MdOutlineBedroomParent } from "react-icons/md";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { BiArea } from "react-icons/bi";
-import { FaRupeeSign, FaBath, FaWhatsapp, FaPhone } from "react-icons/fa";
+import { FaRupeeSign, FaBath, FaUser, FaWhatsapp, FaPhone } from "react-icons/fa";
 import { faChair } from "@fortawesome/free-solid-svg-icons";
 import { PiShareNetworkLight } from "react-icons/pi";
 import { PiCubeFocus } from "react-icons/pi";
 import { Heart, Building2 } from "lucide-react";
-import { RiRuler2Line } from "react-icons/ri";
 import { toast } from "react-toastify";
 import ShareModal from "../containers/ShareModal";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 import { useCity } from "./SearchContext";
 import ContactDetails from "../containers/ContactDetails";
+
+const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 const FeaturedDashboard = () => {
   const [hoveredPropertyId, setHoveredPropertyId] = useState(null);
@@ -530,7 +545,7 @@ const FeaturedDashboard = () => {
         z-index: 1000;
         position: absolute;
         top: 5px;
-        right: 10px; /* Adjust the position from right */
+        right: 10px;
         width: 26px;
         height: 24px;
         border: none;
@@ -549,7 +564,6 @@ const FeaturedDashboard = () => {
         color: white;
       }
       
-      /* Wrapper for marker */
       .marker-wrapper {
         position: relative;
         display: flex;
@@ -561,27 +575,25 @@ const FeaturedDashboard = () => {
          background-color: green;
       }
 
-      /* Tooltip-like price box */
       .price-tooltip {
-  background: white;
-  color: black; /* Ensure the text color is black */
-  padding: 8px 12px;
-  border-radius: 18px;
-  font-weight: bold; /* Make the text bold */
-  font-size: 1.1rem; /* Increased font size */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  position: relative;
-  text-align: center;
-  white-space: nowrap;
-  z-index: 10;
-}
-
-      .price-tooltip:hover {
-        background-color: gray; /* Change to gray on hover */
-        color: white; /* Optional: Change text color for better contrast */
+        background: white;
+        color: black;
+        padding: 8px 12px;
+        border-radius: 18px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        position: relative;
+        text-align: center;
+        white-space: nowrap;
+        z-index: 10;
       }
 
-      /* Pointer (triangle below the box) */
+      .price-tooltip:hover {
+        background-color: gray;
+        color: white;
+      }
+
       .price-tooltip .pointer {
         position: absolute;
         bottom: -8px;
@@ -596,7 +608,6 @@ const FeaturedDashboard = () => {
       }
       
 
-      /* Adjust the marker size */
       .custom-marker {
         display: flex;
         align-items: center;
@@ -1039,7 +1050,6 @@ const FeaturedDashboard = () => {
       setOtherCommercialType([]);
 
       // CLOSE DROPDOWNS
-      // CLOSE DROPDOWNS
       setPriceDropdownOpen(false);
       setSquareFtDropdownOpen(false);
 
@@ -1106,34 +1116,6 @@ const FeaturedDashboard = () => {
   // Slider settings
   const [activeIndexes, setActiveIndexes] = useState({});
   const BASE_URL = process.env.REACT_APP_API_URL;
-
-  const settings = {
-    infinite: true,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    arrows: false,
-    cssEase: "linear",
-    responsive: [
-      {
-        breakpoint: 300,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 3,
-          infinite: true,
-        },
-      },
-      {
-        breakpoint: 300,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 3,
-          infinite: true,
-        },
-      },
-    ],
-  };
 
   const openShareModal = (url, propertyId) => {
     setCurrentShareUrl(url);
@@ -1743,12 +1725,6 @@ const FeaturedDashboard = () => {
   return (
     <>
       <div className="flex flex-col p-1 space-y-4 sm:p-6 bg-rose-50 rounded-xl">
-        {/* Search and Filter Section */}
-        {/* <div className="flex flex-col flex-wrap items-center justify-center gap-4 md:flex-row md:items-center">
-                {/* Left Side - Search Input (Optional Placeholder) */}
-
-        {/* Right Side Fields */}
-        {/* <div className="flex flex-wrap w-full gap-2 mt-2 md:w-auto"> */}
         <div className="relative">
           <div
             className="flex gap-2 overflow-x-auto pb-2 whitespace-nowrap"
@@ -1961,7 +1937,7 @@ const FeaturedDashboard = () => {
                       >
                         <option value="">Min</option>
                         {priceOptions
-                          .filter((price) => !maxPrice || price < maxPrice) // enforce < Max
+                          .filter((price) => !maxPrice || price < maxPrice)
                           .map((price) => (
                             <option key={price} value={price}>
                               {formatPriceMinMax(price)}
@@ -1977,7 +1953,7 @@ const FeaturedDashboard = () => {
                       >
                         <option value="">Max</option>
                         {priceOptions
-                          .filter((price) => !minPrice || price > minPrice) // enforce > Min
+                          .filter((price) => !minPrice || price > minPrice)
                           .map((price) => (
                             <option key={price} value={price}>
                               {formatPriceMinMax(price)}
@@ -2350,7 +2326,6 @@ const FeaturedDashboard = () => {
                         <IoClose size={20} />
                       </button>
                     </div>
-                    {/* Area Unit */}
                     <label className="text-sm text-gray-600">Area Unit</label>
                     <select
                       value={areaIn}
@@ -2364,7 +2339,6 @@ const FeaturedDashboard = () => {
                       ))}
                     </select>
 
-                    {/* Min Area */}
                     <label className="text-sm text-gray-600">Min Area</label>
                     <input
                       type="number"
@@ -2374,7 +2348,6 @@ const FeaturedDashboard = () => {
                       placeholder="Min"
                     />
 
-                    {/* Max Area */}
                     <label className="text-sm text-gray-600">Max Area</label>
                     <input
                       type="number"
@@ -3317,378 +3290,462 @@ const FeaturedDashboard = () => {
               className="z-10 flex-1 p-4 border-white no-scrollbar"
               style={{ scrollbarWidth: "none" }}
             >
-              {/* Right: Properties */}
+              {/* Right: Properties (AdvisorDashboard-style cards) */}
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                 {properties.length > 0 ? (
-                  properties.map((property) => (
-                    <div
-                      key={property._id}
-                      className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${hoveredPropertyId === property._id ? "bg-green-200" : ""
-                        }`}
-                      onMouseEnter={() => setHoveredPropertyId(property._id)}
-                      onMouseLeave={() => setHoveredPropertyId(null)}
-                    >
-                      <div className="relative" key={property._id}>
-                        <Link
-                          to={`/propertydetails/${property._id}`}
-                          className="block overflow-hidden no-underline bg-white border-2 rounded-lg hover:no-underline"
-                        >
-                          {1 + (property?.property_images?.length || 0) > 1 ? (
-                            <Slider
-                              dots
-                              infinite
-                              speed={500}
-                              slidesToShow={1}
-                              slidesToScroll={1}
-                              arrows
-                              autoplay
-                              autoplaySpeed={2000}
-                              beforeChange={(current, next) =>
-                                setActiveIndexes((prev) => ({
-                                  ...prev,
-                                  [property._id]: next,
-                                }))
-                              }
-                              initialSlide={activeIndexes[property._id] || 0}
-                              customPaging={(i) => {
-                                const activeSlide =
-                                  activeIndexes[property._id] || 0;
-                                const totalImages =
-                                  1 + (property?.property_images?.length || 0);
-                                const isActive =
-                                  i === activeSlide % totalImages;
-                                return (
-                                  <div
-                                    style={{
-                                      width: "10px",
-                                      height: "10px",
-                                      borderRadius: "50%",
-                                      background: isActive ? "#fff" : "#888",
-                                      margin: "0 5px",
-                                      cursor: "pointer",
-                                    }}
+                  properties.map((property) => {
+                    let distance = null;
+                    if (
+                      userLocation &&
+                      property.latitude &&
+                      property.longitude
+                    ) {
+                      distance = calculateDistance(
+                        userLocation.latitude,
+                        userLocation.longitude,
+                        parseFloat(property.latitude),
+                        parseFloat(property.longitude),
+                      ).toFixed(1);
+                    }
+
+                    const subtitle = (() => {
+                      const area = property.address_area || property.address || "";
+                      const city = property.city_name || "";
+
+                      const loc =
+                        area.toLowerCase().includes(city.toLowerCase())
+                          ? area
+                          : city
+                            ? `${area}, ${city}`
+                            : area;
+
+                      const type =
+                        property.property_type === "Office"
+                          ? "Office Space"
+                          : property.property_type === "Retail"
+                            ? "Retail Space"
+                            : property.property_type ||
+                            property.building_type ||
+                            "Property";
+
+                      const category = property.property_category_type || "";
+
+                      if (
+                        category === "Commercial Buy" ||
+                        category === "Commercial Lease"
+                      ) {
+                        return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
+                          } in ${loc}`;
+                      }
+
+                      if (
+                        category.includes("PG") ||
+                        category.includes("Co-Living") ||
+                        category.includes("Coliving")
+                      ) {
+                        return `${type} for Rent in ${loc}`;
+                      }
+
+                      const action = category === "Buy" ? "Sale" : category || "Sale";
+
+                      return `${property.bhk_type ? property.bhk_type + " " : ""
+                        }${type} for ${action} in ${loc}`;
+                    })();
+
+                    return (
+                      <div
+                        key={property._id}
+                        className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${hoveredPropertyId === property._id ? "bg-green-200" : ""
+                          }`}
+                        onMouseEnter={() => setHoveredPropertyId(property._id)}
+                        onMouseLeave={() => setHoveredPropertyId(null)}
+                      >
+                        <div className="relative" key={property._id}>
+                          <Link
+                            to={`/propertydetails/${property._id}`}
+                            className="block overflow-hidden no-underline bg-white border-2 rounded-lg hover:no-underline"
+                          >
+                            {1 + (property?.property_images?.length || 0) > 1 ? (
+                              <Slider
+                                dots
+                                infinite
+                                speed={500}
+                                slidesToShow={1}
+                                slidesToScroll={1}
+                                arrows
+                                autoplay
+                                autoplaySpeed={2000}
+                                beforeChange={(current, next) =>
+                                  setActiveIndexes((prev) => ({
+                                    ...prev,
+                                    [property._id]: next,
+                                  }))
+                                }
+                                initialSlide={activeIndexes[property._id] || 0}
+                                customPaging={(i) => {
+                                  const activeSlide =
+                                    activeIndexes[property._id] || 0;
+                                  const totalImages =
+                                    1 + (property?.property_images?.length || 0);
+                                  const isActive =
+                                    i === activeSlide % totalImages;
+                                  return (
+                                    <div
+                                      style={{
+                                        width: "10px",
+                                        height: "10px",
+                                        borderRadius: "50%",
+                                        background: isActive ? "#fff" : "#888",
+                                        margin: "0 5px",
+                                        cursor: "pointer",
+                                      }}
+                                    />
+                                  );
+                                }}
+                                appendDots={(dots) => {
+                                  const totalImages =
+                                    1 + (property?.property_images?.length || 0);
+                                  const visibleDots = dots.slice(0, totalImages);
+                                  return (
+                                    <div
+                                      style={{
+                                        position: "absolute",
+                                        bottom: "10px",
+                                        left: "50%",
+                                        transform: "translateX(-50%)",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        width: "100%",
+                                      }}
+                                    >
+                                      {visibleDots}
+                                    </div>
+                                  );
+                                }}
+                                className="rounded-t-2xl"
+                              >
+                                {/* First slide: cover image */}
+                                <div key={`cover-${property._id}`}>
+                                  <img
+                                    src={property.cover_image}
+                                    alt="Cover"
+                                    className="object-cover w-full h-48 rounded-t-2xl"
                                   />
-                                );
-                              }}
-                              appendDots={(dots) => {
-                                const totalImages =
-                                  1 + (property?.property_images?.length || 0);
-                                const visibleDots = dots.slice(0, totalImages);
-                                return (
-                                  <div
-                                    style={{
-                                      position: "absolute",
-                                      bottom: "10px",
-                                      left: "50%",
-                                      transform: "translateX(-50%)",
-                                      display: "flex",
-                                      justifyContent: "center",
-                                      width: "100%",
-                                    }}
-                                  >
-                                    {visibleDots}
-                                  </div>
-                                );
-                              }}
-                              className="rounded-t-2xl"
-                            >
-                              {/* First slide: cover image */}
-                              <div key={`cover-${property._id}`}>
+                                </div>
+
+                                {/* Other property images */}
+                                {(property?.property_images || []).map(
+                                  (imgObj) => (
+                                    <div key={imgObj._id}>
+                                      <img
+                                        src={imgObj.image}
+                                        alt="Property"
+                                        className="object-cover w-full h-48 rounded-t-2xl"
+                                      />
+                                    </div>
+                                  ),
+                                )}
+                              </Slider>
+                            ) : (
+                              <div>
                                 <img
                                   src={property.cover_image}
                                   alt="Cover"
                                   className="object-cover w-full h-48 rounded-t-2xl"
                                 />
                               </div>
+                            )}
+                          </Link>
 
-                              {/* Other property images */}
-                              {(property?.property_images || []).map(
-                                (imgObj) => (
-                                  <div key={imgObj._id}>
-                                    <img
-                                      src={imgObj.image}
-                                      alt="Property"
-                                      className="object-cover w-full h-48 rounded-t-2xl"
-                                    />
-                                  </div>
-                                ),
-                              )}
-                            </Slider>
-                          ) : (
-                            <div>
-                              <img
-                                src={property.cover_image}
-                                alt="Cover"
-                                className="object-cover w-full h-48 rounded-t-2xl"
+                          {/* Virtual Tour & Favorite Button */}
+                          <div className="absolute flex items-center space-x-2 top-2 right-2">
+                            {property.virtual_tour_availability === "Yes" && (
+                              <span className="flex items-center gap-1 px-2 py-1 text-xs font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm">
+                                <PiCubeFocus className="text-sm text-white" />
+                                Virtual Tour
+                              </span>
+                            )}
+                            <button
+                              className="bg-gray-800/60 backdrop-blur-sm p-1.5 rounded-full shadow"
+                              onClick={(e) => {
+                                if (!accessToken) {
+                                  setIsLoginModalOpen(true);
+                                  return;
+                                }
+                                e.preventDefault();
+                                if (property.is_favorite) {
+                                  removeFromFavorites(property.favorite_id);
+                                } else {
+                                  addToFavorites(property._id);
+                                }
+                              }}
+                            >
+                              <Heart
+                                size={20}
+                                stroke={property.is_favorite ? "none" : "white"}
+                                color={
+                                  property.is_favorite
+                                    ? "red"
+                                    : "rgba(75, 85, 99, 0.4) "
+                                }
+                                fill={
+                                  property.is_favorite
+                                    ? "red"
+                                    : "rgba(75, 85, 99, 0.4) "
+                                }
+                                strokeWidth={2}
                               />
-                            </div>
-                          )}
-                        </Link>
+                            </button>
+                          </div>
 
-                        {/* Days Ago Tag (Top Left) */}
-                        {property.days_since_created !== undefined &&
-                          property.days_since_created !== null && (
-                            <span className="absolute px-2 py-1 text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm">
-                              {property.days_since_created} days ago
-                            </span>
-                          )}
+                          {/* Category Tag (Bottom Left) */}
+                          <div className="absolute bottom-0 left-0">
+                            {(() => {
+                              const { badgeText, badgeColor } =
+                                getCategoryBadge(property);
+                              if (!badgeText) return null;
+                              return (
+                                <span
+                                  className={`text-white text-xs px-3 py-1 rounded-se-lg ${badgeColor}`}
+                                >
+                                  {badgeText}
+                                </span>
+                              );
+                            })()}
+                          </div>
 
-                        {/* Virtual Tour & Heart Icon (Top Right) */}
-                        <div className="absolute flex items-center space-x-2 top-2 right-2">
-                          {property.virtual_tour_availability === "Yes" && (
-                            <span className="flex items-center gap-1 px-2 py-1 text-xs font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm">
-                              <PiCubeFocus className="text-sm text-white" />
-                              Virtual Tour
-                            </span>
-                          )}
-                          <button
-                            className="p-1.5 text-xs font-normal text-white bg-opacity-50 rounded-full bg-gray-800/60 backdrop-blur-sm"
-                            onClick={() => {
-                              if (!accessToken) {
-                                setIsLoginModalOpen(true);
-                                return;
-                              }
-                              if (property.is_favorite) {
-                                removeFromFavorites(property.favorite_id);
-                              } else {
-                                addToFavorites(property._id);
-                              }
-                            }}
-                          >
-                            <Heart
-                              size={20}
-                              stroke={property.is_favorite ? "none" : "white"}
-                              color={
-                                property.is_favorite
-                                  ? "red"
-                                  : "rgba(75, 85, 99, 0.4) "
-                              }
-                              fill={
-                                property.is_favorite
-                                  ? "red"
-                                  : "rgba(75, 85, 99, 0.4) "
-                              }
-                              strokeWidth={2}
-                            />
-                          </button>
-                        </div>
-
-                        {/* Category Ribbon (Bottom Left) */}
-                        {(() => {
-                          const { badgeText, badgeColor } =
-                            getCategoryBadge(property);
-                          if (!badgeText) return null;
-                          return (
-                            <div className="absolute bottom-0 left-0">
-                              <span
-                                className={`text-white text-xs px-3 py-1 rounded-se-lg ${badgeColor}`}
-                              >
-                                {badgeText}
-                              </span>
-                            </div>
-                          );
-                        })()}
-
-                        {/* FEATURED tag - only if marked */}
-                        {property.mark_as_featured === "Yes" && (
+                          {/* FEATURED Tag (Bottom Right) */}
                           <div className="absolute bottom-0 right-0">
-                            <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
-                              FEATURED
-                            </span>
+                            {property.mark_as_featured === "Yes" && (
+                              <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
+                                FEATURED
+                              </span>
+                            )}
                           </div>
-                        )}
-                      </div>
-
-                      {/* Property Description (Spotlight style) */}
-                      <div className="p-4 bg-white">
-                        {/* Row 1: Name + Furnished Type */}
-                        <div className="flex items-start justify-between gap-3 mb-0">
-                          <h3 className="flex-1 m-0 text-base font-bold leading-6 truncate">
-                            {property.property_name}
-                          </h3>
-                          {property.furnished_type && (
-                            <span className="flex-shrink-0 text-sm font-medium leading-6 text-red-500 whitespace-nowrap">
-                              {property.furnished_type}
-                            </span>
-                          )}
                         </div>
 
-                        {/* Row 2: Subtitle */}
-                        <p className="mt-0 mb-2 text-sm leading-5 text-gray-500 truncate">
-                          {property.bhk_type ? `${property.bhk_type} ` : ""}
-                          {property.property_type || property.building_type || "Property"} for Sale in{" "}
-                          {property.address || "No Address Provided"}
-                        </p>
+                        {/* Property Details */}
+                        <div className="flex flex-col flex-1 p-3 text-black bg-white">
+                          <div className="flex items-start justify-between gap-3 mb-0">
+                            <h3
+                              className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate"
+                              title={property.property_name}
+                            >
+                              {property.property_name || "N/A"}
+                            </h3>
+                            <span
+                              className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-black sm:text-base whitespace-nowrap"
+                              title={property.furnished_type}
+                            >
+                              {property.furnished_type || "Un-Furnished"}
+                            </span>
+                          </div>
 
-                        {/* Row 3: Price + Status */}
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="flex items-center text-xl font-bold">
-                            <FaRupeeSign className="mr-1 text-base" />
-                            {property.property_category_type === "Rent"
-                              ? `${formatPrice(property.rent).replace("₹ ", "")}${property.rent_duration
-                                ? ` / ${property.rent_duration}`
-                                : ""
-                              }`
-                              : formatPrice(property.property_price).replace(
-                                "₹ ",
-                                "",
+                          <p
+                            className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate"
+                            title={subtitle}
+                          >
+                            {subtitle}
+                          </p>
+
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center">
+                              <span className="text-2xl font-bold">
+                                ₹{" "}
+                                {property.property_category_type === "Rent"
+                                  ? formatPrice(property.rent).replace("₹ ", "")
+                                  : formatPrice(property.property_price).replace(
+                                    "₹ ",
+                                    "",
+                                  )}
+                              </span>
+                              {property.property_category_type === "Rent" && (
+                                <span className="ml-1 text-sm text-gray-500">
+                                  / {property.rent_duration}
+                                </span>
                               )}
-                          </span>
-                          {/* Ready to Move - Keep close to price */}
-                          {property.property_category_type?.includes("Buy") &&
-                            property.possession_status ===
-                            "Ready To Move" && (
-                              <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
-                                <MdApartment className="text-base text-green-700" />
-                                <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
-                                  Ready to Move
-                                </span>
+                              {property.property_category_type?.includes("Buy") &&
+                                property.possession_status === "Ready To Move" && (
+                                  <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
+                                    <MdApartment className="text-base text-green-700" />
+                                    <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                                      Ready to Move
+                                    </span>
+                                  </div>
+                                )}
+                            </div>
+                            <div className="text-sm font-medium whitespace-nowrap">
+                              {property.property_category_type?.includes("Buy") &&
+                                property.possession_status !== "Ready To Move" &&
+                                property.possession_date && (
+                                  <>
+                                    <span className="text-gray-500">Possession:</span>
+                                    <span className="ml-1 font-semibold">
+                                      {new Date(
+                                        property.possession_date,
+                                      ).toLocaleDateString("en-IN")}
+                                    </span>
+                                  </>
+                                )}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+                            <div className="flex items-center gap-2 px-3 min-w-0">
+                              <MdApartment className="text-[22px] text-gray-700 flex-shrink-0" />
+                              <div className="flex flex-col justify-center min-w-0">
+                                <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                  {property.building_type === "Commercial"
+                                    ? property.property_type === "Office"
+                                      ? "Office Space"
+                                      : property.property_type === "Retail"
+                                        ? "Retail Space"
+                                        : property.property_type
+                                    : property.property_category_type?.includes("PG")
+                                      ? `${property.bathroom || 0} Bathrooms`
+                                      : property.bhk_type}
+                                </p>
+                                <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                  {property.building_type === "Commercial"
+                                    ? "Property Type"
+                                    : property.property_category_type?.includes("PG")
+                                      ? "Bathrooms"
+                                      : property.property_type}
+                                </p>
                               </div>
-                            )}
-
-                          {property.construction_status ===
-                            "Ready To Move" && (
-                              <div className="flex items-center gap-2 px-3 py-1 bg-green-100 border border-green-200 rounded-full">
-                                <MdApartment className="text-base text-green-700" />
-                                <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
-                                  Ready to Move
-                                </span>
-                              </div>
-                            )}
-                        </div>
-
-                        {/* Row 4: Features Grid */}
-                        <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
-                          <div className="flex items-center gap-2 px-1 min-w-0">
-                            <Building2
-                              size={20}
-                              className="text-gray-700 flex-shrink-0"
-                            />
-                            <div className="flex flex-col min-w-0 leading-tight">
-                              <p className="m-0 text-sm font-semibold leading-4 truncate">
-                                {property.bhk_type || "-"}
-                              </p>
-                              <p className="m-0 text-xs leading-4 text-gray-500">
-                                {property.building_type || "Apartment"}
-                              </p>
                             </div>
-                          </div>
 
-                          <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
-                            <FaBath
-                              size={18}
-                              className="text-gray-700 flex-shrink-0"
-                            />
-                            <div className="flex flex-col min-w-0 leading-tight">
-                              <p className="m-0 text-sm font-semibold text-gray-900 truncate">
-                                {property.bathroom || 0} Baths
-                              </p>
-                              <p className="m-0 text-xs text-gray-500 truncate">
-                                Bathrooms
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
-                            <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
-
-                            <div className="flex flex-col justify-center min-w-0">
-                              <p className="m-0 text-sm font-semibold leading-4 truncate">
-                                {property.area} {property.area_in}
-                              </p>
-
-                              <p className="m-0 text-xs leading-4 text-gray-500 truncate">
-                                Built Up Area
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-
-                        {/* Row 5: Posted By + Share */}
-                        <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
-                          <div className="flex items-center flex-wrap min-w-0">
-                            <span>Posted by {property.user_type || "Owner"}</span>
-                            {property.days_since_created && (
-                              <>
-                                <span className="mx-2 text-gray-400">•</span>
-                                <span className="whitespace-nowrap">
-                                  {property.days_since_created} days ago
-                                </span>
-                              </>
-                            )}
-                          </div>
-                          <PiShareNetworkLight
-                            className="ml-2 text-[20px] text-gray-500 cursor-pointer hover:text-blue-500"
-                            onClick={() =>
-                              openShareModal(
-                                `${window.location.origin}/propertydetails/${property._id}`,
-                                property._id,
-                              )
-                            }
-                          />
-                        </div>
-
-                        {/* Row 6: Owner + Contact Buttons */}
-                        <div className="flex items-center justify-between pt-2 gap-2">
-                          <div className="flex items-center min-w-0">
-                            <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
-                              {property.property_owner_image ? (
-                                <img
-                                  src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
-                                  alt="Owner"
-                                  className="object-cover w-full h-full rounded-full"
-                                />
+                            <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                              {property.property_category_type?.includes("PG") ? (
+                                <FaUser className="text-[20px] text-gray-700 flex-shrink-0" />
                               ) : (
-                                <AiOutlineUser
-                                  className="text-gray-600"
-                                  size={20}
-                                />
+                                <FaBath className="text-[20px] text-gray-700 flex-shrink-0" />
                               )}
+                              <div className="flex flex-col justify-center min-w-0">
+                                <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                  {property.property_category_type?.includes("PG")
+                                    ? property.available_for
+                                    : `${property.bathroom || 0} Baths`}
+                                </p>
+                                <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                  {property.property_category_type?.includes("PG")
+                                    ? "Available For"
+                                    : "Bathrooms"}
+                                </p>
+                              </div>
                             </div>
-                            <div className="flex flex-col ml-2 min-w-0">
-                              <span className="text-sm font-semibold truncate">
-                                {property.connect_to_name}
-                              </span>
-                              <span className="text-xs text-gray-500 truncate">
-                                {property.user_type}
-                              </span>
+
+                            <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                              <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
+                              <div className="flex flex-col justify-center min-w-0">
+                                <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                  {property.area} {property.area_in}
+                                </p>
+                                <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                  Built Up Area
+                                </p>
+                              </div>
                             </div>
                           </div>
 
-                          {/* RIGHT SIDE - Buttons */}
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            {/* Contact */}
-                            <div
-                              className="flex items-center justify-center px-4 h-9 text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap"
-                              onClick={() => handleContactClick(property)}
-                            >
-                              Contact
+                          <hr className="my-1 border-gray-100" />
+
+                          <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
+                            <div className="flex items-center flex-wrap min-w-0">
+                              <div className="flex items-center">
+                                <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
+                                <span className="truncate">
+                                  Posted by {property.user_type || "Owner"}
+                                </span>
+                              </div>
+                              <span className="mx-2 text-gray-400">•</span>
+                              <span className="whitespace-nowrap">
+                                {property.days_since_created
+                                  ? `${property.days_since_created} days ago`
+                                  : "Recently"}
+                              </span>
+                              {distance && (
+                                <>
+                                  <span className="mx-2 text-gray-400">•</span>
+                                  <div className="flex items-center whitespace-nowrap">
+                                    <FaMapMarkerAlt className="mr-1 text-red-500" />
+                                    {distance} km from you
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                            <PiShareNetworkLight
+                              className="ml-2 text-[20px] text-gray-500 cursor-pointer hover:text-blue-500"
+                              onClick={() =>
+                                openShareModal(
+                                  `${window.location.origin}/propertydetails/${property._id}`,
+                                  property._id,
+                                )
+                              }
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between pt-3 gap-2">
+                            <div className="flex items-center min-w-0">
+                              <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+                                {property.property_owner_image ? (
+                                  <img
+                                    src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
+                                    alt="Owner"
+                                    className="object-cover w-full h-full rounded-full"
+                                  />
+                                ) : (
+                                  <AiOutlineUser className="text-blue-600" size={24} />
+                                )}
+                              </div>
+                              <div className="flex flex-col ml-3 min-w-0">
+                                <span
+                                  className="text-sm font-semibold text-gray-900 truncate"
+                                  title={property.connect_to_name}
+                                >
+                                  {property.connect_to_name || "Owner"}
+                                </span>
+                                <span className="text-xs text-gray-500 truncate">
+                                  {property.user_type || "Owner"}
+                                </span>
+                              </div>
                             </div>
 
-                            {/* WhatsApp */}
-                            <a
-                              href={`https://wa.me/91${property.connect_to_no}?text=Hello, I am interested in your property`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="flex items-center justify-center w-9 h-9 text-white bg-green-500 rounded-md hover:bg-green-600"
-                            >
-                              <FaWhatsapp />
-                            </a>
+                            {/* RIGHT SIDE - Buttons */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {/* Contact */}
+                              <div
+                                className="flex items-center justify-center px-4 h-9 text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap"
+                                onClick={() => handleContactClick(property)}
+                              >
+                                Contact
+                              </div>
 
-                            {/* Call */}
-                            <a
-                              href={`tel:${property.connect_to_no}`}
-                              onClick={(e) => e.stopPropagation()}
-                              className="flex items-center justify-center w-9 h-9 text-white bg-blue-500 rounded-md hover:bg-blue-600"
-                            >
-                              <FaPhone />
-                            </a>
+                              {/* WhatsApp */}
+                              <a
+                                href={`https://wa.me/91${property.connect_to_no}?text=Hello, I am interested in your property`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex items-center justify-center w-9 h-9 text-white bg-green-500 rounded-md hover:bg-green-600"
+                              >
+                                <FaWhatsapp />
+                              </a>
+
+                              {/* Call */}
+                              <a
+                                href={`tel:${property.connect_to_no}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex items-center justify-center w-9 h-9 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                              >
+                                <FaPhone />
+                              </a>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="text-center text-black">
                     <p>No properties available at the moment.</p>
@@ -3754,7 +3811,7 @@ const FeaturedDashboard = () => {
             </div>
 
             {/* Left: Map */}
-            <div className="flex sticky top-0 w-full sm:w-3/4 md:w-1/2 lg:w-[560px]] h-screen overflow-hidden bg-white rounded-lg">
+            <div className="flex flex-shrink-0 sticky top-0 w-full sm:w-1/2 h-screen overflow-hidden bg-white rounded-lg">
               {loading ? (
                 <p>Loading properties...</p>
               ) : (

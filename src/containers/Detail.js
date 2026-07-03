@@ -16,7 +16,7 @@ import { AiOutlineGlobal } from "react-icons/ai";
 import { FaRulerCombined } from "react-icons/fa";
 import { faChair } from "@fortawesome/free-solid-svg-icons";
 import { MdOutlineBedroomParent } from "react-icons/md";
-import { AiOutlineUser } from "react-icons/ai";
+import { AiOutlineUser, AiOutlineClockCircle } from "react-icons/ai";
 import { BiShapeSquare } from "react-icons/bi";
 import { PiShareNetworkLight } from "react-icons/pi";
 import axios from "axios";
@@ -49,8 +49,25 @@ import { Heart, Building2 } from "lucide-react";
 import { RiRuler2Line } from "react-icons/ri";
 import { MdApartment } from "react-icons/md";
 import { FaWhatsapp, FaPhone } from "react-icons/fa";
+import { FaMapMarkerAlt } from "react-icons/fa";
 
 const defaultImage = "/image/appstore.png";
+
+const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 const Detail = ({ propertyData }) => {
   const toWords = new ToWords({
@@ -391,14 +408,20 @@ const Detail = ({ propertyData }) => {
   const formatPrice = (price) => {
     if (!price) return "";
 
+    price = parseInt(price);
+
+    const formatNumber = (num) => {
+      return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2);
+    };
+
     if (price >= 10000000) {
-      return parseFloat((price / 10000000).toFixed(1)) + " Cr";
+      return `${formatNumber(price / 10000000)} Cr`;
     } else if (price >= 100000) {
-      return parseFloat((price / 100000).toFixed(1)) + " L";
+      return `${formatNumber(price / 100000)} L`;
     } else if (price >= 1000) {
-      return parseFloat((price / 1000).toFixed(1)) + " K";
+      return `${formatNumber(price / 1000)} K`;
     } else {
-      return price;
+      return `${price}`;
     }
   };
 
@@ -461,8 +484,8 @@ const Detail = ({ propertyData }) => {
       );
 
       const data = res.data?.data;
-       console.log("API Response:", data);
-    console.log("Price Onwards:", data.price_onwards);
+      console.log("API Response:", data);
+      console.log("Price Onwards:", data.price_onwards);
 
       if (data?.property_images?.length > 0) {
         setPropertyImages(data.property_images);
@@ -909,71 +932,71 @@ const Detail = ({ propertyData }) => {
   ].filter(([_, value]) => value);
   const statusTimelineItems = [];
 
-const addStatusItem = ({
-  icon,
-  title,
-  value,
-  bgColor,
-  iconColor,
-}) => {
-  if (
-    !value ||
-    value.toString().trim() === "" ||
-    value.toString().toLowerCase() === "n/a" ||
-    value.toString().toLowerCase() === "null"
-  ) {
-    return;
-  }
-
-  statusTimelineItems.push({
+  const addStatusItem = ({
     icon,
     title,
     value,
     bgColor,
     iconColor,
+  }) => {
+    if (
+      !value ||
+      value.toString().trim() === "" ||
+      value.toString().toLowerCase() === "n/a" ||
+      value.toString().toLowerCase() === "null"
+    ) {
+      return;
+    }
+
+    statusTimelineItems.push({
+      icon,
+      title,
+      value,
+      bgColor,
+      iconColor,
+    });
+  };
+  addStatusItem({
+    icon: <HiOutlineBadgeCheck />,
+    title: "Availability",
+    value: propertyDetails?.available_status,
+    bgColor: "bg-green-50",
+    iconColor: "text-green-600",
   });
-};
-addStatusItem({
-  icon: <HiOutlineBadgeCheck />,
-  title: "Availability",
-  value: propertyDetails?.available_status,
-  bgColor: "bg-green-50",
-  iconColor: "text-green-600",
-});
 
-addStatusItem({
-  icon: <HiOutlineCalendar />,
-  title: "Available From",
-  value: propertyDetails?.available_from,
-  bgColor: "bg-blue-50",
-  iconColor: "text-blue-600",
-});
+  addStatusItem({
+    icon: <HiOutlineCalendar />,
+    title: "Available From",
+    value: propertyDetails?.available_from,
+    bgColor: "bg-blue-50",
+    iconColor: "text-blue-600",
+  });
 
-addStatusItem({
-  icon: <HiOutlineHome />,
-  title: "Possession",
-  value: propertyDetails?.possession_status,
-  bgColor: "bg-orange-50",
-  iconColor: "text-orange-600",
-});
+  addStatusItem({
+    icon: <HiOutlineHome />,
+    title: "Possession",
+    value: propertyDetails?.possession_status,
+    bgColor: "bg-orange-50",
+    iconColor: "text-orange-600",
+  });
 
-addStatusItem({
-  icon: <HiOutlineClock />,
-  title: "Last Updated",
-  value: propertyDetails?.updated_at
-    ? new Date(propertyDetails.updated_at).toLocaleDateString("en-GB")
-    : propertyDetails?.property_added_date,
-  bgColor: "bg-purple-50",
-  iconColor: "text-purple-600",
-});
+  addStatusItem({
+    icon: <HiOutlineClock />,
+    title: "Last Updated",
+    value: propertyDetails?.updated_at
+      ? new Date(propertyDetails.updated_at).toLocaleDateString("en-GB")
+      : propertyDetails?.property_added_date,
+    bgColor: "bg-purple-50",
+    iconColor: "text-purple-600",
+  });
 
-addStatusItem({
-  icon: <HiOutlineClock />,
-  title: "Property Age",
-  value: propertyDetails?.age_of_property,
-  bgColor: "bg-amber-50",
-  iconColor: "text-amber-700",
-});
+  addStatusItem({
+    icon: <HiOutlineClock />,
+    title: "Property Age",
+    value: propertyDetails?.age_of_property,
+    bgColor: "bg-amber-50",
+    iconColor: "text-amber-700",
+  });
 
   const handleClick = () => {
     history.push("/featuredDashboard");
@@ -1378,21 +1401,20 @@ addStatusItem({
                 )}
               </button>
 
-                <button
-  onClick={() =>
-    scrollToSection(statusTimelineRef, "statusTimeline")
-  }
-  className={`relative font-medium pb-1 ${
-    activeSection === "statusTimeline"
-      ? "text-red-600"
-      : "hover:text-[#8A2432]"
-  }`}
->
-  Status & Timeline
-  {activeSection === "statusTimeline" && (
-    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
-  )}
-</button>
+              <button
+                onClick={() =>
+                  scrollToSection(statusTimelineRef, "statusTimeline")
+                }
+                className={`relative font-medium pb-1 ${activeSection === "statusTimeline"
+                  ? "text-red-600"
+                  : "hover:text-[#8A2432]"
+                  }`}
+              >
+                Status & Timeline
+                {activeSection === "statusTimeline" && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
+                )}
+              </button>
               <button
                 onClick={() => scrollToSection(moreDetailsRef, "moreDetails")}
                 className={`relative font-medium pb-1 ${activeSection === "moreDetails"
@@ -1466,44 +1488,44 @@ addStatusItem({
               </div>
             )}
             {statusTimelineItems.length > 0 && (
-  <div
-    ref={statusTimelineRef}
-    className="w-full p-5 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20"
-  >
-    <h3 className="mb-5 text-2xl font-semibold text-gray-800">
-      Status & Timeline
-    </h3>
+              <div
+                ref={statusTimelineRef}
+                className="w-full p-5 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20"
+              >
+                <h3 className="mb-5 text-2xl font-semibold text-gray-800">
+                  Status & Timeline
+                </h3>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {statusTimelineItems.map((item, index) => (
-        <div
-          key={index}
-          className={`flex items-start p-4 rounded-xl border border-gray-200 ${item.bgColor}`}
-        >
-          {/* Icon */}
-          <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center ${item.bgColor}`}
-          >
-            <span className={`text-xl ${item.iconColor}`}>
-              {item.icon}
-            </span>
-          </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {statusTimelineItems.map((item, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-start p-4 rounded-xl border border-gray-200 ${item.bgColor}`}
+                    >
+                      {/* Icon */}
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center ${item.bgColor}`}
+                      >
+                        <span className={`text-xl ${item.iconColor}`}>
+                          {item.icon}
+                        </span>
+                      </div>
 
-          {/* Content */}
-          <div className="ml-4 flex-1">
-            <p className="text-sm text-gray-500">
-              {item.title}
-            </p>
+                      {/* Content */}
+                      <div className="ml-4 flex-1">
+                        <p className="text-sm text-gray-500">
+                          {item.title}
+                        </p>
 
-            <p className="mt-1 text-base font-semibold text-gray-800 break-words">
-              {item.value}
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+                        <p className="mt-1 text-base font-semibold text-gray-800 break-words">
+                          {item.value}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {moreDetailsFields.length > 0 && (
               <div
@@ -1758,6 +1780,55 @@ addStatusItem({
 
           <Slider {...settings} className="slider-container" ref={sliderRef}>
             {properties.map((property) => {
+              let distance = null;
+              if (userLocation && property.latitude && property.longitude) {
+                distance = calculateDistance(
+                  userLocation.latitude,
+                  userLocation.longitude,
+                  parseFloat(property.latitude),
+                  parseFloat(property.longitude),
+                ).toFixed(1);
+              }
+
+              const subtitle = (() => {
+                const area = property.address_area || "";
+                const city = property.city_name || "";
+
+                const location =
+                  area.toLowerCase().includes(city.toLowerCase())
+                    ? area
+                    : `${area}, ${city}`;
+
+                const type =
+                  property.property_type === "Office"
+                    ? "Office Space"
+                    : property.property_type === "Retail"
+                      ? "Retail Space"
+                      : property.property_type || "";
+
+                const category = property.property_category_type || "";
+
+                if (
+                  category === "Commercial Buy" ||
+                  category === "Commercial Lease"
+                ) {
+                  return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
+                    } in ${location}`;
+                }
+
+                if (
+                  category.includes("PG") ||
+                  category.includes("Co-Living") ||
+                  category.includes("Coliving")
+                ) {
+                  return `${type} for Rent in ${location}`;
+                }
+
+                const action = category === "Buy" ? "Sale" : category;
+
+                return `${property.bhk_type} ${type} for ${action} in ${location}`;
+              })();
+
               function getValidImageUrl(img) {
                 if (typeof img !== "string") return null;
                 if (img.trim() === "") return null;
@@ -1774,17 +1845,19 @@ addStatusItem({
               ];
 
               return (
-                <div key={property._id} className="box-border p-4">
-                  <div className="shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline bg-white">
+                <div key={property._id} className="box-border p-2">
+                  <div className="overflow-hidden bg-white shadow-md rounded-2xl">
                     <div className="relative">
                       <Link
                         to={`/propertydetails/${property._id}?property_owner_id=${property.user_id}`}
-                        onClick={() => window.scrollTo(0, 0)}
+                        onClick={() =>
+                          window.scrollTo({ top: 0, behavior: "smooth" })
+                        }
                         className="block overflow-hidden no-underline bg-white border-2 rounded-lg hover:no-underline"
                       >
                         {allImages.length > 1 ? (
                           <Slider
-                            key={`${property._id}-${activeIndexes[property._id] || 0}`}
+                            key={`${property._id}-${allImages.length}`}
                             dots
                             infinite
                             speed={500}
@@ -1847,14 +1920,14 @@ addStatusItem({
                           </Slider>
                         ) : (
                           <img
-                            src={allImages[0]}
+                            src={allImages[0] || defaultImage}
                             alt="Property"
                             className="object-cover w-full h-48 rounded-t-2xl"
                           />
                         )}
                       </Link>
 
-                      {/* Virtual Tour & Heart Icon (Top Right) */}
+                      {/* Virtual Tour & Favorite Button */}
                       <div className="absolute flex items-center space-x-2 top-2 right-2">
                         {property.virtual_tour_availability === "Yes" && (
                           <span className="flex items-center gap-1 px-2 py-1 text-xs font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm">
@@ -1863,7 +1936,7 @@ addStatusItem({
                           </span>
                         )}
                         <button
-                          className="p-1.5 text-xs font-normal text-white bg-opacity-50 rounded-full bg-gray-800/60 backdrop-blur-sm"
+                          className="bg-gray-800/60 backdrop-blur-sm p-1.5 rounded-full shadow"
                           onClick={() => {
                             if (property.is_favorite) {
                               removeFromFavoritesRecommendedProperty(
@@ -1892,124 +1965,182 @@ addStatusItem({
                         </button>
                       </div>
 
-                      {/* FOR BUY / FOR RENT Tag (Bottom Left) */}
+                      {/* FOR BUY / RENT / UNKNOWN Tag (Bottom Left) */}
                       <div className="absolute bottom-0 left-0">
-                        <span
-                          className={`${property.property_category_type === "Rent"
-                            ? "bg-blue-500"
-                            : property.property_category_type === "Buy"
-                              ? "bg-green-500"
-                              : "bg-gray-500"
-                            } text-white text-xs px-3 py-1 rounded-se-lg`}
-                        >
-                          {property.property_category_type === "Rent"
-                            ? "FOR RENT"
-                            : property.property_category_type === "Buy"
-                              ? "FOR BUY"
-                              : "UNKNOWN"}
-                        </span>
+                        {(() => {
+                          const rawCategory =
+                            property.property_category_type || "";
+
+                          const normalizedCategory = rawCategory
+                            .replace(/\s+/g, " ")
+                            .replace(/-/g, " ")
+                            .replace(/\//g, " ")
+                            .trim()
+                            .toLowerCase();
+
+                          let badgeText = "UNKNOWN";
+                          let badgeColor = "bg-gray-500";
+
+                          if (normalizedCategory === "buy") {
+                            badgeText = "FOR BUY";
+                            badgeColor = "bg-green-500";
+                          } else if (normalizedCategory === "rent") {
+                            badgeText = "FOR RENT";
+                            badgeColor = "bg-blue-500";
+                          } else if (
+                            normalizedCategory.includes("commercial buy")
+                          ) {
+                            badgeText = "COMMERCIAL BUY";
+                            badgeColor = "bg-purple-500";
+                          } else if (
+                            normalizedCategory.includes("commercial lease")
+                          ) {
+                            badgeText = "COMMERCIAL LEASE";
+                            badgeColor = "bg-indigo-500";
+                          } else if (
+                            normalizedCategory.includes("pg") ||
+                            normalizedCategory.includes("co living") ||
+                            normalizedCategory.includes("coliving")
+                          ) {
+                            badgeText = "PG / CO-LIVING";
+                            badgeColor = "bg-yellow-500";
+                          } else if (
+                            normalizedCategory.includes("residential")
+                          ) {
+                            badgeText = "RESIDENTIAL";
+                            badgeColor = "bg-pink-500";
+                          }
+
+                          return (
+                            <span
+                              className={`text-white text-xs px-3 py-1 rounded-se-lg ${badgeColor}`}
+                            >
+                              {badgeText}
+                            </span>
+                          );
+                        })()}
                       </div>
 
-                      {/* FEATURED tag (Bottom Right) */}
-                      {property.mark_as_featured === "Yes" && (
-                        <div className="absolute bottom-0 right-0">
+                      {/* FEATURED Tag (Bottom Right) */}
+                      <div className="absolute bottom-0 right-0">
+                        {property.mark_as_featured === "Yes" && (
                           <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
                             FEATURED
                           </span>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
 
-                    {/* Property Description (Spotlight style) */}
-                    <div className="p-4 bg-white">
-                      {/* Row 1: Name + Furnished Type */}
+                    {/* Property Details — same design as AdvisorDashboard */}
+                    <div className="flex flex-col flex-1 p-3 text-black bg-white">
                       <div className="flex items-start justify-between gap-3 mb-0">
-                        <h3 className="flex-1 m-0 text-base font-bold leading-6 truncate">
-                          {property.property_name}
+                        <h3
+                          className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate"
+                          title={property.property_name}
+                        >
+                          {property.property_name || "N/A"}
                         </h3>
-                        {property.furnished_type && (
-                          <span className="flex-shrink-0 text-sm font-medium leading-6 text-red-500 whitespace-nowrap">
-                            {property.furnished_type}
-                          </span>
-                        )}
+                        <span
+                          className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-black sm:text-base whitespace-nowrap"
+                          title={property.furnished_type}
+                        >
+                          {property.furnished_type || "Un-Furnished"}
+                        </span>
                       </div>
 
-                      {/* Row 2: Subtitle */}
-                      <p className="mt-0 mb-2 text-sm leading-5 text-gray-500 truncate">
-                        {property.bhk_type ? `${property.bhk_type} ` : ""}
-                        {property.property_type ||
-                          property.building_type ||
-                          "Property"}{" "}
-                        for{" "}
-                        {property.property_category_type === "Rent"
-                          ? "Rent"
-                          : "Sale"}{" "}
-                        in{" "}
-                        {property.address_area ||
-                          property.address ||
-                          "No Address Provided"}
+                      <p
+                        className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate"
+                        title={subtitle}
+                      >
+                        {subtitle}
                       </p>
 
-                      {/* Row 3: Price + Status */}
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="flex items-center text-xl font-bold">
-                          <FaRupeeSign className="mr-1 text-base" />
-                          {property.property_category_type === "Rent"
-                            ? `${formatPrice(property.rent)}${property.rent_duration
-                              ? ` / ${property.rent_duration}`
-                              : ""
-                            }`
-                            : formatPrice(property.property_price)}
-                        </span>
-
-                        {property.property_category_type?.includes("Buy") &&
-                          property.possession_status === "Ready To Move" && (
-                            <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
-                              <MdApartment className="text-base text-green-700" />
-                              <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
-                                Ready to Move
-                              </span>
-                            </div>
-                          )}
-
-                        {property.construction_status === "Ready To Move" && (
-                          <div className="flex items-center gap-2 px-3 py-1 bg-green-100 border border-green-200 rounded-full">
-                            <MdApartment className="text-base text-green-700" />
-                            <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
-                              Ready to Move
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center">
+                          <span className="text-2xl font-bold">
+                            ₹{" "}
+                            {property.property_category_type === "Rent"
+                              ? formatPrice(property.rent)
+                              : formatPrice(property.property_price)}
+                          </span>
+                          {property.property_category_type === "Rent" && (
+                            <span className="ml-1 text-sm text-gray-500">
+                              / {property.rent_duration}
                             </span>
-                          </div>
-                        )}
+                          )}
+                          {property.property_category_type?.includes("Buy") &&
+                            property.possession_status === "Ready To Move" && (
+                              <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
+                                <MdApartment className="text-base text-green-700" />
+                                <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                                  Ready to Move
+                                </span>
+                              </div>
+                            )}
+                        </div>
+                        <div className="text-sm font-medium whitespace-nowrap">
+                          {property.property_category_type?.includes("Buy") &&
+                            property.possession_status !== "Ready To Move" &&
+                            property.possession_date && (
+                              <>
+                                <span className="text-gray-500">
+                                  Possession:
+                                </span>
+                                <span className="ml-1 font-semibold">
+                                  {new Date(
+                                    property.possession_date,
+                                  ).toLocaleDateString("en-IN")}
+                                </span>
+                              </>
+                            )}
+                        </div>
                       </div>
 
-                      {/* Row 4: Features Grid */}
                       <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
-                        <div className="flex items-center gap-2 px-1 min-w-0">
-                          <Building2
-                            size={20}
-                            className="text-gray-700 flex-shrink-0"
-                          />
-                          <div className="flex flex-col min-w-0 leading-tight">
+                        <div className="flex items-center gap-2 px-3 min-w-0">
+                          <MdApartment className="text-[22px] text-gray-700 flex-shrink-0" />
+                          <div className="flex flex-col justify-center min-w-0">
                             <p className="m-0 text-sm font-semibold leading-4 truncate">
-                              {property.bhk_type || "-"}
+                              {property.building_type === "Commercial"
+                                ? property.property_type === "Office"
+                                  ? "Office Space"
+                                  : property.property_type === "Retail"
+                                    ? "Retail Space"
+                                    : property.property_type
+                                : property.property_category_type?.includes(
+                                  "PG",
+                                )
+                                  ? `${property.bathroom || 0} Bathrooms`
+                                  : property.bhk_type}
                             </p>
-                            <p className="m-0 text-xs leading-4 text-gray-500">
-                              {property.building_type || "Apartment"}
+                            <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                              {property.building_type === "Commercial"
+                                ? "Property Type"
+                                : property.property_category_type?.includes(
+                                  "PG",
+                                )
+                                  ? "Bathrooms"
+                                  : property.property_type}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
-                          <FaBath
-                            size={18}
-                            className="text-gray-700 flex-shrink-0"
-                          />
-                          <div className="flex flex-col min-w-0 leading-tight">
-                            <p className="m-0 text-sm font-semibold text-gray-900 truncate">
-                              {property.bathroom || 0} Baths
+                        <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                          {property.property_category_type?.includes("PG") ? (
+                            <FaUser className="text-[20px] text-gray-700 flex-shrink-0" />
+                          ) : (
+                            <FaBath className="text-[20px] text-gray-700 flex-shrink-0" />
+                          )}
+                          <div className="flex flex-col justify-center min-w-0">
+                            <p className="m-0 text-sm font-semibold leading-4 truncate">
+                              {property.property_category_type?.includes("PG")
+                                ? property.available_for
+                                : `${property.bathroom || 0} Baths`}
                             </p>
-                            <p className="m-0 text-xs text-gray-500 truncate">
-                              Bathrooms
+                            <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                              {property.property_category_type?.includes("PG")
+                                ? "Available For"
+                                : "Bathrooms"}
                             </p>
                           </div>
                         </div>
@@ -2027,16 +2158,29 @@ addStatusItem({
                         </div>
                       </div>
 
-                      {/* Row 5: Posted By + Share */}
+                      <hr className="my-1 border-gray-100" />
+
                       <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
                         <div className="flex items-center flex-wrap min-w-0">
-                          <span>Posted by {property.user_type || "Owner"}</span>
-                          {property.days_since_created && (
+                          <div className="flex items-center">
+                            <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
+                            <span className="truncate">
+                              Posted by {property.user_type || "Owner"}
+                            </span>
+                          </div>
+                          <span className="mx-2 text-gray-400">•</span>
+                          <span className="whitespace-nowrap">
+                            {property.days_since_created
+                              ? `${property.days_since_created} days ago`
+                              : "Recently"}
+                          </span>
+                          {distance && (
                             <>
                               <span className="mx-2 text-gray-400">•</span>
-                              <span className="whitespace-nowrap">
-                                {property.days_since_created} days ago
-                              </span>
+                              <div className="flex items-center whitespace-nowrap">
+                                <FaMapMarkerAlt className="mr-1 text-red-500" />
+                                {distance} km from you
+                              </div>
                             </>
                           )}
                         </div>
@@ -2051,10 +2195,9 @@ addStatusItem({
                         />
                       </div>
 
-                      {/* Row 6: Owner + Contact Buttons */}
-                      <div className="flex items-center justify-between pt-2 gap-2">
+                      <div className="flex items-center justify-between pt-3 gap-2">
                         <div className="flex items-center min-w-0">
-                          <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
+                          <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
                             {property.property_owner_image ? (
                               <img
                                 src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
@@ -2062,24 +2205,25 @@ addStatusItem({
                                 className="object-cover w-full h-full rounded-full"
                               />
                             ) : (
-                              <AiOutlineUser
-                                className="text-gray-600"
-                                size={20}
-                              />
+                              <AiOutlineUser className="text-blue-600" size={24} />
                             )}
                           </div>
-                          <div className="flex flex-col ml-2 min-w-0">
-                            <span className="text-sm font-semibold truncate">
-                              {property.connect_to_name}
+                          <div className="flex flex-col ml-3 min-w-0">
+                            <span
+                              className="text-sm font-semibold text-gray-900 truncate"
+                              title={property.connect_to_name}
+                            >
+                              {property.connect_to_name || "Owner"}
                             </span>
                             <span className="text-xs text-gray-500 truncate">
-                              {property.user_type}
+                              {property.user_type || "Owner"}
                             </span>
                           </div>
                         </div>
 
                         {/* RIGHT SIDE - Buttons */}
                         <div className="flex items-center gap-2 flex-shrink-0">
+                          {/* Contact */}
                           <div
                             className="flex items-center justify-center px-4 h-9 text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap"
                             onClick={() => {
@@ -2101,6 +2245,7 @@ addStatusItem({
                             Contact
                           </div>
 
+                          {/* WhatsApp */}
                           <a
                             href={`https://wa.me/91${property.connect_to_no}?text=Hello, I am interested in your property`}
                             target="_blank"
@@ -2111,6 +2256,7 @@ addStatusItem({
                             <FaWhatsapp />
                           </a>
 
+                          {/* Call */}
                           <a
                             href={`tel:${property.connect_to_no}`}
                             onClick={(e) => e.stopPropagation()}
