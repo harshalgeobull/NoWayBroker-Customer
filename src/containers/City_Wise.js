@@ -277,6 +277,8 @@ const City_Wise = () => {
     "Food Court",
     "Multiplex",
     "Co-working",
+    "Corner Shop",
+    "Main Road Shop"
   ];
 
   const purchaseTypeOptions = ["Resale", "New bookings"];

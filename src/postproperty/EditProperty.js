@@ -2200,13 +2200,13 @@ Make it engaging, attractive, and human-like.
                         )}
                       </div>
                       {/* Locality */}
-                      <div>
+                      {/* <div>
                         <label className="font-medium text-gray-700">
-                          Locality{" "}
+                          Locality{" "} */}
                           {/* <span className="text-xl font-bold text-red-500">
                           *
                         </span> */}
-                        </label>
+                        {/* </label>
                         <input
                           type="text"
                           value={locality}
@@ -2214,16 +2214,16 @@ Make it engaging, attractive, and human-like.
                           placeholder="Enter Locality"
                           className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
                         />
-                      </div>
+                      </div> */}
 
                       {/* Sub Locality */}
-                      <div>
+                      {/* <div>
                         <label className="font-medium text-gray-700">
-                          Sub Locality{" "}
+                          Sub Locality{" "} */}
                           {/* <span className="text-xl font-bold text-red-500">
                           *
                         </span> */}
-                        </label>
+                        {/* </label>
                         <input
                           type="text"
                           value={subLocality}
@@ -2231,7 +2231,7 @@ Make it engaging, attractive, and human-like.
                           placeholder="Enter Sub Locality"
                           className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
                         />
-                      </div>
+                      </div> */}
 
                       {/* Zip Code */}
                       <div>
@@ -5662,6 +5662,9 @@ Make it engaging, attractive, and human-like.
                           <option value="Food Court">Food Court</option>
                           <option value="Multiplex">Multiplex</option>
                           <option value="Co-working">Co-working</option>
+                          <option value="Multiplex">Multiplex</option>
+                          <option value="Corner Shop">Corner Shop</option>
+                          <option value="Main Road Shop">Main Road Shop</option>
                         </select>
                       </div>
                     )}

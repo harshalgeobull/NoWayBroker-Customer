@@ -266,6 +266,8 @@ const FeaturedDashboard = () => {
     "Food Court",
     "Multiplex",
     "Co-working",
+    "Corner Shop",
+    "Main Road Shop"
   ];
 
   const purchaseTypeOptions = ["Resale", "New bookings"];
