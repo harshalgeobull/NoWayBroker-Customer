@@ -2183,13 +2183,13 @@ Make it engaging, attractive, and human-like.
                         )}
                       </div>
                       {/* Locality */}
-                      <div>
+                      {/* <div>
                         <label className="font-medium text-gray-700">
-                          Locality{" "}
+                          Locality{" "} */}
                           {/* <span className="text-xl font-bold text-red-500">
                           *
                         </span> */}
-                        </label>
+                        {/* </label>
                         <input
                           type="text"
                           value={locality}
@@ -2197,16 +2197,16 @@ Make it engaging, attractive, and human-like.
                           placeholder="Enter Locality"
                           className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
                         />
-                      </div>
+                      </div> */}
 
                       {/* Sub Locality */}
-                      <div>
+                      {/* <div>
                         <label className="font-medium text-gray-700">
-                          Sub Locality{" "}
+                          Sub Locality{" "} */}
                           {/* <span className="text-xl font-bold text-red-500">
                           *
                         </span> */}
-                        </label>
+                        {/* </label>
                         <input
                           type="text"
                           value={subLocality}
@@ -2214,7 +2214,7 @@ Make it engaging, attractive, and human-like.
                           placeholder="Enter Sub Locality"
                           className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
                         />
-                      </div>
+                      </div> */}
 
                       {/* Zip Code */}
                       <div>
@@ -5621,6 +5621,7 @@ Make it engaging, attractive, and human-like.
                             Investment Option
                           </label>
 
+<<<<<<< HEAD
                           <select
                             name="investment_options"
                             className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
@@ -5642,6 +5643,32 @@ Make it engaging, attractive, and human-like.
                           </select>
                         </div>
                       )}
+=======
+                        <select
+                          name="investment_options"
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={formData.investment_options}
+                          onChange={handleInputChange}
+                        >
+                          <option value="">Select Investment Option</option>
+                          <option value="Pre-Leased Spaces">
+                            Pre-Leased Spaces
+                          </option>
+                          <option value="Restaurants">Restaurants</option>
+                          <option value="SCO Plots">SCO Plots</option>
+                          <option value="Business Center">
+                            Business Center
+                          </option>
+                          <option value="Food Court">Food Court</option>
+                          <option value="Multiplex">Multiplex</option>
+                          <option value="Co-working">Co-working</option>
+                          <option value="Multiplex">Multiplex</option>
+                          <option value="Corner Shop">Corner Shop</option>
+                          <option value="Main Road Shop">Main Road Shop</option>
+                        </select>
+                      </div>
+                    )}
+>>>>>>> origin/harshal-dev
 
                     {(propertyType === "Office Space" ||
                       propertyType === "Retail" ||

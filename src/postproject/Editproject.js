@@ -1996,6 +1996,7 @@ Make it engaging, attractive, and human-like.
                           placeholder="Loading Google Maps..."
                           className={`w-full border rounded-md p-3 text-gray-700 border-gray-300`}
                         />
+<<<<<<< HEAD
                       )}
 
                       {formErrors.address && (
@@ -2004,6 +2005,78 @@ Make it engaging, attractive, and human-like.
                           {formErrors.address}
                         </p>
                       )}
+=======
+                        {errors.city && (
+                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <MdErrorOutline className="text-lg" />
+                            {errors.city}
+                          </p>
+                        )}
+                      </div>
+                      {/* Locality */}
+                      {/* <div>
+                        <label className="font-medium text-gray-700">
+                          Locality{" "}
+                          <span className="invisible text-xl font-bold">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={locality}
+                          onChange={(e) => setLocality(e.target.value)}
+                          placeholder="Enter Locality"
+                          className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
+                        />
+                      </div> */}
+
+                      {/* Sub Locality */}
+                      {/* <div>
+                        <label className="font-medium text-gray-700">
+                          Sub Locality{" "}
+                          <span className="invisible text-xl font-bold">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={subLocality}
+                          onChange={(e) => setSubLocality(e.target.value)}
+                          placeholder="Enter Sub Locality"
+                          className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
+                        />
+                      </div> */}
+                      {/* Zip Code */}
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Zip <span className="text-xl text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Zip Code"
+                          value={zipCode}
+                          onChange={(e) => {
+                            const value = e.target.value;
+
+                            if (/^\d{0,10}$/.test(value)) {
+                              setZipCode(value);
+
+                              setFormData((prev) => ({
+                                ...prev,
+                                zip_code: value,
+                              }));
+                            }
+                          }}
+                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
+                            errors.zipCode
+                              ? "border-red-600"
+                              : "border-gray-300"
+                          }`}
+                        />
+                        {errors.zipCode && (
+                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <MdErrorOutline className="text-lg" />
+                            {errors.zipCode}
+                          </p>
+                        )}
+                      </div>
+>>>>>>> origin/harshal-dev
                     </div>
 
                     {/* Country Dropdown */}

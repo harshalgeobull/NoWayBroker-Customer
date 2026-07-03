@@ -1467,7 +1467,7 @@ Make it engaging, attractive, and human-like.
                       )}
                     </div>
                     {/* Locality */}
-                    <div>
+                    {/* <div>
                       <label className="font-medium text-gray-700">
                         Locality{" "}
                         <span className="invisible text-xl font-bold">*</span>
@@ -1479,10 +1479,10 @@ Make it engaging, attractive, and human-like.
                         placeholder="Enter Locality"
                         className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
                       />
-                    </div>
+                    </div> */}
 
                     {/* Sub Locality */}
-                    <div>
+                    {/* <div>
                       <label className="font-medium text-gray-700">
                         Sub Locality{" "}
                         <span className="invisible text-xl font-bold">*</span>
@@ -1494,7 +1494,7 @@ Make it engaging, attractive, and human-like.
                         placeholder="Enter Sub Locality"
                         className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
                       />
-                    </div>
+                    </div> */}
                     {/* Zip Code */}
                     <div>
                       <label className="font-medium text-gray-700">

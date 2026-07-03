@@ -20,6 +20,12 @@ import { AiOutlineUser } from "react-icons/ai";
 import { BiShapeSquare } from "react-icons/bi";
 import { PiShareNetworkLight } from "react-icons/pi";
 import axios from "axios";
+import {
+  HiOutlineBadgeCheck,
+  HiOutlineCalendar,
+  HiOutlineHome,
+  HiOutlineClock,
+} from "react-icons/hi";
 import { FaMoneyBillWave } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import Slider from "react-slick";
@@ -65,6 +71,7 @@ const Detail = ({ propertyData }) => {
   const amenitiesRef = useRef(null);
   const aboutRef = useRef(null);
   const locationRef = useRef(null);
+  const statusTimelineRef = useRef(null);
   const [activeSection, setActiveSection] = useState("overview");
   const [currentShareUrl1, setcurrentShareUrl1] = useState("");
   const [propertyDetails, setPropertyDetails] = useState({});
@@ -454,6 +461,8 @@ const Detail = ({ propertyData }) => {
       );
 
       const data = res.data?.data;
+       console.log("API Response:", data);
+    console.log("Price Onwards:", data.price_onwards);
 
       if (data?.property_images?.length > 0) {
         setPropertyImages(data.property_images);
@@ -673,7 +682,7 @@ const Detail = ({ propertyData }) => {
 
   // Add this line below all useState declarations or just before return:
   const overviewFields = [
-    ["Status", propertyDetails?.available_status || null],
+    //["Status", propertyDetails?.available_status || null],
     ["Property Added Date", propertyDetails?.property_added_date || null],
     ["Property Name", propertyDetails?.property_name || null],
     [
@@ -898,6 +907,73 @@ const Detail = ({ propertyData }) => {
     //     : null,
     // ],
   ].filter(([_, value]) => value);
+  const statusTimelineItems = [];
+
+const addStatusItem = ({
+  icon,
+  title,
+  value,
+  bgColor,
+  iconColor,
+}) => {
+  if (
+    !value ||
+    value.toString().trim() === "" ||
+    value.toString().toLowerCase() === "n/a" ||
+    value.toString().toLowerCase() === "null"
+  ) {
+    return;
+  }
+
+  statusTimelineItems.push({
+    icon,
+    title,
+    value,
+    bgColor,
+    iconColor,
+  });
+};
+addStatusItem({
+  icon: <HiOutlineBadgeCheck />,
+  title: "Availability",
+  value: propertyDetails?.available_status,
+  bgColor: "bg-green-50",
+  iconColor: "text-green-600",
+});
+
+addStatusItem({
+  icon: <HiOutlineCalendar />,
+  title: "Available From",
+  value: propertyDetails?.available_from,
+  bgColor: "bg-blue-50",
+  iconColor: "text-blue-600",
+});
+
+addStatusItem({
+  icon: <HiOutlineHome />,
+  title: "Possession",
+  value: propertyDetails?.possession_status,
+  bgColor: "bg-orange-50",
+  iconColor: "text-orange-600",
+});
+
+addStatusItem({
+  icon: <HiOutlineClock />,
+  title: "Last Updated",
+  value: propertyDetails?.updated_at
+    ? new Date(propertyDetails.updated_at).toLocaleDateString("en-GB")
+    : propertyDetails?.property_added_date,
+  bgColor: "bg-purple-50",
+  iconColor: "text-purple-600",
+});
+
+addStatusItem({
+  icon: <HiOutlineClock />,
+  title: "Property Age",
+  value: propertyDetails?.age_of_property,
+  bgColor: "bg-amber-50",
+  iconColor: "text-amber-700",
+});
 
   const handleClick = () => {
     history.push("/featuredDashboard");
@@ -1302,6 +1378,21 @@ const Detail = ({ propertyData }) => {
                 )}
               </button>
 
+                <button
+  onClick={() =>
+    scrollToSection(statusTimelineRef, "statusTimeline")
+  }
+  className={`relative font-medium pb-1 ${
+    activeSection === "statusTimeline"
+      ? "text-red-600"
+      : "hover:text-[#8A2432]"
+  }`}
+>
+  Status & Timeline
+  {activeSection === "statusTimeline" && (
+    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
+  )}
+</button>
               <button
                 onClick={() => scrollToSection(moreDetailsRef, "moreDetails")}
                 className={`relative font-medium pb-1 ${activeSection === "moreDetails"
@@ -1374,6 +1465,45 @@ const Detail = ({ propertyData }) => {
                 </div>
               </div>
             )}
+            {statusTimelineItems.length > 0 && (
+  <div
+    ref={statusTimelineRef}
+    className="w-full p-5 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20"
+  >
+    <h3 className="mb-5 text-2xl font-semibold text-gray-800">
+      Status & Timeline
+    </h3>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {statusTimelineItems.map((item, index) => (
+        <div
+          key={index}
+          className={`flex items-start p-4 rounded-xl border border-gray-200 ${item.bgColor}`}
+        >
+          {/* Icon */}
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center ${item.bgColor}`}
+          >
+            <span className={`text-xl ${item.iconColor}`}>
+              {item.icon}
+            </span>
+          </div>
+
+          {/* Content */}
+          <div className="ml-4 flex-1">
+            <p className="text-sm text-gray-500">
+              {item.title}
+            </p>
+
+            <p className="mt-1 text-base font-semibold text-gray-800 break-words">
+              {item.value}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
             {moreDetailsFields.length > 0 && (
               <div

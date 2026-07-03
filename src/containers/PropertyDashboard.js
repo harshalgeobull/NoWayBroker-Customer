@@ -296,6 +296,8 @@ const PropertyDashboard = () => {
     "Food Court",
     "Multiplex",
     "Co-working",
+    "Corner Shop",
+    "Main Road Shop"
   ];
 
   const getTimeAgo = (dateString) => {
