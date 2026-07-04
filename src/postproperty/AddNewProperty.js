@@ -1588,10 +1588,10 @@ Make it engaging, attractive, and human-like.
             <button
               key={index}
               className={`px-4 py-2 rounded-full text-sm font-medium transition ${activeStep === index
-                  ? "bg-gray-200 my-text"
-                  : completedSteps.includes(index)
-                    ? "text-green-600"
-                    : "text-gray-600"
+                ? "bg-gray-200 my-text"
+                : completedSteps.includes(index)
+                  ? "text-green-600"
+                  : "text-gray-600"
                 }`}
               onClick={() => {
                 if (completedSteps.includes(index)) {
@@ -1625,8 +1625,8 @@ Make it engaging, attractive, and human-like.
                   placeholder="Enter Name"
                   name="property_name"
                   className={`w-full p-3 rounded-lg outline-none focus:ring-2 focus:ring-rose-500 ${formErrors.property_name
-                      ? "border border-red-600"
-                      : "border border-gray-300"
+                    ? "border border-red-600"
+                    : "border border-gray-300"
                     }`}
                   value={formData.property_name}
                   onChange={handleInputChange}
@@ -1680,8 +1680,8 @@ Make it engaging, attractive, and human-like.
                     <button
                       key={category}
                       className={`px-4 py-2 rounded-full border transition ${propertyCategory === category
-                          ? "bg-rose-100 text-rose-700 border-rose-500"
-                          : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                        ? "bg-rose-100 text-rose-700 border-rose-500"
+                        : "border-gray-300 text-gray-600 hover:bg-gray-100"
                         }`}
                       onClick={() => {
                         setPropertyCategory(category);
@@ -1714,8 +1714,8 @@ Make it engaging, attractive, and human-like.
                       <button
                         key={type}
                         className={`px-4 py-2 rounded-full border transition ${buildingType === type
-                            ? "bg-rose-100 text-rose-700 border-rose-500"
-                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                          ? "bg-rose-100 text-rose-700 border-rose-500"
+                          : "border-gray-300 text-gray-600 hover:bg-gray-100"
                           }`}
                         onClick={() => handleBuildingTypeChange(type)}
                       >
@@ -1736,8 +1736,8 @@ Make it engaging, attractive, and human-like.
                     <button
                       key={type}
                       className={`px-4 py-2 rounded-full border transition ${propertyType === type
-                          ? "bg-rose-100 text-rose-700 border-rose-500"
-                          : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                        ? "bg-rose-100 text-rose-700 border-rose-500"
+                        : "border-gray-300 text-gray-600 hover:bg-gray-100"
                         }`}
                       onClick={() => {
                         setPropertyType(type);
@@ -1760,8 +1760,8 @@ Make it engaging, attractive, and human-like.
                           key={type}
                           type="button"
                           className={`px-4 py-2 rounded-full border transition ${hospitalityType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
                             }`}
                           onClick={() => {
                             setHospitalityType(type);
@@ -1785,8 +1785,8 @@ Make it engaging, attractive, and human-like.
                           key={type}
                           type="button"
                           className={`px-4 py-2 rounded-full border transition ${landType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
                             }`}
                           onClick={() => {
                             setLandType(type);
@@ -1811,8 +1811,8 @@ Make it engaging, attractive, and human-like.
                           key={type}
                           type="button"
                           className={`px-4 py-2 rounded-full border transition ${industryType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
                             }`}
                           onClick={() => {
                             setIndustryType(type);
@@ -1836,8 +1836,8 @@ Make it engaging, attractive, and human-like.
                           key={type}
                           type="button"
                           className={`px-4 py-2 rounded-full border transition ${storageType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
                             }`}
                           onClick={() => {
                             setStorageType(type);
@@ -1861,8 +1861,8 @@ Make it engaging, attractive, and human-like.
                           key={type}
                           type="button"
                           className={`px-4 py-2 rounded-full border transition ${officeSubType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
                             }`}
                           onClick={() => {
                             setOfficeSubType(type);
@@ -1887,8 +1887,8 @@ Make it engaging, attractive, and human-like.
                           key={type}
                           type="button"
                           className={`px-4 py-2 rounded-full border transition ${RetailSubType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
                             }`}
                           onClick={() => {
                             setRetailSubType(type);
@@ -1916,8 +1916,8 @@ Make it engaging, attractive, and human-like.
                           key={type}
                           type="button"
                           className={`px-4 py-2 rounded-full border transition ${retailLocation === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
                             }`}
                           onClick={() => {
                             setRetailLocation(type);
@@ -1984,8 +1984,8 @@ Make it engaging, attractive, and human-like.
                               }
                             }}
                             className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.address
-                                ? "border-red-600"
-                                : "border-gray-300"
+                              ? "border-red-600"
+                              : "border-gray-300"
                               }`}
                           />
                         </Autocomplete>
@@ -2021,8 +2021,8 @@ Make it engaging, attractive, and human-like.
                           setState("");
                         }}
                         className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.country
-                            ? "border-red-600"
-                            : "border-gray-300"
+                          ? "border-red-600"
+                          : "border-gray-300"
                           }`}
                       >
                         <option value="">Select Country</option>
@@ -2052,8 +2052,8 @@ Make it engaging, attractive, and human-like.
                         value={state}
                         onChange={(e) => setState(e.target.value)}
                         className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.state
-                            ? "border-red-600"
-                            : "border-gray-300"
+                          ? "border-red-600"
+                          : "border-gray-300"
                           }`}
                       >
                         <option value="">Select State</option>
@@ -2105,10 +2105,10 @@ Make it engaging, attractive, and human-like.
                       <label className="font-medium text-gray-700">
                         Locality{" "}
                         <span className="invisible text-xl font-bold">*</span> */}
-                        {/* <span className="text-xl font-bold text-red-500">
+                    {/* <span className="text-xl font-bold text-red-500">
                           *
                         </span> */}
-                      {/* </label>
+                    {/* </label>
                       <input
                         type="text"
                         value={locality}
@@ -2123,10 +2123,10 @@ Make it engaging, attractive, and human-like.
                       <label className="font-medium text-gray-700">
                         Sub Locality{" "}
                         <span className="invisible text-xl font-bold">*</span> */}
-                        {/* <span className="text-xl font-bold text-red-500">
+                    {/* <span className="text-xl font-bold text-red-500">
                           *
                         </span> */}
-                      {/* </label>
+                    {/* </label>
                       <input
                         type="text"
                         value={subLocality}
@@ -2152,8 +2152,8 @@ Make it engaging, attractive, and human-like.
                           }
                         }}
                         className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.zipCode
-                            ? "border-red-600"
-                            : "border-gray-300"
+                          ? "border-red-600"
+                          : "border-gray-300"
                           }`}
                       />
                       {formErrors.zipCode && (
@@ -2229,8 +2229,8 @@ Make it engaging, attractive, and human-like.
                                 }
                               }}
                               className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.property_price || !propertyPrice
-                                  ? "border-red-600"
-                                  : "border-gray-300"
+                                ? "border-red-600"
+                                : "border-gray-300"
                                 }`}
                             />
                             {formErrors.property_price && (
@@ -2281,8 +2281,8 @@ Make it engaging, attractive, and human-like.
                             </label>
                             <select
                               className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.bhk_type || !propertyPrice
-                                  ? "border-red-600"
-                                  : "border-gray-300"
+                                ? "border-red-600"
+                                : "border-gray-300"
                                 }`}
                               value={formData.bhk_type}
                               onChange={(e) =>
@@ -2670,8 +2670,8 @@ Make it engaging, attractive, and human-like.
                               type="text"
                               name="rent"
                               className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.rent
-                                  ? "border-red-600"
-                                  : "border-gray-300"
+                                ? "border-red-600"
+                                : "border-gray-300"
                                 }`}
                               value={
                                 formData.rent
@@ -2887,8 +2887,8 @@ Make it engaging, attractive, and human-like.
                                 }
                               }}
                               className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.security_deposit_amount
-                                  ? "border-red-600"
-                                  : "border-gray-300"
+                                ? "border-red-600"
+                                : "border-gray-300"
                                 }`}
                             />
                             {formData.custom_deposit_amount && (
@@ -3281,8 +3281,8 @@ Make it engaging, attractive, and human-like.
                           type="date"
                           name="possession_date"
                           className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.possession_date
-                              ? "border-red-600"
-                              : "border-rose-300"
+                            ? "border-red-600"
+                            : "border-rose-300"
                             }`}
                           value={formData.possession_date || ""}
                           min={new Date().toISOString().split("T")[0]}
@@ -5560,7 +5560,6 @@ Make it engaging, attractive, and human-like.
                           Investment Option
                         </label>
 
-<<<<<<< HEAD
                         <select
                           name="investment_options"
                           className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
@@ -5577,32 +5576,11 @@ Make it engaging, attractive, and human-like.
                           <option value="Food Court">Food Court</option>
                           <option value="Multiplex">Multiplex</option>
                           <option value="Co-working">Co-working</option>
+                          <option value="Corner Shop">Corner Shop</option>
+                          <option value="Main Road Shop">Main Road Shop</option>
                         </select>
                       </div>
                     )}
-=======
-                      <select
-                        name="investment_options"
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.investment_options}
-                        onChange={handleInputChange}
-                      >
-                        <option value="">Select Investment Option</option>
-                        <option value="Pre-Leased Spaces">
-                          Pre-Leased Spaces
-                        </option>
-                        <option value="Restaurants">Restaurants</option>
-                        <option value="SCO Plots">SCO Plots</option>
-                        <option value="Business Center">Business Center</option>
-                        <option value="Food Court">Food Court</option>
-                        <option value="Multiplex">Multiplex</option>
-                        <option value="Co-working">Co-working</option>
-                        <option value="Corner Shop">Corner Shop</option>
-                        <option value="Main Road Shop">Main Road Shop</option>
-                      </select>
-                    </div>
-                  )}
->>>>>>> origin/harshal-dev
 
                   {(propertyType === "Office Space" ||
                     propertyType === "Retail" ||
@@ -8999,8 +8977,8 @@ fice Space") ||
                     />
                     <span
                       className={`text-gray-700 ${selectedAmenities.includes(amenity._id)
-                          ? "my-text font-medium"
-                          : ""
+                        ? "my-text font-medium"
+                        : ""
                         }`}
                     >
                       {amenity.amenity_name}
