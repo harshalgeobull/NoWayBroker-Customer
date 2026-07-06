@@ -50,7 +50,6 @@ const sliderFixStyles = `
 `;
 
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
-console.log(userLocation);
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
@@ -98,38 +97,6 @@ const ManyMore = ({
   const [paidViewCount, setPaidViewCount] = useState(0);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
-  // useEffect(() => {
-  //   if (userId) {
-  //     setIsLoggedIn(true);
-  //     fetchSavedProperties(userId);
-  //   } else {
-  //     setIsLoggedIn(false);
-  //   }
-  // }, []);
-
-  // const fetchSavedProperties = async () => {
-  //   try {
-  //     const response = await axios.post(
-  //       `${ process.env.REACT_APP_API_URL }/cust_api/get_favorite_properties`,
-  //       {
-  //         user_id: userId,
-  //       }
-  //     );
-
-  //     if (response.data.status === 1 && Array.isArray(response.data.data)) {
-  //       const savedIds = response.data.data.map((prop) => prop._id);
-  //       setSavedProperties(savedIds);
-  //     } else {
-  //       setSavedProperties([]);
-  //       toast.error("No saved properties found.");
-  //     }
-  //   } catch (error) {
-  //     toast.error("Error fetching saved properties:", error);
-  //   }
-  // };
-
-  // Fetch recommended properties
-
   const fetchRecommendedProperties = async () => {
     try {
       if (data && data.status === 1 && Array.isArray(data.data)) {
@@ -162,7 +129,7 @@ const ManyMore = ({
 
     try {
       await axios.post(
-        `${process.env.REACT_APP_API_URL} /cust_api/add_to_favorite`,
+        `${process.env.REACT_APP_API_URL}/cust_api/add_to_favorite`,
         data,
       );
 
@@ -182,7 +149,7 @@ const ManyMore = ({
 
     try {
       await axios.delete(
-        `${process.env.REACT_APP_API_URL} /cust_api/remove_from_favorite`,
+        `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
         { data: { favorite_id: FavoriteId } },
       );
 
@@ -298,7 +265,7 @@ const ManyMore = ({
       profileForm.append("user_id", accessToken);
 
       const profileResponse = await axios.post(
-        `${process.env.REACT_APP_API_URL} /cust_api/get_profile`,
+        `${process.env.REACT_APP_API_URL}/cust_api/get_profile`,
         profileForm,
         {
           headers: {
@@ -337,7 +304,7 @@ const ManyMore = ({
       addCountFormData.append("user_id", accessToken);
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL} /cust_api/add_count`,
+        `${process.env.REACT_APP_API_URL}/cust_api/add_count`,
         {
           method: "POST",
           body: addCountFormData,
@@ -433,7 +400,7 @@ const ManyMore = ({
 
                   const location = area.toLowerCase().includes(city.toLowerCase())
                     ? area
-                    : `${area}, ${city} `;
+                    : `${area}, ${city}`;
 
                   const type =
                     property.property_type === "Office"
@@ -450,7 +417,7 @@ const ManyMore = ({
                     category === "Commercial Lease"
                   ) {
                     return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
-                      } in ${location} `;
+                      } in ${location}`;
                   }
 
                   // PG / Co-Living
@@ -459,7 +426,7 @@ const ManyMore = ({
                     category.includes("Co-Living") ||
                     category.includes("Coliving")
                   ) {
-                    return `${type} for Rent in ${location} `;
+                    return `${type} for Rent in ${location}`;
                   }
 
                   // Residential
@@ -495,7 +462,7 @@ const ManyMore = ({
                     <div className="flex flex-col h-full w-full shadow-md rounded-2xl overflow-hidden">
                       <div className="relative">
                         <Link
-                          to={`/ propertydetails / ${property._id} `}
+                          to={`/propertydetails/${property._id}`}
                           className="block"
                           onClick={() =>
                             window.scrollTo({ top: 0, behavior: "smooth" })
@@ -503,7 +470,7 @@ const ManyMore = ({
                         >
                           {allImages.length > 1 ? (
                             <Slider
-                              key={`${property._id} -${allImages.length} -${Date.now()} `}
+                              key={`${property._id}-${allImages.length}-${Date.now()}`}
                               dots
                               infinite
                               speed={500}
@@ -555,7 +522,7 @@ const ManyMore = ({
                               className="rounded-t-2xl"
                             >
                               {allImages.map((imgUrl, idx) => (
-                                <div key={`${property._id} -${idx} `}>
+                                <div key={`${property._id}-${idx}`}>
                                   <img
                                     src={imgUrl}
                                     alt="Property"
@@ -572,11 +539,6 @@ const ManyMore = ({
                             />
                           )}
                         </Link>
-
-                        {/* Days on nowaybroker */}
-                        {/* <span className="absolute px-2 py-1 text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm">
-                          {property.days_since_created} days on NoWayBroker
-                        </span> */}
 
                         {/* Virtual Tour & Favorite Button */}
                         <div className="absolute flex items-center space-x-2 top-2 right-2">
@@ -606,12 +568,12 @@ const ManyMore = ({
                               color={
                                 property.is_favorite
                                   ? "red"
-                                  : "rgba(75, 85, 99, 0.4) "
+                                  : "rgba(75, 85, 99, 0.4)"
                               }
                               fill={
                                 property.is_favorite
                                   ? "red"
-                                  : "rgba(75, 85, 99, 0.4) "
+                                  : "rgba(75, 85, 99, 0.4)"
                               }
                               strokeWidth={2}
                             />
@@ -664,7 +626,7 @@ const ManyMore = ({
 
                             return (
                               <span
-                                className={`text - white text - xs px - 3 py - 1 rounded - se - lg ${badgeColor} `}
+                                className={`text-white text-xs px-3 py-1 rounded-se-lg ${badgeColor}`}
                               >
                                 {matchedType}
                               </span>
@@ -897,7 +859,7 @@ const ManyMore = ({
                                 ) ? (
                                 <>
                                   <img
-                                    src={`${process.env.REACT_APP_API_URL} /media/${property.property_owner_image} `}
+                                    src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
                                     alt={property.connect_to_name || "Owner"}
                                     className="object-cover w-full h-full rounded-full"
                                     onError={(e) => {
@@ -955,7 +917,7 @@ const ManyMore = ({
                               className="flex items-center justify-center w-9 h-9 text-white bg-green-500 rounded-md hover:bg-green-600"
                             >
                               <FaWhatsapp />
-                            </a >
+                            </a>
                             {/* Call */}
                             <a
                               href={`tel:${property.connect_to_no}`}
@@ -964,16 +926,16 @@ const ManyMore = ({
                             >
                               <FaPhone />
                             </a>
-                          </div >
-                        </div >
-                      </div > {" "}
-                    </div >
-                  </div >
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
-            </Slider >
-          </div >
-        </div >
+            </Slider>
+          </div>
+        </div>
 
         {isContactModalOpen && selectedProperty && (
           <ContactDetails
@@ -990,8 +952,7 @@ const ManyMore = ({
             showUpgradePrompt={showUpgradePrompt}
             onClose={() => setIsContactModalOpen(false)}
           />
-        )
-        }
+        )}
 
         <div
           id="shareModal"
@@ -1072,7 +1033,7 @@ const ManyMore = ({
             setIsLoginModalOpen(true);
           }}
         />
-      </div >
+      </div>
     </>
   );
 };

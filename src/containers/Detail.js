@@ -2191,6 +2191,7 @@ const Detail = ({ propertyData }) => {
                               `${window.location.origin}/propertydetails/${property._id}`,
                               property._id,
                             )
+
                           }
                         />
                       </div>
