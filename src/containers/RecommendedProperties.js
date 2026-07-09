@@ -328,8 +328,10 @@ const RecommendedProperties = ({
             </div>
           </div>
 
-          <Slider {...settings} className="slider-container" ref={sliderRef}>
-            {properties?.map((property) => {
+         <Slider {...settings} className="slider-container" ref={sliderRef}>
+    {properties
+        .filter((property) => property.available_status !== "Sold")
+        .map((property) => {
               const getValidImageUrl = (img) => {
                 if (typeof img !== "string" || !img.trim()) return null;
                 return img.startsWith("http") ? img : BASE_URL + img;

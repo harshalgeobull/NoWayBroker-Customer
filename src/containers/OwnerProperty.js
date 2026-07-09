@@ -289,7 +289,9 @@ const OwnerProperty = ({
           </div>
 
           <Slider {...settings} className="slider-container" ref={sliderRef}>
-            {properties.map((property) => {
+    {properties
+        .filter((property) => property.available_status !== "Sold")
+        .map((property) => {
               let distance = null;
 
               const subtitle = (() => {
