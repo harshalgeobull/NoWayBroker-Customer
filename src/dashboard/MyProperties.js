@@ -134,77 +134,77 @@ const MyProperties = () => {
 
       if (response.data.status === 1) {
         const transformed = response.data.data.map((item) => {
-        let badgeColor = "bg-gray-400";
-        let type = "UNKNOWN";
-        let status = "Available";
+          let badgeColor = "bg-gray-400";
+          let type = "UNKNOWN";
+          let status = "Available";
 
-        // Set badge color, type, and status based on property category type
-        switch (item.property_category_type) {
-          case "Buy":
-            badgeColor = "bg-green-600";
-            type = "FOR BUY";
-            status =
-              item.available_status === "Sold" ? "Sold Out" : "Available";
-            break;
+          // Set badge color, type, and status based on property category type
+          switch (item.property_category_type) {
+            case "Buy":
+              badgeColor = "bg-green-600";
+              type = "FOR BUY";
+              status =
+                item.available_status === "Sold" ? "Sold Out" : "Available";
+              break;
 
-          case "Rent":
-            badgeColor = "bg-blue-600";
-            type = "FOR RENT";
-            status =
-              item.available_status === "Sold" ? "Rented Out" : "Available";
-            break;
+            case "Rent":
+              badgeColor = "bg-blue-600";
+              type = "FOR RENT";
+              status =
+                item.available_status === "Sold" ? "Rented Out" : "Available";
+              break;
 
-          case "Commercial Buy":
-            badgeColor = "bg-purple-600";
-            type = "COMMERCIAL BUY";
-            status =
-              item.available_status === "Sold" ? "Sold Out" : "Available";
-            break;
+            case "Commercial Buy":
+              badgeColor = "bg-purple-600";
+              type = "COMMERCIAL BUY";
+              status =
+                item.available_status === "Sold" ? "Sold Out" : "Available";
+              break;
 
-          case "Commercial Lease":
-            badgeColor = "bg-indigo-600";
-            type = "COMMERCIAL LEASE";
-            status =
-              item.available_status === "Sold" ? "Leased Out" : "Available";
-            break;
+            case "Commercial Lease":
+              badgeColor = "bg-indigo-600";
+              type = "COMMERCIAL LEASE";
+              status =
+                item.available_status === "Sold" ? "Leased Out" : "Available";
+              break;
 
-          case "PG/Co-living":
-            badgeColor = "bg-yellow-500";
-            type = "PG / CO-LIVING";
-            status =
-              item.available_status === "Sold" ? "Occupied" : "Available";
-            break;
+            case "PG/Co-living":
+              badgeColor = "bg-yellow-500";
+              type = "PG / CO-LIVING";
+              status =
+                item.available_status === "Sold" ? "Occupied" : "Available";
+              break;
 
-          default:
-            badgeColor = "bg-gray-400";
-            type = item.property_category_type?.toUpperCase() || "UNKNOWN";
-            status = "Available";
-        }
+            default:
+              badgeColor = "bg-gray-400";
+              type = item.property_category_type?.toUpperCase() || "UNKNOWN";
+              status = "Available";
+          }
 
-        return {
-          id: item._id,
-          type,
-          title: item.property_name,
-          location: item.address_area,
-          price: item.property_price,
-          date: item.created_at
-            ? new Date(item.created_at).toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-              })
-            : "N/A",
-          badgeColor,
-          status,
-          soldOut: item.available_status,
-          image: item.cover_image,
-          published: item.admin_approval,
-          rent: item.rent,
-          rent_duration: item.rent_duration,
-          view_count: item.view_count,
-          leads_count: item.leads_count,
-        };
-      });
+          return {
+            id: item._id,
+            type,
+            title: item.property_name,
+            location: item.address_area,
+            price: item.property_price,
+            date: item.created_at
+              ? new Date(item.created_at).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })
+              : "N/A",
+            badgeColor,
+            status,
+            soldOut: item.available_status,
+            image: item.cover_image,
+            published: item.admin_approval,
+            rent: item.rent,
+            rent_duration: item.rent_duration,
+            view_count: item.view_count,
+            leads_count: item.leads_count,
+          };
+        });
 
         setProperties(transformed);
         setTotalPages(response.data.total_pages);
@@ -395,7 +395,6 @@ const MyProperties = () => {
   };
 
   const firstLoad = useRef(true);
-
 
   const fetchFilteredProperties = async () => {
     if (!userId) {
@@ -760,8 +759,12 @@ const MyProperties = () => {
             <option value="">Property Type</option>
             <option value="Flat/Apartment">Flat/Apartment</option>
             <option value="Builder Floor">Builder Floor</option>
-            <option value="Independent House/Villa">Independent House/Villa</option>
-            <option value="Independent/Builder Floor">Independent/Builder Floor</option>
+            <option value="Independent House/Villa">
+              Independent House/Villa
+            </option>
+            <option value="Independent/Builder Floor">
+              Independent/Builder Floor
+            </option>
             <option value="1RK/Studio Apartment">1RK/Studio Apartment</option>
             <option value="Service Apartment">Service Apartment</option>
             <option value="Farmhouse">Farmhouse</option>
@@ -876,15 +879,16 @@ const MyProperties = () => {
                   <p className="mb-0 text-sm text-gray-500">
                     {property.location}
                   </p>
-                  {property.type === "FOR RENT" ? (
+                  {property.type === "FOR RENT" ||
+                  property.type === "PG / CO-LIVING" ? (
                     <p className="mt-1 font-bold text-black">
                       ₹{" "}
                       {property.rent >= 10000000
-                        ? `${(property.rent / 10000000).toFixed(1).replace(/\.0$/, "")} Cr`
+                        ? `${(property.rent / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`
                         : property.rent >= 100000
-                          ? `${(property.rent / 100000).toFixed(1).replace(/\.0$/, "")} L`
+                          ? `${(property.rent / 100000).toFixed(2).replace(/\.?0+$/, "")} L`
                           : property.rent >= 1000
-                            ? `${(property.rent / 1000).toFixed(1).replace(/\.0$/, "")} K`
+                            ? `${(property.rent / 1000).toFixed(2).replace(/\.?0+$/, "")} K`
                             : property.rent}
                       {property.rent_duration &&
                       property.rent_duration !== "N/A"
@@ -897,11 +901,11 @@ const MyProperties = () => {
                       <p className="mt-1 font-bold text-black">
                         ₹{" "}
                         {Number(property.price) >= 10000000
-                          ? `${(Number(property.price) / 10000000).toFixed(1).replace(/\.0$/, "")} Cr`
+                          ? `${(Number(property.price) / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`
                           : Number(property.price) >= 100000
-                            ? `${(Number(property.price) / 100000).toFixed(1).replace(/\.0$/, "")} L`
+                            ? `${(Number(property.price) / 100000).toFixed(2).replace(/\.?0+$/, "")} L`
                             : Number(property.price) >= 1000
-                              ? `${(Number(property.price) / 1000).toFixed(1).replace(/\.0$/, "")} K`
+                              ? `${(Number(property.price) / 1000).toFixed(2).replace(/\.?0+$/, "")} K`
                               : property.price}
                       </p>
                     )

@@ -157,27 +157,29 @@ const MyFavourite = () => {
   };
 
   const formatPrice = (price) => {
-    if (!price) return "";
-    price = parseInt(price);
+  if (!price) return "";
 
-    const formatNumber = (num) => {
-      return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2);
-    };
+  price = Number(price);
 
-    if (price >= 10000000) {
-      return `₹ ${formatNumber(price / 10000000)} Cr`;
-    } else if (price >= 100000) {
-      return `₹ ${formatNumber(price / 100000)} L`;
-    } else if (price >= 1000) {
-      return `₹ ${formatNumber(price / 1000)} K`;
-    } else {
-      return `₹ ${price}`;
-    }
+  const formatNumber = (num) => {
+    return num.toFixed(2).replace(/\.?0+$/, "");
   };
+
+  if (price >= 10000000) {
+    return `₹ ${formatNumber(price / 10000000)} Cr`;
+  } else if (price >= 100000) {
+    return `₹ ${formatNumber(price / 100000)} L`;
+  } else if (price >= 1000) {
+    return `₹ ${formatNumber(price / 1000)} K`;
+  } else {
+    return `₹ ${price}`;
+  }
+};
 
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
-
+if (typeof price === "string" && price.includes("-")) {
+    const parts = price.split("-").map((p) => p.trim());
     if (typeof price === "string" && price.includes("-")) {
       const parts = price.split("-").map((p) => p.trim());
       return (
@@ -192,24 +194,25 @@ const MyFavourite = () => {
         </>
       );
     }
+  }
 
-    price = parseInt(price);
-    if (isNaN(price)) return "";
+    // price = parseInt(price);
+    // if (isNaN(price)) return "";
 
-    let formatted;
-    if (price >= 10000000) {
-      formatted = parseFloat((price / 10000000).toFixed(1)) + " Cr";
-    } else if (price >= 100000) {
-      formatted = parseFloat((price / 100000).toFixed(1)) + " L";
-    } else if (price >= 1000) {
-      formatted = parseFloat((price / 1000).toFixed(1)) + " K";
-    } else {
-      formatted = price.toString();
-    }
+    // let formatted;
+    // if (price >= 10000000) {
+    //   formatted = parseFloat((price / 10000000).toFixed(1)) + " Cr";
+    // } else if (price >= 100000) {
+    //   formatted = parseFloat((price / 100000).toFixed(1)) + " L";
+    // } else if (price >= 1000) {
+    //   formatted = parseFloat((price / 1000).toFixed(1)) + " K";
+    // } else {
+    //   formatted = price.toString();
+    // }
     return (
       <span className="inline-flex items-center">
         <FaRupeeSign className="inline-block mr-1" />
-        {formatted}
+        {formatPrice(price).replace("₹ ", "")}
       </span>
     );
   };
@@ -1057,7 +1060,7 @@ const MyFavourite = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center mt-8 space-x-2">
+          <div className="xl:col-span-2 flex items-center justify-center mt-8 space-x-2">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}

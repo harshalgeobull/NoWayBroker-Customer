@@ -217,7 +217,11 @@ const RecommendedProperties = ({
     if (!price) return "";
 
     const formatNumber = (value, unit) => {
-      return (value % 1 === 0 ? parseInt(value) : value.toFixed(1)) + unit;
+      return (
+        (value % 1 === 0
+          ? parseInt(value)
+          : value.toFixed(2).replace(/\.?0+$/, "")) + unit
+      );
     };
 
     if (price >= 10000000) {
@@ -322,49 +326,45 @@ const RecommendedProperties = ({
                 ...additionalImages,
               ];
               const subtitle = (() => {
-      const area = property.address_area || "";
-      const city = property.city_name || "";
+                const area = property.address_area || "";
+                const city = property.city_name || "";
 
-      const location = area.toLowerCase().includes(city.toLowerCase())
-        ? area
-        : `${area}, ${city}`;
+                const location = area.toLowerCase().includes(city.toLowerCase())
+                  ? area
+                  : `${area}, ${city}`;
 
-      const type =
-        property.property_type === "Office"
-          ? "Office Space"
-          : property.property_type === "Retail"
-          ? "Retail Space"
-          : property.property_type || "";
+                const type =
+                  property.property_type === "Office"
+                    ? "Office Space"
+                    : property.property_type === "Retail"
+                      ? "Retail Space"
+                      : property.property_type || "";
 
-      const category = property.property_category_type || "";
+                const category = property.property_category_type || "";
 
-      if (
-        category === "Commercial Buy" ||
-        category === "Commercial Lease"
-      ) {
-        return `${type} for ${
-          category === "Commercial Buy" ? "Sale" : "Lease"
-        } in ${location}`;
-      }
-      return `${type} in ${location}`;
-    })();
-    let distance = null;
+                if (
+                  category === "Commercial Buy" ||
+                  category === "Commercial Lease"
+                ) {
+                  return `${type} for ${
+                    category === "Commercial Buy" ? "Sale" : "Lease"
+                  } in ${location}`;
+                }
+                return `${type} in ${location}`;
+              })();
+              let distance = null;
 
-    if (userLocation && property.latitude && property.longitude) {
-      distance = calculateDistance(
-        parseFloat(userLocation.latitude),
-        parseFloat(userLocation.longitude),
-        parseFloat(property.latitude),
-        parseFloat(property.longitude)
-      ).toFixed(1);
-    }
-
+              if (userLocation && property.latitude && property.longitude) {
+                distance = calculateDistance(
+                  parseFloat(userLocation.latitude),
+                  parseFloat(userLocation.longitude),
+                  parseFloat(property.latitude),
+                  parseFloat(property.longitude),
+                ).toFixed(1);
+              }
 
               return (
-                <div
-                  key={property._id}
-                  className="px-2 py-4"
-                >
+                <div key={property._id} className="px-2 py-4">
                   <div className="property-card flex flex-col h-full min-h-[520px] bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                     <div className="flex flex-col h-full w-full overflow-hidden rounded-xl">
                       <div className="relative">
@@ -552,262 +552,266 @@ const RecommendedProperties = ({
                       {/* Property Details */}
                       {/* Property Details Wrapper */}
                       <div className="flex flex-col flex-1 justify-between p-4 bg-white">
-                        
-                                                                        {/* Price Section */}
-                                                <div className="flex items-start justify-between gap-3 mb-0">
-                                                  {/* Property Name */}
-                                                  <h3
-                                                    className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate"
-                                                    title={property.property_name}
-                                                  >
-                                                    {property.property_name || "N/A"}
-                                                  </h3>
-                        
-                                                  {/* Furnishing */}
-                                                  <span
-                                                    className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-[#E85B6B] sm:text-base whitespace-nowrap"
-                                                    title={property.furnished_type}
-                                                  >
-                                                    {property.furnished_type || "Un-Furnished"}
-                                                  </span>
-                                                </div>
-                        
-                                                <p
-                                                  className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate"
-                                                  title={subtitle}
-                                                >
-                                                  {subtitle}
-                                                </p>
-                                                <div className="flex items-center justify-between mb-1">
-                                                  {/* Left Side */}
-                                                  <div className="flex items-center">
-                                                    <span className="text-2xl font-bold">
-                                                      ₹{" "}
-                                                      {property.property_category_type === "Rent"
-                                                        ? formatPrice(property.rent)
-                                                        : formatPrice(property.property_price)}
-                                                    </span>
-                        
-                                                    {property.property_category_type === "Rent" && (
-                                                      <span className="ml-1 text-sm text-gray-500">
-                                                        / {property.rent_duration}
-                                                      </span>
-                                                    )}
-                        
-                                                    {/* Ready to Move - Keep close to price */}
-                                                    {property.property_category_type?.includes("Buy") &&
-                                                      property.possession_status ===
-                                                        "Ready To Move" && (
-                                                        <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
-                                                          <MdApartment className="text-base text-green-700" />
-                                                          <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
-                                                            Ready to Move
-                                                          </span>
-                                                        </div>
-                                                      )}
-                                                  </div>
-                        
-                                                  {/* Right Side */}
-                                                  <div className="text-sm font-medium whitespace-nowrap">
-                                                    {property.property_category_type === "Rent" && (
-                                                      <>
-                                                        <span className="text-gray-500">Deposit:</span>
-                                                        <span className="ml-1 font-semibold">
-                                                          ₹{" "}
-                                                          {property.custom_deposit_amount?.toLocaleString(
-                                                            "en-IN",
-                                                          )}
-                                                        </span>
-                                                      </>
-                                                    )}
-                        
-                                                    {property.property_category_type?.includes("Buy") &&
-                                                      property.possession_status !== "Ready To Move" &&
-                                                      property.possession_date && (
-                                                        <>
-                                                          <span className="text-gray-500">
-                                                            Possession:
-                                                          </span>
-                                                          <span className="ml-1 font-semibold">
-                                                            {new Date(
-                                                              property.possession_date,
-                                                            ).toLocaleDateString("en-IN")}
-                                                          </span>
-                                                        </>
-                                                      )}
-                                                  </div>
-                                                </div>
-                                                {/* Features Row */}
-                                                <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
-                                                  {/* First Column */}
-                                                  <div className="flex items-center gap-2 px-3 min-w-0">
-                                                    <MdApartment className="text-[22px] text-gray-700 flex-shrink-0" />
-                        
-                                                    <div className="flex flex-col justify-center min-w-0">
-                                                      <p className="m-0 text-sm font-semibold leading-4 truncate">
-                                                        {property.building_type === "Commercial"
-                                                          ? property.property_type === "Office"
-                                                            ? "Office Space"
-                                                            : property.property_type === "Retail"
-                                                              ? "Retail Space"
-                                                              : property.property_type
-                                                          : property.property_category_type?.includes(
-                                                                "PG",
-                                                              )
-                                                            ? `${property.bathroom || 0} Bathrooms`
-                                                            : property.bhk_type}
-                                                      </p>
-                        
-                                                      <p className="m-0 text-xs leading-4 text-gray-500 truncate">
-                                                        {property.building_type === "Commercial"
-                                                          ? "Property Type"
-                                                          : property.property_category_type?.includes(
-                                                                "PG",
-                                                              )
-                                                            ? "Bathrooms"
-                                                            : property.property_type}
-                                                      </p>
-                                                    </div>
-                                                  </div>
-                        
-                                                  {/* Second Column */}
-                                                  <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
-                                                    {property.property_category_type?.includes("PG") ? (
-                                                      <FaUser className="text-[20px] text-gray-700 flex-shrink-0" />
-                                                    ) : (
-                                                      <FaBath className="text-[20px] text-gray-700 flex-shrink-0" />
-                                                    )}
-                        
-                                                    <div className="flex flex-col justify-center min-w-0">
-                                                      <p className="m-0 text-sm font-semibold leading-4 truncate">
-                                                        {property.property_category_type?.includes("PG")
-                                                          ? property.available_for
-                                                          : `${property.bathroom || 0} Baths`}
-                                                      </p>
-                        
-                                                      <p className="m-0 text-xs leading-4 text-gray-500 truncate">
-                                                        {property.property_category_type?.includes("PG")
-                                                          ? "Available For"
-                                                          : "Bathrooms"}
-                                                      </p>
-                                                    </div>
-                                                  </div>
-                        
-                                                  {/* Third Column */}
-                                                  <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
-                                                    <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
-                        
-                                                    <div className="flex flex-col justify-center min-w-0">
-                                                      <p className="m-0 text-sm font-semibold leading-4 truncate">
-                                                        {property.area} {property.area_in}
-                                                      </p>
-                        
-                                                      <p className="m-0 text-xs leading-4 text-gray-500 truncate">
-                                                        Built Up Area
-                                                      </p>
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                                {/* Divider */}
-                                                <hr className="my-1 border-gray-100" />
-                        
-                                                {/* Row 5 : Posted By | Days | Distance | Share */}
-                                                <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
-                                                  {/* Left */}
-                                                  <div className="flex items-center flex-wrap min-w-0">
-                                                    {/* Posted By */}
-                                                    <div className="flex items-center">
-                                                      <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
-                                                      <span className="truncate">
-                                                        Posted by {property.user_type || "Owner"}
-                                                      </span>
-                                                    </div>
-                        
-                                                    {/* Dot */}
-                                                    <span className="mx-2 text-gray-400">•</span>
-                        
-                                                    {/* Days */}
-                                                    <span className="whitespace-nowrap">
-                                                      {property.days_since_created
-                                                        ? `${property.days_since_created} days ago`
-                                                        : "Recently"}
-                                                    </span>
-                        
-                                                    {/* Distance */}
-                                                    {distance && (
-                                                      <>
-                                                        <span className="mx-2 text-gray-400">•</span>
-                        
-                                                        <div className="flex items-center whitespace-nowrap">
-                                                          <FaMapMarkerAlt className="mr-1 text-red-500" />
-                                                          {distance} km from you
-                                                        </div>
-                                                      </>
-                                                    )}
-                                                  </div>
-                        
-                                                  {/* Share */}
-                                                  <FontAwesomeIcon
-                                                    icon={faShareNodes}
-                                                    className="ml-2 text-[17px] text-gray-500 transition-colors cursor-pointer hover:text-blue-500"
-                                                    onClick={(e) => {
-                                                      e.preventDefault();
-                                                      e.stopPropagation();
-                                                      openRecommendedShareModal(property._id);
-                                                    }}
-                                                  />
-                                                </div>
-                                                {console.log(
-                                                  property.connect_to_name,
-                                                  property.property_owner_image,
-                                                )}
-                                                {/* Row 6 : Owner Details */}
-                                                <div className="flex items-center pt-3">
-                                                  {/* Avatar */}
-                                                  <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
-                                                    {property.property_owner_image &&
-                                                    !property.property_owner_image.includes(
-                                                      "default_profile",
-                                                    ) ? (
-                                                      <>
-                                                        <img
-                                                          src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
-                                                          alt={property.connect_to_name || "Owner"}
-                                                          className="object-cover w-full h-full rounded-full"
-                                                          onError={(e) => {
-                                                            e.target.style.display = "none";
-                                                            e.target.nextSibling.style.display = "flex";
-                                                          }}
-                                                        />
-                        
-                                                        {/* Fallback */}
-                                                        <div className="items-center justify-center hidden w-full h-full">
-                                                          <AiOutlineUser className="text-2xl text-blue-600" />
-                                                        </div>
-                                                      </>
-                                                    ) : (
-                                                      <div className="flex items-center justify-center w-full h-full">
-                                                        <AiOutlineUser className="text-2xl text-blue-600" />
-                                                      </div>
-                                                    )}
-                                                  </div>
-                        
-                                                  {/* Name & User Type */}
-                                                  <div className="flex items-center ml-4">
-                                                    <span
-                                                      className="text-sm font-semibold text-gray-900 whitespace-nowrap"
-                                                      title={property.connect_to_name}
-                                                    >
-                                                      {property.connect_to_name || "Owner"}
-                                                    </span>
-                        
-                                                    <div className="w-px h-4 mx-4 bg-gray-300"></div>
-                        
-                                                    <span className="text-sm text-gray-500 whitespace-nowrap">
-                                                      {property.user_type || "Owner"}
-                                                    </span>
-                                                  </div>
-                                                </div>
+                        {/* Price Section */}
+                        <div className="flex items-start justify-between gap-3 mb-0">
+                          {/* Property Name */}
+                          <h3
+                            className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate"
+                            title={property.property_name}
+                          >
+                            {property.property_name || "N/A"}
+                          </h3>
+
+                          {/* Furnishing */}
+                          <span
+                            className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-[#E85B6B] sm:text-base whitespace-nowrap"
+                            title={property.furnished_type}
+                          >
+                            {property.furnished_type || "Un-Furnished"}
+                          </span>
+                        </div>
+
+                        <p
+                          className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate"
+                          title={subtitle}
+                        >
+                          {subtitle}
+                        </p>
+                        <div className="flex items-center justify-between mb-1">
+                          {/* Left Side */}
+                          <div className="flex items-center">
+                            <span className="text-2xl font-bold">
+                              ₹{" "}
+                              {property.property_category_type === "Rent" ||
+                              property.property_category_type === "PG/Co-living"
+                                ? formatPrice(property.rent)
+                                : formatPrice(property.property_price)}
+                            </span>
+
+                            {(property.property_category_type === "Rent" ||
+                              property.property_category_type ===
+                                "PG/Co-living") && (
+                              <span className="ml-1 text-sm text-gray-500">
+                                / {property.rent_duration || "Per Month"}
+                              </span>
+                            )}
+
+                            {/* Ready to Move - Keep close to price */}
+                            {property.property_category_type?.includes("Buy") &&
+                              property.possession_status ===
+                                "Ready To Move" && (
+                                <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
+                                  <MdApartment className="text-base text-green-700" />
+                                  <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                                    Ready to Move
+                                  </span>
+                                </div>
+                              )}
+                          </div>
+
+                          {/* Right Side */}
+                          <div className="text-sm font-medium whitespace-nowrap">
+                            {(property.property_category_type === "Rent" ||
+                              property.property_category_type ===
+                                "PG/Co-living") && (
+                              <>
+                                <span className="text-gray-500">Deposit:</span>
+                                <span className="ml-1 font-semibold">
+                                  ₹{" "}
+                                  {property.custom_deposit_amount?.toLocaleString(
+                                    "en-IN",
+                                  )}
+                                </span>
+                              </>
+                            )}
+
+                            {property.property_category_type?.includes("Buy") &&
+                              property.possession_status !== "Ready To Move" &&
+                              property.possession_date && (
+                                <>
+                                  <span className="text-gray-500">
+                                    Possession:
+                                  </span>
+                                  <span className="ml-1 font-semibold">
+                                    {new Date(
+                                      property.possession_date,
+                                    ).toLocaleDateString("en-IN")}
+                                  </span>
+                                </>
+                              )}
+                          </div>
+                        </div>
+                        {/* Features Row */}
+                        <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+                          {/* First Column */}
+                          <div className="flex items-center gap-2 px-3 min-w-0">
+                            <MdApartment className="text-[22px] text-gray-700 flex-shrink-0" />
+
+                            <div className="flex flex-col justify-center min-w-0">
+                              <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                {property.building_type === "Commercial"
+                                  ? property.property_type === "Office"
+                                    ? "Office Space"
+                                    : property.property_type === "Retail"
+                                      ? "Retail Space"
+                                      : property.property_type
+                                  : property.property_category_type?.includes(
+                                        "PG",
+                                      )
+                                    ? `${property.bathroom || 0} Bathrooms`
+                                    : property.bhk_type}
+                              </p>
+
+                              <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                {property.building_type === "Commercial"
+                                  ? "Property Type"
+                                  : property.property_category_type?.includes(
+                                        "PG",
+                                      )
+                                    ? "Bathrooms"
+                                    : property.property_type}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Second Column */}
+                          <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                            {property.property_category_type?.includes("PG") ? (
+                              <FaUser className="text-[20px] text-gray-700 flex-shrink-0" />
+                            ) : (
+                              <FaBath className="text-[20px] text-gray-700 flex-shrink-0" />
+                            )}
+
+                            <div className="flex flex-col justify-center min-w-0">
+                              <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                {property.property_category_type?.includes("PG")
+                                  ? property.available_for
+                                  : `${property.bathroom || 0} Baths`}
+                              </p>
+
+                              <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                {property.property_category_type?.includes("PG")
+                                  ? "Available For"
+                                  : "Bathrooms"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Third Column */}
+                          <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                            <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
+
+                            <div className="flex flex-col justify-center min-w-0">
+                              <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                {property.area} {property.area_in}
+                              </p>
+
+                              <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                Built Up Area
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        {/* Divider */}
+                        <hr className="my-1 border-gray-100" />
+
+                        {/* Row 5 : Posted By | Days | Distance | Share */}
+                        <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
+                          {/* Left */}
+                          <div className="flex items-center flex-wrap min-w-0">
+                            {/* Posted By */}
+                            <div className="flex items-center">
+                              <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
+                              <span className="truncate">
+                                Posted by {property.user_type || "Owner"}
+                              </span>
+                            </div>
+
+                            {/* Dot */}
+                            <span className="mx-2 text-gray-400">•</span>
+
+                            {/* Days */}
+                            <span className="whitespace-nowrap">
+                              {property.days_since_created
+                                ? `${property.days_since_created} days ago`
+                                : "Recently"}
+                            </span>
+
+                            {/* Distance */}
+                            {distance && (
+                              <>
+                                <span className="mx-2 text-gray-400">•</span>
+
+                                <div className="flex items-center whitespace-nowrap">
+                                  <FaMapMarkerAlt className="mr-1 text-red-500" />
+                                  {distance} km from you
+                                </div>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Share */}
+                          <FontAwesomeIcon
+                            icon={faShareNodes}
+                            className="ml-2 text-[17px] text-gray-500 transition-colors cursor-pointer hover:text-blue-500"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              openRecommendedShareModal(property._id);
+                            }}
+                          />
+                        </div>
+                        {console.log(
+                          property.connect_to_name,
+                          property.property_owner_image,
+                        )}
+                        {/* Row 6 : Owner Details */}
+                        <div className="flex items-center pt-3">
+                          {/* Avatar */}
+                          <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+                            {property.property_owner_image &&
+                            !property.property_owner_image.includes(
+                              "default_profile",
+                            ) ? (
+                              <>
+                                <img
+                                  src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
+                                  alt={property.connect_to_name || "Owner"}
+                                  className="object-cover w-full h-full rounded-full"
+                                  onError={(e) => {
+                                    e.target.style.display = "none";
+                                    e.target.nextSibling.style.display = "flex";
+                                  }}
+                                />
+
+                                {/* Fallback */}
+                                <div className="items-center justify-center hidden w-full h-full">
+                                  <AiOutlineUser className="text-2xl text-blue-600" />
+                                </div>
+                              </>
+                            ) : (
+                              <div className="flex items-center justify-center w-full h-full">
+                                <AiOutlineUser className="text-2xl text-blue-600" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Name & User Type */}
+                          <div className="flex items-center ml-4">
+                            <span
+                              className="text-sm font-semibold text-gray-900 whitespace-nowrap"
+                              title={property.connect_to_name}
+                            >
+                              {property.connect_to_name || "Owner"}
+                            </span>
+
+                            <div className="w-px h-4 mx-4 bg-gray-300"></div>
+
+                            <span className="text-sm text-gray-500 whitespace-nowrap">
+                              {property.user_type || "Owner"}
+                            </span>
+                          </div>
+                        </div>
                         {/* <h4 className="h-[56px] flex items-start text-lg font-semibold leading-7 text-gray-900 line-clamp-2">
                           {property.property_name}
                         </h4> */}
@@ -852,18 +856,18 @@ const RecommendedProperties = ({
 
                         {/* Footer: Posted by & Time */}
                         {/* <div className="flex items-center justify-between pt-4 mt-auto border-t border-gray-100"> */}
-                          {/* <div className="flex flex-col"> */}
-                            {/* <span className="text-[10px] sm:text-[11px] text-gray-400 uppercase tracking-wide">
+                        {/* <div className="flex flex-col"> */}
+                        {/* <span className="text-[10px] sm:text-[11px] text-gray-400 uppercase tracking-wide">
                               Posted by {property.user_type || "Owner"}
                             </span> */}
-                            {/* Time Ago - Static example like image */}
-                            {/* <span className="text-[11px] text-gray-400">
+                        {/* Time Ago - Static example like image */}
+                        {/* <span className="text-[11px] text-gray-400">
                               1 month ago
                             </span> */}
-                          {/* </div> */}
+                        {/* </div> */}
 
-                          {/* Share or Heart Icon */}
-                          {/* <div className="flex space-x-2">
+                        {/* Share or Heart Icon */}
+                        {/* <div className="flex space-x-2">
                             <FontAwesomeIcon
                               icon={faShareNodes}
                               className="text-xl text-gray-400 transition cursor-pointer hover:text-blue-600"
@@ -882,7 +886,7 @@ const RecommendedProperties = ({
             })}
           </Slider>
         </div>
-      </div >
+      </div>
       <div
         id="shareModal"
         className="fixed bottom-0 right-0 z-50 items-center justify-center hidden bg-black bg-opacity-50"
@@ -963,7 +967,7 @@ const RecommendedProperties = ({
           fetchHomeData();
         }}
       />
-    </div >
+    </div>
   );
 };
 

@@ -1785,6 +1785,7 @@ Make it engaging, attractive, and human-like.
                         <option value="2">2</option>
                         <option value="3">3</option>
                         <option value="4">4</option>
+                        <option value="4">+4</option>
                       </select>
                     </div>
                   )}
@@ -1828,7 +1829,7 @@ Make it engaging, attractive, and human-like.
                         </label>
 
                         <select
-                          name="washroom"
+                          name="commercial_washroom"
                           value={formData.commercial_washroom}
                           onChange={handleInputChange}
                           className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
@@ -2972,7 +2973,7 @@ Make it engaging, attractive, and human-like.
                         <option value="2">2</option>
                         <option value="3">3</option>
                         <option value="4">4</option>
-                        <option value="4+">4+</option>
+                        <option value="4">4+</option>
                       </select>
                     </div>
                   )}

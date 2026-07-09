@@ -804,7 +804,7 @@ Make it engaging, attractive, and human-like.
     property_description: propertyDescription,
     units: units,
     plot_no: plotNo,
-    available_from: availableFrom,
+    available_from: "Immediately",
     available_on: availableOn,
     operating_since: operatingSince,
     furnished_type: furnishedType,
@@ -869,7 +869,8 @@ Make it engaging, attractive, and human-like.
     video_url_type: videoSource,
     virtual_tour_availability: virtualTourLink,
     office_type: officeSubType,
-    washroom: retailWashroom,
+    washroom: "No",
+commercial_washroom: "",
     conferenceRoom: conferenceRoom,
     // length_of_land: lengthOfLand,
     // breadthOfLand: breadthOfLand,
@@ -944,25 +945,24 @@ Make it engaging, attractive, and human-like.
     }));
   }, [parkingTypes]);
 
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      washroom: retailWashroom,
-    }));
-  }, [retailWashroom]);
+  // useEffect(() => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     washroom: retailWashroom,
+  //   }));
+  // }, [retailWashroom]);
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       central_AC: centralAC,
     }));
   }, [centralAC]);
-
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      reception_area: receptionArea,
-    }));
-  }, [receptionArea]);
+// useEffect(() => {
+//   setFormData((prev) => ({
+//     ...prev,
+//     commercial_washroom: retailWashroom,
+//   }));
+// }, [retailWashroom]);
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -989,12 +989,12 @@ Make it engaging, attractive, and human-like.
       conferenceRoom: conferenceRoom,
     }));
   }, [conferenceRoom]);
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      washroom: washroom,
-    }));
-  }, [washroom]);
+useEffect(() => {
+  setFormData((prev) => ({
+    ...prev,
+    commercial_washroom: washroom,
+  }));
+}, [washroom]);
   useEffect(() => {
     if (
       propertyCategory === "Rent" &&
@@ -1171,9 +1171,14 @@ Make it engaging, attractive, and human-like.
         [name]: value,
       };
 
-      if (name === "available_from") {
-        updatedData.isImmediateAvailable =
-          value === "Immediately" ? "Yes" : "No";
+      // if (name === "available_from") {
+      //   updatedData.isImmediateAvailable =
+      //     value === "Immediately" ? "Yes" : "No";
+
+          if (name === "available_from") {
+  updatedData.available_from = "Immediately";
+  updatedData.isImmediateAvailable = "Yes";
+  updatedData.possession_date = new Date().toISOString().split("T")[0];
 
         updatedData.possession_date =
           value === "Immediately"
@@ -1483,18 +1488,18 @@ Make it engaging, attractive, and human-like.
         }
       }
 
-      if (
-        (propertyCategory === "Buy" &&
-          buildingType === "Residential" &&
-          propertyType === "Plot") ||
-        (propertyCategory === "Rent" &&
-          buildingType === "Residential" &&
-          propertyType === "Plot")
-      ) {
-        if (!formData.plot_no?.trim()) {
-          errors.plot_no = "plot no is required";
-        }
-      }
+      // if (
+      //   (propertyCategory === "Buy" &&
+      //     buildingType === "Residential" &&
+      //     propertyType === "Plot") ||
+      //   (propertyCategory === "Rent" &&
+      //     buildingType === "Residential" &&
+      //     propertyType === "Plot")
+      // ) {
+      //   if (!formData.plot_no?.trim()) {
+      //     errors.plot_no = "plot no is required";
+      //   }
+      // }
 
       if (
         !(
@@ -1952,7 +1957,7 @@ Make it engaging, attractive, and human-like.
           {activeStep === 1 && (
             <>
               <div className="max-w-5xl mx-auto mb-32 bg-white rounded-xl">
-                <h2 className="text-2xl text-gray-900">Project Address</h2>
+                <h2 className="text-2xl text-gray-900">Property Address</h2>
                 <p className="mt-1 text-gray-500">
                   Place the listing pin on the map
                 </p>
@@ -2312,7 +2317,7 @@ Make it engaging, attractive, and human-like.
                           }
                         >
                           <option value="">Select Configuration</option>
-                          <option value="Studio">Studio/Single Room</option>
+                          <option value="Studio/Single Room">Studio/Single Room</option>
                           <option value="1 RK">1 RK</option>
                           <option value="1 BHK">1 BHK</option>
                           <option value="1.5 BHK">1.5 BHK</option>
@@ -2443,7 +2448,7 @@ Make it engaging, attractive, and human-like.
                           <option value="2">2</option>
                           <option value="3">3</option>
                           <option value="4">4</option>
-                          <option value="4+">4+</option>
+                          <option value="4">4+</option>
                         </select>
                       </div>
                     )}
@@ -2457,8 +2462,9 @@ Make it engaging, attractive, and human-like.
                           </label>
 
                           <select
-                            value={retailWashroom}
-                            onChange={(e) => setRetailWashroom(e.target.value)}
+                            name="commercial_washroom"
+                            value={formData.commercial_washroom}
+                            onChange={handleInputChange}
                             className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                           >
                             <option value="">Select Washroom</option>
@@ -2482,9 +2488,9 @@ Make it engaging, attractive, and human-like.
                         </label>
 
                         <select
-                          name="washroom"
+                          name="commercial_washroom"
                           className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                          value={formData.washroom}
+                          value={formData.commercial_washroom}
                           onChange={handleInputChange}
                         >
                           <option value="">Select Washrooms</option>
@@ -2494,7 +2500,7 @@ Make it engaging, attractive, and human-like.
                           <option value="2">2</option>
                           <option value="3">3</option>
                           <option value="4">4</option>
-                          <option value="4+">4+</option>
+                          <option value="4">4+</option>
                         </select>
                       </div>
                     )}
@@ -3274,16 +3280,18 @@ Make it engaging, attractive, and human-like.
 
                         <select
                           name="available_from"
-                          value={formData.available_from}
-                          onChange={(e) => {
-                            setIsLaterSelected(e.target.value === "Later");
-                            handleInputChange(e);
-                          }}
+                          //value={formData.available_from}
+                          value="Immediately"
+                          // onChange={(e) => {
+                          //   setIsLaterSelected(e.target.value === "Later");
+                          //   handleInputChange(e);
+                          // }}
+                          onChange={() => {}}
                           className="w-full p-3 mt-1 text-gray-800 bg-white border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                         >
-                          <option value="">Select availability</option>
+                          {/* <option value="">Select availability</option> */}
                           <option value="Immediately">Immediate</option>
-                          <option value="Later">Later</option>
+                          {/* <option value="Later">Later</option> */}
                         </select>
                       </div>
                     )
@@ -7390,7 +7398,7 @@ fice Space") ||
                         <option value="2">2</option>
                         <option value="3">3</option>
                         <option value="4">4</option>
-                        <option value="4+">4+</option>
+                        <option value="4">4+</option>
                       </select>
                     </div>
                   )}

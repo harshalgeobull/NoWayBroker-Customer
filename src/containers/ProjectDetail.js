@@ -28,6 +28,20 @@ import { Building2, Ruler, Bath } from "lucide-react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { MdApartment } from "react-icons/md";
 import { RiRuler2Line } from "react-icons/ri";
+import { AiOutlineClockCircle, AiOutlineUser } from "react-icons/ai";
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 const ProjectDetail = () => {
   // const [showAllImages, setShowAllImages] = useState(false);
@@ -372,19 +386,25 @@ const ProjectDetail = () => {
   useEffect(() => {
     fetchProjects();
   }, [projectId]);
+
+  // Slider settings - matched to Spotlights.js card slider
   const settings = {
-    dots: false,
     infinite: true,
-    speed: 800,
+    speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
-    arrows: false,
     autoplay: true,
     autoplaySpeed: 3000,
+    arrows: false,
+    dots: false,
+    adaptiveHeight: false,
+
     responsive: [
+      { breakpoint: 1536, settings: { slidesToShow: 4 } },
       { breakpoint: 1280, settings: { slidesToShow: 3 } },
       { breakpoint: 1024, settings: { slidesToShow: 2 } },
-      { breakpoint: 768, settings: { slidesToShow: 1 } },
+      { breakpoint: 768, settings: { slidesToShow: 2 } },
+      { breakpoint: 640, settings: { slidesToShow: 1 } },
     ],
   };
   // for send Enquiry 'add_property_enquiry' api
@@ -526,22 +546,74 @@ const ProjectDetail = () => {
   }, [openContactModalAfterLogin]);
 
   const formatPrice = (price) => {
-    if (!price) return "";
-    price = parseInt(price);
+  if (!price) return "";
 
-    if (price >= 10000000) {
-      return parseFloat((price / 10000000).toFixed(1)) + " Cr";
-    } else if (price >= 100000) {
-      return parseFloat((price / 100000).toFixed(1)) + " L";
-    } else if (price >= 1000) {
-      return parseFloat((price / 1000).toFixed(1)) + " K";
-    } else {
-      return price.toString();
+  price = Number(price);
+
+  if (price >= 10000000) {
+    return `${(price / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
+  } else if (price >= 100000) {
+    return `${(price / 100000).toFixed(2).replace(/\.?0+$/, "")} L`;
+  } else if (price >= 1000) {
+    return `${(price / 1000).toFixed(2).replace(/\.?0+$/, "")} K`;
+  } else {
+    return price.toString();
+  }
+};
+
+  let userLocation = null;
+  try {
+    userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
+  } catch (e) {
+    userLocation = null;
+  }
+
+  const getProjectDistance = (project) => {
+    const projLat =
+      project.latitude ??
+      project.lat ??
+      project.Latitude ??
+      project.project_latitude ??
+      project.location?.latitude ??
+      project.location?.lat;
+
+    const projLng =
+      project.longitude ??
+      project.lng ??
+      project.Longitude ??
+      project.project_longitude ??
+      project.location?.longitude ??
+      project.location?.lng;
+
+    if (
+      userLocation &&
+      userLocation.latitude &&
+      userLocation.longitude &&
+      projLat &&
+      projLng &&
+      !isNaN(Number(projLat)) &&
+      !isNaN(Number(projLng)) &&
+      Number(projLat) !== 0 &&
+      Number(projLng) !== 0
+    ) {
+      const dist = calculateDistance(
+        Number(userLocation.latitude),
+        Number(userLocation.longitude),
+        Number(projLat),
+        Number(projLng),
+      );
+      return dist.toFixed(1);
     }
+    return null;
   };
 
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
+
+ if (typeof price === "string" && price.includes("-")) {
+    const parts = price.split("-").map((p) => p.trim());
+
+
 
     // If it's a range (contains "-"), split and format both
     if (typeof price === "string" && price.includes("-")) {
@@ -558,23 +630,23 @@ const ProjectDetail = () => {
         </>
       );
     }
-
+  }
     // Normal number formatting
-    price = parseInt(price);
-    if (isNaN(price)) return "";
+    // price = parseInt(price);
+    // if (isNaN(price)) return "";
 
-    let formatted;
-    if (price >= 10000000) {
-      formatted = parseFloat((price / 10000000).toFixed(1)) + " Cr";
-    } else if (price >= 100000) {
-      formatted = parseFloat((price / 100000).toFixed(1)) + " L";
-    } else if (price >= 1000) {
-      formatted = parseFloat((price / 1000).toFixed(1)) + " K";
-    } else {
-      formatted = price.toString();
-    }
+    // let formatted;
+    // if (price >= 10000000) {
+    //   formatted = parseFloat((price / 10000000).toFixed(1)) + " Cr";
+    // } else if (price >= 100000) {
+    //   formatted = parseFloat((price / 100000).toFixed(1)) + " L";
+    // } else if (price >= 1000) {
+    //   formatted = parseFloat((price / 1000).toFixed(1)) + " K";
+    // } else {
+    //   formatted = price.toString();
+    // }
 
-    return <span className="inline-flex items-center">{formatted}</span>;
+    return <span className="inline-flex items-center">{formatPrice(price)}</span>;
   };
 
   //  Add to favorites
@@ -763,41 +835,41 @@ const ProjectDetail = () => {
           {(projects[0]?.project_details?.address ||
             projects[0]?.project_details?.city_name ||
             projects[0]?.project_details?.state) && (
-            <>
-              <p className="text-xl font-bold text-gray-700 sm:text-xl">
-                By{" "}
-                <span className="my-text">
-                  {projects[0]?.project_details?.connect_to_name}
-                </span>
-              </p>
+              <>
+                <p className="text-xl font-bold text-gray-700 sm:text-xl">
+                  By{" "}
+                  <span className="my-text">
+                    {projects[0]?.project_details?.connect_to_name}
+                  </span>
+                </p>
 
-              <p className="mt-1 text-base text-gray-600 sm:text-lg">
-                {projects[0]?.project_details?.address && (
-                  <>
-                    <img
-                      src="/image/address_icon.png"
-                      alt="Address Icon"
-                      className="inline-block w-5 h-5 mr-2"
-                    />
-                    {projects[0].project_details.address}
-                    <br className="hidden sm:block" />
-                  </>
-                )}
+                <p className="mt-1 text-base text-gray-600 sm:text-lg">
+                  {projects[0]?.project_details?.address && (
+                    <>
+                      <img
+                        src="/image/address_icon.png"
+                        alt="Address Icon"
+                        className="inline-block w-5 h-5 mr-2"
+                      />
+                      {projects[0].project_details.address}
+                      <br className="hidden sm:block" />
+                    </>
+                  )}
 
-                {(projects[0]?.project_details?.city_name ||
-                  projects[0]?.project_details?.state) && (
-                  <>
-                    {projects[0]?.project_details?.city_name || ""}
-                    {projects[0]?.project_details?.city_name &&
-                    projects[0]?.project_details?.state
-                      ? ", "
-                      : ""}
-                    {projects[0]?.project_details?.state || ""}
-                  </>
-                )}
-              </p>
-            </>
-          )}
+                  {(projects[0]?.project_details?.city_name ||
+                    projects[0]?.project_details?.state) && (
+                      <>
+                        {projects[0]?.project_details?.city_name || ""}
+                        {projects[0]?.project_details?.city_name &&
+                          projects[0]?.project_details?.state
+                          ? ", "
+                          : ""}
+                        {projects[0]?.project_details?.state || ""}
+                      </>
+                    )}
+                </p>
+              </>
+            )}
         </div>
 
         {/* Property Features */}
@@ -845,11 +917,11 @@ const ProjectDetail = () => {
                     {projects[0]?.project_details?.area}{" "}
                     {projects[0]?.project_details?.area_in
                       ? projects[0]?.project_details?.area_in
-                          .charAt(0)
-                          .toUpperCase() +
-                        projects[0]?.project_details?.area_in
-                          .slice(1)
-                          .toLowerCase()
+                        .charAt(0)
+                        .toUpperCase() +
+                      projects[0]?.project_details?.area_in
+                        .slice(1)
+                        .toLowerCase()
                       : ""}
                   </span>
                 </p>
@@ -870,11 +942,11 @@ const ProjectDetail = () => {
                     {projects[0]?.project_details?.carpet_area}{" "}
                     {projects[0]?.project_details?.carpet_area_unit
                       ? projects[0]?.project_details?.carpet_area_unit
-                          .charAt(0)
-                          .toUpperCase() +
-                        projects[0]?.project_details?.carpet_area_unit
-                          .slice(1)
-                          .toLowerCase()
+                        .charAt(0)
+                        .toUpperCase() +
+                      projects[0]?.project_details?.carpet_area_unit
+                        .slice(1)
+                        .toLowerCase()
                       : ""}
                   </span>
                 </p>
@@ -913,42 +985,41 @@ const ProjectDetail = () => {
           <div className="flex flex-wrap w-full gap-2 mt-4 sm:gap-4 md:mt-0 sm:w-auto">
             {projects[0]?.project_details?.virtual_tour_availability ===
               "Yes" && (
-              <button
-                className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
-                ${
-                  scheduledDateLabel === "Virtual Tour"
-                    ? "bg-white border my-text rounded-lg"
-                    : projects[0]?.tour_schedule?.[0]?.status === "Accepted"
-                      ? "bg-green-500 text-white rounded-full"
-                      : "bg-[#FFD700] text-black rounded-full"
-                }`}
-                onClick={() => {
-                  const token = sessionStorage.getItem("accessToken");
+                <button
+                  className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
+                ${scheduledDateLabel === "Virtual Tour"
+                      ? "bg-white border my-text rounded-lg"
+                      : projects[0]?.tour_schedule?.[0]?.status === "Accepted"
+                        ? "bg-green-500 text-white rounded-full"
+                        : "bg-[#FFD700] text-black rounded-full"
+                    }`}
+                  onClick={() => {
+                    const token = sessionStorage.getItem("accessToken");
 
-                  if (scheduledDateLabel !== "Virtual Tour") {
-                    history.push({
-                      pathname: "/dashboard",
-                      state: { page: "myVirtualtour" },
-                    });
-                  } else {
-                    if (token) {
-                      setIsModalOpen(true);
+                    if (scheduledDateLabel !== "Virtual Tour") {
+                      history.push({
+                        pathname: "/dashboard",
+                        state: { page: "myVirtualtour" },
+                      });
                     } else {
-                      setOpenVirtualTourAfterLogin(true);
-                      setIsLoginModalOpen(true);
+                      if (token) {
+                        setIsModalOpen(true);
+                      } else {
+                        setOpenVirtualTourAfterLogin(true);
+                        setIsLoginModalOpen(true);
+                      }
                     }
-                  }
-                }}
-              >
-                <PiCubeFocus size={20} />
+                  }}
+                >
+                  <PiCubeFocus size={20} />
 
-                {scheduledDateLabel}
+                  {scheduledDateLabel}
 
-                {scheduledDateLabel !== "Virtual Tour" && (
-                  <HiOutlineArrowRight size={16} />
-                )}
-              </button>
-            )}
+                  {scheduledDateLabel !== "Virtual Tour" && (
+                    <HiOutlineArrowRight size={16} />
+                  )}
+                </button>
+              )}
 
             {isModalOpen && (
               <GetScheduleModal
@@ -1240,11 +1311,10 @@ const ProjectDetail = () => {
                   key={tab.key}
                   type="button"
                   onClick={() => handleDetailTabClick(tab)}
-                  className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                    activeDetailTab === tab.key
-                      ? "border-rose-600 text-rose-600"
-                      : "border-transparent text-gray-600 hover:text-rose-600"
-                  }`}
+                  className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeDetailTab === tab.key
+                    ? "border-rose-600 text-rose-600"
+                    : "border-transparent text-gray-600 hover:text-rose-600"
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -1517,7 +1587,7 @@ const ProjectDetail = () => {
                                 year: "numeric",
                               },
                             );
-                          } catch (e) {}
+                          } catch (e) { }
                         }
 
                         // boolean handling
@@ -1710,11 +1780,10 @@ const ProjectDetail = () => {
 
             {enquiryStatus && (
               <div
-                className={`text-center mt-4 text-lg ${
-                  enquiryStatus.type === "success"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
+                className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
+                  ? "text-green-600"
+                  : "text-red-600"
+                  }`}
               >
                 {enquiryStatus.message}
               </div>
@@ -1772,7 +1841,7 @@ const ProjectDetail = () => {
               className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg"
               onClick={() => sliderRef.current.slickPrev()}
             >
-              <GoArrowLeft className="text-3xl text-black" />
+              <GoArrowLeft className="text-xl text-black md:text-2xl" />
             </button>
 
             <button
@@ -1784,59 +1853,6 @@ const ProjectDetail = () => {
           </div>
         </div>
 
-        {/* <Slider ref={sliderRef} {...settings} className="mx-auto mt-4">
-          {projectList
-            .filter(
-              (project) =>
-                project?.cover_image &&
-                project?.project_name &&
-                project?.average_project_price,
-            )
-            .map((project, index) => (
-              <div
-                key={index}
-                className="px-4 cursor-pointer"
-                onClick={() => history.push(`/projectdetail/${project._id}`)}
-              >
-                <div className="max-w-[500px] w-full bg-white rounded-3xl">
-                  <div className="relative">
-                    <img
-                      src={project.cover_image}
-                      alt={project.project_name}
-                      className="object-cover w-full h-64 md:h-96 rounded-3xl"
-                    />
-
-                    <div className="absolute bottom-0 flex flex-col justify-end h-24 p-4 transform -translate-x-1/2 left-1/2 w-80 bg-gray-800/60 backdrop-blur-md rounded-t-3xl">
-                      <div className="absolute flex items-center justify-center overflow-hidden transform -translate-x-1/2 bg-white border-2 border-gray-200 rounded-full shadow-lg -top-7 left-1/2 w-14 h-14">
-                        <img
-                          src={project.logo}
-                          alt="Project Logo"
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-
-                      <h3 className="text-xl font-semibold text-center text-white">
-                        {project.project_name}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="px-4">
-                    <div className="p-3 text-center bg-white shadow-sm rounded-b-3xl">
-                      <p className="text-lg text-gray-500 sm:text-base truncate">
-                        {project.project_description || "No description"}
-                      </p>
-                      <h4 className="mt-2 text-lg font-bold text-gray-800 sm:text-md">
-                        {formatAverageProjectPrice(
-                          project.average_project_price,
-                        )}
-                      </h4>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-        </Slider> */}
         <Slider ref={sliderRef} {...settings} className="mx-auto mt-4">
           {projectList
             .filter(
@@ -1943,9 +1959,9 @@ const ProjectDetail = () => {
                         ? project.congfigurations.includes("BHK")
                           ? project.congfigurations
                           : project.congfigurations
-                              .split(",")
-                              .map((c) => `${c.trim()} BHK`)
-                              .join(", ")
+                            .split(",")
+                            .map((c) => `${c.trim()} BHK`)
+                            .join(", ")
                         : ""}{" "}
                       {project.project_type} for Sale in{" "}
                       {project.address_area || ""}
@@ -2012,30 +2028,67 @@ const ProjectDetail = () => {
                         <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
                         <div className="flex flex-col min-w-0 leading-tight">
                           <p className="m-0 text-sm font-semibold leading-4 truncate">
-                            {project.area ? `${project.area} sq.ft` : "N/A"}
+                            {project.area ? `${project.area} Sq.ft` : "N/A"}
                           </p>
                           <p className="m-0 text-xs leading-4 text-gray-500">
-                            Built Up Ar...
+                            Built Up Area
                           </p>
                         </div>
                       </div>
                     </div>
-                    {/* Row 5: Posted By + Share */}
+
+                    <hr className="my-1 border-gray-100" />
+
+                    {/* Row 5 : Posted By | Days | Distance | Share */}
                     <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
+                      {/* Left */}
                       <div className="flex items-center flex-wrap min-w-0">
-                        <span>Posted by {project.user_type || "Builder"}</span>
-                        {project.days_since_created && (
+                        {/* Posted By */}
+                        <div className="flex items-center">
+                          <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
+                          <span className="truncate">
+                            Posted by {project.user_type || "Builder"}
+                          </span>
+                        </div>
+
+                        {/* Dot */}
+                        <span className="mx-2 text-gray-400">•</span>
+
+                        {/* Days */}
+                        <span className="whitespace-nowrap">
+                          {project.days_since_created !== undefined &&
+                            project.days_since_created !== null
+                            ? project.days_since_created === 0
+                              ? "Today"
+                              : `${project.days_since_created} days ago`
+                            : project.created_at
+                              ? `${Math.max(
+                                0,
+                                Math.floor(
+                                  (Date.now() -
+                                    new Date(project.created_at).getTime()) /
+                                  (1000 * 60 * 60 * 24),
+                                ),
+                              )} days ago`
+                              : "Recently"}
+                        </span>
+
+                        {/* Distance */}
+                        {getProjectDistance(project) && (
                           <>
                             <span className="mx-2 text-gray-400">•</span>
-                            <span className="whitespace-nowrap">
-                              {project.days_since_created} days ago
-                            </span>
+                            <div className="flex items-center whitespace-nowrap">
+                              <FaMapMarkerAlt className="mr-1 text-red-500" />
+                              {getProjectDistance(project)} km from you
+                            </div>
                           </>
                         )}
                       </div>
+
+                      {/* Share */}
                       <FontAwesomeIcon
                         icon={faShareNodes}
-                        className="ml-2 text-[17px] text-gray-500 cursor-pointer hover:text-blue-500"
+                        className="ml-2 text-[17px] text-gray-500 transition-colors cursor-pointer hover:text-blue-500"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -2046,27 +2099,26 @@ const ProjectDetail = () => {
 
                     {/* Row 6: Owner Details */}
                     <div className="flex items-center pt-2">
-                      <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
+                      <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
                         {project.property_owner_image &&
-                        !project.property_owner_image.includes(
-                          "default_profile",
-                        ) ? (
+                          !project.property_owner_image.includes(
+                            "default_profile",
+                          ) ? (
                           <img
                             src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
-                            alt={project.connect_to_name || "Owner"}
+                            alt={project.connect_to_name || "Builder"}
                             className="object-cover w-full h-full rounded-full"
                           />
                         ) : (
-                          <span className="text-base text-blue-600 font-bold">
-                            {(project.connect_to_name || "B")[0].toUpperCase()}
-                          </span>
+                          <AiOutlineUser className="text-xl text-blue-600" />
                         )}
                       </div>
-                      <div className="flex items-center ml-3">
+
+                      <div className="flex items-center ml-4">
                         <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
                           {project.connect_to_name || "Builder"}
                         </span>
-                        <div className="w-px h-4 mx-3 bg-gray-300"></div>
+                        <div className="w-px h-4 mx-4 bg-gray-300"></div>
                         <span className="text-sm text-gray-500 whitespace-nowrap">
                           {project.user_type || "Builder"}
                         </span>
@@ -2079,6 +2131,7 @@ const ProjectDetail = () => {
         </Slider>
       </div>
       {/* Other Projects Section End */}
+
     </div>
   );
 };

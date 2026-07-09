@@ -2323,7 +2323,7 @@ Make it engaging, attractive, and human-like.
                           <option value="2">2</option>
                           <option value="3">3</option>
                           <option value="4">4</option>
-                          <option value="4+">4+</option>
+                          <option value="4">4+</option>
                         </select>
                       </div>
                     )}
@@ -2341,7 +2341,7 @@ Make it engaging, attractive, and human-like.
 
                               setFormData((prev) => ({
                                 ...prev,
-                                washroom: e.target.value,
+                                commercial_washroom: e.target.value,
                               }));
                             }}
                             className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
@@ -2379,7 +2379,7 @@ Make it engaging, attractive, and human-like.
                             <option value="2">2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
-                            <option value="4+">4+</option>
+                            <option value="4">4+</option>
                           </select>
                         </div>
                       )}
@@ -3455,7 +3455,7 @@ Make it engaging, attractive, and human-like.
                           <option value="2">2</option>
                           <option value="3">3</option>
                           <option value="4">4</option>
-                          <option value="4+">4+</option>
+                          <option value="4">4+</option>
                         </select>
                       </div>
                     )}

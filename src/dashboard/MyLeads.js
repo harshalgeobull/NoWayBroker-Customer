@@ -19,39 +19,28 @@ const MyLeads = () => {
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   const formatPrice = (price) => {
-    if (!price) return "";
-    price = parseInt(price);
+  if (!price) return "";
 
-    if (price >= 10000000) {
-      return parseFloat((price / 10000000).toFixed(1)) + " Cr";
-    } else if (price >= 100000) {
-      return parseFloat((price / 100000).toFixed(1)) + " L";
-    } else if (price >= 1000) {
-      return parseFloat((price / 1000).toFixed(1)) + " K";
-    } else {
-      return price.toString();
-    }
-  };
+  price = Number(price);
+
+  if (price >= 10000000) {
+    return `${(price / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
+  } else if (price >= 100000) {
+    return `${(price / 100000).toFixed(2).replace(/\.?0+$/, "")} L`;
+  } else if (price >= 1000) {
+    return `${(price / 1000).toFixed(2).replace(/\.?0+$/, "")} K`;
+  } else {
+    return price.toString();
+  }
+};
 
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
 
     const formatValue = (val) => {
-      if (val === null || val === undefined) return "";
-      const numericStr = String(val).replace(/[^\d.-]/g, "");
-      const n = parseFloat(numericStr);
-      if (Number.isNaN(n)) return "";
-
-      if (n >= 10000000)
-        return (n / 10000000).toFixed(1).replace(/\.0$/, "") + " Cr";
-      if (n >= 100000)
-        return (n / 100000).toFixed(1).replace(/\.0$/, "") + " L";
-      if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + " K";
-
-      // 👇 NEW: treat any value below 1000 as K
-      return n.toFixed(1).replace(/\.0$/, "") + " K";
-    };
-
+  if (val === null || val === undefined) return "";
+  return formatPrice(Number(val));
+};
     let values;
     if (typeof price === "string" && /[-–—]/.test(price)) {
       values = price
@@ -121,47 +110,10 @@ const MyLeads = () => {
                 item?.project_details?.address_area ||
                 "Not provided",
               price: isProperty
-                ? `₹${
-                    Number(item.enquiry_property_price) >= 10000000
-                      ? (Number(item.enquiry_property_price) / 10000000)
-                          .toFixed(1)
-                          .replace(/\.0$/, "") + " Cr"
-                      : Number(item.enquiry_property_price) >= 100000
-                        ? (Number(item.enquiry_property_price) / 100000)
-                            .toFixed(1)
-                            .replace(/\.0$/, "") + " L"
-                        : Number(item.enquiry_property_price) >= 1000
-                          ? (Number(item.enquiry_property_price) / 1000)
-                              .toFixed(1)
-                              .replace(/\.0$/, "") + " K"
-                          : item.enquiry_property_price
-                  }`
-                : isProject
-                  ? `₹${
-                      Number(item.enquiry_average_project_price) >= 10000000
-                        ? (
-                            Number(item.enquiry_average_project_price) /
-                            10000000
-                          )
-                            .toFixed(1)
-                            .replace(/\.0$/, "") + " Cr"
-                        : Number(item.enquiry_average_project_price) >= 100000
-                          ? (
-                              Number(item.enquiry_average_project_price) /
-                              100000
-                            )
-                              .toFixed(1)
-                              .replace(/\.0$/, "") + " L"
-                          : Number(item.enquiry_average_project_price) >= 1000
-                            ? (
-                                Number(item.enquiry_average_project_price) /
-                                1000
-                              )
-                                .toFixed(1)
-                                .replace(/\.0$/, "") + " K"
-                            : item.enquiry_average_project_price
-                    }`
-                  : "N/A",
+  ? `₹ ${formatPrice(item.enquiry_property_price)}`
+  : isProject
+    ? `₹ ${formatPrice(item.enquiry_average_project_price)}`
+    : "N/A",
               rent: item.rent,
               rent_duration: item.rent_duration,
               receivedOn: new Date(item.created_at).toLocaleDateString(

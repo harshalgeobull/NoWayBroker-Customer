@@ -12,25 +12,42 @@ import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Slider from "react-slick";
 import { RiArrowDropDownLine } from "react-icons/ri";
-import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
+import { MdOutlineNavigateBefore, MdOutlineNavigateNext, MdApartment } from "react-icons/md";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareNodes, faUserCircle } from "@fortawesome/free-solid-svg-icons";
-import { AiOutlineUser } from "react-icons/ai";
+import { AiOutlineUser, AiOutlineClockCircle } from "react-icons/ai";
 import { MdOutlineBedroomParent } from "react-icons/md";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { BiArea } from "react-icons/bi";
-import { FaRupeeSign } from "react-icons/fa";
+import { FaRupeeSign, FaBath, FaWhatsapp, FaPhone, FaUser } from "react-icons/fa";
 import { faChair } from "@fortawesome/free-solid-svg-icons";
 import { PiShareNetworkLight } from "react-icons/pi";
 import { PiCubeFocus } from "react-icons/pi";
-import { Heart } from "lucide-react";
+import { Heart, Building2 } from "lucide-react";
+import { RiRuler2Line } from "react-icons/ri";
 import { toast } from "react-toastify";
 import ShareModal from "../containers/ShareModal";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 import { useCity } from "./SearchContext";
-import { FaWhatsapp, FaPhone } from "react-icons/fa";
 import ContactDetails from "../containers/ContactDetails";
+
+// Distance helper (same logic used across the app - e.g. OfferDetail)
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
 
 const FeaturedDashboard = () => {
   const [hoveredPropertyId, setHoveredPropertyId] = useState(null);
@@ -888,7 +905,7 @@ const FeaturedDashboard = () => {
 
       setError(
         error?.response?.data?.message ||
-          "Failed to load properties. Please try again.",
+        "Failed to load properties. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -905,6 +922,18 @@ const FeaturedDashboard = () => {
     propertytype,
     filterTrigger,
   ]);
+
+//   useEffect(() => {
+//   console.log("Properties:", properties);
+
+//   properties.forEach((property) => {
+//     console.log(
+//       property.property_name,
+//       property.latitude,
+//       property.longitude
+//     );
+//   });
+// }, [properties]);
 
   //  Add to favorites
   const addToFavorites = async (PropertyId) => {
@@ -952,24 +981,24 @@ const FeaturedDashboard = () => {
   };
 
   const formatPrice = (price) => {
-    if (!price) return "";
+  if (!price) return "";
 
-    price = parseInt(price);
+  price = Number(price);
 
-    const formatNumber = (num) => {
-      return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2); // no decimals if whole number
-    };
-
-    if (price >= 10000000) {
-      return `₹ ${formatNumber(price / 10000000)} Cr`; // Crores
-    } else if (price >= 100000) {
-      return `₹ ${formatNumber(price / 100000)} L`; // Lakhs
-    } else if (price >= 1000) {
-      return `₹ ${formatNumber(price / 1000)} K`; // Thousands
-    } else {
-      return `₹ ${price}`;
-    }
+  const formatNumber = (num) => {
+    return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2);
   };
+
+  if (price >= 10000000) {
+    return `₹ ${formatNumber(price / 10000000)} Cr`;
+  } else if (price >= 100000) {
+    return `₹ ${formatNumber(price / 100000)} L`;
+  } else if (price >= 1000) {
+    return `₹ ${formatNumber(price / 1000)} K`;
+  } else {
+    return `₹ ${price}`;
+  }
+};
 
   const createCustomIcon = (property, isActive = false) => {
     // Decide what to display
@@ -1693,6 +1722,108 @@ const FeaturedDashboard = () => {
   const FILTER_WIDTH = "w-[220px]";
   const DROPDOWN_WIDTH = 320;
 
+  // ============================================================
+  // CARD DESIGN HELPERS (aligned with OfferDetail's property card)
+  // ============================================================
+
+  // Subtitle line -> "<BHK> <Type> for <Sale/Rent/Lease> in <Area, City>"
+  const getSubtitle = (property) => {
+    const area = property.address_area || property.address || "";
+    const city = property.city_name || "";
+
+    const loc =
+      area && city && area.toLowerCase().includes(city.toLowerCase())
+        ? area
+        : `${area}${area && city ? ", " : ""}${city}`;
+
+    const type =
+      property.property_type === "Office"
+        ? "Office Space"
+        : property.property_type === "Retail"
+          ? "Retail Space"
+          : property.property_type || property.building_type || "Property";
+
+    const category = property.property_category_type || "";
+
+    if (category === "Commercial Buy" || category === "Commercial Lease") {
+      return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"} in ${loc || "N/A"
+        }`;
+    }
+
+    if (
+      category.includes("PG") ||
+      category.includes("Co-Living") ||
+      category.includes("Coliving")
+    ) {
+      return `${type} for Rent in ${loc || "N/A"}`;
+    }
+
+    const action = category === "Buy" ? "Sale" : category || "Sale";
+
+    return `${property.bhk_type || ""} ${type} for ${action} in ${loc || "N/A"
+      }`;
+  };
+
+  // Bottom-left category badge
+  const renderCategoryBadge = (property) => {
+    const rawCategory = property.property_category_type || "";
+
+    const normalizedCategory = rawCategory
+      .replace(/\s+/g, " ")
+      .replace(/-/g, " ")
+      .replace(/\//g, " ")
+      .trim()
+      .toLowerCase();
+
+    let badgeText = "UNKNOWN";
+    let badgeColor = "bg-gray-500";
+
+    if (normalizedCategory === "buy") {
+      badgeText = "FOR BUY";
+      badgeColor = "bg-green-500";
+    } else if (normalizedCategory === "rent") {
+      badgeText = "FOR RENT";
+      badgeColor = "bg-blue-500";
+    } else if (normalizedCategory.includes("commercial buy")) {
+      badgeText = "COMMERCIAL BUY";
+      badgeColor = "bg-purple-500";
+    } else if (normalizedCategory.includes("commercial lease")) {
+      badgeText = "COMMERCIAL LEASE";
+      badgeColor = "bg-indigo-500";
+    } else if (
+      normalizedCategory.includes("pg") ||
+      normalizedCategory.includes("co living") ||
+      normalizedCategory.includes("coliving")
+    ) {
+      badgeText = "PG / CO-LIVING";
+      badgeColor = "bg-yellow-500";
+    } else if (normalizedCategory.includes("residential")) {
+      badgeText = "RESIDENTIAL";
+      badgeColor = "bg-pink-500";
+    }
+
+    return (
+      <span
+        className={`text-white text-xs px-3 py-1 rounded-se-lg ${badgeColor}`}
+      >
+        {badgeText}
+      </span>
+    );
+  };
+
+  // Distance from user (same logic as OfferDetail)
+  const getDistance = (property) => {
+    if (userLocation && property.latitude && property.longitude) {
+      return calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        parseFloat(property.latitude),
+        parseFloat(property.longitude),
+      ).toFixed(1);
+    }
+    return null;
+  };
+
   return (
     <>
       <div className="flex flex-col p-1 space-y-4 sm:p-6 bg-rose-50 rounded-xl">
@@ -1822,7 +1953,7 @@ const FeaturedDashboard = () => {
                         <input
                           type={
                             propertyType === "Commercial Lease" &&
-                            buildingType === "Commercial"
+                              buildingType === "Commercial"
                               ? "radio"
                               : "checkbox"
                           }
@@ -2104,11 +2235,11 @@ const FeaturedDashboard = () => {
                 <span className="block pr-8 truncate text-left">
                   {selectedAmenities.length > 0
                     ? amenitiesList
-                        .filter((item) =>
-                          selectedAmenities.includes(String(item._id)),
-                        )
-                        .map((item) => item.amenity_name)
-                        .join(", ")
+                      .filter((item) =>
+                        selectedAmenities.includes(String(item._id)),
+                      )
+                      .map((item) => item.amenity_name)
+                      .join(", ")
                     : "Amenities"}
                 </span>
 
@@ -3273,357 +3404,435 @@ const FeaturedDashboard = () => {
               {/* Right: Properties */}
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                 {properties.length > 0 ? (
-                  properties.map((property) => (
-                    <div
-                      key={property._id}
-                      className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${
-                        hoveredPropertyId === property._id ? "bg-green-200" : ""
-                      }`}
-                      onMouseEnter={() => setHoveredPropertyId(property._id)}
-                      onMouseLeave={() => setHoveredPropertyId(null)}
-                    >
-                      <div className="relative" key={property._id}>
-                        <Link
-                          to={`/propertydetails/${property._id}`}
-                          className="block overflow-hidden no-underline bg-white border-2 rounded-lg hover:no-underline"
-                        >
-                          {1 + (property?.property_images?.length || 0) > 1 ? (
-                            <Slider
-                              dots
-                              infinite
-                              speed={500}
-                              slidesToShow={1}
-                              slidesToScroll={1}
-                              arrows
-                              autoplay
-                              autoplaySpeed={2000}
-                              beforeChange={(current, next) =>
-                                setActiveIndexes((prev) => ({
-                                  ...prev,
-                                  [property._id]: next,
-                                }))
-                              }
-                              initialSlide={activeIndexes[property._id] || 0}
-                              customPaging={(i) => {
-                                const activeSlide =
-                                  activeIndexes[property._id] || 0;
-                                const totalImages =
-                                  1 + (property?.property_images?.length || 0);
-                                const isActive =
-                                  i === activeSlide % totalImages;
-                                return (
-                                  <div
-                                    style={{
-                                      width: "10px",
-                                      height: "10px",
-                                      borderRadius: "50%",
-                                      background: isActive ? "#fff" : "#888",
-                                      margin: "0 5px",
-                                      cursor: "pointer",
-                                    }}
+                  properties.map((property) => {
+                    const distance = getDistance(property);
+                    const subtitle = getSubtitle(property);
+
+                    return (
+                      <div
+                        key={property._id}
+                        className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${hoveredPropertyId === property._id ? "bg-green-200" : ""
+                          }`}
+                        onMouseEnter={() => setHoveredPropertyId(property._id)}
+                        onMouseLeave={() => setHoveredPropertyId(null)}
+                      >
+                        <div className="relative" key={property._id}>
+                          <Link
+                            to={`/propertydetails/${property._id}`}
+                            className="block overflow-hidden no-underline bg-white border-2 rounded-lg hover:no-underline"
+                          >
+                            {1 + (property?.property_images?.length || 0) > 1 ? (
+                              <Slider
+                                dots
+                                infinite
+                                speed={500}
+                                slidesToShow={1}
+                                slidesToScroll={1}
+                                arrows
+                                autoplay
+                                autoplaySpeed={2000}
+                                beforeChange={(current, next) =>
+                                  setActiveIndexes((prev) => ({
+                                    ...prev,
+                                    [property._id]: next,
+                                  }))
+                                }
+                                initialSlide={activeIndexes[property._id] || 0}
+                                customPaging={(i) => {
+                                  const activeSlide =
+                                    activeIndexes[property._id] || 0;
+                                  const totalImages =
+                                    1 + (property?.property_images?.length || 0);
+                                  const isActive =
+                                    i === activeSlide % totalImages;
+                                  return (
+                                    <div
+                                      style={{
+                                        width: "10px",
+                                        height: "10px",
+                                        borderRadius: "50%",
+                                        background: isActive ? "#fff" : "#888",
+                                        margin: "0 5px",
+                                        cursor: "pointer",
+                                      }}
+                                    />
+                                  );
+                                }}
+                                appendDots={(dots) => {
+                                  const totalImages =
+                                    1 + (property?.property_images?.length || 0);
+                                  const visibleDots = dots.slice(0, totalImages);
+                                  return (
+                                    <div
+                                      style={{
+                                        position: "absolute",
+                                        bottom: "10px",
+                                        left: "50%",
+                                        transform: "translateX(-50%)",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        width: "100%",
+                                      }}
+                                    >
+                                      {visibleDots}
+                                    </div>
+                                  );
+                                }}
+                                className="rounded-t-2xl"
+                              >
+                                {/* First slide: cover image */}
+                                <div key={`cover-${property._id}`}>
+                                  <img
+                                    src={property.cover_image}
+                                    alt="Cover"
+                                    className="object-cover w-full h-48 rounded-t-2xl"
                                   />
-                                );
-                              }}
-                              appendDots={(dots) => {
-                                const totalImages =
-                                  1 + (property?.property_images?.length || 0);
-                                const visibleDots = dots.slice(0, totalImages);
-                                return (
-                                  <div
-                                    style={{
-                                      position: "absolute",
-                                      bottom: "10px",
-                                      left: "50%",
-                                      transform: "translateX(-50%)",
-                                      display: "flex",
-                                      justifyContent: "center",
-                                      width: "100%",
-                                    }}
-                                  >
-                                    {visibleDots}
-                                  </div>
-                                );
-                              }}
-                              className="rounded-t-2xl"
-                            >
-                              {/* First slide: cover image */}
-                              <div key={`cover-${property._id}`}>
+                                </div>
+
+                                {/* Other property images */}
+                                {(property?.property_images || []).map(
+                                  (imgObj) => (
+                                    <div key={imgObj._id}>
+                                      <img
+                                        src={imgObj.image}
+                                        alt="Property"
+                                        className="object-cover w-full h-48 rounded-t-2xl"
+                                      />
+                                    </div>
+                                  ),
+                                )}
+                              </Slider>
+                            ) : (
+                              <div>
                                 <img
                                   src={property.cover_image}
                                   alt="Cover"
                                   className="object-cover w-full h-48 rounded-t-2xl"
                                 />
                               </div>
+                            )}
+                          </Link>
 
-                              {/* Other property images */}
-                              {(property?.property_images || []).map(
-                                (imgObj) => (
-                                  <div key={imgObj._id}>
-                                    <img
-                                      src={imgObj.image}
-                                      alt="Property"
-                                      className="object-cover w-full h-48 rounded-t-2xl"
-                                    />
-                                  </div>
-                                ),
-                              )}
-                            </Slider>
-                          ) : (
-                            <div>
-                              <img
-                                src={property.cover_image}
-                                alt="Cover"
-                                className="object-cover w-full h-48 rounded-t-2xl"
-                              />
-                            </div>
-                          )}
-                        </Link>
-
-                        {/* 10 Days NoWayBroker Tag (Top Left) */}
-                        <span className="absolute px-2 py-1 text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm">
-                          {property.days_since_created} days on NoWayBroker
-                        </span>
-
-                        {/* Virtual Tour & Heart Icon (Top Right) */}
-                        <div className="absolute flex items-center space-x-2 top-2 right-2">
-                          {property.virtual_tour_availability === "Yes" && (
-                            <span className="flex items-center gap-1 px-2 py-1 text-xs font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm">
-                              <PiCubeFocus className="text-sm text-white" />
-                              Virtual Tour
-                            </span>
-                          )}
-                          <button
-                            className="p-1.5 text-xs font-normal text-white bg-opacity-50 rounded-full bg-gray-800/60 backdrop-blur-sm"
-                            onClick={() => {
-                              if (!accessToken) {
-                                setIsLoginModalOpen(true);
-                                return;
-                              }
-                              if (property.is_favorite) {
-                                removeFromFavorites(property.favorite_id);
-                              } else {
-                                addToFavorites(property._id);
-                              }
-                            }}
-                          >
-                            <Heart
-                              size={20}
-                              stroke={property.is_favorite ? "none" : "white"}
-                              color={
-                                property.is_favorite
-                                  ? "red"
-                                  : "rgba(75, 85, 99, 0.4) "
-                              }
-                              fill={
-                                property.is_favorite
-                                  ? "red"
-                                  : "rgba(75, 85, 99, 0.4) "
-                              }
-                              strokeWidth={2}
-                            />
-                          </button>
-                        </div>
-
-                        {/* FOR BUY / RENT / UNKNOWN */}
-                        <div className="absolute bottom-0 left-0">
-                          {(() => {
-                            const rawCategory =
-                              property.property_category_type || "";
-
-                            const normalizedCategory = rawCategory
-                              .replace(/\s+/g, " ")
-                              .replace(/-/g, " ")
-                              .replace(/\//g, " ")
-                              .trim()
-                              .toLowerCase();
-
-                            let badgeText = "UNKNOWN";
-                            let badgeColor = "bg-gray-500";
-
-                            if (normalizedCategory === "buy") {
-                              badgeText = "FOR BUY";
-                              badgeColor = "bg-green-500";
-                            } else if (normalizedCategory === "rent") {
-                              badgeText = "FOR RENT";
-                              badgeColor = "bg-blue-500";
-                            } else if (
-                              normalizedCategory.includes("commercial buy")
-                            ) {
-                              badgeText = "COMMERCIAL BUY";
-                              badgeColor = "bg-purple-500";
-                            } else if (
-                              normalizedCategory.includes("commercial lease")
-                            ) {
-                              badgeText = "COMMERCIAL LEASE";
-                              badgeColor = "bg-indigo-500";
-                            } else if (
-                              normalizedCategory.includes("pg") ||
-                              normalizedCategory.includes("co living") ||
-                              normalizedCategory.includes("coliving")
-                            ) {
-                              badgeText = "PG / CO-LIVING";
-                              badgeColor = "bg-yellow-500";
-                            } else if (
-                              normalizedCategory.includes("residential")
-                            ) {
-                              badgeText = "RESIDENTIAL";
-                              badgeColor = "bg-pink-500";
-                            }
-
-                            return (
-                              <span
-                                className={`text-white text-xs px-3 py-1 rounded-se-lg ${badgeColor}`}
-                              >
-                                {badgeText}
+                          {/* Virtual Tour & Heart Icon (Top Right) */}
+                          <div className="absolute flex items-center space-x-2 top-2 right-2">
+                            {property.virtual_tour_availability === "Yes" && (
+                              <span className="flex items-center gap-1 px-2 py-1 text-xs font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm">
+                                <PiCubeFocus className="text-sm text-white" />
+                                Virtual Tour
                               </span>
-                            );
-                          })()}
+                            )}
+                            <button
+                              className="p-1.5 text-xs font-normal text-white bg-opacity-50 rounded-full bg-gray-800/60 backdrop-blur-sm"
+                              onClick={() => {
+                                if (!accessToken) {
+                                  setIsLoginModalOpen(true);
+                                  return;
+                                }
+                                if (property.is_favorite) {
+                                  removeFromFavorites(property.favorite_id);
+                                } else {
+                                  addToFavorites(property._id);
+                                }
+                              }}
+                            >
+                              <Heart
+                                size={20}
+                                stroke={property.is_favorite ? "none" : "white"}
+                                color={
+                                  property.is_favorite
+                                    ? "red"
+                                    : "rgba(75, 85, 99, 0.4) "
+                                }
+                                fill={
+                                  property.is_favorite
+                                    ? "red"
+                                    : "rgba(75, 85, 99, 0.4) "
+                                }
+                                strokeWidth={2}
+                              />
+                            </button>
+                          </div>
+
+                          {/* Category Tag (Bottom Left) - same as OfferDetail */}
+                          <div className="absolute bottom-0 left-0">
+                            {renderCategoryBadge(property)}
+                          </div>
+
+                          {/* FEATURED tag - only if marked */}
+                          {property.mark_as_featured === "Yes" && (
+                            <div className="absolute bottom-0 right-0">
+                              <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
+                                FEATURED
+                              </span>
+                            </div>
+                          )}
                         </div>
 
-                        {/* FEATURED tag - only if marked */}
-                        {property.mark_as_featured === "Yes" && (
-                          <div className="absolute bottom-0 right-0">
-                            <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
-                              FEATURED
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Property Description */}
-                      <div className="p-1">
-                        {/* Property Name & Share Button */}
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-xl font-semibold text-gray-800 truncate">
-                            {property.property_name}
+                        {/* Property Description (Spotlight style) */}
+                              {/* Property Details - Refined 99acres Style */}
+                      <div className="flex flex-col flex-1 p-3 text-black bg-white">
+                        {/* Price Section */}
+                        <div className="flex items-start justify-between gap-3 mb-0">
+                          {/* Property Name */}
+                          <h3
+                            className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate"
+                            title={property.property_name}
+                          >
+                            {property.property_name || "N/A"}
                           </h3>
-                          <PiShareNetworkLight
-                            className="p-2 text-gray-500 bg-white rounded shadow cursor-pointer"
-                            size={32}
-                            onClick={() =>
-                              openShareModal(
-                                `${window.location.origin}/propertydetails/${property._id}`,
-                                property._id,
-                              )
-                            }
-                          />
+
+                          {/* Furnishing */}
+                          <span
+                            className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-[#E85B6B] sm:text-base whitespace-nowrap"
+                            title={property.furnished_type}
+                          >
+                            {property.furnished_type || "Un-Furnished"}
+                          </span>
                         </div>
 
-                        {/* Property Details (Only 3 elements on top) */}
-                        <div className="flex flex-wrap items-center gap-4 mt-1 text-gray-700">
-                          {/* Price */}
-                          <div className="flex items-center gap-1 text-lg font-semibold">
-                            <FaRupeeSign className="text-xl my-text" />
-                            <span>
-                              {property.property_category_type === "Rent"
-                                ? `${formatPrice(property.rent)} / ${
-                                    property.rent_duration
-                                  }`
-                                : formatPrice(property.property_price)}
-                            </span>
-                          </div>
-
-                          {/* BHK Type */}
-                          {property.bhk_type && (
-                            <div className="flex items-center gap-1">
-                              <MdOutlineBedroomParent className="text-xl my-text" />
-                              <p className="m-0 font-semibold">
-                                {property.bhk_type}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* Area in Sq Ft */}
-                          {property.area_sq && (
-                            <div className="flex items-center gap-1">
-                              <BiArea className="text-xl my-text" />
-                              <p className="m-0 font-semibold">
-                                {property.area_sq} sq ft
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Furnished/Semi-Furnished */}
-                        {property.furnished_type && (
-                          <div className="flex items-center mt-2">
-                            <FontAwesomeIcon
-                              icon={faChair}
-                              className="mr-1 my-text"
-                            />
-                            <p className="m-0 font-semibold text-black">
-                              {property.furnished_type}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Address */}
-                        <p className="mt-2 text-sm text-gray-400 truncate">
-                          <b>{property.address}</b>
+                        <p
+                          className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate"
+                          title={subtitle}
+                        >
+                          {subtitle}
                         </p>
 
-                        {/* Owner Section */}
-                        <div className="flex items-center justify-between mb-0 p-2">
-                          {/* LEFT SIDE - Owner */}
-                          <div className="flex flex-col items-center">
-                            <div className="p-2 rounded-full bg-slate-100">
-                              {property.property_owner_image ? (
-                                <img
-                                  src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
-                                  alt="Owner"
-                                  className="object-cover w-10 h-10 rounded-full"
-                                />
-                              ) : (
-                                <AiOutlineUser
-                                  className="text-gray-600"
-                                  size={30}
-                                />
-                              )}
-                            </div>
+                          {/* Row 3: Price + Status */}
+                          <div className="flex items-center justify-between mb-1">
+  {/* Left Side */}
+  <div className="flex items-center">
+    <span className="text-2xl font-bold">
+      ₹{" "}
+      {property.property_category_type === "Rent" ||
+      property.property_category_type === "PG/Co-living"
+        ? formatPrice(property.rent).replace("₹ ", "")
+        : formatPrice(property.property_price).replace("₹ ", "")}
+    </span>
 
-                            <span className="text-sm font-semibold mt-1">
-                              {property.connect_to_name}
-                            </span>
+    {(property.property_category_type === "Rent" ||
+      property.property_category_type === "PG/Co-living") && (
+      <span className="ml-1 text-sm text-gray-500">
+        / {property.rent_duration || "Per Month"}
+      </span>
+    )}
 
-                            <span className="text-xs text-gray-500">
-                              {property.user_type}
-                            </span>
-                          </div>
+    {property.property_category_type?.includes("Buy") &&
+      property.possession_status === "Ready To Move" && (
+        <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
+          <MdApartment className="text-base text-green-700" />
+          <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+            Ready to Move
+          </span>
+        </div>
+      )}
+  </div>
 
-                          {/* RIGHT SIDE - Buttons */}
-                          <div className="flex items-center gap-2">
-                            {/* Contact */}
-                            <div
-                              className="flex items-center justify-center w-24 h-9 text-sm text-white rounded-lg cursor-pointer my-bg"
-                              onClick={() => handleContactClick(property)}
-                            >
-                              Contact
-                            </div>
+  {/* Right Side */}
+  <div className="text-sm font-medium whitespace-nowrap">
+    {(property.property_category_type === "Rent" ||
+      property.property_category_type === "PG/Co-living") && (
+      <>
+        <span className="text-gray-500">Deposit:</span>
+        <span className="ml-1 font-semibold">
+          ₹{" "}
+          {property.custom_deposit_amount
+            ? property.custom_deposit_amount.toLocaleString("en-IN")
+            : "0"}
+        </span>
+      </>
+    )}
 
-                            {/* WhatsApp */}
-                            <a
-                              href={`https://wa.me/91${property.connect_to_no}?text=Hello, I am interested in your property`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="flex items-center justify-center w-9 h-9 text-white bg-green-500 rounded-lg hover:bg-green-600"
-                            >
-                              <FaWhatsapp />
-                            </a>
+    {property.property_category_type?.includes("Buy") &&
+      property.possession_status !== "Ready To Move" &&
+      property.possession_date && (
+        <>
+          <span className="text-gray-500">Possession:</span>
+          <span className="ml-1 font-semibold">
+            {new Date(property.possession_date).toLocaleDateString("en-IN")}
+          </span>
+        </>
+      )}
+  </div>
+</div>
 
-                            {/* Call */}
-                            <a
-                              href={`tel:${property.connect_to_no}`}
-                              onClick={(e) => e.stopPropagation()}
-                              className="flex items-center justify-center w-9 h-9 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-                            >
-                              <FaPhone />
-                            </a>
-                          </div>
+                          {/* Row 4: Features Grid */}
+<div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+  {/* First Column */}
+  <div className="flex items-center gap-2 px-1 min-w-0">
+    <MdApartment className="text-[22px] text-gray-700 flex-shrink-0" />
+
+    <div className="flex flex-col min-w-0 leading-tight">
+      <p className="m-0 text-sm font-semibold leading-4 truncate">
+        {property.building_type === "Commercial"
+          ? property.property_type === "Office"
+            ? "Office Space"
+            : property.property_type === "Retail"
+            ? "Retail Space"
+            : property.property_type
+          : property.property_category_type?.includes("PG")
+          ? `${property.bathroom || 0} Bathrooms`
+          : property.bhk_type}
+      </p>
+
+      <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+        {property.building_type === "Commercial"
+          ? "Property Type"
+          : property.property_category_type?.includes("PG")
+          ? "Bathrooms"
+          : property.property_type}
+      </p>
+    </div>
+  </div>
+
+  {/* Second Column */}
+  <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
+    {property.property_category_type?.includes("PG") ? (
+      <FaUser className="text-[18px] text-gray-700 flex-shrink-0" />
+    ) : (
+      <FaBath
+        size={18}
+        className="text-gray-700 flex-shrink-0"
+      />
+    )}
+
+    <div className="flex flex-col min-w-0 leading-tight">
+      <p className="m-0 text-sm font-semibold leading-4 truncate">
+        {property.property_category_type?.includes("PG")
+          ? property.available_for
+          : `${property.bathroom || 0} Baths`}
+      </p>
+
+      <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+        {property.property_category_type?.includes("PG")
+          ? "Available For"
+          : "Bathrooms"}
+      </p>
+    </div>
+  </div>
+
+  {/* Third Column */}
+  <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+    <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
+
+    <div className="flex flex-col justify-center min-w-0">
+      <p className="m-0 text-sm font-semibold leading-4 truncate">
+        {property.area} {property.area_in}
+      </p>
+
+      <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+        Built Up Area
+      </p>
+    </div>
+  </div>
+</div>
+
+                          {/* Row 5: Posted By + Days + Distance + Share */}
+<div className="flex items-center justify-between gap-2 pt-1 pb-2 text-[13px] text-gray-600">
+  <div className="flex items-center flex-1 min-w-0 gap-1 overflow-hidden flex-nowrap">
+    {/* Posted By */}
+    <AiOutlineClockCircle className="text-[15px] text-gray-700 flex-shrink-0" />
+    <span className="truncate">
+      Posted by {property.user_type || "Owner"}
+    </span>
+
+    {/* Dot */}
+    <span className="mx-2 text-gray-400 flex-shrink-0">•</span>
+
+    {/* Days */}
+    <span className="flex-shrink-0 whitespace-nowrap">
+      {property.days_since_created
+        ? `${property.days_since_created} days ago`
+        : "Recently"}
+    </span>
+
+    {/* Distance */}
+    {distance && (
+      <>
+        <span className="mx-2 text-gray-400 flex-shrink-0">•</span>
+        <span className="flex items-center flex-shrink-0 whitespace-nowrap">
+          <FaMapMarkerAlt className="mr-1 text-red-500" />
+          {distance} km from you
+        </span>
+      </>
+    )}
+  </div>
+
+  {/* Share */}
+  <PiShareNetworkLight
+    className="flex-shrink-0 ml-2 text-[20px] text-gray-500 cursor-pointer hover:text-blue-500"
+    onClick={() =>
+      openShareModal(
+        `${window.location.origin}/propertydetails/${property._id}`,
+        property._id,
+      )
+    }
+  />
+</div>
+
+                          {/* Row 6: Owner + Contact Buttons */}
+<div className="flex items-center justify-between pt-3 gap-2">
+  <div className="flex items-center min-w-0">
+    <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+      {property.property_owner_image ? (
+        <img
+          src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
+          alt="Owner"
+          className="object-cover w-full h-full rounded-full"
+        />
+      ) : (
+        <AiOutlineUser className="text-blue-600" size={24} />
+      )}
+    </div>
+
+    <div className="flex flex-col ml-3 min-w-0">
+      <span
+        className="text-sm font-semibold text-gray-900 truncate"
+        title={property.connect_to_name}
+      >
+        {property.connect_to_name || "Owner"}
+      </span>
+
+      <span className="text-xs text-gray-500 truncate">
+        {property.user_type || "Owner"}
+      </span>
+    </div>
+  </div>
+
+  {/* RIGHT SIDE - Buttons */}
+  <div className="flex items-center gap-2 flex-shrink-0">
+    {/* Contact */}
+    <div
+      className="flex items-center justify-center px-4 h-9 text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap"
+      onClick={() => handleContactClick(property)}
+    >
+      Contact
+    </div>
+
+    {/* WhatsApp */}
+    <a
+      href={`https://wa.me/91${property.connect_to_no}?text=Hello, I am interested in your property`}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className="flex items-center justify-center w-9 h-9 text-white bg-green-500 rounded-md hover:bg-green-600"
+    >
+      <FaWhatsapp />
+    </a>
+
+    {/* Call */}
+    <a
+      href={`tel:${property.connect_to_no}`}
+      onClick={(e) => e.stopPropagation()}
+      className="flex items-center justify-center w-9 h-9 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+    >
+      <FaPhone />
+    </a>
+  </div>
+</div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="text-center text-black">
                     <p>No properties available at the moment.</p>
@@ -3652,9 +3861,8 @@ const FeaturedDashboard = () => {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${
-                      currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     <MdOutlineNavigateBefore className="text-xl text-gray-700" />
                   </button>
@@ -3666,11 +3874,10 @@ const FeaturedDashboard = () => {
                       onClick={() =>
                         page !== "..." ? handlePageChange(page) : null
                       }
-                      className={`px-3 py-1 text-sm transition-colors ${
-                        currentPage === page
-                          ? "rounded-full my-border w-8 h-8 flex items-center justify-center font-normal"
-                          : "text-gray-700"
-                      }`}
+                      className={`px-3 py-1 text-sm transition-colors ${currentPage === page
+                        ? "rounded-full my-border w-8 h-8 flex items-center justify-center font-normal"
+                        : "text-gray-700"
+                        }`}
                     >
                       {page}
                     </button>
@@ -3679,11 +3886,10 @@ const FeaturedDashboard = () => {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${
-                      currentPage === totalPages
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === totalPages
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                      }`}
                   >
                     <MdOutlineNavigateNext className="text-xl text-gray-700" />
                   </button>
@@ -3704,9 +3910,25 @@ const FeaturedDashboard = () => {
                 >
                   <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}" />
                   {properties
-                    .filter(
-                      (property) => property.latitude && property.longitude,
-                    )
+                    // .filter(
+                    //   (property) => property.latitude && property.longitude,
+                    // )
+                    .filter((property) => {
+  const lat = Number(property.latitude);
+  const lng = Number(property.longitude);
+
+  // console.log(
+  //   property.property_name,
+  //   property.latitude,
+  //   property.longitude,
+  //   lat,
+  //   lng,
+  //   Number.isFinite(lat),
+  //   Number.isFinite(lng)
+  // );
+
+  return Number.isFinite(lat) && Number.isFinite(lng);
+})
                     .map((property, index) => (
                       <Marker
                         key={property._id}
@@ -3717,7 +3939,7 @@ const FeaturedDashboard = () => {
                         icon={createCustomIcon(
                           property,
                           property._id === activePropertyId ||
-                            property._id === hoveredPropertyId,
+                          property._id === hoveredPropertyId,
                         )}
                         eventHandlers={{
                           mouseover: () => setHoveredPropertyId(property._id),

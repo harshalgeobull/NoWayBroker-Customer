@@ -637,22 +637,24 @@ const PropertyDashboard = () => {
   };
 
   const formatPrice = (price) => {
-    if (!price) return "";
+  if (!price) return "";
 
-    const formatNumber = (value, unit) => {
-      return `${value % 1 === 0 ? parseInt(value) : value.toFixed(1)} ${unit}`;
-    };
-
-    if (price >= 10000000) {
-      return formatNumber(price / 10000000, "Cr");
-    } else if (price >= 100000) {
-      return formatNumber(price / 100000, "L");
-    } else if (price >= 1000) {
-      return formatNumber(price / 1000, "K");
-    } else {
-      return price.toString();
-    }
+  const formatNumber = (value, unit) => {
+    return `${value % 1 === 0
+      ? parseInt(value)
+      : value.toFixed(2).replace(/\.?0+$/, "")} ${unit}`;
   };
+
+  if (price >= 10000000) {
+    return formatNumber(price / 10000000, "Cr");
+  } else if (price >= 100000) {
+    return formatNumber(price / 100000, "L");
+  } else if (price >= 1000) {
+    return formatNumber(price / 1000, "K");
+  } else {
+    return price.toString();
+  }
+};
 
   useEffect(() => {
     setError(null);
@@ -3427,16 +3429,17 @@ const PropertyDashboard = () => {
                                 <div className="flex items-center">
                                   <span className="text-2xl font-bold">
                                     ₹{" "}
-                                    {property.property_category_type === "Rent"
+                                    {property.property_category_type === "Rent" ||
+                                    property.property_category_type === "PG/Co-living"
                                       ? formatPrice(property.rent)
                                       : formatPrice(property.property_price)}
                                   </span>
 
-                                  {property.property_category_type ===
-                                    "Rent" && (
+                                  {(property.property_category_type ===
+                                    "Rent" || property.property_category_type === "PG/Co-living") && (
                                     <span className="ml-1 text-sm text-gray-500">
-                                      / {property.rent_duration}
-                                    </span>
+    / {property.rent_duration || "Per Month"}
+  </span>
                                   )}
 
                                   {/* Ready to Move - Keep close to price */}
@@ -3456,8 +3459,8 @@ const PropertyDashboard = () => {
 
                                 {/* Right Side */}
                                 <div className="text-sm font-medium whitespace-nowrap">
-                                  {property.property_category_type ===
-                                    "Rent" && (
+                                  {(property.property_category_type ===
+                                    "Rent" || property.property_category_type === "PG/Co-living")&& (
                                     <>
                                       <span className="text-gray-500">
                                         Deposit:

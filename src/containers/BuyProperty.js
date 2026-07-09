@@ -221,22 +221,24 @@ const BuyProperty = ({
     };
 
     const formatPrice = (price) => {
-        if (!price) return "";
+  if (price === null || price === undefined || price === "") return "";
 
-        const formatNumber = (value, unit) => {
-            return (value % 1 === 0 ? parseInt(value) : value.toFixed(1)) + unit;
-        };
+  price = Number(price);
 
-        if (price >= 10000000) {
-            return formatNumber(price / 10000000, " Cr");
-        } else if (price >= 100000) {
-            return formatNumber(price / 100000, " L");
-        } else if (price >= 1000) {
-            return formatNumber(price / 1000, " K");
-        } else {
-            return price.toString();
-        }
-    };
+  const formatNumber = (value, unit) => {
+    return `${value.toFixed(2).replace(/\.?0+$/, "")}${unit}`;
+  };
+
+  if (price >= 10000000) {
+    return formatNumber(price / 10000000, " Cr");
+  } else if (price >= 100000) {
+    return formatNumber(price / 100000, " L");
+  } else if (price >= 1000) {
+    return formatNumber(price / 1000, " K");
+  } else {
+    return price.toString();
+  }
+};
 
     // Auto-slide effect
     useEffect(() => {

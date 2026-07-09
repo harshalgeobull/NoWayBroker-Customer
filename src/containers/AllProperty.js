@@ -255,16 +255,23 @@ const AllProperty = () => {
   };
 
   const formatPrice = (price) => {
-    if (price >= 10000000) {
-      return `&#8377; ${(price / 10000000).toFixed(2)} Cr`; // Crores
-    } else if (price >= 100000) {
-      return `&#8377; ${(price / 100000).toFixed(2)} L`; // Lakhs
-    } else if (price >= 1000) {
-      return `&#8377; ${(price / 1000).toFixed(2)} K`; // Thousands
-    } else {
-      return `&#8377; ${price}`; // Direct value for prices below 1000
-    }
-  };
+  if (price === null || price === undefined || price === "") return "";
+
+  price = Number(price);
+
+  const formatNumber = (value) =>
+    value.toFixed(2).replace(/\.?0+$/, "");
+
+  if (price >= 10000000) {
+    return `₹ ${formatNumber(price / 10000000)} Cr`;
+  } else if (price >= 100000) {
+    return `₹ ${formatNumber(price / 100000)} L`;
+  } else if (price >= 1000) {
+    return `₹ ${formatNumber(price / 1000)} K`;
+  } else {
+    return `₹ ${price}`;
+  }
+};
 
   const createCustomIcon = (price, isActive = false) =>
     L.divIcon({

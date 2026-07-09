@@ -240,22 +240,24 @@ const ManyMore = ({
   };
 
   const formatPrice = (price) => {
-    if (!price) return "";
+  if (price === null || price === undefined || price === "") return "";
 
-    const formatNumber = (value, unit) => {
-      return (value % 1 === 0 ? parseInt(value) : value.toFixed(1)) + unit;
-    };
+  price = Number(price);
 
-    if (price >= 10000000) {
-      return formatNumber(price / 10000000, " Cr");
-    } else if (price >= 100000) {
-      return formatNumber(price / 100000, " L");
-    } else if (price >= 1000) {
-      return formatNumber(price / 1000, " K");
-    } else {
-      return price.toString();
-    }
+  const formatNumber = (value, unit) => {
+    return `${value.toFixed(2).replace(/\.?0+$/, "")}${unit}`;
   };
+
+  if (price >= 10000000) {
+    return formatNumber(price / 10000000, " Cr");
+  } else if (price >= 100000) {
+    return formatNumber(price / 100000, " L");
+  } else if (price >= 1000) {
+    return formatNumber(price / 1000, " K");
+  } else {
+    return price.toString();
+  }
+};
 
   // Auto-slide effect
   useEffect(() => {
@@ -596,14 +598,16 @@ const subtitle = (() => {
                                                   <div className="flex items-center">
                                                     <span className="text-2xl font-bold">
                                                       ₹{" "}
-                                                      {property.property_category_type === "Rent"
+                                                      {property.property_category_type === "Rent" ||
+                                                       property.property_category_type === "PG/Co-living"
                                                         ? formatPrice(property.rent)
                                                         : formatPrice(property.property_price)}
                                                     </span>
                         
-                                                    {property.property_category_type === "Rent" && (
+                                                    {(property.property_category_type === "Rent" ||
+                                                     property.property_category_type === "PG/Co-living") && (
                                                       <span className="ml-1 text-sm text-gray-500">
-                                                        / {property.rent_duration}
+                                                        / {property.rent_duration || "Per Month"}
                                                       </span>
                                                     )}
                         
@@ -622,7 +626,8 @@ const subtitle = (() => {
                         
                                                   {/* Right Side */}
                                                   <div className="text-sm font-medium whitespace-nowrap">
-                                                    {property.property_category_type === "Rent" && (
+                                                    {(property.property_category_type === "Rent" ||
+                                                     property.property_category_type === "PG/Co-living") && (
                                                       <>
                                                         <span className="text-gray-500">Deposit:</span>
                                                         <span className="ml-1 font-semibold">
