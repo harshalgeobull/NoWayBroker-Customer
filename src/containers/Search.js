@@ -17,18 +17,35 @@ import { SearchContext } from "./SearchContext";
 
 const Search = () => {
   const history = useHistory();
-
   const { searchCity, setSearchCity } = useContext(SearchContext);
   const [searchQuery, setSearchQuery] = useState("");
   const GOOGLE_MAPS_API_KEY = "AIzaSyAt8bj4UACvakZfiSy-0c1o_ivfplm7jEU";
   const [type, setType] = useState("");
   const [error, setError] = useState("");
   const inputRef = useRef(null);
+
   const handleCityChange = (e) => {
     const selectedCity = e.target.value;
     setSearchCity(selectedCity);
   };
 
+  // Rotating placeholder text (cycles every 3s, then repeats)
+  const placeholderTexts = [
+    "Search by City or Locality...",
+    "Search Properties by Location",
+    "Enter City, Area",
+    'Search "Pune"',
+    'Search "Mumbai"',
+  ];
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % placeholderTexts.length);
+    }, 3000);
+
+    return () => clearInterval(intervalId); // cleanup on unmount
+  }, []);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   const handleNearMeSearch = async (e) => {
@@ -246,7 +263,7 @@ const Search = () => {
                 ref={inputRef}
                 type="text"
                 id="search"
-                placeholder="Search by City or Locality..."
+                placeholder={placeholderTexts[placeholderIndex]}
                 className="w-full px-2 ml-2 text-sm text-gray-600 bg-transparent outline-none border-none sm:text-base"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -326,8 +343,8 @@ const Search = () => {
                   onClick={handleNearMeSearch}
                   disabled={isLoadingLocation}
                   className={`flex items-center justify-center p-2 transition rounded-full focus:outline-none ${isLoadingLocation
-                      ? "bg-gray-100 text-gray-400 animate-pulse"
-                      : "bg-rose-50 my-text hover:bg-rose-100"
+                    ? "bg-gray-100 text-gray-400 animate-pulse"
+                    : "bg-rose-50 my-text hover:bg-rose-100"
                     }`}
                 >
                   <MdMyLocation size={20} />
