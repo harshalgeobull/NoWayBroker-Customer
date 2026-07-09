@@ -38,9 +38,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -194,21 +194,25 @@ const RecommendedProperties = ({
     centerMode: false,
     responsive: [
       {
-        breakpoint: 1280,
+        // Laptop: 1024px–1399px -> 3 cards (default slidesToShow: 4 covers 1400px+)
+        breakpoint: 1399,
         settings: {
           slidesToShow: 3,
         },
       },
       {
-        breakpoint: 1024,
+        // Tablet: 768px–1023px -> 2 cards
+        breakpoint: 1023,
         settings: {
           slidesToShow: 2,
         },
       },
       {
-        breakpoint: 768,
+        // Mobile: <768px -> 1 card, full width
+        breakpoint: 767,
         settings: {
           slidesToShow: 1,
+          arrows: false,
         },
       },
     ],
@@ -275,38 +279,52 @@ const RecommendedProperties = ({
   }, [isLoginModalOpen, isContactModalOpen, openContactModalAfterLogin]);
 
   return (
-    <div className="w-full px-3 py-8 bg-white sm:px-5 md:px-8 lg:px-10 xl:px-12">
+    <div className="w-full px-3 py-8 bg-white sm:px-5 md:px-8 lg:px-10 xl:px-12 overflow-x-hidden">
+      <style>{`
+        .slider-container .slick-track {
+          display: flex !important;
+        }
+        .slider-container .slick-slide {
+          height: auto;
+          display: flex !important;
+        }
+        .slider-container .slick-slide > div {
+          width: 100%;
+        }
+      `}</style>
       <div className="w-full bg-slate-50 rounded">
         <div className="w-full sm:px-6 lg:px-4">
-          <div className="flex flex-col gap-4 px-5 pt-6 pb-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 px-4 pt-6 pb-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-col">
-              <h2 className="mb-2 text-2xl font-bold tracking-wide text-gray-800 sm:text-3xl">
+              <h2 className="mb-2 text-xl font-bold tracking-wide text-gray-800 sm:text-2xl lg:text-3xl">
                 Featured Properties
               </h2>
-              <p className="text-gray-500">Go from browsing to buying</p>
+              <p className="text-sm text-gray-500 sm:text-base">Go from browsing to buying</p>
             </div>
 
-            <div className="flex items-center gap-3 mt-2 lg:mt-0">
+            <div className="flex flex-wrap items-center gap-3 mt-2 lg:mt-0">
               <button
-                className="px-5 py-2.5 text-sm font-medium bg-white border rounded-lg transition hover:bg-gray-50"
+                className="px-5 py-2.5 text-sm font-medium bg-white border rounded-lg transition hover:bg-gray-50 w-full sm:w-auto"
                 onClick={handleClick}
               >
                 View All Properties
               </button>
 
-              <button
-                className="flex items-center justify-center w-11 h-11 bg-white rounded-full shadow-md transition hover:shadow-xl"
-                onClick={() => sliderRef.current.slickPrev()}
-              >
-                <GoArrowLeft className="text-3xl text-black" />
-              </button>
+              <div className="hidden md:flex items-center gap-3">
+                <button
+                  className="flex items-center justify-center w-11 h-11 bg-white rounded-full shadow-md transition hover:shadow-xl"
+                  onClick={() => sliderRef.current.slickPrev()}
+                >
+                  <GoArrowLeft className="text-3xl text-black" />
+                </button>
 
-              <button
-                className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg "
-                onClick={() => sliderRef.current.slickNext()}
-              >
-                <GoArrowRight className="text-3xl text-black" />
-              </button>
+                <button
+                  className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg "
+                  onClick={() => sliderRef.current.slickNext()}
+                >
+                  <GoArrowRight className="text-3xl text-black" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -346,9 +364,8 @@ const RecommendedProperties = ({
                   category === "Commercial Buy" ||
                   category === "Commercial Lease"
                 ) {
-                  return `${type} for ${
-                    category === "Commercial Buy" ? "Sale" : "Lease"
-                  } in ${location}`;
+                  return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
+                    } in ${location}`;
                 }
                 return `${type} in ${location}`;
               })();
@@ -364,8 +381,8 @@ const RecommendedProperties = ({
               }
 
               return (
-                <div key={property._id} className="px-2 py-4">
-                  <div className="property-card flex flex-col h-full min-h-[520px] bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                <div key={property._id} className="h-full px-2 py-4">
+                  <div className="property-card flex flex-col h-full min-h-[480px] sm:min-h-[500px] lg:min-h-[520px] bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                     <div className="flex flex-col h-full w-full overflow-hidden rounded-xl">
                       <div className="relative">
                         <Link
@@ -430,7 +447,7 @@ const RecommendedProperties = ({
                                   <img
                                     src={imgUrl}
                                     alt="Property"
-                                    className="w-full h-[220px] object-cover rounded-t-2xl"
+                                    className="w-full h-[160px] sm:h-[190px] lg:h-[220px] object-cover rounded-t-2xl"
                                   />
                                 </div>
                               ))}
@@ -439,7 +456,7 @@ const RecommendedProperties = ({
                             <img
                               src={allImages[0] || "/image/app.png"}
                               alt="Property"
-                              className="w-full h-[220px] object-cover rounded-t-2xl"
+                              className="w-full h-[160px] sm:h-[190px] lg:h-[220px] object-cover rounded-t-2xl"
                               loading="lazy"
                               onError={(e) => (e.target.style.display = "none")}
                             />
@@ -551,12 +568,12 @@ const RecommendedProperties = ({
 
                       {/* Property Details */}
                       {/* Property Details Wrapper */}
-                      <div className="flex flex-col flex-1 justify-between p-4 bg-white">
+                      <div className="flex flex-col flex-1 justify-between p-3 sm:p-4 bg-white">
                         {/* Price Section */}
-                        <div className="flex items-start justify-between gap-3 mb-0">
+                        <div className="flex items-start justify-between gap-2 sm:gap-3 mb-0">
                           {/* Property Name */}
                           <h3
-                            className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate"
+                            className="flex-1 min-w-0 m-0 text-base sm:text-lg font-semibold leading-6 text-gray-900 truncate"
                             title={property.property_name}
                           >
                             {property.property_name || "N/A"}
@@ -564,7 +581,7 @@ const RecommendedProperties = ({
 
                           {/* Furnishing */}
                           <span
-                            className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-[#E85B6B] sm:text-base whitespace-nowrap"
+                            className="flex-shrink-0 m-0 text-xs sm:text-sm font-medium leading-6 text-[#E85B6B] sm:text-base whitespace-nowrap"
                             title={property.furnished_type}
                           >
                             {property.furnished_type || "Un-Furnished"}
@@ -572,35 +589,35 @@ const RecommendedProperties = ({
                         </div>
 
                         <p
-                          className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate"
+                          className="mt-0 mb-1 text-xs sm:text-sm leading-5 text-gray-600 break-words"
                           title={subtitle}
                         >
                           {subtitle}
                         </p>
-                        <div className="flex items-center justify-between mb-1">
+                        <div className="flex flex-wrap items-center justify-between gap-y-1 mb-1">
                           {/* Left Side */}
-                          <div className="flex items-center">
-                            <span className="text-2xl font-bold">
+                          <div className="flex flex-wrap items-center gap-y-1">
+                            <span className="text-xl sm:text-2xl font-bold">
                               ₹{" "}
                               {property.property_category_type === "Rent" ||
-                              property.property_category_type === "PG/Co-living"
+                                property.property_category_type === "PG/Co-living"
                                 ? formatPrice(property.rent)
                                 : formatPrice(property.property_price)}
                             </span>
 
                             {(property.property_category_type === "Rent" ||
                               property.property_category_type ===
-                                "PG/Co-living") && (
-                              <span className="ml-1 text-sm text-gray-500">
-                                / {property.rent_duration || "Per Month"}
-                              </span>
-                            )}
+                              "PG/Co-living") && (
+                                <span className="ml-1 text-xs sm:text-sm text-gray-500">
+                                  / {property.rent_duration || "Per Month"}
+                                </span>
+                              )}
 
                             {/* Ready to Move - Keep close to price */}
                             {property.property_category_type?.includes("Buy") &&
                               property.possession_status ===
-                                "Ready To Move" && (
-                                <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
+                              "Ready To Move" && (
+                                <div className="flex items-center gap-2 px-3 py-1 ml-3 sm:ml-6 bg-green-100 border border-green-200 rounded-full">
                                   <MdApartment className="text-base text-green-700" />
                                   <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
                                     Ready to Move
@@ -610,20 +627,20 @@ const RecommendedProperties = ({
                           </div>
 
                           {/* Right Side */}
-                          <div className="text-sm font-medium whitespace-nowrap">
+                          <div className="text-xs sm:text-sm font-medium whitespace-nowrap">
                             {(property.property_category_type === "Rent" ||
                               property.property_category_type ===
-                                "PG/Co-living") && (
-                              <>
-                                <span className="text-gray-500">Deposit:</span>
-                                <span className="ml-1 font-semibold">
-                                  ₹{" "}
-                                  {property.custom_deposit_amount?.toLocaleString(
-                                    "en-IN",
-                                  )}
-                                </span>
-                              </>
-                            )}
+                              "PG/Co-living") && (
+                                <>
+                                  <span className="text-gray-500">Deposit:</span>
+                                  <span className="ml-1 font-semibold">
+                                    ₹{" "}
+                                    {property.custom_deposit_amount?.toLocaleString(
+                                      "en-IN",
+                                    )}
+                                  </span>
+                                </>
+                              )}
 
                             {property.property_category_type?.includes("Buy") &&
                               property.possession_status !== "Ready To Move" &&
@@ -642,9 +659,9 @@ const RecommendedProperties = ({
                           </div>
                         </div>
                         {/* Features Row */}
-                        <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+                        <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100 gap-x-1">
                           {/* First Column */}
-                          <div className="flex items-center gap-2 px-3 min-w-0">
+                          <div className="flex items-center gap-1.5 sm:gap-2 px-1 sm:px-3 min-w-0">
                             <MdApartment className="text-[22px] text-gray-700 flex-shrink-0" />
 
                             <div className="flex flex-col justify-center min-w-0">
@@ -656,8 +673,8 @@ const RecommendedProperties = ({
                                       ? "Retail Space"
                                       : property.property_type
                                   : property.property_category_type?.includes(
-                                        "PG",
-                                      )
+                                    "PG",
+                                  )
                                     ? `${property.bathroom || 0} Bathrooms`
                                     : property.bhk_type}
                               </p>
@@ -666,8 +683,8 @@ const RecommendedProperties = ({
                                 {property.building_type === "Commercial"
                                   ? "Property Type"
                                   : property.property_category_type?.includes(
-                                        "PG",
-                                      )
+                                    "PG",
+                                  )
                                     ? "Bathrooms"
                                     : property.property_type}
                               </p>
@@ -675,7 +692,7 @@ const RecommendedProperties = ({
                           </div>
 
                           {/* Second Column */}
-                          <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                          <div className="flex items-center gap-1.5 sm:gap-2 px-1 sm:px-3 border-l border-gray-200 min-w-0">
                             {property.property_category_type?.includes("PG") ? (
                               <FaUser className="text-[20px] text-gray-700 flex-shrink-0" />
                             ) : (
@@ -698,7 +715,7 @@ const RecommendedProperties = ({
                           </div>
 
                           {/* Third Column */}
-                          <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                          <div className="flex items-center gap-1.5 sm:gap-2 px-1 sm:px-3 border-l border-gray-200 min-w-0">
                             <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
 
                             <div className="flex flex-col justify-center min-w-0">
@@ -770,9 +787,9 @@ const RecommendedProperties = ({
                           {/* Avatar */}
                           <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
                             {property.property_owner_image &&
-                            !property.property_owner_image.includes(
-                              "default_profile",
-                            ) ? (
+                              !property.property_owner_image.includes(
+                                "default_profile",
+                              ) ? (
                               <>
                                 <img
                                   src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
@@ -797,17 +814,17 @@ const RecommendedProperties = ({
                           </div>
 
                           {/* Name & User Type */}
-                          <div className="flex items-center ml-4">
+                          <div className="flex items-center flex-1 min-w-0 ml-3 sm:ml-4">
                             <span
-                              className="text-sm font-semibold text-gray-900 whitespace-nowrap"
+                              className="text-sm font-semibold text-gray-900 truncate"
                               title={property.connect_to_name}
                             >
                               {property.connect_to_name || "Owner"}
                             </span>
 
-                            <div className="w-px h-4 mx-4 bg-gray-300"></div>
+                            <div className="w-px h-4 mx-3 sm:mx-4 bg-gray-300 flex-shrink-0"></div>
 
-                            <span className="text-sm text-gray-500 whitespace-nowrap">
+                            <span className="text-sm text-gray-500 truncate">
                               {property.user_type || "Owner"}
                             </span>
                           </div>
