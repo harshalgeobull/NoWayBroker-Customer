@@ -47,9 +47,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-    Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -237,23 +237,25 @@ const OwnerProperty = ({
     ],
   };
 
-  const formatPrice = (price) => {
-    if (!price) return "";
+ const formatPrice = (price) => {
+  if (!price) return "";
 
-    const formatNumber = (value, unit) => {
-      return (value % 1 === 0 ? parseInt(value) : value.toFixed(1)) + unit;
-    };
+  price = Number(price);
 
-    if (price >= 10000000) {
-      return formatNumber(price / 10000000, " Cr");
-    } else if (price >= 100000) {
-      return formatNumber(price / 100000, " L");
-    } else if (price >= 1000) {
-      return formatNumber(price / 1000, " K");
-    } else {
-      return price.toString();
-    }
+  const formatNumber = (value, unit) => {
+    return value.toFixed(2).replace(/\.?0+$/, "") + unit;
   };
+
+  if (price >= 10000000) {
+    return formatNumber(price / 10000000, " Cr");
+  } else if (price >= 100000) {
+    return formatNumber(price / 100000, " L");
+  } else if (price >= 1000) {
+    return formatNumber(price / 1000, " K");
+  } else {
+    return price.toString();
+  }
+};
 
   // Auto-slide effect
   useEffect(() => {
@@ -331,8 +333,9 @@ const OwnerProperty = ({
                   category === "Commercial Buy" ||
                   category === "Commercial Lease"
                 ) {
-                  return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
-                    } in ${location}`;
+                  return `${type} for ${
+                    category === "Commercial Buy" ? "Sale" : "Lease"
+                  } in ${location}`;
                 }
 
                 // PG / Co-Living
@@ -575,7 +578,7 @@ const OwnerProperty = ({
 
                           {/* Furnishing */}
                           <span
-                            className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-black sm:text-base whitespace-nowrap"
+                            className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-[#E85B6B] sm:text-base whitespace-nowrap"
                             title={property.furnished_type}
                           >
                             {property.furnished_type || "Un-Furnished"}
@@ -593,21 +596,23 @@ const OwnerProperty = ({
                           <div className="flex items-center">
                             <span className="text-2xl font-bold">
                               ₹{" "}
-                              {property.property_category_type === "Rent"
+                              {property.property_category_type === "Rent" ||
+                              property.property_category_type === "PG/Co-living"
                                 ? formatPrice(property.rent)
                                 : formatPrice(property.property_price)}
                             </span>
 
-                            {property.property_category_type === "Rent" && (
-                              <span className="ml-1 text-sm text-gray-500">
-                                / {property.rent_duration}
-                              </span>
-                            )}
+                           {(property.property_category_type === "Rent" ||
+  property.property_category_type === "PG/Co-living") && (
+  <span className="ml-1 text-sm text-gray-500">
+    / {property.rent_duration || "Per Month"}
+  </span>
+)}
 
                             {/* Ready to Move - Keep close to price */}
                             {property.property_category_type?.includes("Buy") &&
                               property.possession_status ===
-                              "Ready To Move" && (
+                                "Ready To Move" && (
                                 <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
                                   <MdApartment className="text-base text-green-700" />
                                   <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
@@ -619,7 +624,8 @@ const OwnerProperty = ({
 
                           {/* Right Side */}
                           <div className="text-sm font-medium whitespace-nowrap">
-                            {property.property_category_type === "Rent" && (
+                            {(property.property_category_type === "Rent" ||
+                              property.property_category_type === "PG/Co-living") && (
                               <>
                                 <span className="text-gray-500">Deposit:</span>
                                 <span className="ml-1 font-semibold">
@@ -694,8 +700,8 @@ const OwnerProperty = ({
                                       ? "Retail Space"
                                       : property.property_type
                                   : property.property_category_type?.includes(
-                                    "PG",
-                                  )
+                                        "PG",
+                                      )
                                     ? `${property.bathroom || 0} Bathrooms`
                                     : property.bhk_type}
                               </p>
@@ -704,8 +710,8 @@ const OwnerProperty = ({
                                 {property.building_type === "Commercial"
                                   ? "Property Type"
                                   : property.property_category_type?.includes(
-                                    "PG",
-                                  )
+                                        "PG",
+                                      )
                                     ? "Bathrooms"
                                     : property.property_type}
                               </p>

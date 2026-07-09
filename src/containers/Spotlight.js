@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
 import { FaRupeeSign, FaMapMarkerAlt, FaBath } from "react-icons/fa";
-import { Building2, Ruler } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { RiRuler2Line } from "react-icons/ri";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { AiOutlineUser } from "react-icons/ai";
@@ -92,19 +92,20 @@ const Spotlights = ({
   };
 
   const formatPrice = (price) => {
-    if (!price) return "";
-    price = parseInt(price);
+  if (!price) return "";
 
-    if (price >= 10000000) {
-      return parseFloat((price / 10000000).toFixed(1)) + " Cr";
-    } else if (price >= 100000) {
-      return parseFloat((price / 100000).toFixed(1)) + " L";
-    } else if (price >= 1000) {
-      return parseFloat((price / 1000).toFixed(1)) + " K";
-    } else {
-      return price.toString();
-    }
-  };
+  price = Number(price);
+
+  if (price >= 10000000) {
+    return `${(price / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
+  } else if (price >= 100000) {
+    return `${(price / 100000).toFixed(2).replace(/\.?0+$/, "")} L`;
+  } else if (price >= 1000) {
+    return `${(price / 1000).toFixed(2).replace(/\.?0+$/, "")} K`;
+  } else {
+    return price.toString();
+  }
+};
 
   const getProjectDistance = (project) => {
     const projLat =
@@ -147,6 +148,10 @@ const Spotlights = ({
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
 
+     // Price Range
+  if (typeof price === "string" && price.includes("-")) {
+    const parts = price.split("-").map((p) => p.trim());
+
     if (typeof price === "string" && price.includes("-")) {
       const parts = price.split("-").map((p) => p.trim());
       return (
@@ -161,24 +166,25 @@ const Spotlights = ({
         </>
       );
     }
+  }
 
-    price = parseInt(price);
-    if (isNaN(price)) return "";
+    // price = parseInt(price);
+    // if (isNaN(price)) return "";
 
-    let formatted;
-    if (price >= 10000000) {
-      formatted = parseFloat((price / 10000000).toFixed(1)) + " Cr";
-    } else if (price >= 100000) {
-      formatted = parseFloat((price / 100000).toFixed(1)) + " L";
-    } else if (price >= 1000) {
-      formatted = parseFloat((price / 1000).toFixed(1)) + " K";
-    } else {
-      formatted = price.toString();
-    }
+    // let formatted;
+    // if (price >= 10000000) {
+    //   formatted = parseFloat((price / 10000000).toFixed(1)) + " Cr";
+    // } else if (price >= 100000) {
+    //   formatted = parseFloat((price / 100000).toFixed(1)) + " L";
+    // } else if (price >= 1000) {
+    //   formatted = parseFloat((price / 1000).toFixed(1)) + " K";
+    // } else {
+    //   formatted = price.toString();
+    // }
     return (
       <span className="inline-flex items-center">
         <FaRupeeSign className="inline-block mr-1" />
-        {formatted}
+        {formatPrice(Number(price))}
       </span>
     );
   };

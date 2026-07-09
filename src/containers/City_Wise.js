@@ -722,24 +722,26 @@ const City_Wise = () => {
   };
 
   const formatPrice = (price) => {
-    if (!price) return "";
+  // Return empty only if value is missing
+  if (price === null || price === undefined || price === "") return "";
 
-    price = parseInt(price);
+  price = Number(price);
 
-    const formatNumber = (num) => {
-      return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2); // no decimals if whole number
-    };
-
-    if (price >= 10000000) {
-      return `₹ ${formatNumber(price / 10000000)} Cr`; // Crores
-    } else if (price >= 100000) {
-      return `₹ ${formatNumber(price / 100000)} L`; // Lakhs
-    } else if (price >= 1000) {
-      return `₹ ${formatNumber(price / 1000)} K`; // Thousands
-    } else {
-      return `₹ ${price}`;
-    }
+  const formatNumber = (num) => {
+    // 3.00 -> 3, 3.50 -> 3.5, 3.25 -> 3.25
+    return num.toFixed(2).replace(/\.?0+$/, "");
   };
+
+  if (price >= 10000000) {
+    return `₹ ${formatNumber(price / 10000000)} Cr`;
+  } else if (price >= 100000) {
+    return `₹ ${formatNumber(price / 100000)} L`;
+  } else if (price >= 1000) {
+    return `₹ ${formatNumber(price / 1000)} K`;
+  } else {
+    return `₹ ${price}`;
+  }
+};
 
   const createCustomIcon = (property, isActive = false) => {
     // Decide what to display

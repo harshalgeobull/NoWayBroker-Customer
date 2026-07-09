@@ -870,24 +870,26 @@ const AdvisorDashboard = () => {
   }, [label, currentPage, searchCity, filtersApplied]);
 
   const formatPrice = (price) => {
-    if (!price) return "";
+  if (price === null || price === undefined || price === "") return "";
 
-    price = parseInt(price);
+  price = Number(price);
 
-    const formatNumber = (num) => {
-      return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2);
-    };
-
-    if (price >= 10000000) {
-      return `₹ ${formatNumber(price / 10000000)} Cr`;
-    } else if (price >= 100000) {
-      return `₹ ${formatNumber(price / 100000)} L`;
-    } else if (price >= 1000) {
-      return `₹ ${formatNumber(price / 1000)} K`;
-    } else {
-      return `₹ ${price}`;
-    }
+  const formatNumber = (num) => {
+    return num % 1 === 0
+      ? num.toFixed(0)
+      : num.toFixed(2).replace(/\.?0+$/, "");
   };
+
+  if (price >= 10000000) {
+    return `₹ ${formatNumber(price / 10000000)} Cr`;
+  } else if (price >= 100000) {
+    return `₹ ${formatNumber(price / 100000)} L`;
+  } else if (price >= 1000) {
+    return `₹ ${formatNumber(price / 1000)} K`;
+  } else {
+    return `₹ ${price}`;
+  }
+};
 
   const createCustomIcon = (property, isActive = false) => {
     let displayValue = "";
@@ -3376,12 +3378,13 @@ const AdvisorDashboard = () => {
                             <div className="flex items-center">
                               <span className="text-2xl font-bold">
                                 ₹{" "}
-                                {property.property_category_type === "Rent"
+                                {property.property_category_type === "Rent" ||
+                                property.property_category_type === "PG/Co-living"
                                   ? formatPrice(property.rent).replace("₹ ", "")
                                   : formatPrice(property.property_price).replace("₹ ", "")}
                               </span>
-                              {property.property_category_type === "Rent" && (
-                                <span className="ml-1 text-sm text-gray-500">/ {property.rent_duration}</span>
+                              {(property.property_category_type === "Rent" || property.property_category_type === "PG/Co-living") && (
+                                <span className="ml-1 text-sm text-gray-500">/ {property.rent_duration || "Per Month"}</span>
                               )}
                               {property.property_category_type?.includes("Buy") &&
                                 property.possession_status === "Ready To Move" && (
@@ -3392,17 +3395,30 @@ const AdvisorDashboard = () => {
                                 )}
                             </div>
                             <div className="text-sm font-medium whitespace-nowrap">
-                              {property.property_category_type?.includes("Buy") &&
-                                property.possession_status !== "Ready To Move" &&
-                                property.possession_date && (
-                                  <>
-                                    <span className="text-gray-500">Possession:</span>
-                                    <span className="ml-1 font-semibold">
-                                      {new Date(property.possession_date).toLocaleDateString("en-IN")}
-                                    </span>
-                                  </>
-                                )}
-                            </div>
+  {(property.property_category_type === "Rent" ||
+    property.property_category_type === "PG/Co-living") && (
+    <>
+      <span className="text-gray-500">Deposit:</span>
+      <span className="ml-1 font-semibold">
+        ₹{" "}
+        {property.custom_deposit_amount
+          ? property.custom_deposit_amount.toLocaleString("en-IN")
+          : "0"}
+      </span>
+    </>
+  )}
+
+  {property.property_category_type?.includes("Buy") &&
+    property.possession_status !== "Ready To Move" &&
+    property.possession_date && (
+      <>
+        <span className="text-gray-500">Possession:</span>
+        <span className="ml-1 font-semibold">
+          {new Date(property.possession_date).toLocaleDateString("en-IN")}
+        </span>
+      </>
+    )}
+</div>
                           </div>
 
                           <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">

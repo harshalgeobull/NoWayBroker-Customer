@@ -52,7 +52,6 @@ import { FaWhatsapp, FaPhone } from "react-icons/fa";
 import { FaMapMarkerAlt } from "react-icons/fa";
 
 const defaultImage = "/image/appstore.png";
-
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -68,7 +67,6 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
-
 const Detail = ({ propertyData }) => {
   const toWords = new ToWords({
     localeCode: "en-IN",
@@ -406,24 +404,20 @@ const Detail = ({ propertyData }) => {
   };
 
   const formatPrice = (price) => {
-    if (!price) return "";
+  if (price === null || price === undefined || price === "") return "";
 
-    price = parseInt(price);
+  price = Number(price);
 
-    const formatNumber = (num) => {
-      return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2);
-    };
-
-    if (price >= 10000000) {
-      return `${formatNumber(price / 10000000)} Cr`;
-    } else if (price >= 100000) {
-      return `${formatNumber(price / 100000)} L`;
-    } else if (price >= 1000) {
-      return `${formatNumber(price / 1000)} K`;
-    } else {
-      return `${price}`;
-    }
-  };
+  if (price >= 10000000) {
+    return (price / 10000000).toFixed(2).replace(/\.?0+$/, "") + " Cr";
+  } else if (price >= 100000) {
+    return (price / 100000).toFixed(2).replace(/\.?0+$/, "") + " L";
+  } else if (price >= 1000) {
+    return (price / 1000).toFixed(2).replace(/\.?0+$/, "") + " K";
+  } else {
+    return price.toString();
+  }
+};
 
   // for the image section with 'get_property_detail' api
 
@@ -484,8 +478,8 @@ const Detail = ({ propertyData }) => {
       );
 
       const data = res.data?.data;
-      console.log("API Response:", data);
-      console.log("Price Onwards:", data.price_onwards);
+       console.log("API Response:", data);
+    console.log("Price Onwards:", data.price_onwards);
 
       if (data?.property_images?.length > 0) {
         setPropertyImages(data.property_images);
@@ -708,15 +702,19 @@ const Detail = ({ propertyData }) => {
     //["Status", propertyDetails?.available_status || null],
     ["Property Added Date", propertyDetails?.property_added_date || null],
     ["Property Name", propertyDetails?.property_name || null],
+    // [
+    //   "Address",
+    //   propertyDetails?.address &&
+    //   propertyDetails?.city_name &&
+    //   propertyDetails?.state &&
+    //   propertyDetails?.zip_code
+    //     ? `${propertyDetails.address}, ${propertyDetails.city_name}, ${propertyDetails.state}, ${propertyDetails.zip_code}`
+    //     : null,
+    // ],
     [
-      "Address",
-      propertyDetails?.address &&
-        propertyDetails?.city_name &&
-        propertyDetails?.state &&
-        propertyDetails?.zip_code
-        ? `${propertyDetails.address}, ${propertyDetails.city_name}, ${propertyDetails.state}, ${propertyDetails.zip_code}`
-        : null,
-    ],
+  "Address",
+  propertyDetails?.address || null,
+],
     [
       "Area",
       propertyDetails?.area
@@ -932,71 +930,71 @@ const Detail = ({ propertyData }) => {
   ].filter(([_, value]) => value);
   const statusTimelineItems = [];
 
-  const addStatusItem = ({
+const addStatusItem = ({
+  icon,
+  title,
+  value,
+  bgColor,
+  iconColor,
+}) => {
+  if (
+    !value ||
+    value.toString().trim() === "" ||
+    value.toString().toLowerCase() === "n/a" ||
+    value.toString().toLowerCase() === "null"
+  ) {
+    return;
+  }
+
+  statusTimelineItems.push({
     icon,
     title,
     value,
     bgColor,
     iconColor,
-  }) => {
-    if (
-      !value ||
-      value.toString().trim() === "" ||
-      value.toString().toLowerCase() === "n/a" ||
-      value.toString().toLowerCase() === "null"
-    ) {
-      return;
-    }
-
-    statusTimelineItems.push({
-      icon,
-      title,
-      value,
-      bgColor,
-      iconColor,
-    });
-  };
-  addStatusItem({
-    icon: <HiOutlineBadgeCheck />,
-    title: "Availability",
-    value: propertyDetails?.available_status,
-    bgColor: "bg-green-50",
-    iconColor: "text-green-600",
   });
+};
+addStatusItem({
+  icon: <HiOutlineBadgeCheck />,
+  title: "Availability",
+  value: propertyDetails?.available_status,
+  bgColor: "bg-green-50",
+  iconColor: "text-green-600",
+});
 
-  addStatusItem({
-    icon: <HiOutlineCalendar />,
-    title: "Available From",
-    value: propertyDetails?.available_from,
-    bgColor: "bg-blue-50",
-    iconColor: "text-blue-600",
-  });
+addStatusItem({
+  icon: <HiOutlineCalendar />,
+  title: "Available From",
+  value: propertyDetails?.available_from,
+  bgColor: "bg-blue-50",
+  iconColor: "text-blue-600",
+});
 
-  addStatusItem({
-    icon: <HiOutlineHome />,
-    title: "Possession",
-    value: propertyDetails?.possession_status,
-    bgColor: "bg-orange-50",
-    iconColor: "text-orange-600",
-  });
+addStatusItem({
+  icon: <HiOutlineHome />,
+  title: "Possession",
+  value: propertyDetails?.possession_status,
+  bgColor: "bg-orange-50",
+  iconColor: "text-orange-600",
+});
 
-  addStatusItem({
-    icon: <HiOutlineClock />,
-    title: "Last Updated",
-    value: propertyDetails?.updated_at
-      ? new Date(propertyDetails.updated_at).toLocaleDateString("en-GB")
-      : propertyDetails?.property_added_date,
-    bgColor: "bg-purple-50",
-    iconColor: "text-purple-600",
-  });
+addStatusItem({
+  icon: <HiOutlineClock />,
+  title: "Last Updated",
+  value: propertyDetails?.updated_at
+    ? new Date(propertyDetails.updated_at).toLocaleDateString("en-GB")
+    : propertyDetails?.property_added_date,
+  bgColor: "bg-purple-50",
+  iconColor: "text-purple-600",
+});
 
-  addStatusItem({
-    icon: <HiOutlineClock />,
-    title: "Property Age",
-    value: propertyDetails?.age_of_property,
-    bgColor: "bg-amber-50",
-    iconColor: "text-amber-700",
-  });
+addStatusItem({
+  icon: <HiOutlineClock />,
+  title: "Property Age",
+  value: propertyDetails?.age_of_property,
+  bgColor: "bg-amber-50",
+  iconColor: "text-amber-700",
+});
 
   const handleClick = () => {
     history.push("/featuredDashboard");
@@ -1069,26 +1067,37 @@ const Detail = ({ propertyData }) => {
             <div className="absolute top-4 right-4 flex flex-col items-end">
               <p className="flex items-center mt-5 text-3xl font-bold my-text">
                 <FaRupeeSign className="mr-2" />
-                {propertyDetails?.property_category_type === "Rent" ? (
+                {propertyDetails?.property_category_type === "Rent" ||
+                propertyDetails?.property_category_type === "PG/Co-living" ? (
                   <>
                     {formatPrice(propertyDetails?.rent)}{" "}
-                    <span className="ml-1 text-xl gray-700 text-">
-                      {propertyDetails?.rent_duration
-                        ? ` / ${propertyDetails.rent_duration}`
-                        : ""}
-                    </span>
+                    <span className="ml-1 text-xl text-gray-700">
+  / {propertyDetails?.rent_duration || "Per Month"}
+</span>
                   </>
                 ) : (
                   formatPrice(propertyDetails?.property_price)
                 )}
               </p>
               <p className="mt-1 text-sm font-medium text-gray-500">
-                {propertyDetails?.property_category_type === "Rent"
+                {propertyDetails?.property_category_type === "Rent"||
+                propertyDetails?.property_category_type === "PG/Co-living"
                   ? `${toWords.convert(Number(propertyDetails?.rent))} Only`
                   : `${toWords.convert(Number(propertyDetails?.property_price))} Only`}
               </p>
             </div>
           )}
+
+          {/* <h2 className="mt-2 ml-6 text-3xl font-normal">
+            {propertyDetails?.bhk_type ? `${propertyDetails.bhk_type} ` : ""}
+            {propertyDetails?.area ? `${propertyDetails.area} Sq-ft ` : ""}
+            {propertyDetails?.property_type
+              ? `${propertyDetails.property_type} `
+              : ""}
+            for {propertyDetails?.property_category_type
+              ? `${propertyDetails.property_category_type}`
+              : ""}
+          </h2> */}
 
           <h2 className="mt-2 ml-6 text-3xl font-normal">
             {propertyDetails?.property_name
@@ -1137,12 +1146,13 @@ const Detail = ({ propertyData }) => {
             {propertyDetails.virtual_tour_availability === "Yes" && (
               <button
                 className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
-      ${tourSchedule?.[0]?.status === "Accepted"
-                    ? "bg-green-500 text-white rounded-full"
-                    : scheduledDateLabel === "Virtual Tour"
-                      ? "bg-white border my-text rounded-lg"
-                      : "bg-[#FFD700] text-black rounded-full"
-                  }`}
+      ${
+        tourSchedule?.[0]?.status === "Accepted"
+          ? "bg-green-500 text-white rounded-full"
+          : scheduledDateLabel === "Virtual Tour"
+            ? "bg-white border my-text rounded-lg"
+            : "bg-[#FFD700] text-black rounded-full"
+      }`}
                 onClick={() => {
                   const token = sessionStorage.getItem("accessToken");
 
@@ -1246,10 +1256,11 @@ const Detail = ({ propertyData }) => {
               }}
             >
               <FiHeart
-                className={`text-2xl ${propertyDetails.is_favorite
-                  ? "text-red-600 fill-red-600"
-                  : "text-gray-600"
-                  }`}
+                className={`text-2xl ${
+                  propertyDetails.is_favorite
+                    ? "text-red-600 fill-red-600"
+                    : "text-gray-600"
+                }`}
               />
             </div>
 
@@ -1390,10 +1401,11 @@ const Detail = ({ propertyData }) => {
             <div className="sticky top-0 z-20 flex items-center gap-8 px-6 py-4 mb-4 bg-white rounded-lg shadow-sm">
               <button
                 onClick={() => scrollToSection(overviewRef, "overview")}
-                className={`relative font-medium pb-1 ${activeSection === "overview"
-                  ? "text-red-600"
-                  : "hover:text-[#8A2432]"
-                  }`}
+                className={`relative font-medium pb-1 ${
+                  activeSection === "overview"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
+                }`}
               >
                 Overview
                 {activeSection === "overview" && (
@@ -1401,26 +1413,28 @@ const Detail = ({ propertyData }) => {
                 )}
               </button>
 
-              <button
-                onClick={() =>
-                  scrollToSection(statusTimelineRef, "statusTimeline")
-                }
-                className={`relative font-medium pb-1 ${activeSection === "statusTimeline"
-                  ? "text-red-600"
-                  : "hover:text-[#8A2432]"
-                  }`}
-              >
-                Status & Timeline
-                {activeSection === "statusTimeline" && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
-                )}
-              </button>
+                <button
+  onClick={() =>
+    scrollToSection(statusTimelineRef, "statusTimeline")
+  }
+  className={`relative font-medium pb-1 ${
+    activeSection === "statusTimeline"
+      ? "text-red-600"
+      : "hover:text-[#8A2432]"
+  }`}
+>
+  Status & Timeline
+  {activeSection === "statusTimeline" && (
+    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
+  )}
+</button>
               <button
                 onClick={() => scrollToSection(moreDetailsRef, "moreDetails")}
-                className={`relative font-medium pb-1 ${activeSection === "moreDetails"
-                  ? "text-red-600"
-                  : "hover:text-[#8A2432]"
-                  }`}
+                className={`relative font-medium pb-1 ${
+                  activeSection === "moreDetails"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
+                }`}
               >
                 More Details
                 {activeSection === "moreDetails" && (
@@ -1430,10 +1444,11 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(amenitiesRef, "amenities")}
-                className={`relative font-medium pb-1 ${activeSection === "amenities"
-                  ? "text-red-600"
-                  : "hover:text-[#8A2432]"
-                  }`}
+                className={`relative font-medium pb-1 ${
+                  activeSection === "amenities"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
+                }`}
               >
                 Amenities
                 {activeSection === "amenities" && (
@@ -1443,10 +1458,11 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(aboutRef, "about")}
-                className={`relative font-medium pb-1 ${activeSection === "about"
-                  ? "text-red-600"
-                  : "hover:text-[#8A2432]"
-                  }`}
+                className={`relative font-medium pb-1 ${
+                  activeSection === "about"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
+                }`}
               >
                 About Property
                 {activeSection === "about" && (
@@ -1456,10 +1472,11 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(locationRef, "location")}
-                className={`relative font-medium pb-1 ${activeSection === "location"
-                  ? "text-red-600"
-                  : "hover:text-[#8A2432]"
-                  }`}
+                className={`relative font-medium pb-1 ${
+                  activeSection === "location"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
+                }`}
               >
                 Location
                 {activeSection === "location" && (
@@ -1488,44 +1505,65 @@ const Detail = ({ propertyData }) => {
               </div>
             )}
             {statusTimelineItems.length > 0 && (
-              <div
-                ref={statusTimelineRef}
-                className="w-full p-5 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20"
-              >
-                <h3 className="mb-5 text-2xl font-semibold text-gray-800">
-                  Status & Timeline
+  <div
+    ref={statusTimelineRef}
+    className="w-full p-5 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20"
+  >
+    <h3 className="mb-5 text-2xl font-semibold text-gray-800">
+      Status & Timeline
+    </h3>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {statusTimelineItems.map((item, index) => (
+        <div
+          key={index}
+          className={`flex items-start p-4 rounded-xl border border-gray-200 ${item.bgColor}`}
+        >
+          {/* Icon */}
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center ${item.bgColor}`}
+          >
+            <span className={`text-xl ${item.iconColor}`}>
+              {item.icon}
+            </span>
+          </div>
+
+          {/* Content */}
+          <div className="ml-4 flex-1">
+            <p className="text-sm text-gray-500">
+              {item.title}
+            </p>
+
+            <p className="mt-1 text-base font-semibold text-gray-800 break-words">
+              {item.value}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
+            {/* More Details Section */}
+            {/* {moreDetailsFields.length > 0 && (
+              <div className="w-full p-4 mt-4 bg-white rounded-lg shadow-sm">
+                <h3 className="mb-4 ml-2 text-3xl font-semibold">
+                  More Details
                 </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {statusTimelineItems.map((item, index) => (
-                    <div
-                      key={index}
-                      className={`flex items-start p-4 rounded-xl border border-gray-200 ${item.bgColor}`}
-                    >
-                      {/* Icon */}
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center ${item.bgColor}`}
-                      >
-                        <span className={`text-xl ${item.iconColor}`}>
-                          {item.icon}
-                        </span>
-                      </div>
-
-                      {/* Content */}
-                      <div className="ml-4 flex-1">
-                        <p className="text-sm text-gray-500">
-                          {item.title}
-                        </p>
-
-                        <p className="mt-1 text-base font-semibold text-gray-800 break-words">
-                          {item.value}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <table className="min-w-full table-auto text-left text-[16px] text-black ml-2">
+                  <tbody>
+                    {moreDetailsFields.map(([label, value], index) => (
+                      <tr key={index} className="align-top">
+                        <td className="py-1 pr-2 text-gray-500 sm:pr-6 md:pr-12 lg:pr-20 whitespace-nowrap">
+                          {label}:
+                        </td>
+                        <td className="py-1 pl-1 break-words">{value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            )}
+            )} */}
 
             {moreDetailsFields.length > 0 && (
               <div
@@ -1686,10 +1724,11 @@ const Detail = ({ propertyData }) => {
 
               {enquiryStatus && (
                 <div
-                  className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
-                    ? "text-green-600"
-                    : "text-red-600"
-                    }`}
+                  className={`text-center mt-4 text-lg ${
+                    enquiryStatus.type === "success"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
                 >
                   {enquiryStatus.message}
                 </div>

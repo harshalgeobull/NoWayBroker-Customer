@@ -755,11 +755,11 @@ export default function SearchDashboard() {
   const formatPrice = (price) => {
     if (!price) return "";
 
-    price = parseInt(price);
+    price = Number(price);
 
-    const formatNumber = (num) => {
-      return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2); // no decimals if whole number
-    };
+const formatNumber = (num) => {
+  return num.toFixed(2).replace(/\.?0+$/, "");
+};
 
     if (price >= 10000000) {
       return `₹ ${formatNumber(price / 10000000)} Cr`; // Crores
@@ -773,14 +773,22 @@ export default function SearchDashboard() {
   };
 
   const formatPriceMinMax = (value) => {
-    const num = Number(value);
-    if (num >= 10000000)
-      return (num / 10000000).toFixed(1).replace(/\.0$/, "") + " Cr";
-    if (num >= 100000)
-      return (num / 100000).toFixed(1).replace(/\.0$/, "") + " L";
-    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, "") + " K";
-    return num;
-  };
+  const num = Number(value);
+
+  const formatNumber = (n) =>
+    n.toFixed(2).replace(/\.?0+$/, "");
+
+  if (num >= 10000000)
+    return `${formatNumber(num / 10000000)} Cr`;
+
+  if (num >= 100000)
+    return `${formatNumber(num / 100000)} L`;
+
+  if (num >= 1000)
+    return `${formatNumber(num / 1000)} K`;
+
+  return num.toString();
+};
   // 5L = 500000, goes up to 75Cr (750000000)
 
   const createCustomIcon = (property, isActive = false) => {

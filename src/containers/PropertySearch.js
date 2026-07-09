@@ -73,52 +73,52 @@ const PropertySearch = () => {
 
   return (
     <section
-      className="property-search bg-cover bg-center p-6 md:p-10 lg:p-12 relative mb-10 content-center"
+    className="property-search bg-cover bg-center p-6 md:p-10 lg:p-12 relative mb-10 content-center"
+    style={{
+      backgroundImage: "url('/image/propertysearchbg.jpg')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      height: "70vh",
+    }}
+  >
+    <div
+      className="absolute inset-0 bg-black"
       style={{
-        backgroundImage: "url('/image/propertysearchbg.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        height: "70vh",
+        opacity: 0.4, // Add a subtle overlay
       }}
-    >
-      <div
-        className="absolute inset-0 bg-black"
-        style={{
-          opacity: 0.4, // Add a subtle overlay
-        }}
-      ></div>
-
-      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
-        {/* Left Side Heading */}
-        <div className="flex-1 text-center md:text-left">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-extrabold text-white mb-6 font-sans">
-            Find Your Perfect Property
-          </h2>
-        </div>
-
-        {/* Right Side Grid with Images */}
-        <div className="flex flex-wrap justify-start gap-4 md:w-2/5">
-          {[1, 2, 3, 4, 5].map((item, index) => (
-            <div
-              key={index}
-              className="w-full sm:w-1/2 lg:w-1/3 xl:w-1/5 relative"
+    ></div>
+  
+    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
+      {/* Left Side Heading */}
+      <div className="flex-1 text-center md:text-left">
+        <h2 className="text-2xl md:text-4xl lg:text-5xl font-extrabold text-white mb-6 font-sans">
+          Find Your Perfect Property
+        </h2>
+      </div>
+  
+      {/* Right Side Grid with Images */}
+      <div className="flex flex-wrap justify-start gap-4 md:w-2/5">
+        {[1, 2, 3, 4, 5].map((item, index) => (
+          <div
+            key={index}
+            className="w-full sm:w-1/2 lg:w-1/3 xl:w-1/5 relative"
+          >
+            {/* Image with Heading */}
+            <div className="w-full h-64 bg-cover bg-center rounded-lg"
+              style={{
+                backgroundImage: `url('/image/property${item}.jpg')`, // You can replace the URL with your actual image paths
+              }}
             >
-              {/* Image with Heading */}
-              <div className="w-full h-64 bg-cover bg-center rounded-lg"
-                style={{
-                  backgroundImage: `url('/image/property${item}.jpg')`, // You can replace the URL with your actual image paths
-                }}
-              >
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
-                  <h4 className="text-xl font-semibold text-white">Property {item}</h4>
-                </div>
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
+                <h4 className="text-xl font-semibold text-white">Property {item}</h4>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-    </section>
-
+    </div>
+  </section>
+  
   );
 };
 

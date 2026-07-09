@@ -12,14 +12,24 @@ import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Slider from "react-slick";
 import { RiArrowDropDownLine, RiRuler2Line } from "react-icons/ri";
-import { MdOutlineNavigateBefore, MdOutlineNavigateNext, MdApartment } from "react-icons/md";
+import {
+  MdOutlineNavigateBefore,
+  MdOutlineNavigateNext,
+  MdApartment,
+} from "react-icons/md";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareNodes, faUserCircle } from "@fortawesome/free-solid-svg-icons";
 import { AiOutlineUser, AiOutlineClockCircle } from "react-icons/ai";
 import { MdOutlineBedroomParent } from "react-icons/md";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { BiArea } from "react-icons/bi";
-import { FaRupeeSign, FaBath, FaUser, FaWhatsapp, FaPhone } from "react-icons/fa";
+import {
+  FaRupeeSign,
+  FaBath,
+  FaUser,
+  FaWhatsapp,
+  FaPhone,
+} from "react-icons/fa";
 import { faChair } from "@fortawesome/free-solid-svg-icons";
 import { PiShareNetworkLight } from "react-icons/pi";
 import { PiCubeFocus } from "react-icons/pi";
@@ -40,9 +50,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-    Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -283,7 +293,7 @@ const FeaturedDashboard = () => {
     "Multiplex",
     "Co-working",
     "Corner Shop",
-    "Main Road Shop"
+    "Main Road Shop",
   ];
 
   const purchaseTypeOptions = ["Resale", "New bookings"];
@@ -369,14 +379,28 @@ const FeaturedDashboard = () => {
   ];
 
   const DEFAULT_CENTER = [18.5204, 73.8567];
+  // const getMapCenter = () => {
+  //   if (
+  //     properties.length > 0 &&
+  //     properties[0].latitude &&
+  //     properties[0].longitude
+  //   ) {
+  //     return [properties[0].latitude, properties[0].longitude];
+  //   }
+  //   return DEFAULT_CENTER;
+  // };
   const getMapCenter = () => {
-    if (
-      properties.length > 0 &&
-      properties[0].latitude &&
-      properties[0].longitude
-    ) {
-      return [properties[0].latitude, properties[0].longitude];
+    const firstValid = properties.find((property) => {
+      const lat = Number(property.latitude);
+      const lng = Number(property.longitude);
+
+      return Number.isFinite(lat) && Number.isFinite(lng);
+    });
+
+    if (firstValid) {
+      return [Number(firstValid.latitude), Number(firstValid.longitude)];
     }
+
     return DEFAULT_CENTER;
   };
 
@@ -899,7 +923,7 @@ const FeaturedDashboard = () => {
 
       setError(
         error?.response?.data?.message ||
-        "Failed to load properties. Please try again.",
+          "Failed to load properties. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -963,20 +987,20 @@ const FeaturedDashboard = () => {
   };
 
   const formatPrice = (price) => {
-    if (!price) return "";
+    if (price === null || price === undefined || price === "") return "";
 
-    price = parseInt(price);
+    price = Number(price);
 
     const formatNumber = (num) => {
-      return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2); // no decimals if whole number
+      return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2);
     };
 
     if (price >= 10000000) {
-      return `₹ ${formatNumber(price / 10000000)} Cr`; // Crores
+      return `₹ ${formatNumber(price / 10000000)} Cr`;
     } else if (price >= 100000) {
-      return `₹ ${formatNumber(price / 100000)} L`; // Lakhs
+      return `₹ ${formatNumber(price / 100000)} L`;
     } else if (price >= 1000) {
-      return `₹ ${formatNumber(price / 1000)} K`; // Thousands
+      return `₹ ${formatNumber(price / 1000)} K`;
     } else {
       return `₹ ${price}`;
     }
@@ -1845,7 +1869,7 @@ const FeaturedDashboard = () => {
                         <input
                           type={
                             propertyType === "Commercial Lease" &&
-                              buildingType === "Commercial"
+                            buildingType === "Commercial"
                               ? "radio"
                               : "checkbox"
                           }
@@ -2127,11 +2151,11 @@ const FeaturedDashboard = () => {
                 <span className="block pr-8 truncate text-left">
                   {selectedAmenities.length > 0
                     ? amenitiesList
-                      .filter((item) =>
-                        selectedAmenities.includes(String(item._id)),
-                      )
-                      .map((item) => item.amenity_name)
-                      .join(", ")
+                        .filter((item) =>
+                          selectedAmenities.includes(String(item._id)),
+                        )
+                        .map((item) => item.amenity_name)
+                        .join(", ")
                     : "Amenities"}
                 </span>
 
@@ -3309,15 +3333,17 @@ const FeaturedDashboard = () => {
                     }
 
                     const subtitle = (() => {
-                      const area = property.address_area || property.address || "";
+                      const area =
+                        property.address_area || property.address || "";
                       const city = property.city_name || "";
 
-                      const loc =
-                        area.toLowerCase().includes(city.toLowerCase())
-                          ? area
-                          : city
-                            ? `${area}, ${city}`
-                            : area;
+                      const loc = area
+                        .toLowerCase()
+                        .includes(city.toLowerCase())
+                        ? area
+                        : city
+                          ? `${area}, ${city}`
+                          : area;
 
                       const type =
                         property.property_type === "Office"
@@ -3325,8 +3351,8 @@ const FeaturedDashboard = () => {
                           : property.property_type === "Retail"
                             ? "Retail Space"
                             : property.property_type ||
-                            property.building_type ||
-                            "Property";
+                              property.building_type ||
+                              "Property";
 
                       const category = property.property_category_type || "";
 
@@ -3334,8 +3360,9 @@ const FeaturedDashboard = () => {
                         category === "Commercial Buy" ||
                         category === "Commercial Lease"
                       ) {
-                        return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
-                          } in ${loc}`;
+                        return `${type} for ${
+                          category === "Commercial Buy" ? "Sale" : "Lease"
+                        } in ${loc}`;
                       }
 
                       if (
@@ -3346,17 +3373,22 @@ const FeaturedDashboard = () => {
                         return `${type} for Rent in ${loc}`;
                       }
 
-                      const action = category === "Buy" ? "Sale" : category || "Sale";
+                      const action =
+                        category === "Buy" ? "Sale" : category || "Sale";
 
-                      return `${property.bhk_type ? property.bhk_type + " " : ""
-                        }${type} for ${action} in ${loc}`;
+                      return `${
+                        property.bhk_type ? property.bhk_type + " " : ""
+                      }${type} for ${action} in ${loc}`;
                     })();
 
                     return (
                       <div
                         key={property._id}
-                        className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${hoveredPropertyId === property._id ? "bg-green-200" : ""
-                          }`}
+                        className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${
+                          hoveredPropertyId === property._id
+                            ? "bg-green-200"
+                            : ""
+                        }`}
                         onMouseEnter={() => setHoveredPropertyId(property._id)}
                         onMouseLeave={() => setHoveredPropertyId(null)}
                       >
@@ -3365,7 +3397,8 @@ const FeaturedDashboard = () => {
                             to={`/propertydetails/${property._id}`}
                             className="block overflow-hidden no-underline bg-white border-2 rounded-lg hover:no-underline"
                           >
-                            {1 + (property?.property_images?.length || 0) > 1 ? (
+                            {1 + (property?.property_images?.length || 0) >
+                            1 ? (
                               <Slider
                                 dots
                                 infinite
@@ -3386,7 +3419,8 @@ const FeaturedDashboard = () => {
                                   const activeSlide =
                                     activeIndexes[property._id] || 0;
                                   const totalImages =
-                                    1 + (property?.property_images?.length || 0);
+                                    1 +
+                                    (property?.property_images?.length || 0);
                                   const isActive =
                                     i === activeSlide % totalImages;
                                   return (
@@ -3404,8 +3438,12 @@ const FeaturedDashboard = () => {
                                 }}
                                 appendDots={(dots) => {
                                   const totalImages =
-                                    1 + (property?.property_images?.length || 0);
-                                  const visibleDots = dots.slice(0, totalImages);
+                                    1 +
+                                    (property?.property_images?.length || 0);
+                                  const visibleDots = dots.slice(
+                                    0,
+                                    totalImages,
+                                  );
                                   return (
                                     <div
                                       style={{
@@ -3552,20 +3590,26 @@ const FeaturedDashboard = () => {
                             <div className="flex items-center">
                               <span className="text-2xl font-bold">
                                 ₹{" "}
-                                {property.property_category_type === "Rent"
+                                {property.property_category_type === "Rent" ||
+                                property.property_category_type ===
+                                  "PG/Co-living"
                                   ? formatPrice(property.rent).replace("₹ ", "")
-                                  : formatPrice(property.property_price).replace(
-                                    "₹ ",
-                                    "",
-                                  )}
+                                  : formatPrice(
+                                      property.property_price,
+                                    ).replace("₹ ", "")}
                               </span>
-                              {property.property_category_type === "Rent" && (
+                              {(property.property_category_type === "Rent" ||
+                                property.property_category_type ===
+                                  "PG/Co-living") && (
                                 <span className="ml-1 text-sm text-gray-500">
-                                  / {property.rent_duration}
+                                  / {property.rent_duration || "Per Month"}
                                 </span>
                               )}
-                              {property.property_category_type?.includes("Buy") &&
-                                property.possession_status === "Ready To Move" && (
+                              {property.property_category_type?.includes(
+                                "Buy",
+                              ) &&
+                                property.possession_status ===
+                                  "Ready To Move" && (
                                   <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
                                     <MdApartment className="text-base text-green-700" />
                                     <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
@@ -3575,11 +3619,33 @@ const FeaturedDashboard = () => {
                                 )}
                             </div>
                             <div className="text-sm font-medium whitespace-nowrap">
-                              {property.property_category_type?.includes("Buy") &&
-                                property.possession_status !== "Ready To Move" &&
+                              {(property.property_category_type === "Rent" ||
+                                property.property_category_type ===
+                                  "PG/Co-living") && (
+                                <>
+                                  <span className="text-gray-500">
+                                    Deposit:
+                                  </span>
+                                  <span className="ml-1 font-semibold">
+                                    ₹{" "}
+                                    {property.custom_deposit_amount
+                                      ? property.custom_deposit_amount.toLocaleString(
+                                          "en-IN",
+                                        )
+                                      : "0"}
+                                  </span>
+                                </>
+                              )}
+                              {property.property_category_type?.includes(
+                                "Buy",
+                              ) &&
+                                property.possession_status !==
+                                  "Ready To Move" &&
                                 property.possession_date && (
                                   <>
-                                    <span className="text-gray-500">Possession:</span>
+                                    <span className="text-gray-500">
+                                      Possession:
+                                    </span>
                                     <span className="ml-1 font-semibold">
                                       {new Date(
                                         property.possession_date,
@@ -3601,14 +3667,18 @@ const FeaturedDashboard = () => {
                                       : property.property_type === "Retail"
                                         ? "Retail Space"
                                         : property.property_type
-                                    : property.property_category_type?.includes("PG")
+                                    : property.property_category_type?.includes(
+                                          "PG",
+                                        )
                                       ? `${property.bathroom || 0} Bathrooms`
                                       : property.bhk_type}
                                 </p>
                                 <p className="m-0 text-xs leading-4 text-gray-500 truncate">
                                   {property.building_type === "Commercial"
                                     ? "Property Type"
-                                    : property.property_category_type?.includes("PG")
+                                    : property.property_category_type?.includes(
+                                          "PG",
+                                        )
                                       ? "Bathrooms"
                                       : property.property_type}
                                 </p>
@@ -3616,19 +3686,25 @@ const FeaturedDashboard = () => {
                             </div>
 
                             <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
-                              {property.property_category_type?.includes("PG") ? (
+                              {property.property_category_type?.includes(
+                                "PG",
+                              ) ? (
                                 <FaUser className="text-[20px] text-gray-700 flex-shrink-0" />
                               ) : (
                                 <FaBath className="text-[20px] text-gray-700 flex-shrink-0" />
                               )}
                               <div className="flex flex-col justify-center min-w-0">
                                 <p className="m-0 text-sm font-semibold leading-4 truncate">
-                                  {property.property_category_type?.includes("PG")
+                                  {property.property_category_type?.includes(
+                                    "PG",
+                                  )
                                     ? property.available_for
                                     : `${property.bathroom || 0} Baths`}
                                 </p>
                                 <p className="m-0 text-xs leading-4 text-gray-500 truncate">
-                                  {property.property_category_type?.includes("PG")
+                                  {property.property_category_type?.includes(
+                                    "PG",
+                                  )
                                     ? "Available For"
                                     : "Bathrooms"}
                                 </p>
@@ -3695,7 +3771,10 @@ const FeaturedDashboard = () => {
                                     className="object-cover w-full h-full rounded-full"
                                   />
                                 ) : (
-                                  <AiOutlineUser className="text-blue-600" size={24} />
+                                  <AiOutlineUser
+                                    className="text-blue-600"
+                                    size={24}
+                                  />
                                 )}
                               </div>
                               <div className="flex flex-col ml-3 min-w-0">
@@ -3774,8 +3853,9 @@ const FeaturedDashboard = () => {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${
+                      currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
                     <MdOutlineNavigateBefore className="text-xl text-gray-700" />
                   </button>
@@ -3787,10 +3867,11 @@ const FeaturedDashboard = () => {
                       onClick={() =>
                         page !== "..." ? handlePageChange(page) : null
                       }
-                      className={`px-3 py-1 text-sm transition-colors ${currentPage === page
-                        ? "rounded-full my-border w-8 h-8 flex items-center justify-center font-normal"
-                        : "text-gray-700"
-                        }`}
+                      className={`px-3 py-1 text-sm transition-colors ${
+                        currentPage === page
+                          ? "rounded-full my-border w-8 h-8 flex items-center justify-center font-normal"
+                          : "text-gray-700"
+                      }`}
                     >
                       {page}
                     </button>
@@ -3799,10 +3880,11 @@ const FeaturedDashboard = () => {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === totalPages
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                      }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${
+                      currentPage === totalPages
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
                   >
                     <MdOutlineNavigateNext className="text-xl text-gray-700" />
                   </button>
@@ -3823,10 +3905,16 @@ const FeaturedDashboard = () => {
                 >
                   <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}" />
                   {properties
-                    .filter(
-                      (property) => property.latitude && property.longitude,
-                    )
-                    .map((property, index) => (
+                    // .filter(
+                    //   (property) => property.latitude && property.longitude,
+                    // )
+                    .filter((property) => {
+                      const lat = Number(property.latitude);
+                      const lng = Number(property.longitude);
+
+                      return Number.isFinite(lat) && Number.isFinite(lng);
+                    })
+                    .map((property) => (
                       <Marker
                         key={property._id}
                         position={[
@@ -3836,7 +3924,7 @@ const FeaturedDashboard = () => {
                         icon={createCustomIcon(
                           property,
                           property._id === activePropertyId ||
-                          property._id === hoveredPropertyId,
+                            property._id === hoveredPropertyId,
                         )}
                         eventHandlers={{
                           mouseover: () => setHoveredPropertyId(property._id),

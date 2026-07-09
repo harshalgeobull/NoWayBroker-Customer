@@ -198,8 +198,9 @@ const Profile = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {alert && (
             <div
-              className={`alert ${alert.type === "success" ? "text-green-500" : "text-red-500"
-                } my-4`}
+              className={`alert ${
+                alert.type === "success" ? "text-green-500" : "text-red-500"
+              } my-4`}
             >
               {alert.msg}
             </div>

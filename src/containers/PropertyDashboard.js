@@ -47,9 +47,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-    Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -637,22 +637,24 @@ const PropertyDashboard = () => {
   };
 
   const formatPrice = (price) => {
-    if (!price) return "";
+  if (!price) return "";
 
-    const formatNumber = (value, unit) => {
-      return `${value % 1 === 0 ? parseInt(value) : value.toFixed(1)} ${unit}`;
-    };
-
-    if (price >= 10000000) {
-      return formatNumber(price / 10000000, "Cr");
-    } else if (price >= 100000) {
-      return formatNumber(price / 100000, "L");
-    } else if (price >= 1000) {
-      return formatNumber(price / 1000, "K");
-    } else {
-      return price.toString();
-    }
+  const formatNumber = (value, unit) => {
+    return `${value % 1 === 0
+      ? parseInt(value)
+      : value.toFixed(2).replace(/\.?0+$/, "")} ${unit}`;
   };
+
+  if (price >= 10000000) {
+    return formatNumber(price / 10000000, "Cr");
+  } else if (price >= 100000) {
+    return formatNumber(price / 100000, "L");
+  } else if (price >= 1000) {
+    return formatNumber(price / 1000, "K");
+  } else {
+    return price.toString();
+  }
+};
 
   useEffect(() => {
     setError(null);
@@ -1710,7 +1712,7 @@ const PropertyDashboard = () => {
                         <input
                           type={
                             propertyType === "Commercial Lease" &&
-                              buildingType === "Commercial"
+                            buildingType === "Commercial"
                               ? "radio"
                               : "checkbox"
                           }
@@ -1992,11 +1994,11 @@ const PropertyDashboard = () => {
                 <span className="block pr-8 truncate text-left">
                   {selectedAmenities.length > 0
                     ? amenitiesList
-                      .filter((item) =>
-                        selectedAmenities.includes(String(item._id)),
-                      )
-                      .map((item) => item.amenity_name)
-                      .join(", ")
+                        .filter((item) =>
+                          selectedAmenities.includes(String(item._id)),
+                        )
+                        .map((item) => item.amenity_name)
+                        .join(", ")
                     : "Amenities"}
                 </span>
 
@@ -3193,8 +3195,9 @@ const PropertyDashboard = () => {
                           category === "Commercial Buy" ||
                           category === "Commercial Lease"
                         ) {
-                          return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
-                            } in ${location}`;
+                          return `${type} for ${
+                            category === "Commercial Buy" ? "Sale" : "Lease"
+                          } in ${location}`;
                         }
 
                         if (
@@ -3227,10 +3230,11 @@ const PropertyDashboard = () => {
                       return (
                         <div
                           key={property._id}
-                          className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${hoveredPropertyId === property._id
+                          className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${
+                            hoveredPropertyId === property._id
                               ? "bg-green-200"
                               : ""
-                            }`}
+                          }`}
                           onMouseEnter={() =>
                             setHoveredPropertyId(property._id)
                           }
@@ -3242,7 +3246,7 @@ const PropertyDashboard = () => {
                               className="block overflow-hidden no-underline bg-white rounded-lg hover:no-underline"
                             >
                               {1 + (property?.property_images?.length || 0) >
-                                1 ? (
+                              1 ? (
                                 <Slider
                                   dots
                                   infinite
@@ -3425,24 +3429,25 @@ const PropertyDashboard = () => {
                                 <div className="flex items-center">
                                   <span className="text-2xl font-bold">
                                     ₹{" "}
-                                    {property.property_category_type === "Rent"
+                                    {property.property_category_type === "Rent" ||
+                                    property.property_category_type === "PG/Co-living"
                                       ? formatPrice(property.rent)
                                       : formatPrice(property.property_price)}
                                   </span>
 
-                                  {property.property_category_type ===
-                                    "Rent" && (
-                                      <span className="ml-1 text-sm text-gray-500">
-                                        / {property.rent_duration}
-                                      </span>
-                                    )}
+                                  {(property.property_category_type ===
+                                    "Rent" || property.property_category_type === "PG/Co-living") && (
+                                    <span className="ml-1 text-sm text-gray-500">
+    / {property.rent_duration || "Per Month"}
+  </span>
+                                  )}
 
                                   {/* Ready to Move - Keep close to price */}
                                   {property.property_category_type?.includes(
                                     "Buy",
                                   ) &&
                                     property.possession_status ===
-                                    "Ready To Move" && (
+                                      "Ready To Move" && (
                                       <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
                                         <MdApartment className="text-base text-green-700" />
                                         <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
@@ -3454,26 +3459,26 @@ const PropertyDashboard = () => {
 
                                 {/* Right Side */}
                                 <div className="text-sm font-medium whitespace-nowrap">
-                                  {property.property_category_type ===
-                                    "Rent" && (
-                                      <>
-                                        <span className="text-gray-500">
-                                          Deposit:
-                                        </span>
-                                        <span className="ml-1 font-semibold">
-                                          ₹{" "}
-                                          {property.custom_deposit_amount?.toLocaleString(
-                                            "en-IN",
-                                          )}
-                                        </span>
-                                      </>
-                                    )}
+                                  {(property.property_category_type ===
+                                    "Rent" || property.property_category_type === "PG/Co-living")&& (
+                                    <>
+                                      <span className="text-gray-500">
+                                        Deposit:
+                                      </span>
+                                      <span className="ml-1 font-semibold">
+                                        ₹{" "}
+                                        {property.custom_deposit_amount?.toLocaleString(
+                                          "en-IN",
+                                        )}
+                                      </span>
+                                    </>
+                                  )}
 
                                   {property.property_category_type?.includes(
                                     "Buy",
                                   ) &&
                                     property.possession_status !==
-                                    "Ready To Move" &&
+                                      "Ready To Move" &&
                                     property.possession_date && (
                                       <>
                                         <span className="text-gray-500">
@@ -3503,8 +3508,8 @@ const PropertyDashboard = () => {
                                             ? "Retail Space"
                                             : property.property_type
                                         : property.property_category_type?.includes(
-                                          "PG",
-                                        )
+                                              "PG",
+                                            )
                                           ? `${property.bathroom || 0} Bathrooms`
                                           : property.bhk_type}
                                     </p>
@@ -3513,8 +3518,8 @@ const PropertyDashboard = () => {
                                       {property.building_type === "Commercial"
                                         ? "Property Type"
                                         : property.property_category_type?.includes(
-                                          "PG",
-                                        )
+                                              "PG",
+                                            )
                                           ? "Bathrooms"
                                           : property.property_type}
                                     </p>
@@ -3630,9 +3635,9 @@ const PropertyDashboard = () => {
                                   {/* Avatar */}
                                   <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
                                     {property.property_owner_image &&
-                                      !property.property_owner_image.includes(
-                                        "default_profile",
-                                      ) ? (
+                                    !property.property_owner_image.includes(
+                                      "default_profile",
+                                    ) ? (
                                       <>
                                         <img
                                           src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
@@ -3977,8 +3982,9 @@ const PropertyDashboard = () => {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${
+                      currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
                     <MdOutlineNavigateBefore className="text-xl text-gray-700" />
                   </button>
@@ -3990,10 +3996,11 @@ const PropertyDashboard = () => {
                       onClick={() =>
                         page !== "..." ? handlePageChange(page) : null
                       }
-                      className={`px-3 py-1 text-sm transition-colors ${currentPage === page
+                      className={`px-3 py-1 text-sm transition-colors ${
+                        currentPage === page
                           ? "rounded-full my-border w-8 h-8 flex items-center justify-center font-normal"
                           : "text-gray-700"
-                        }`}
+                      }`}
                     >
                       {page}
                     </button>
@@ -4002,10 +4009,11 @@ const PropertyDashboard = () => {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === totalPages
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${
+                      currentPage === totalPages
                         ? "opacity-50 cursor-not-allowed"
                         : ""
-                      }`}
+                    }`}
                   >
                     <MdOutlineNavigateNext className="text-xl text-gray-700" />
                   </button>
@@ -4047,7 +4055,7 @@ const PropertyDashboard = () => {
                         icon={createCustomIcon(
                           property.property_price,
                           property._id === activePropertyId ||
-                          property._id === hoveredPropertyId,
+                            property._id === hoveredPropertyId,
                         )}
                         eventHandlers={{
                           mouseover: () => setHoveredPropertyId(property._id),

@@ -38,9 +38,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-    Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -217,7 +217,11 @@ const RecommendedProperties = ({
     if (!price) return "";
 
     const formatNumber = (value, unit) => {
-      return (value % 1 === 0 ? parseInt(value) : value.toFixed(1)) + unit;
+      return (
+        (value % 1 === 0
+          ? parseInt(value)
+          : value.toFixed(2).replace(/\.?0+$/, "")) + unit
+      );
     };
 
     if (price >= 10000000) {
@@ -342,8 +346,9 @@ const RecommendedProperties = ({
                   category === "Commercial Buy" ||
                   category === "Commercial Lease"
                 ) {
-                  return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
-                    } in ${location}`;
+                  return `${type} for ${
+                    category === "Commercial Buy" ? "Sale" : "Lease"
+                  } in ${location}`;
                 }
                 return `${type} in ${location}`;
               })();
@@ -354,16 +359,12 @@ const RecommendedProperties = ({
                   parseFloat(userLocation.latitude),
                   parseFloat(userLocation.longitude),
                   parseFloat(property.latitude),
-                  parseFloat(property.longitude)
+                  parseFloat(property.longitude),
                 ).toFixed(1);
               }
 
-
               return (
-                <div
-                  key={property._id}
-                  className="px-2 py-4"
-                >
+                <div key={property._id} className="px-2 py-4">
                   <div className="property-card flex flex-col h-full min-h-[520px] bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                     <div className="flex flex-col h-full w-full overflow-hidden rounded-xl">
                       <div className="relative">
@@ -551,7 +552,6 @@ const RecommendedProperties = ({
                       {/* Property Details */}
                       {/* Property Details Wrapper */}
                       <div className="flex flex-col flex-1 justify-between p-4 bg-white">
-
                         {/* Price Section */}
                         <div className="flex items-start justify-between gap-3 mb-0">
                           {/* Property Name */}
@@ -564,7 +564,7 @@ const RecommendedProperties = ({
 
                           {/* Furnishing */}
                           <span
-                            className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-black sm:text-base whitespace-nowrap"
+                            className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-[#E85B6B] sm:text-base whitespace-nowrap"
                             title={property.furnished_type}
                           >
                             {property.furnished_type || "Un-Furnished"}
@@ -582,21 +582,24 @@ const RecommendedProperties = ({
                           <div className="flex items-center">
                             <span className="text-2xl font-bold">
                               ₹{" "}
-                              {property.property_category_type === "Rent"
+                              {property.property_category_type === "Rent" ||
+                              property.property_category_type === "PG/Co-living"
                                 ? formatPrice(property.rent)
                                 : formatPrice(property.property_price)}
                             </span>
 
-                            {property.property_category_type === "Rent" && (
+                            {(property.property_category_type === "Rent" ||
+                              property.property_category_type ===
+                                "PG/Co-living") && (
                               <span className="ml-1 text-sm text-gray-500">
-                                / {property.rent_duration}
+                                / {property.rent_duration || "Per Month"}
                               </span>
                             )}
 
                             {/* Ready to Move - Keep close to price */}
                             {property.property_category_type?.includes("Buy") &&
                               property.possession_status ===
-                              "Ready To Move" && (
+                                "Ready To Move" && (
                                 <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
                                   <MdApartment className="text-base text-green-700" />
                                   <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
@@ -608,7 +611,9 @@ const RecommendedProperties = ({
 
                           {/* Right Side */}
                           <div className="text-sm font-medium whitespace-nowrap">
-                            {property.property_category_type === "Rent" && (
+                            {(property.property_category_type === "Rent" ||
+                              property.property_category_type ===
+                                "PG/Co-living") && (
                               <>
                                 <span className="text-gray-500">Deposit:</span>
                                 <span className="ml-1 font-semibold">
@@ -651,8 +656,8 @@ const RecommendedProperties = ({
                                       ? "Retail Space"
                                       : property.property_type
                                   : property.property_category_type?.includes(
-                                    "PG",
-                                  )
+                                        "PG",
+                                      )
                                     ? `${property.bathroom || 0} Bathrooms`
                                     : property.bhk_type}
                               </p>
@@ -661,8 +666,8 @@ const RecommendedProperties = ({
                                 {property.building_type === "Commercial"
                                   ? "Property Type"
                                   : property.property_category_type?.includes(
-                                    "PG",
-                                  )
+                                        "PG",
+                                      )
                                     ? "Bathrooms"
                                     : property.property_type}
                               </p>
@@ -765,9 +770,9 @@ const RecommendedProperties = ({
                           {/* Avatar */}
                           <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
                             {property.property_owner_image &&
-                              !property.property_owner_image.includes(
-                                "default_profile",
-                              ) ? (
+                            !property.property_owner_image.includes(
+                              "default_profile",
+                            ) ? (
                               <>
                                 <img
                                   src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
@@ -881,7 +886,7 @@ const RecommendedProperties = ({
             })}
           </Slider>
         </div>
-      </div >
+      </div>
       <div
         id="shareModal"
         className="fixed bottom-0 right-0 z-50 items-center justify-center hidden bg-black bg-opacity-50"
@@ -962,7 +967,7 @@ const RecommendedProperties = ({
           fetchHomeData();
         }}
       />
-    </div >
+    </div>
   );
 };
 

@@ -716,7 +716,7 @@ Make it engaging, attractive, and human-like.
 
         mark_as_featured:
           formData.mark_as_featured === true ||
-            formData.mark_as_featured === "Yes"
+          formData.mark_as_featured === "Yes"
             ? "Yes"
             : "No",
 
@@ -1449,12 +1449,13 @@ Make it engaging, attractive, and human-like.
             {steps.map((step, index) => (
               <button
                 key={index}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition ${activeStep === index
-                  ? "bg-gray-200 my-text"
-                  : completedSteps.includes(index)
-                    ? "text-green-600"
-                    : "text-gray-600"
-                  }`}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                  activeStep === index
+                    ? "bg-gray-200 my-text"
+                    : completedSteps.includes(index)
+                      ? "text-green-600"
+                      : "text-gray-600"
+                }`}
                 onClick={() => {
                   // Only allow clicking back to completed steps or current
                   if (completedSteps.includes(index) || index === activeStep) {
@@ -1502,10 +1503,11 @@ Make it engaging, attractive, and human-like.
                           project_name: alphaNumericOnly,
                         }));
                       }}
-                      className={`w-full p-3 rounded-lg outline-none focus:ring-2 focus:ring-rose-500 ${errors.projectName
-                        ? "border border-red-600"
-                        : "border border-gray-300"
-                        }`}
+                      className={`w-full p-3 rounded-lg outline-none focus:ring-2 focus:ring-rose-500 ${
+                        errors.projectName
+                          ? "border border-red-600"
+                          : "border border-gray-300"
+                      }`}
                     />
                     {errors.projectName && (
                       <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -1609,10 +1611,11 @@ Make it engaging, attractive, and human-like.
                               attached_bathroom: "",
                             }));
                           }}
-                          className={`px-4 py-2 rounded-full border ${buildingType === type
-                            ? "bg-rose-100 text-rose-700 border-rose-500"
-                            : "border-gray-300 text-gray-600"
-                            }`}
+                          className={`px-4 py-2 rounded-full border ${
+                            buildingType === type
+                              ? "bg-rose-100 text-rose-700 border-rose-500"
+                              : "border-gray-300 text-gray-600"
+                          }`}
                         >
                           {type}
                         </button>
@@ -1635,10 +1638,11 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             onClick={() => setPropertyType(type)}
-                            className={`px-4 py-2 rounded-full border ${propertyType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600"
-                              }`}
+                            className={`px-4 py-2 rounded-full border ${
+                              propertyType === type
+                                ? "bg-rose-100 text-rose-700 border-rose-500"
+                                : "border-gray-300 text-gray-600"
+                            }`}
                           >
                             {type === "Plot/Land" ? "Land" : type}
                           </button>
@@ -1657,10 +1661,11 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${hospitalityType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                              }`}
+                            className={`px-4 py-2 rounded-full border transition ${
+                              hospitalityType === type
+                                ? "bg-rose-100 text-rose-700 border-rose-500"
+                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                             onClick={() => {
                               setHospitalityType(type);
 
@@ -1687,10 +1692,11 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${landType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                              }`}
+                            className={`px-4 py-2 rounded-full border transition ${
+                              landType === type
+                                ? "bg-rose-100 text-rose-700 border-rose-500"
+                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                             onClick={() => {
                               setLandType(type);
 
@@ -1717,10 +1723,11 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${industryType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                              }`}
+                            className={`px-4 py-2 rounded-full border transition ${
+                              industryType === type
+                                ? "bg-rose-100 text-rose-700 border-rose-500"
+                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                             onClick={() => {
                               setIndustryType(type);
 
@@ -1747,10 +1754,11 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${storageType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                              }`}
+                            className={`px-4 py-2 rounded-full border transition ${
+                              storageType === type
+                                ? "bg-rose-100 text-rose-700 border-rose-500"
+                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                             onClick={() => {
                               setStorageType(type);
 
@@ -1777,10 +1785,11 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${officeSubType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                              }`}
+                            className={`px-4 py-2 rounded-full border transition ${
+                              officeSubType === type
+                                ? "bg-rose-100 text-rose-700 border-rose-500"
+                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                             onClick={() => {
                               setOfficeSubType(type);
 
@@ -1807,10 +1816,11 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${RetailSubType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                              }`}
+                            className={`px-4 py-2 rounded-full border transition ${
+                              RetailSubType === type
+                                ? "bg-rose-100 text-rose-700 border-rose-500"
+                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                             onClick={() => {
                               setRetailSubType(type);
                               setFormData((prev) => ({
@@ -1836,10 +1846,11 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${retailLocation === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                              }`}
+                            className={`px-4 py-2 rounded-full border transition ${
+                              retailLocation === type
+                                ? "bg-rose-100 text-rose-700 border-rose-500"
+                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                             onClick={() => {
                               setRetailLocation(type);
                               setFormData((prev) => ({
@@ -1908,10 +1919,11 @@ Make it engaging, attractive, and human-like.
                                 address: e.target.value,
                               }));
                             }}
-                            className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${errors.address
-                              ? "border-red-600"
-                              : "border-gray-300"
-                              }`}
+                            className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
+                              errors.address
+                                ? "border-red-600"
+                                : "border-gray-300"
+                            }`}
                           />
                         </Autocomplete>
 
@@ -1944,10 +1956,11 @@ Make it engaging, attractive, and human-like.
                               state: "",
                             }));
                           }}
-                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${errors.country
-                            ? "border-red-600"
-                            : "border-gray-300"
-                            }`}
+                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
+                            errors.country
+                              ? "border-red-600"
+                              : "border-gray-300"
+                          }`}
                         >
                           <option value="">Select Country</option>
                           {allCountries.map((c) => (
@@ -1982,8 +1995,9 @@ Make it engaging, attractive, and human-like.
                               state: e.target.value,
                             }));
                           }}
-                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${errors.state ? "border-red-600" : "border-gray-300"
-                            }`}
+                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
+                            errors.state ? "border-red-600" : "border-gray-300"
+                          }`}
                         >
                           <option value="">Select State</option>
                           {allStates.map((s) => (
@@ -2019,8 +2033,9 @@ Make it engaging, attractive, and human-like.
                             }));
                           }}
                           placeholder="Enter City"
-                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${errors.city ? "border-red-600" : "border-gray-300"
-                            }`}
+                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
+                            errors.city ? "border-red-600" : "border-gray-300"
+                          }`}
                         />
                         {errors.city && (
                           <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -2079,10 +2094,11 @@ Make it engaging, attractive, and human-like.
                               }));
                             }
                           }}
-                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${errors.zipCode
-                            ? "border-red-600"
-                            : "border-gray-300"
-                            }`}
+                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
+                            errors.zipCode
+                              ? "border-red-600"
+                              : "border-gray-300"
+                          }`}
                         />
                         {errors.zipCode && (
                           <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -2123,8 +2139,8 @@ Make it engaging, attractive, and human-like.
                         value={
                           formData.average_project_price
                             ? Number(
-                              formData.average_project_price,
-                            ).toLocaleString("en-IN")
+                                formData.average_project_price,
+                              ).toLocaleString("en-IN")
                             : ""
                         }
                         onChange={(e) => {
@@ -2160,49 +2176,49 @@ Make it engaging, attractive, and human-like.
                       buildingType === "Commercial" ||
                       propertyType === "Plot/Land"
                     ) && (
-                        <div className="w-full">
-                          <label className="block mb-1 text-sm font-medium text-gray-700">
-                            BHK{" "}
-                            <span className="text-xl font-bold text-red-500">
-                              *
-                            </span>
-                          </label>
+                      <div className="w-full">
+                        <label className="block mb-1 text-sm font-medium text-gray-700">
+                          BHK{" "}
+                          <span className="text-xl font-bold text-red-500">
+                            *
+                          </span>
+                        </label>
 
-                          <select
-                            value={formData.bhk_type || ""}
-                            onChange={(e) => {
-                              handleInputChange("bhk_type", e.target.value);
-                            }}
-                            className="w-full mt-1 p-3 border rounded-lg text-gray-700 outline-none focus:ring-2 focus:ring-rose-500"
-                          >
-                            <option value="">Select BHK Type</option>
-                            {[
-                              "Studio/Single Room",
-                              "1 BHK",
-                              "1.5 BHK",
-                              "2 BHK",
-                              "2.5 BHK",
-                              "3 BHK",
-                              "3.5 BHK",
-                              "4 BHK",
-                              "5 BHK",
-                              "6 BHK",
-                              "6+ BHK",
-                            ].map((bhk) => (
-                              <option key={bhk} value={bhk}>
-                                {bhk}
-                              </option>
-                            ))}
-                          </select>
+                        <select
+                          value={formData.bhk_type || ""}
+                          onChange={(e) => {
+                            handleInputChange("bhk_type", e.target.value);
+                          }}
+                          className="w-full mt-1 p-3 border rounded-lg text-gray-700 outline-none focus:ring-2 focus:ring-rose-500"
+                        >
+                          <option value="">Select BHK Type</option>
+                          {[
+                            "Studio/Single Room",
+                            "1 BHK",
+                            "1.5 BHK",
+                            "2 BHK",
+                            "2.5 BHK",
+                            "3 BHK",
+                            "3.5 BHK",
+                            "4 BHK",
+                            "5 BHK",
+                            "6 BHK",
+                            "6+ BHK",
+                          ].map((bhk) => (
+                            <option key={bhk} value={bhk}>
+                              {bhk}
+                            </option>
+                          ))}
+                        </select>
 
-                          {errors.bhk_type && (
-                            <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                              <MdErrorOutline className="text-lg" />
-                              {errors.bhk_type}
-                            </p>
-                          )}
-                        </div>
-                      )}
+                        {errors.bhk_type && (
+                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <MdErrorOutline className="text-lg" />
+                            {errors.bhk_type}
+                          </p>
+                        )}
+                      </div>
+                    )}
 
                     {/* Carpet Area */}
                     <div>
@@ -2286,31 +2302,31 @@ Make it engaging, attractive, and human-like.
                           "Plot/Land",
                         ].includes(propertyType))
                     ) && (
-                        <div>
-                          <label className="font-medium text-gray-700">
-                            Bathroom
-                          </label>
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Bathroom
+                        </label>
 
-                          <select
-                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                            value={formData.bathroom}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                bathroom: e.target.value,
-                              })
-                            }
-                          >
-                            <option value="">Select Bathrooms</option>
-                            <option value="0">0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="4+">4+</option>
-                          </select>
-                        </div>
-                      )}
+                        <select
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={formData.bathroom}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              bathroom: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="">Select Bathrooms</option>
+                          <option value="0">0</option>
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                          <option value="4">4</option>
+                          <option value="4">4+</option>
+                        </select>
+                      </div>
+                    )}
                     {buildingType === "Commercial" &&
                       propertyType === "Retail" && (
                         <div>
@@ -2325,7 +2341,7 @@ Make it engaging, attractive, and human-like.
 
                               setFormData((prev) => ({
                                 ...prev,
-                                washroom: e.target.value,
+                                commercial_washroom: e.target.value,
                               }));
                             }}
                             className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
@@ -2363,7 +2379,7 @@ Make it engaging, attractive, and human-like.
                             <option value="2">2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
-                            <option value="4+">4+</option>
+                            <option value="4">4+</option>
                           </select>
                         </div>
                       )}
@@ -2470,8 +2486,8 @@ Make it engaging, attractive, and human-like.
                           value={
                             formData.custom_deposit_amount
                               ? Number(
-                                formData.custom_deposit_amount,
-                              ).toLocaleString("en-IN")
+                                  formData.custom_deposit_amount,
+                                ).toLocaleString("en-IN")
                               : ""
                           }
                           onChange={(e) => {
@@ -2484,10 +2500,11 @@ Make it engaging, attractive, and human-like.
                               }));
                             }
                           }}
-                          className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${errors?.custom_deposit_amount
-                            ? "border-red-600"
-                            : "border-gray-300"
-                            }`}
+                          className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+                            errors?.custom_deposit_amount
+                              ? "border-red-600"
+                              : "border-gray-300"
+                          }`}
                         />
                         {formData.custom_deposit_amount && (
                           <p className="mt-2 text-sm font-medium text-gray-600">
@@ -2511,29 +2528,29 @@ Make it engaging, attractive, and human-like.
                     (buildingType === "Commercial" &&
                       ["Land", "Plot/Land"].includes(propertyType))
                   ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Possession Status
-                        </label>
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Possession Status
+                      </label>
 
-                        <select
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                          value={formData.possession_status || ""}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              possession_status: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="">Select Status</option>
-                          <option value="Ready To Move">Ready To Move</option>
-                          <option value="Under Construction">
-                            Under Construction
-                          </option>
-                        </select>
-                      </div>
-                    )}
+                      <select
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                        value={formData.possession_status || ""}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            possession_status: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">Select Status</option>
+                        <option value="Ready To Move">Ready To Move</option>
+                        <option value="Under Construction">
+                          Under Construction
+                        </option>
+                      </select>
+                    </div>
+                  )}
                   {formData.possession_status === "Under Construction" && (
                     <div>
                       <label className="font-medium text-gray-700">
@@ -2554,10 +2571,11 @@ Make it engaging, attractive, and human-like.
                             possession_date: e.target.value,
                           })
                         }
-                        className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${errors?.possession_date
-                          ? "border-red-600"
-                          : "border-gray-300"
-                          }`}
+                        className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+                          errors?.possession_date
+                            ? "border-red-600"
+                            : "border-gray-300"
+                        }`}
                       />
 
                       {errors?.possession_date && (
@@ -2581,35 +2599,35 @@ Make it engaging, attractive, and human-like.
                         "Hospitality",
                       ].includes(propertyType))
                   ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Total Floor
-                        </label>
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Total Floor
+                      </label>
 
-                        <input
-                          type="text"
-                          name="total_floor"
-                          value={formData.total_floor || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
+                      <input
+                        type="text"
+                        name="total_floor"
+                        value={formData.total_floor || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
 
-                            // allow only numbers till 100
-                            if (/^\d{0,3}$/.test(value)) {
-                              const numericValue = Number(value);
+                          // allow only numbers till 100
+                          if (/^\d{0,3}$/.test(value)) {
+                            const numericValue = Number(value);
 
-                              if (value === "" || numericValue <= 100) {
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  total_floor: value,
-                                }));
-                              }
+                            if (value === "" || numericValue <= 100) {
+                              setFormData((prev) => ({
+                                ...prev,
+                                total_floor: value,
+                              }));
                             }
-                          }}
-                          placeholder="Enter total floors"
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        />
-                      </div>
-                    )}
+                          }
+                        }}
+                        placeholder="Enter total floors"
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      />
+                    </div>
+                  )}
 
                   {!(
                     (buildingType === "Residential" &&
@@ -2624,42 +2642,42 @@ Make it engaging, attractive, and human-like.
                         "Hospitality",
                       ].includes(propertyType))
                   ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Flat on the floor
-                        </label>
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Flat on the floor
+                      </label>
 
-                        <select
-                          name="project_floor"
-                          value={formData.project_floor || ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              project_floor: e.target.value,
-                            }))
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Floor</option>
+                      <select
+                        name="project_floor"
+                        value={formData.project_floor || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            project_floor: e.target.value,
+                          }))
+                        }
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select Floor</option>
 
-                          <option value="Lower Basement">Lower Basement</option>
-                          <option value="Basement">Basement</option>
-                          <option value="Lower Ground">Lower Ground</option>
-                          <option value="Ground">Ground</option>
+                        <option value="Lower Basement">Lower Basement</option>
+                        <option value="Basement">Basement</option>
+                        <option value="Lower Ground">Lower Ground</option>
+                        <option value="Ground">Ground</option>
 
-                          {Array.from(
-                            { length: Number(formData.total_floor || 0) },
-                            (_, i) => (
-                              <option key={i + 1} value={String(i + 1)}>
-                                {i + 1}
-                              </option>
-                            ),
-                          )}
+                        {Array.from(
+                          { length: Number(formData.total_floor || 0) },
+                          (_, i) => (
+                            <option key={i + 1} value={String(i + 1)}>
+                              {i + 1}
+                            </option>
+                          ),
+                        )}
 
-                          <option value="Rooftop/Terrace">Rooftop/Terrace</option>
-                        </select>
-                      </div>
-                    )}
+                        <option value="Rooftop/Terrace">Rooftop/Terrace</option>
+                      </select>
+                    </div>
+                  )}
 
                   {buildingType === "Commercial" &&
                     propertyType === "Retail" && (
@@ -2829,30 +2847,30 @@ Make it engaging, attractive, and human-like.
                         "Plot/Land",
                       ].includes(propertyType))
                   ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Facing
-                        </label>
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Facing
+                      </label>
 
-                        <select
-                          value={formData.facing || ""}
-                          onChange={(e) =>
-                            handleInputChange("facing", e.target.value)
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Facing</option>
-                          <option value="East">East</option>
-                          <option value="West">West</option>
-                          <option value="North">North</option>
-                          <option value="South">South</option>
-                          <option value="North East">North East</option>
-                          <option value="North West">North West</option>
-                          <option value="South East">South East</option>
-                          <option value="South West">South West</option>
-                        </select>
-                      </div>
-                    )}
+                      <select
+                        value={formData.facing || ""}
+                        onChange={(e) =>
+                          handleInputChange("facing", e.target.value)
+                        }
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select Facing</option>
+                        <option value="East">East</option>
+                        <option value="West">West</option>
+                        <option value="North">North</option>
+                        <option value="South">South</option>
+                        <option value="North East">North East</option>
+                        <option value="North West">North West</option>
+                        <option value="South East">South East</option>
+                        <option value="South West">South West</option>
+                      </select>
+                    </div>
+                  )}
                   {buildingType === "Residential" &&
                     propertyType === "Independent/Builder Floor" && (
                       <div>
@@ -2884,151 +2902,153 @@ Make it engaging, attractive, and human-like.
                     propertyType === "Plot") ||
                     (buildingType === "Commercial" &&
                       propertyType === "Plot/Land")) && (
-                      <>
-                        {/* Length */}
-                        <div>
-                          <label className="font-medium text-gray-700">
-                            Length of Plot (ft){" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-
-                          <input
-                            type="text"
-                            value={formData.property_dimensions_length || ""}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (/^\d*$/.test(value)) {
-                                handleInputChange(
-                                  "property_dimensions_length",
-                                  value,
-                                );
-                              }
-                            }}
-                            placeholder="Enter Length"
-                            className={`w-full p-3 mt-1 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${errors?.property_dimensions_length
-                              ? "border-red-600"
-                              : "border-gray-300"
-                              }`}
-                          />
-
-                          {errors?.property_dimensions_length && (
-                            <p className="text-sm text-red-500 mt-1">
-                              {errors.property_dimensions_length}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Breadth */}
-                        <div>
-                          <label className="font-medium text-gray-700">
-                            Breadth of Plot (ft){" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-
-                          <input
-                            type="text"
-                            value={formData.property_dimensions_breadth || ""}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (/^\d*$/.test(value)) {
-                                handleInputChange(
-                                  "property_dimensions_breadth",
-                                  value,
-                                );
-                              }
-                            }}
-                            placeholder="Enter Breadth"
-                            className={`w-full p-3 mt-1 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${errors?.property_dimensions_breadth
-                              ? "border-red-600"
-                              : "border-gray-300"
-                              }`}
-                          />
-
-                          {errors?.property_dimensions_breadth && (
-                            <p className="text-sm text-red-500 mt-1">
-                              {errors.property_dimensions_breadth}
-                            </p>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  {((buildingType === "Residential" &&
-                    propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      propertyType === "Plot/Land")) && (
+                    <>
+                      {/* Length */}
                       <div>
                         <label className="font-medium text-gray-700">
-                          No. of Open Sides
+                          Length of Plot (ft){" "}
+                          <span className="text-red-500">*</span>
                         </label>
 
-                        <select
-                          name="no_of_open_sides"
-                          value={formData.no_of_open_sides || ""}
-                          onChange={handleInputChange}
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Open Sides</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
-                        </select>
-                      </div>
-                    )}
-                  {((buildingType === "Residential" &&
-                    propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      propertyType === "Plot/Land")) && (
-                      <div>
-                        <label className="block mb-2 font-medium text-gray-700">
-                          Any Construction on Property
-                        </label>
+                        <input
+                          type="text"
+                          value={formData.property_dimensions_length || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^\d*$/.test(value)) {
+                              handleInputChange(
+                                "property_dimensions_length",
+                                value,
+                              );
+                            }
+                          }}
+                          placeholder="Enter Length"
+                          className={`w-full p-3 mt-1 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+                            errors?.property_dimensions_length
+                              ? "border-red-600"
+                              : "border-gray-300"
+                          }`}
+                        />
 
-                        <select
-                          name="type_of_construction"
-                          value={formData.type_of_construction || ""}
-                          onChange={handleInputChange}
-                          className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Construction Type</option>
-                          {constructionOptions.map((item) => (
-                            <option key={item} value={item}>
-                              {item}
-                            </option>
-                          ))}
-                        </select>
+                        {errors?.property_dimensions_length && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.property_dimensions_length}
+                          </p>
+                        )}
                       </div>
-                    )}
-                  {((buildingType === "Residential" &&
-                    propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      propertyType === "Plot/Land")) && (
+
+                      {/* Breadth */}
                       <div>
                         <label className="font-medium text-gray-700">
-                          Possession By
+                          Breadth of Plot (ft){" "}
+                          <span className="text-red-500">*</span>
                         </label>
 
-                        <select
-                          value={formData.possession_by || ""}
-                          onChange={(e) =>
-                            handleInputChange("possession_by", e.target.value)
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Possession</option>
-                          <option value="Immediate">Immediate</option>
-                          <option value="Within 3 Months">Within 3 Months</option>
-                          <option value="Within 6 Months">Within 6 Months</option>
-                          <option value="By 2026">By 2026</option>
-                          <option value="By 2027">By 2027</option>
-                          <option value="By 2028">By 2028</option>
-                          <option value="By 2029">By 2029</option>
-                          <option value="By 2030">By 2030</option>
-                          <option value="By 2031">By 2031</option>
-                          <option value="By 2032">By 2032</option>
-                        </select>
+                        <input
+                          type="text"
+                          value={formData.property_dimensions_breadth || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^\d*$/.test(value)) {
+                              handleInputChange(
+                                "property_dimensions_breadth",
+                                value,
+                              );
+                            }
+                          }}
+                          placeholder="Enter Breadth"
+                          className={`w-full p-3 mt-1 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+                            errors?.property_dimensions_breadth
+                              ? "border-red-600"
+                              : "border-gray-300"
+                          }`}
+                        />
+
+                        {errors?.property_dimensions_breadth && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.property_dimensions_breadth}
+                          </p>
+                        )}
                       </div>
-                    )}
+                    </>
+                  )}
+                  {((buildingType === "Residential" &&
+                    propertyType === "Plot") ||
+                    (buildingType === "Commercial" &&
+                      propertyType === "Plot/Land")) && (
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        No. of Open Sides
+                      </label>
+
+                      <select
+                        name="no_of_open_sides"
+                        value={formData.no_of_open_sides || ""}
+                        onChange={handleInputChange}
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select Open Sides</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                      </select>
+                    </div>
+                  )}
+                  {((buildingType === "Residential" &&
+                    propertyType === "Plot") ||
+                    (buildingType === "Commercial" &&
+                      propertyType === "Plot/Land")) && (
+                    <div>
+                      <label className="block mb-2 font-medium text-gray-700">
+                        Any Construction on Property
+                      </label>
+
+                      <select
+                        name="type_of_construction"
+                        value={formData.type_of_construction || ""}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select Construction Type</option>
+                        {constructionOptions.map((item) => (
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {((buildingType === "Residential" &&
+                    propertyType === "Plot") ||
+                    (buildingType === "Commercial" &&
+                      propertyType === "Plot/Land")) && (
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Possession By
+                      </label>
+
+                      <select
+                        value={formData.possession_by || ""}
+                        onChange={(e) =>
+                          handleInputChange("possession_by", e.target.value)
+                        }
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select Possession</option>
+                        <option value="Immediate">Immediate</option>
+                        <option value="Within 3 Months">Within 3 Months</option>
+                        <option value="Within 6 Months">Within 6 Months</option>
+                        <option value="By 2026">By 2026</option>
+                        <option value="By 2027">By 2027</option>
+                        <option value="By 2028">By 2028</option>
+                        <option value="By 2029">By 2029</option>
+                        <option value="By 2030">By 2030</option>
+                        <option value="By 2031">By 2031</option>
+                        <option value="By 2032">By 2032</option>
+                      </select>
+                    </div>
+                  )}
                   {!(
                     (buildingType === "Residential" &&
                       propertyType === "Plot") ||
@@ -3041,65 +3061,65 @@ Make it engaging, attractive, and human-like.
                         "Hospitality",
                       ].includes(propertyType))
                   ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Age of Property
-                        </label>
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Age of Property
+                      </label>
 
-                        <select
-                          value={formData.age_of_property || ""}
-                          onChange={(e) =>
-                            handleInputChange("age_of_property", e.target.value)
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Age of Property</option>
-                          <option value="0-1">0-1</option>
-                          <option value="2-4">2-4</option>
-                          <option value="5-7">5-7</option>
-                          <option value="8-10">8-10</option>
-                          <option value="10+">10+</option>
-                        </select>
-                      </div>
-                    )}
+                      <select
+                        value={formData.age_of_property || ""}
+                        onChange={(e) =>
+                          handleInputChange("age_of_property", e.target.value)
+                        }
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select Age of Property</option>
+                        <option value="0-1">0-1</option>
+                        <option value="2-4">2-4</option>
+                        <option value="5-7">5-7</option>
+                        <option value="8-10">8-10</option>
+                        <option value="10+">10+</option>
+                      </select>
+                    </div>
+                  )}
                   {!(
                     (buildingType === "Residential" &&
                       propertyType === "Plot") ||
                     (buildingType === "Commercial" &&
                       ["Land"].includes(propertyType))
                   ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Furnishing Type{" "}
-                          <span className="text-xl font-bold text-red-500">
-                            *
-                          </span>
-                        </label>
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Furnishing Type{" "}
+                        <span className="text-xl font-bold text-red-500">
+                          *
+                        </span>
+                      </label>
 
-                        <select
-                          value={formData.furnished_type || ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              furnished_type: e.target.value,
-                            }))
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Furnishing Type</option>
-                          <option value="Furnished">Furnished</option>
-                          <option value="Semi-Furnished">Semi-Furnished</option>
-                          <option value="Unfurnished">Unfurnished</option>
-                        </select>
+                      <select
+                        value={formData.furnished_type || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            furnished_type: e.target.value,
+                          }))
+                        }
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select Furnishing Type</option>
+                        <option value="Furnished">Furnished</option>
+                        <option value="Semi-Furnished">Semi-Furnished</option>
+                        <option value="Unfurnished">Unfurnished</option>
+                      </select>
 
-                        {errors?.furnished_type && (
-                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                            <MdErrorOutline className="text-lg" />
-                            {errors.furnished_type}
-                          </p>
-                        )}
-                      </div>
-                    )}
+                      {errors?.furnished_type && (
+                        <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                          <MdErrorOutline className="text-lg" />
+                          {errors.furnished_type}
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {/* {!(
                   (buildingType === "Residential" && propertyType === "Plot") ||
@@ -3166,24 +3186,24 @@ Make it engaging, attractive, and human-like.
                         "Hospitality",
                       ].includes(propertyType))
                   ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Lift Availability
-                        </label>
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Lift Availability
+                      </label>
 
-                        <select
-                          value={formData.lift_availability || ""}
-                          onChange={(e) =>
-                            handleInputChange("lift_availability", e.target.value)
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Lift Availability</option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
-                        </select>
-                      </div>
-                    )}
+                      <select
+                        value={formData.lift_availability || ""}
+                        onChange={(e) =>
+                          handleInputChange("lift_availability", e.target.value)
+                        }
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select Lift Availability</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                  )}
                   {!(
                     (buildingType === "Residential" &&
                       propertyType === "Plot") ||
@@ -3197,25 +3217,25 @@ Make it engaging, attractive, and human-like.
                         "Hospitality",
                       ].includes(propertyType))
                   ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Pantry
-                        </label>
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Pantry
+                      </label>
 
-                        <select
-                          value={formData.pantry_option || ""}
-                          onChange={(e) =>
-                            handleInputChange("pantry_option", e.target.value)
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Pantry</option>
-                          <option value="Wet">Wet</option>
-                          <option value="Dry">Dry</option>
-                          <option value="None">None</option>
-                        </select>
-                      </div>
-                    )}
+                      <select
+                        value={formData.pantry_option || ""}
+                        onChange={(e) =>
+                          handleInputChange("pantry_option", e.target.value)
+                        }
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select Pantry</option>
+                        <option value="Wet">Wet</option>
+                        <option value="Dry">Dry</option>
+                        <option value="None">None</option>
+                      </select>
+                    </div>
+                  )}
 
                   {buildingType === "Commercial" &&
                     propertyType === "Office" && (
@@ -3435,7 +3455,7 @@ Make it engaging, attractive, and human-like.
                           <option value="2">2</option>
                           <option value="3">3</option>
                           <option value="4">4</option>
-                          <option value="4+">4+</option>
+                          <option value="4">4+</option>
                         </select>
                       </div>
                     )}
@@ -3520,35 +3540,35 @@ Make it engaging, attractive, and human-like.
                     "Service Apartment",
                     "Office",
                   ].includes(propertyType) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Parking Availability
-                        </label>
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Parking Availability
+                      </label>
 
-                        <select
-                          value={formData.parking_availability || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
+                      <select
+                        value={formData.parking_availability || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
 
-                            setFormData((prev) => ({
-                              ...prev,
+                          setFormData((prev) => ({
+                            ...prev,
 
-                              parking_availability: value,
+                            parking_availability: value,
 
-                              covered_parking:
-                                value === "No" ? "NA" : prev.covered_parking,
-                              uncovered_parking:
-                                value === "No" ? "NA" : prev.uncovered_parking,
-                            }));
-                          }}
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Parking Availability</option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
-                        </select>
-                      </div>
-                    )}
+                            covered_parking:
+                              value === "No" ? "NA" : prev.covered_parking,
+                            uncovered_parking:
+                              value === "No" ? "NA" : prev.uncovered_parking,
+                          }));
+                        }}
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select Parking Availability</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                  )}
 
                   {!(
                     (buildingType === "Residential" &&
@@ -3689,10 +3709,11 @@ Make it engaging, attractive, and human-like.
                         </p>
 
                         <p
-                          className={`text-sm ${description?.length > 700
-                            ? "text-red-500"
-                            : "text-gray-500"
-                            }`}
+                          className={`text-sm ${
+                            description?.length > 700
+                              ? "text-red-500"
+                              : "text-gray-500"
+                          }`}
                         >
                           {description?.length || 0}/700
                         </p>
@@ -4143,8 +4164,9 @@ Make it engaging, attractive, and human-like.
 
             {/* Navigation Buttons - Fixed at Bottom */}
             <div
-              className={`fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md flex mx-32 ${activeStep === 0 ? "justify-end" : "justify-between"
-                }`}
+              className={`fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md flex mx-32 ${
+                activeStep === 0 ? "justify-end" : "justify-between"
+              }`}
             >
               {" "}
               {activeStep > 0 && (
@@ -4257,4 +4279,4 @@ Make it engaging, attractive, and human-like.
     </>
   );
 };
-export default Editproject; 
+export default Editproject;

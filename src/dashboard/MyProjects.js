@@ -76,58 +76,63 @@ const MyProjects = () => {
   ];
 
   const formatPrice = (price) => {
-    if (!price) return "";
-    price = parseInt(price);
+  if (!price) return "";
 
-    if (price >= 10000000) {
-      return parseFloat((price / 10000000).toFixed(1)) + " Cr";
-    } else if (price >= 100000) {
-      return parseFloat((price / 100000).toFixed(1)) + " L";
-    } else if (price >= 1000) {
-      return parseFloat((price / 1000).toFixed(1)) + " K";
-    } else {
-      return price.toString();
-    }
-  };
+  price = Number(price);
 
-  const formatAverageProjectPrice = (price) => {
-    if (!price) return "";
+  const formatNumber = (num) =>
+    num.toFixed(2).replace(/\.?0+$/, "");
 
-    // If it's a range (contains "-"), split and format both
-    if (typeof price === "string" && price.includes("-")) {
-      const parts = price.split("-").map((p) => p.trim());
-      return (
-        <>
-          {parts.map((p, idx) => (
-            <span key={idx} className="inline-flex items-center">
-              <FaRupeeSign className="inline-block mr-1" />
-              {formatPrice(p)}
-              {idx === 0 && " - "}
-            </span>
-          ))}
-        </>
-      );
-    }
+  if (price >= 10000000) {
+    return `${formatNumber(price / 10000000)} Cr`;
+  } else if (price >= 100000) {
+    return `${formatNumber(price / 100000)} L`;
+  } else if (price >= 1000) {
+    return `${formatNumber(price / 1000)} K`;
+  } else {
+    return price.toString();
+  }
+};
+
+ const formatAverageProjectPrice = (price) => {
+  if (!price) return "";
+
+  // Price Range
+  if (typeof price === "string" && price.includes("-")) {
+    const parts = price.split("-").map((p) => p.trim());
+
+    return (
+      <>
+        {parts.map((p, idx) => (
+          <span key={idx} className="inline-flex items-center">
+            <FaRupeeSign className="inline-block mr-1" />
+            {formatPrice(Number(p))}
+            {idx === 0 && " - "}
+          </span>
+        ))}
+      </>
+    );
+  }
 
     // Normal number formatting
-    price = parseInt(price);
-    if (isNaN(price)) return "";
+    // price = parseInt(price);
+    // if (isNaN(price)) return "";
 
-    let formatted;
-    if (price >= 10000000) {
-      formatted = parseFloat((price / 10000000).toFixed(1)) + " Cr";
-    } else if (price >= 100000) {
-      formatted = parseFloat((price / 100000).toFixed(1)) + " L";
-    } else if (price >= 1000) {
-      formatted = parseFloat((price / 1000).toFixed(1)) + " K";
-    } else {
-      formatted = price.toString();
-    }
+    // let formatted;
+    // if (price >= 10000000) {
+    //   formatted = parseFloat((price / 10000000).toFixed(1)) + " Cr";
+    // } else if (price >= 100000) {
+    //   formatted = parseFloat((price / 100000).toFixed(1)) + " L";
+    // } else if (price >= 1000) {
+    //   formatted = parseFloat((price / 1000).toFixed(1)) + " K";
+    // } else {
+    //   formatted = price.toString();
+    // }
 
     return (
       <span className="inline-flex items-center">
         <FaRupeeSign className="inline-block mr-1" />
-        {formatted}
+        {formatPrice(Number(price))}
       </span>
     );
   };
