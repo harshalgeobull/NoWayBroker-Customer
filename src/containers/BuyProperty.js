@@ -264,516 +264,518 @@ const BuyProperty = ({
                     </div>
 
                     <Slider {...settings} className="slider-container" ref={sliderRef}>
-                        {properties.map((property) => {
-                            let distance = null;
+                        {properties
+                            .filter((property) => property.available_status !== "Sold")
+                            .map((property) => {
+                                let distance = null;
 
-                            const subtitle = (() => {
-                                const area = property.address_area || "";
-                                const city = property.city_name || "";
-                                const location = area.toLowerCase().includes(city.toLowerCase())
-                                    ? area
-                                    : `${area}, ${city}`;
+                                const subtitle = (() => {
+                                    const area = property.address_area || "";
+                                    const city = property.city_name || "";
+                                    const location = area.toLowerCase().includes(city.toLowerCase())
+                                        ? area
+                                        : `${area}, ${city}`;
 
-                                const type =
-                                    property.property_type === "Office"
-                                        ? "Office Space"
-                                        : property.property_type === "Retail"
-                                            ? "Retail Space"
-                                            : property.property_type || "";
+                                    const type =
+                                        property.property_type === "Office"
+                                            ? "Office Space"
+                                            : property.property_type === "Retail"
+                                                ? "Retail Space"
+                                                : property.property_type || "";
 
-                                const category = property.property_category_type || "";
+                                    const category = property.property_category_type || "";
 
-                                // Commercial Properties
-                                if (
-                                    category === "Commercial Buy" ||
-                                    category === "Commercial Lease"
-                                ) {
-                                    return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
-                                        } in ${location}`;
+                                    // Commercial Properties
+                                    if (
+                                        category === "Commercial Buy" ||
+                                        category === "Commercial Lease"
+                                    ) {
+                                        return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
+                                            } in ${location}`;
+                                    }
+
+                                    // PG / Co-Living
+                                    if (
+                                        category.includes("PG") ||
+                                        category.includes("Co-Living") ||
+                                        category.includes("Coliving")
+                                    ) {
+                                        return `${type} for Rent in ${location}`;
+                                    }
+
+                                    // Residential
+                                    const action = category === "Buy" ? "Sale" : category;
+                                    return `${property.bhk_type} ${type} for ${action} in ${location}`;
+                                })();
+
+                                if (userLocation && property.latitude && property.longitude) {
+                                    distance = calculateDistance(
+                                        userLocation.latitude,
+                                        userLocation.longitude,
+                                        parseFloat(property.latitude),
+                                        parseFloat(property.longitude),
+                                    ).toFixed(1);
                                 }
 
-                                // PG / Co-Living
-                                if (
-                                    category.includes("PG") ||
-                                    category.includes("Co-Living") ||
-                                    category.includes("Coliving")
-                                ) {
-                                    return `${type} for Rent in ${location}`;
+                                function getValidImageUrl(img) {
+                                    if (typeof img !== "string") return null;
+                                    if (img.trim() === "") return null;
+                                    return img.startsWith("http") ? img : BASE_URL + img;
                                 }
 
-                                // Residential
-                                const action = category === "Buy" ? "Sale" : category;
-                                return `${property.bhk_type} ${type} for ${action} in ${location}`;
-                            })();
+                                const coverImage = getValidImageUrl(property.cover_image);
+                                const additionalImages = (property.property_images || [])
+                                    .map((imgObj) => getValidImageUrl(imgObj?.image))
+                                    .filter(Boolean);
 
-                            if (userLocation && property.latitude && property.longitude) {
-                                distance = calculateDistance(
-                                    userLocation.latitude,
-                                    userLocation.longitude,
-                                    parseFloat(property.latitude),
-                                    parseFloat(property.longitude),
-                                ).toFixed(1);
-                            }
+                                const allImages = [
+                                    ...(coverImage ? [coverImage] : []),
+                                    ...additionalImages,
+                                ];
 
-                            function getValidImageUrl(img) {
-                                if (typeof img !== "string") return null;
-                                if (img.trim() === "") return null;
-                                return img.startsWith("http") ? img : BASE_URL + img;
-                            }
-
-                            const coverImage = getValidImageUrl(property.cover_image);
-                            const additionalImages = (property.property_images || [])
-                                .map((imgObj) => getValidImageUrl(imgObj?.image))
-                                .filter(Boolean);
-
-                            const allImages = [
-                                ...(coverImage ? [coverImage] : []),
-                                ...additionalImages,
-                            ];
-
-                            return (
-                                <div key={property._id} className="w-full h-full p-2">
-                                    <div className="flex flex-col h-full overflow-hidden shadow rounded-2xl bg-slate-100 min-h-[440px] sm:min-h-[460px]">
-                                        <div className="w-full overflow-hidden rounded-xl">
-                                            <div className="relative">
-                                                <Link
-                                                    to={`/propertydetails/${property._id}`}
-                                                    className="block"
-                                                    onClick={() =>
-                                                        window.scrollTo({ top: 0, behavior: "smooth" })
-                                                    }
-                                                >
-                                                    {allImages.length > 1 ? (
-                                                        <Slider
-                                                            key={`${property._id}-${allImages.length}-${Date.now()}`}
-                                                            className="h-40 sm:h-44 md:h-48"
-                                                            dots
-                                                            infinite
-                                                            speed={500}
-                                                            slidesToShow={1}
-                                                            slidesToScroll={1}
-                                                            arrows
-                                                            autoplay
-                                                            autoplaySpeed={2000}
-                                                            beforeChange={(current, next) =>
-                                                                setActiveIndexes((prev) => ({
-                                                                    ...prev,
-                                                                    [property._id]: next,
-                                                                }))
-                                                            }
-                                                            initialSlide={activeIndexes[property._id] || 0}
-                                                            customPaging={(i) => {
-                                                                const activeSlide =
-                                                                    activeIndexes[property._id] || 0;
-                                                                const isActive =
-                                                                    i === activeSlide % allImages.length;
-                                                                return (
+                                return (
+                                    <div key={property._id} className="w-full h-full p-2">
+                                        <div className="flex flex-col h-full overflow-hidden shadow rounded-2xl bg-slate-100 min-h-[440px] sm:min-h-[460px]">
+                                            <div className="w-full overflow-hidden rounded-xl">
+                                                <div className="relative">
+                                                    <Link
+                                                        to={`/propertydetails/${property._id}`}
+                                                        className="block"
+                                                        onClick={() =>
+                                                            window.scrollTo({ top: 0, behavior: "smooth" })
+                                                        }
+                                                    >
+                                                        {allImages.length > 1 ? (
+                                                            <Slider
+                                                                key={`${property._id}-${allImages.length}-${Date.now()}`}
+                                                                className="h-40 sm:h-44 md:h-48"
+                                                                dots
+                                                                infinite
+                                                                speed={500}
+                                                                slidesToShow={1}
+                                                                slidesToScroll={1}
+                                                                arrows
+                                                                autoplay
+                                                                autoplaySpeed={2000}
+                                                                beforeChange={(current, next) =>
+                                                                    setActiveIndexes((prev) => ({
+                                                                        ...prev,
+                                                                        [property._id]: next,
+                                                                    }))
+                                                                }
+                                                                initialSlide={activeIndexes[property._id] || 0}
+                                                                customPaging={(i) => {
+                                                                    const activeSlide =
+                                                                        activeIndexes[property._id] || 0;
+                                                                    const isActive =
+                                                                        i === activeSlide % allImages.length;
+                                                                    return (
+                                                                        <div
+                                                                            style={{
+                                                                                width: "10px",
+                                                                                height: "10px",
+                                                                                borderRadius: "50%",
+                                                                                background: isActive ? "#fff" : "#888",
+                                                                                margin: "0 5px",
+                                                                                cursor: "pointer",
+                                                                            }}
+                                                                        />
+                                                                    );
+                                                                }}
+                                                                appendDots={(dots) => (
                                                                     <div
                                                                         style={{
-                                                                            width: "10px",
-                                                                            height: "10px",
-                                                                            borderRadius: "50%",
-                                                                            background: isActive ? "#fff" : "#888",
-                                                                            margin: "0 5px",
-                                                                            cursor: "pointer",
+                                                                            position: "absolute",
+                                                                            bottom: "10px",
+                                                                            left: "50%",
+                                                                            transform: "translateX(-50%)",
+                                                                            display: "flex",
+                                                                            justifyContent: "center",
+                                                                            width: "100%",
                                                                         }}
-                                                                    />
-                                                                );
-                                                            }}
-                                                            appendDots={(dots) => (
-                                                                <div
-                                                                    style={{
-                                                                        position: "absolute",
-                                                                        bottom: "10px",
-                                                                        left: "50%",
-                                                                        transform: "translateX(-50%)",
-                                                                        display: "flex",
-                                                                        justifyContent: "center",
-                                                                        width: "100%",
-                                                                    }}
-                                                                >
-                                                                    {dots}
-                                                                </div>
-                                                            )}
-                                                        >
-                                                            {allImages.map((imgUrl, idx) => (
-                                                                <div key={`${property._id}-${idx}`}>
-                                                                    <img
-                                                                        src={imgUrl}
-                                                                        alt="Property"
-                                                                        className="object-cover w-full h-40 rounded-t-2xl sm:h-44 md:h-48"
-                                                                    />
-                                                                </div>
-                                                            ))}
-                                                        </Slider>
-                                                    ) : (
-                                                        <img
-                                                            src={allImages[0] || "/image/app.png"}
-                                                            alt="Property"
-                                                            className="object-cover w-full h-40 rounded-t-2xl sm:h-44 md:h-48"
-                                                        />
-                                                    )}
-                                                </Link>
+                                                                    >
+                                                                        {dots}
+                                                                    </div>
+                                                                )}
+                                                            >
+                                                                {allImages.map((imgUrl, idx) => (
+                                                                    <div key={`${property._id}-${idx}`}>
+                                                                        <img
+                                                                            src={imgUrl}
+                                                                            alt="Property"
+                                                                            className="object-cover w-full h-40 rounded-t-2xl sm:h-44 md:h-48"
+                                                                        />
+                                                                    </div>
+                                                                ))}
+                                                            </Slider>
+                                                        ) : (
+                                                            <img
+                                                                src={allImages[0] || "/image/app.png"}
+                                                                alt="Property"
+                                                                className="object-cover w-full h-40 rounded-t-2xl sm:h-44 md:h-48"
+                                                            />
+                                                        )}
+                                                    </Link>
 
-                                                {/* Days on nowaybroker */}
-                                                {/* <span className="absolute px-2 py-1 text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm">
+                                                    {/* Days on nowaybroker */}
+                                                    {/* <span className="absolute px-2 py-1 text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm">
                           {property.days_since_created} days on NoWayBroker
                         </span> */}
 
-                                                {/* Virtual Tour & Favorite Button */}
-                                                <div className="absolute flex items-center space-x-2 top-2 right-2">
-                                                    {property.virtual_tour_availability === "Yes" && (
-                                                        <span className="flex items-center gap-1 px-2 py-1 text-[10px] font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm sm:text-xs">
-                                                            <PiCubeFocus className="text-sm text-white" />
-                                                            Virtual Tour
-                                                        </span>
-                                                    )}
-                                                    <button
-                                                        className="p-2 rounded-full shadow bg-gray-800/60 backdrop-blur-sm"
-                                                        onClick={() => {
-                                                            if (!userId) {
-                                                                setIsLoginModalOpen(true);
-                                                                return;
-                                                            }
-                                                            if (property.is_favorite) {
-                                                                removeFromFavorites(property.favorite_id);
-                                                            } else {
-                                                                addToFavorites(property._id);
-                                                            }
-                                                        }}
-                                                    >
-                                                        <Heart
-                                                            size={20}
-                                                            stroke={property.is_favorite ? "none" : "white"}
-                                                            color={
-                                                                property.is_favorite
-                                                                    ? "red"
-                                                                    : "rgba(75, 85, 99, 0.4)"
-                                                            }
-                                                            fill={
-                                                                property.is_favorite
-                                                                    ? "red"
-                                                                    : "rgba(75, 85, 99, 0.4)"
-                                                            }
-                                                            strokeWidth={2}
-                                                        />
-                                                    </button>
-                                                </div>
-
-                                                {/* FOR BUY/RENT & FEATURED tags */}
-                                                <div className="absolute bottom-0 left-0 max-w-[70%]">
-                                                    {(() => {
-                                                        const rawCategory =
-                                                            property.property_category_type || "";
-                                                        const normalizedCategory = rawCategory
-                                                            .replace(/\s+/g, " ")
-                                                            .replace(/-/g, " ")
-                                                            .replace(/\//g, " ")
-                                                            .trim()
-                                                            .toLowerCase();
-
-                                                        let matchedType = "UNKNOWN";
-                                                        let badgeColor = "bg-gray-500";
-
-                                                        if (normalizedCategory === "buy") {
-                                                            matchedType = "FOR BUY";
-                                                            badgeColor = "bg-green-500";
-                                                        } else if (normalizedCategory === "rent") {
-                                                            matchedType = "FOR RENT";
-                                                            badgeColor = "bg-blue-500";
-                                                        } else if (
-                                                            normalizedCategory.includes("commercial buy")
-                                                        ) {
-                                                            matchedType = "COMMERCIAL BUY";
-                                                            badgeColor = "bg-purple-500";
-                                                        } else if (
-                                                            normalizedCategory.includes("commercial lease")
-                                                        ) {
-                                                            matchedType = "COMMERCIAL LEASE";
-                                                            badgeColor = "bg-indigo-500";
-                                                        } else if (
-                                                            normalizedCategory.includes("pg") ||
-                                                            normalizedCategory.includes("co living") ||
-                                                            normalizedCategory.includes("coliving")
-                                                        ) {
-                                                            matchedType = "PG/CO-LIVING";
-                                                            badgeColor = "bg-yellow-500";
-                                                        }
-
-                                                        return (
-                                                            <span
-                                                                className={`text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-se-lg truncate block ${badgeColor}`}
-                                                            >
-                                                                {matchedType}
+                                                    {/* Virtual Tour & Favorite Button */}
+                                                    <div className="absolute flex items-center space-x-2 top-2 right-2">
+                                                        {property.virtual_tour_availability === "Yes" && (
+                                                            <span className="flex items-center gap-1 px-2 py-1 text-[10px] font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm sm:text-xs">
+                                                                <PiCubeFocus className="text-sm text-white" />
+                                                                Virtual Tour
                                                             </span>
-                                                        );
-                                                    })()}
-                                                </div>
-
-                                                <div className="absolute bottom-0 right-0">
-                                                    {property.mark_as_featured === "Yes" && (
-                                                        <span className="px-2 py-1 text-[10px] text-white bg-yellow-500 rounded-ss-lg sm:text-xs sm:px-3">
-                                                            FEATURED
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Property Details */}
-                                        <div className="flex flex-col flex-1 p-3 text-black bg-white">
-                                            {/* Price Section */}
-                                            <div className="flex items-start justify-between gap-2 mb-0 sm:gap-3">
-                                                {/* Property Name */}
-                                                <h3
-                                                    className="flex-1 min-w-0 m-0 text-base font-semibold leading-6 text-gray-900 truncate sm:text-lg"
-                                                    title={property.property_name}
-                                                >
-                                                    {property.property_name || "N/A"}
-                                                </h3>
-
-                                                {/* Furnishing */}
-                                                <span
-                                                    className="flex-shrink-0 m-0 text-xs font-medium leading-6 text-[#E85B6B] sm:text-sm whitespace-nowrap"
-                                                    title={property.furnished_type}
-                                                >
-                                                    {property.furnished_type || "Un-Furnished"}
-                                                </span>
-                                            </div>
-
-                                            <p
-                                                className="mt-0 mb-1 text-sm leading-5 text-gray-600 line-clamp-2 sm:truncate"
-                                                title={subtitle}
-                                            >
-                                                {subtitle}
-                                            </p>
-
-                                            <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
-                                                {/* Left Side */}
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <span className="text-xl font-bold sm:text-2xl">
-                                                        ₹{" "}
-                                                        {property.property_category_type === "Rent"
-                                                            ? formatPrice(property.rent)
-                                                            : formatPrice(property.property_price)}
-                                                    </span>
-                                                    {property.property_category_type === "Rent" && (
-                                                        <span className="text-sm text-gray-500">
-                                                            /{property.rent_duration}
-                                                        </span>
-                                                    )}
-
-                                                    {/* Ready to Move - Keep close to price */}
-                                                    {property.property_category_type?.includes("Buy") &&
-                                                        property.possession_status ===
-                                                        "Ready To Move" && (
-                                                            <div className="flex items-center gap-2 px-2 py-1 bg-green-100 border border-green-200 rounded-full sm:px-3">
-                                                                <MdApartment className="text-base text-green-700" />
-                                                                <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
-                                                                    Ready to Move
-                                                                </span>
-                                                            </div>
                                                         )}
+                                                        <button
+                                                            className="p-2 rounded-full shadow bg-gray-800/60 backdrop-blur-sm"
+                                                            onClick={() => {
+                                                                if (!userId) {
+                                                                    setIsLoginModalOpen(true);
+                                                                    return;
+                                                                }
+                                                                if (property.is_favorite) {
+                                                                    removeFromFavorites(property.favorite_id);
+                                                                } else {
+                                                                    addToFavorites(property._id);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Heart
+                                                                size={20}
+                                                                stroke={property.is_favorite ? "none" : "white"}
+                                                                color={
+                                                                    property.is_favorite
+                                                                        ? "red"
+                                                                        : "rgba(75, 85, 99, 0.4)"
+                                                                }
+                                                                fill={
+                                                                    property.is_favorite
+                                                                        ? "red"
+                                                                        : "rgba(75, 85, 99, 0.4)"
+                                                                }
+                                                                strokeWidth={2}
+                                                            />
+                                                        </button>
+                                                    </div>
+
+                                                    {/* FOR BUY/RENT & FEATURED tags */}
+                                                    <div className="absolute bottom-0 left-0 max-w-[70%]">
+                                                        {(() => {
+                                                            const rawCategory =
+                                                                property.property_category_type || "";
+                                                            const normalizedCategory = rawCategory
+                                                                .replace(/\s+/g, " ")
+                                                                .replace(/-/g, " ")
+                                                                .replace(/\//g, " ")
+                                                                .trim()
+                                                                .toLowerCase();
+
+                                                            let matchedType = "UNKNOWN";
+                                                            let badgeColor = "bg-gray-500";
+
+                                                            if (normalizedCategory === "buy") {
+                                                                matchedType = "FOR BUY";
+                                                                badgeColor = "bg-green-500";
+                                                            } else if (normalizedCategory === "rent") {
+                                                                matchedType = "FOR RENT";
+                                                                badgeColor = "bg-blue-500";
+                                                            } else if (
+                                                                normalizedCategory.includes("commercial buy")
+                                                            ) {
+                                                                matchedType = "COMMERCIAL BUY";
+                                                                badgeColor = "bg-purple-500";
+                                                            } else if (
+                                                                normalizedCategory.includes("commercial lease")
+                                                            ) {
+                                                                matchedType = "COMMERCIAL LEASE";
+                                                                badgeColor = "bg-indigo-500";
+                                                            } else if (
+                                                                normalizedCategory.includes("pg") ||
+                                                                normalizedCategory.includes("co living") ||
+                                                                normalizedCategory.includes("coliving")
+                                                            ) {
+                                                                matchedType = "PG/CO-LIVING";
+                                                                badgeColor = "bg-yellow-500";
+                                                            }
+
+                                                            return (
+                                                                <span
+                                                                    className={`text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-se-lg truncate block ${badgeColor}`}
+                                                                >
+                                                                    {matchedType}
+                                                                </span>
+                                                            );
+                                                        })()}
+                                                    </div>
+
+                                                    <div className="absolute bottom-0 right-0">
+                                                        {property.mark_as_featured === "Yes" && (
+                                                            <span className="px-2 py-1 text-[10px] text-white bg-yellow-500 rounded-ss-lg sm:text-xs sm:px-3">
+                                                                FEATURED
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Property Details */}
+                                            <div className="flex flex-col flex-1 p-3 text-black bg-white">
+                                                {/* Price Section */}
+                                                <div className="flex items-start justify-between gap-2 mb-0 sm:gap-3">
+                                                    {/* Property Name */}
+                                                    <h3
+                                                        className="flex-1 min-w-0 m-0 text-base font-semibold leading-6 text-gray-900 truncate sm:text-lg"
+                                                        title={property.property_name}
+                                                    >
+                                                        {property.property_name || "N/A"}
+                                                    </h3>
+
+                                                    {/* Furnishing */}
+                                                    <span
+                                                        className="flex-shrink-0 m-0 text-xs font-medium leading-6 text-[#E85B6B] sm:text-sm whitespace-nowrap"
+                                                        title={property.furnished_type}
+                                                    >
+                                                        {property.furnished_type || "Un-Furnished"}
+                                                    </span>
                                                 </div>
 
-                                                {/* Right Side */}
-                                                <div className="text-sm font-medium whitespace-nowrap">
-                                                    {property.property_category_type === "Rent" && (
-                                                        <>
-                                                            <span className="text-gray-500">Deposit:</span>
-                                                            <span className="ml-1 font-semibold">
-                                                                ₹{" "}
-                                                                {property.custom_deposit_amount?.toLocaleString(
-                                                                    "en-IN",
-                                                                )}
+                                                <p
+                                                    className="mt-0 mb-1 text-sm leading-5 text-gray-600 line-clamp-2 sm:truncate"
+                                                    title={subtitle}
+                                                >
+                                                    {subtitle}
+                                                </p>
+
+                                                <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
+                                                    {/* Left Side */}
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <span className="text-xl font-bold sm:text-2xl">
+                                                            ₹{" "}
+                                                            {property.property_category_type === "Rent"
+                                                                ? formatPrice(property.rent)
+                                                                : formatPrice(property.property_price)}
+                                                        </span>
+                                                        {property.property_category_type === "Rent" && (
+                                                            <span className="text-sm text-gray-500">
+                                                                /{property.rent_duration}
                                                             </span>
-                                                        </>
-                                                    )}
-                                                    {property.property_category_type?.includes("Buy") &&
-                                                        property.possession_status !==
-                                                        "Ready To Move" &&
-                                                        property.possession_date && (
+                                                        )}
+
+                                                        {/* Ready to Move - Keep close to price */}
+                                                        {property.property_category_type?.includes("Buy") &&
+                                                            property.possession_status ===
+                                                            "Ready To Move" && (
+                                                                <div className="flex items-center gap-2 px-2 py-1 bg-green-100 border border-green-200 rounded-full sm:px-3">
+                                                                    <MdApartment className="text-base text-green-700" />
+                                                                    <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                                                                        Ready to Move
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                    </div>
+
+                                                    {/* Right Side */}
+                                                    <div className="text-sm font-medium whitespace-nowrap">
+                                                        {property.property_category_type === "Rent" && (
                                                             <>
-                                                                <span className="text-gray-500">
-                                                                    Possession:
-                                                                </span>
+                                                                <span className="text-gray-500">Deposit:</span>
                                                                 <span className="ml-1 font-semibold">
-                                                                    {new Date(
-                                                                        property.possession_date,
-                                                                    ).toLocaleDateString("en-IN")}
+                                                                    ₹{" "}
+                                                                    {property.custom_deposit_amount?.toLocaleString(
+                                                                        "en-IN",
+                                                                    )}
                                                                 </span>
                                                             </>
                                                         )}
-                                                </div>
-                                            </div>
-
-                                            {/* Features Row */}
-                                            <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
-                                                {/* First Column */}
-                                                <div className="flex items-center gap-2 px-1 min-w-0 sm:px-3">
-                                                    <MdApartment className="text-[18px] sm:text-[22px] text-gray-700 flex-shrink-0" />
-                                                    <div className="flex flex-col justify-center min-w-0">
-                                                        <p className="m-0 text-xs font-semibold leading-4 truncate sm:text-sm">
-                                                            {property.building_type === "Commercial"
-                                                                ? property.property_type === "Office"
-                                                                    ? "Office Space"
-                                                                    : property.property_type === "Retail"
-                                                                        ? "Retail Space"
-                                                                        : property.property_type
-                                                                : property.property_category_type?.includes(
-                                                                    "PG",
-                                                                )
-                                                                    ? `${property.bathroom || 0} Bathrooms`
-                                                                    : property.bhk_type}
-                                                        </p>
-                                                        <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
-                                                            {property.building_type === "Commercial"
-                                                                ? "Property Type"
-                                                                : property.property_category_type?.includes(
-                                                                    "PG",
-                                                                )
-                                                                    ? "Bathrooms"
-                                                                    : property.property_type}
-                                                        </p>
+                                                        {property.property_category_type?.includes("Buy") &&
+                                                            property.possession_status !==
+                                                            "Ready To Move" &&
+                                                            property.possession_date && (
+                                                                <>
+                                                                    <span className="text-gray-500">
+                                                                        Possession:
+                                                                    </span>
+                                                                    <span className="ml-1 font-semibold">
+                                                                        {new Date(
+                                                                            property.possession_date,
+                                                                        ).toLocaleDateString("en-IN")}
+                                                                    </span>
+                                                                </>
+                                                            )}
                                                     </div>
                                                 </div>
 
-                                                {/* Second Column */}
-                                                <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0 sm:px-3">
-                                                    {property.property_category_type?.includes("PG") ? (
-                                                        <FaUser className="text-[16px] sm:text-[20px] text-gray-700 flex-shrink-0" />
-                                                    ) : (
-                                                        <FaBath className="text-[16px] sm:text-[20px] text-gray-700 flex-shrink-0" />
-                                                    )}
-                                                    <div className="flex flex-col justify-center min-w-0">
-                                                        <p className="m-0 text-xs font-semibold leading-4 truncate sm:text-sm">
-                                                            {property.property_category_type?.includes("PG")
-                                                                ? property.available_for
-                                                                : `${property.bathroom || 0} Baths`}
-                                                        </p>
-                                                        <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
-                                                            {property.property_category_type?.includes("PG")
-                                                                ? "Available For"
-                                                                : "Bathrooms"}
-                                                        </p>
+                                                {/* Features Row */}
+                                                <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+                                                    {/* First Column */}
+                                                    <div className="flex items-center gap-2 px-1 min-w-0 sm:px-3">
+                                                        <MdApartment className="text-[18px] sm:text-[22px] text-gray-700 flex-shrink-0" />
+                                                        <div className="flex flex-col justify-center min-w-0">
+                                                            <p className="m-0 text-xs font-semibold leading-4 truncate sm:text-sm">
+                                                                {property.building_type === "Commercial"
+                                                                    ? property.property_type === "Office"
+                                                                        ? "Office Space"
+                                                                        : property.property_type === "Retail"
+                                                                            ? "Retail Space"
+                                                                            : property.property_type
+                                                                    : property.property_category_type?.includes(
+                                                                        "PG",
+                                                                    )
+                                                                        ? `${property.bathroom || 0} Bathrooms`
+                                                                        : property.bhk_type}
+                                                            </p>
+                                                            <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
+                                                                {property.building_type === "Commercial"
+                                                                    ? "Property Type"
+                                                                    : property.property_category_type?.includes(
+                                                                        "PG",
+                                                                    )
+                                                                        ? "Bathrooms"
+                                                                        : property.property_type}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Second Column */}
+                                                    <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0 sm:px-3">
+                                                        {property.property_category_type?.includes("PG") ? (
+                                                            <FaUser className="text-[16px] sm:text-[20px] text-gray-700 flex-shrink-0" />
+                                                        ) : (
+                                                            <FaBath className="text-[16px] sm:text-[20px] text-gray-700 flex-shrink-0" />
+                                                        )}
+                                                        <div className="flex flex-col justify-center min-w-0">
+                                                            <p className="m-0 text-xs font-semibold leading-4 truncate sm:text-sm">
+                                                                {property.property_category_type?.includes("PG")
+                                                                    ? property.available_for
+                                                                    : `${property.bathroom || 0} Baths`}
+                                                            </p>
+                                                            <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
+                                                                {property.property_category_type?.includes("PG")
+                                                                    ? "Available For"
+                                                                    : "Bathrooms"}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Third Column */}
+                                                    <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0 sm:px-3">
+                                                        <RiRuler2Line className="text-[18px] sm:text-[22px] text-gray-700 flex-shrink-0" />
+                                                        <div className="flex flex-col justify-center min-w-0">
+                                                            <p className="m-0 text-xs font-semibold leading-4 truncate sm:text-sm">
+                                                                {property.area} {property.area_in}
+                                                            </p>
+                                                            <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
+                                                                Built Up Area
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Third Column */}
-                                                <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0 sm:px-3">
-                                                    <RiRuler2Line className="text-[18px] sm:text-[22px] text-gray-700 flex-shrink-0" />
-                                                    <div className="flex flex-col justify-center min-w-0">
-                                                        <p className="m-0 text-xs font-semibold leading-4 truncate sm:text-sm">
-                                                            {property.area} {property.area_in}
-                                                        </p>
-                                                        <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
-                                                            Built Up Area
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                {/* Divider */}
+                                                <hr className="my-1 border-gray-100" />
 
-                                            {/* Divider */}
-                                            <hr className="my-1 border-gray-100" />
-
-                                            {/* Row 5: Posted By | Days | Distance | Share */}
-                                            <div className="flex items-center justify-between gap-2 pt-1 pb-2 text-[12px] sm:text-[13px] text-gray-600">
-                                                {/* Left */}
-                                                <div className="flex items-center flex-wrap min-w-0 gap-x-1">
-                                                    {/* Posted By */}
-                                                    <div className="flex items-center min-w-0">
-                                                        <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700 flex-shrink-0" />
-                                                        <span className="truncate">
-                                                            Posted by {property.user_type || "Owner"}
-                                                        </span>
-                                                    </div>
-                                                    {/* Dot */}
-                                                    <span className="mx-1 text-gray-400 sm:mx-2">•</span>
-                                                    {/* Days */}
-                                                    <span className="whitespace-nowrap">
-                                                        {property.days_since_created
-                                                            ? `${property.days_since_created} days ago`
-                                                            : "Recently"}
-                                                    </span>
-                                                    {/* Distance */}
-                                                    {distance && (
-                                                        <>
-                                                            <span className="mx-1 text-gray-400 sm:mx-2">
-                                                                •
+                                                {/* Row 5: Posted By | Days | Distance | Share */}
+                                                <div className="flex items-center justify-between gap-2 pt-1 pb-2 text-[12px] sm:text-[13px] text-gray-600">
+                                                    {/* Left */}
+                                                    <div className="flex items-center flex-wrap min-w-0 gap-x-1">
+                                                        {/* Posted By */}
+                                                        <div className="flex items-center min-w-0">
+                                                            <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700 flex-shrink-0" />
+                                                            <span className="truncate">
+                                                                Posted by {property.user_type || "Owner"}
                                                             </span>
-                                                            <div className="flex items-center whitespace-nowrap">
-                                                                <FaMapMarkerAlt className="mr-1 text-red-500" />
-                                                                {distance} km from you
-                                                            </div>
-                                                        </>
-                                                    )}
+                                                        </div>
+                                                        {/* Dot */}
+                                                        <span className="mx-1 text-gray-400 sm:mx-2">•</span>
+                                                        {/* Days */}
+                                                        <span className="whitespace-nowrap">
+                                                            {property.days_since_created
+                                                                ? `${property.days_since_created} days ago`
+                                                                : "Recently"}
+                                                        </span>
+                                                        {/* Distance */}
+                                                        {distance && (
+                                                            <>
+                                                                <span className="mx-1 text-gray-400 sm:mx-2">
+                                                                    •
+                                                                </span>
+                                                                <div className="flex items-center whitespace-nowrap">
+                                                                    <FaMapMarkerAlt className="mr-1 text-red-500" />
+                                                                    {distance} km from you
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                    {/* Share */}
+                                                    <FontAwesomeIcon
+                                                        icon={faShareNodes}
+                                                        className="ml-2 text-[17px] text-gray-500 transition-colors cursor-pointer hover:text-blue-500 flex-shrink-0"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            openRecommendedShareModal(property._id);
+                                                        }}
+                                                    />
                                                 </div>
-                                                {/* Share */}
-                                                <FontAwesomeIcon
-                                                    icon={faShareNodes}
-                                                    className="ml-2 text-[17px] text-gray-500 transition-colors cursor-pointer hover:text-blue-500 flex-shrink-0"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        openRecommendedShareModal(property._id);
-                                                    }}
-                                                />
-                                            </div>
 
-                                            {console.log(
-                                                property.connect_to_name,
-                                                property.property_owner_image,
-                                            )}
+                                                {console.log(
+                                                    property.connect_to_name,
+                                                    property.property_owner_image,
+                                                )}
 
-                                            {/* Row 6: Owner Details */}
-                                            <div className="flex items-center pt-3 mt-auto">
-                                                {/* Avatar */}
-                                                <div className="flex items-center justify-center flex-shrink-0 w-9 h-9 overflow-hidden rounded-full bg-blue-100 sm:w-10 sm:h-10">
-                                                    {property.property_owner_image &&
-                                                        !property.property_owner_image.includes(
-                                                            "default_profile",
-                                                        ) ? (
-                                                        <>
-                                                            <img
-                                                                src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
-                                                                alt={property.connect_to_name || "Owner"}
-                                                                className="object-cover w-full h-full rounded-full"
-                                                                onError={(e) => {
-                                                                    e.target.style.display = "none";
-                                                                    e.target.nextSibling.style.display = "flex";
-                                                                }}
-                                                            />
-                                                            {/* Fallback */}
-                                                            <div className="items-center justify-center hidden w-full h-full">
+                                                {/* Row 6: Owner Details */}
+                                                <div className="flex items-center pt-3 mt-auto">
+                                                    {/* Avatar */}
+                                                    <div className="flex items-center justify-center flex-shrink-0 w-9 h-9 overflow-hidden rounded-full bg-blue-100 sm:w-10 sm:h-10">
+                                                        {property.property_owner_image &&
+                                                            !property.property_owner_image.includes(
+                                                                "default_profile",
+                                                            ) ? (
+                                                            <>
+                                                                <img
+                                                                    src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
+                                                                    alt={property.connect_to_name || "Owner"}
+                                                                    className="object-cover w-full h-full rounded-full"
+                                                                    onError={(e) => {
+                                                                        e.target.style.display = "none";
+                                                                        e.target.nextSibling.style.display = "flex";
+                                                                    }}
+                                                                />
+                                                                {/* Fallback */}
+                                                                <div className="items-center justify-center hidden w-full h-full">
+                                                                    <AiOutlineUser className="text-2xl text-blue-600" />
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <div className="flex items-center justify-center w-full h-full">
                                                                 <AiOutlineUser className="text-2xl text-blue-600" />
                                                             </div>
-                                                        </>
-                                                    ) : (
-                                                        <div className="flex items-center justify-center w-full h-full">
-                                                            <AiOutlineUser className="text-2xl text-blue-600" />
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                        )}
+                                                    </div>
 
-                                                {/* Name & User Type */}
-                                                <div className="flex items-center min-w-0 ml-3 sm:ml-4">
-                                                    <span
-                                                        className="text-sm font-semibold text-gray-900 truncate whitespace-nowrap"
-                                                        title={property.connect_to_name}
-                                                    >
-                                                        {property.connect_to_name || "Owner"}
-                                                    </span>
-                                                    <div className="w-px h-4 mx-3 bg-gray-300 sm:mx-4"></div>
-                                                    <span className="text-sm text-gray-500 whitespace-nowrap">
-                                                        {property.user_type || "Owner"}
-                                                    </span>
+                                                    {/* Name & User Type */}
+                                                    <div className="flex items-center min-w-0 ml-3 sm:ml-4">
+                                                        <span
+                                                            className="text-sm font-semibold text-gray-900 truncate whitespace-nowrap"
+                                                            title={property.connect_to_name}
+                                                        >
+                                                            {property.connect_to_name || "Owner"}
+                                                        </span>
+                                                        <div className="w-px h-4 mx-3 bg-gray-300 sm:mx-4"></div>
+                                                        <span className="text-sm text-gray-500 whitespace-nowrap">
+                                                            {property.user_type || "Owner"}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
                     </Slider>
 
                     {/* Mobile slider nav (arrows moved below the cards on small screens) */}

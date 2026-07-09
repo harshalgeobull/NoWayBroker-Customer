@@ -360,28 +360,21 @@ const Detail = ({ propertyData }) => {
     centerPadding: "0px",
     responsive: [
       {
-        breakpoint: 1400,
-        settings: {
-          slidesToShow: 4,
-          slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 1200,
+        breakpoint: 1399,
         settings: {
           slidesToShow: 3,
           slidesToScroll: 1,
         },
       },
       {
-        breakpoint: 992,
+        breakpoint: 1023,
         settings: {
           slidesToShow: 2,
           slidesToScroll: 1,
         },
       },
       {
-        breakpoint: 576,
+        breakpoint: 767,
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
@@ -404,20 +397,20 @@ const Detail = ({ propertyData }) => {
   };
 
   const formatPrice = (price) => {
-  if (price === null || price === undefined || price === "") return "";
+    if (price === null || price === undefined || price === "") return "";
 
-  price = Number(price);
+    price = Number(price);
 
-  if (price >= 10000000) {
-    return (price / 10000000).toFixed(2).replace(/\.?0+$/, "") + " Cr";
-  } else if (price >= 100000) {
-    return (price / 100000).toFixed(2).replace(/\.?0+$/, "") + " L";
-  } else if (price >= 1000) {
-    return (price / 1000).toFixed(2).replace(/\.?0+$/, "") + " K";
-  } else {
-    return price.toString();
-  }
-};
+    if (price >= 10000000) {
+      return (price / 10000000).toFixed(2).replace(/\.?0+$/, "") + " Cr";
+    } else if (price >= 100000) {
+      return (price / 100000).toFixed(2).replace(/\.?0+$/, "") + " L";
+    } else if (price >= 1000) {
+      return (price / 1000).toFixed(2).replace(/\.?0+$/, "") + " K";
+    } else {
+      return price.toString();
+    }
+  };
 
   // for the image section with 'get_property_detail' api
 
@@ -478,8 +471,8 @@ const Detail = ({ propertyData }) => {
       );
 
       const data = res.data?.data;
-       console.log("API Response:", data);
-    console.log("Price Onwards:", data.price_onwards);
+      console.log("API Response:", data);
+      console.log("Price Onwards:", data.price_onwards);
 
       if (data?.property_images?.length > 0) {
         setPropertyImages(data.property_images);
@@ -712,9 +705,9 @@ const Detail = ({ propertyData }) => {
     //     : null,
     // ],
     [
-  "Address",
-  propertyDetails?.address || null,
-],
+      "Address",
+      propertyDetails?.address || null,
+    ],
     [
       "Area",
       propertyDetails?.area
@@ -930,71 +923,71 @@ const Detail = ({ propertyData }) => {
   ].filter(([_, value]) => value);
   const statusTimelineItems = [];
 
-const addStatusItem = ({
-  icon,
-  title,
-  value,
-  bgColor,
-  iconColor,
-}) => {
-  if (
-    !value ||
-    value.toString().trim() === "" ||
-    value.toString().toLowerCase() === "n/a" ||
-    value.toString().toLowerCase() === "null"
-  ) {
-    return;
-  }
-
-  statusTimelineItems.push({
+  const addStatusItem = ({
     icon,
     title,
     value,
     bgColor,
     iconColor,
+  }) => {
+    if (
+      !value ||
+      value.toString().trim() === "" ||
+      value.toString().toLowerCase() === "n/a" ||
+      value.toString().toLowerCase() === "null"
+    ) {
+      return;
+    }
+
+    statusTimelineItems.push({
+      icon,
+      title,
+      value,
+      bgColor,
+      iconColor,
+    });
+  };
+  addStatusItem({
+    icon: <HiOutlineBadgeCheck />,
+    title: "Availability",
+    value: propertyDetails?.available_status,
+    bgColor: "bg-green-50",
+    iconColor: "text-green-600",
   });
-};
-addStatusItem({
-  icon: <HiOutlineBadgeCheck />,
-  title: "Availability",
-  value: propertyDetails?.available_status,
-  bgColor: "bg-green-50",
-  iconColor: "text-green-600",
-});
 
-addStatusItem({
-  icon: <HiOutlineCalendar />,
-  title: "Available From",
-  value: propertyDetails?.available_from,
-  bgColor: "bg-blue-50",
-  iconColor: "text-blue-600",
-});
+  addStatusItem({
+    icon: <HiOutlineCalendar />,
+    title: "Available From",
+    value: propertyDetails?.available_from,
+    bgColor: "bg-blue-50",
+    iconColor: "text-blue-600",
+  });
 
-addStatusItem({
-  icon: <HiOutlineHome />,
-  title: "Possession",
-  value: propertyDetails?.possession_status,
-  bgColor: "bg-orange-50",
-  iconColor: "text-orange-600",
-});
+  addStatusItem({
+    icon: <HiOutlineHome />,
+    title: "Possession",
+    value: propertyDetails?.possession_status,
+    bgColor: "bg-orange-50",
+    iconColor: "text-orange-600",
+  });
 
-addStatusItem({
-  icon: <HiOutlineClock />,
-  title: "Last Updated",
-  value: propertyDetails?.updated_at
-    ? new Date(propertyDetails.updated_at).toLocaleDateString("en-GB")
-    : propertyDetails?.property_added_date,
-  bgColor: "bg-purple-50",
-  iconColor: "text-purple-600",
-});
+  addStatusItem({
+    icon: <HiOutlineClock />,
+    title: "Last Updated",
+    value: propertyDetails?.updated_at
+      ? new Date(propertyDetails.updated_at).toLocaleDateString("en-GB")
+      : propertyDetails?.property_added_date,
+    bgColor: "bg-purple-50",
+    iconColor: "text-purple-600",
+  });
 
-addStatusItem({
-  icon: <HiOutlineClock />,
-  title: "Property Age",
-  value: propertyDetails?.age_of_property,
-  bgColor: "bg-amber-50",
-  iconColor: "text-amber-700",
-});
+  addStatusItem({
+    icon: <HiOutlineClock />,
+    title: "Property Age",
+    value: propertyDetails?.age_of_property,
+    bgColor: "bg-amber-50",
+    iconColor: "text-amber-700",
+  });
 
   const handleClick = () => {
     history.push("/featuredDashboard");
@@ -1068,20 +1061,20 @@ addStatusItem({
               <p className="flex items-center mt-5 text-3xl font-bold my-text">
                 <FaRupeeSign className="mr-2" />
                 {propertyDetails?.property_category_type === "Rent" ||
-                propertyDetails?.property_category_type === "PG/Co-living" ? (
+                  propertyDetails?.property_category_type === "PG/Co-living" ? (
                   <>
                     {formatPrice(propertyDetails?.rent)}{" "}
                     <span className="ml-1 text-xl text-gray-700">
-  / {propertyDetails?.rent_duration || "Per Month"}
-</span>
+                      / {propertyDetails?.rent_duration || "Per Month"}
+                    </span>
                   </>
                 ) : (
                   formatPrice(propertyDetails?.property_price)
                 )}
               </p>
               <p className="mt-1 text-sm font-medium text-gray-500">
-                {propertyDetails?.property_category_type === "Rent"||
-                propertyDetails?.property_category_type === "PG/Co-living"
+                {propertyDetails?.property_category_type === "Rent" ||
+                  propertyDetails?.property_category_type === "PG/Co-living"
                   ? `${toWords.convert(Number(propertyDetails?.rent))} Only`
                   : `${toWords.convert(Number(propertyDetails?.property_price))} Only`}
               </p>
@@ -1146,13 +1139,12 @@ addStatusItem({
             {propertyDetails.virtual_tour_availability === "Yes" && (
               <button
                 className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
-      ${
-        tourSchedule?.[0]?.status === "Accepted"
-          ? "bg-green-500 text-white rounded-full"
-          : scheduledDateLabel === "Virtual Tour"
-            ? "bg-white border my-text rounded-lg"
-            : "bg-[#FFD700] text-black rounded-full"
-      }`}
+      ${tourSchedule?.[0]?.status === "Accepted"
+                    ? "bg-green-500 text-white rounded-full"
+                    : scheduledDateLabel === "Virtual Tour"
+                      ? "bg-white border my-text rounded-lg"
+                      : "bg-[#FFD700] text-black rounded-full"
+                  }`}
                 onClick={() => {
                   const token = sessionStorage.getItem("accessToken");
 
@@ -1256,11 +1248,10 @@ addStatusItem({
               }}
             >
               <FiHeart
-                className={`text-2xl ${
-                  propertyDetails.is_favorite
+                className={`text-2xl ${propertyDetails.is_favorite
                     ? "text-red-600 fill-red-600"
                     : "text-gray-600"
-                }`}
+                  }`}
               />
             </div>
 
@@ -1401,11 +1392,10 @@ addStatusItem({
             <div className="sticky top-0 z-20 flex items-center gap-8 px-6 py-4 mb-4 bg-white rounded-lg shadow-sm">
               <button
                 onClick={() => scrollToSection(overviewRef, "overview")}
-                className={`relative font-medium pb-1 ${
-                  activeSection === "overview"
+                className={`relative font-medium pb-1 ${activeSection === "overview"
                     ? "text-red-600"
                     : "hover:text-[#8A2432]"
-                }`}
+                  }`}
               >
                 Overview
                 {activeSection === "overview" && (
@@ -1413,28 +1403,26 @@ addStatusItem({
                 )}
               </button>
 
-                <button
-  onClick={() =>
-    scrollToSection(statusTimelineRef, "statusTimeline")
-  }
-  className={`relative font-medium pb-1 ${
-    activeSection === "statusTimeline"
-      ? "text-red-600"
-      : "hover:text-[#8A2432]"
-  }`}
->
-  Status & Timeline
-  {activeSection === "statusTimeline" && (
-    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
-  )}
-</button>
               <button
-                onClick={() => scrollToSection(moreDetailsRef, "moreDetails")}
-                className={`relative font-medium pb-1 ${
-                  activeSection === "moreDetails"
+                onClick={() =>
+                  scrollToSection(statusTimelineRef, "statusTimeline")
+                }
+                className={`relative font-medium pb-1 ${activeSection === "statusTimeline"
                     ? "text-red-600"
                     : "hover:text-[#8A2432]"
-                }`}
+                  }`}
+              >
+                Status & Timeline
+                {activeSection === "statusTimeline" && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-[2px] bg-red-500 rounded-full"></span>
+                )}
+              </button>
+              <button
+                onClick={() => scrollToSection(moreDetailsRef, "moreDetails")}
+                className={`relative font-medium pb-1 ${activeSection === "moreDetails"
+                    ? "text-red-600"
+                    : "hover:text-[#8A2432]"
+                  }`}
               >
                 More Details
                 {activeSection === "moreDetails" && (
@@ -1444,11 +1432,10 @@ addStatusItem({
 
               <button
                 onClick={() => scrollToSection(amenitiesRef, "amenities")}
-                className={`relative font-medium pb-1 ${
-                  activeSection === "amenities"
+                className={`relative font-medium pb-1 ${activeSection === "amenities"
                     ? "text-red-600"
                     : "hover:text-[#8A2432]"
-                }`}
+                  }`}
               >
                 Amenities
                 {activeSection === "amenities" && (
@@ -1458,11 +1445,10 @@ addStatusItem({
 
               <button
                 onClick={() => scrollToSection(aboutRef, "about")}
-                className={`relative font-medium pb-1 ${
-                  activeSection === "about"
+                className={`relative font-medium pb-1 ${activeSection === "about"
                     ? "text-red-600"
                     : "hover:text-[#8A2432]"
-                }`}
+                  }`}
               >
                 About Property
                 {activeSection === "about" && (
@@ -1472,11 +1458,10 @@ addStatusItem({
 
               <button
                 onClick={() => scrollToSection(locationRef, "location")}
-                className={`relative font-medium pb-1 ${
-                  activeSection === "location"
+                className={`relative font-medium pb-1 ${activeSection === "location"
                     ? "text-red-600"
                     : "hover:text-[#8A2432]"
-                }`}
+                  }`}
               >
                 Location
                 {activeSection === "location" && (
@@ -1505,44 +1490,44 @@ addStatusItem({
               </div>
             )}
             {statusTimelineItems.length > 0 && (
-  <div
-    ref={statusTimelineRef}
-    className="w-full p-5 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20"
-  >
-    <h3 className="mb-5 text-2xl font-semibold text-gray-800">
-      Status & Timeline
-    </h3>
+              <div
+                ref={statusTimelineRef}
+                className="w-full p-5 mt-4 bg-white rounded-lg shadow-sm scroll-mt-20"
+              >
+                <h3 className="mb-5 text-2xl font-semibold text-gray-800">
+                  Status & Timeline
+                </h3>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {statusTimelineItems.map((item, index) => (
-        <div
-          key={index}
-          className={`flex items-start p-4 rounded-xl border border-gray-200 ${item.bgColor}`}
-        >
-          {/* Icon */}
-          <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center ${item.bgColor}`}
-          >
-            <span className={`text-xl ${item.iconColor}`}>
-              {item.icon}
-            </span>
-          </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {statusTimelineItems.map((item, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-start p-4 rounded-xl border border-gray-200 ${item.bgColor}`}
+                    >
+                      {/* Icon */}
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center ${item.bgColor}`}
+                      >
+                        <span className={`text-xl ${item.iconColor}`}>
+                          {item.icon}
+                        </span>
+                      </div>
 
-          {/* Content */}
-          <div className="ml-4 flex-1">
-            <p className="text-sm text-gray-500">
-              {item.title}
-            </p>
+                      {/* Content */}
+                      <div className="ml-4 flex-1">
+                        <p className="text-sm text-gray-500">
+                          {item.title}
+                        </p>
 
-            <p className="mt-1 text-base font-semibold text-gray-800 break-words">
-              {item.value}
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+                        <p className="mt-1 text-base font-semibold text-gray-800 break-words">
+                          {item.value}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* More Details Section */}
             {/* {moreDetailsFields.length > 0 && (
@@ -1724,11 +1709,10 @@ addStatusItem({
 
               {enquiryStatus && (
                 <div
-                  className={`text-center mt-4 text-lg ${
-                    enquiryStatus.type === "success"
+                  className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
                       ? "text-green-600"
                       : "text-red-600"
-                  }`}
+                    }`}
                 >
                   {enquiryStatus.message}
                 </div>
@@ -1784,36 +1768,38 @@ addStatusItem({
         )}
 
         {/* Exclusive Recommended Section */}
-        <div className="w-full sm:px-6 lg:px-4">
-          <div className="flex flex-col items-start justify-between px-4 pt-3 mb-3 sm:flex-row sm:items-center">
+        <div className="w-full px-2 sm:px-6 lg:px-4">
+          <div className="flex flex-col items-start justify-between gap-3 px-2 sm:px-4 pt-3 mb-3 sm:flex-row sm:items-center">
             <div className="flex flex-col">
-              <h2 className="mb-2 text-2xl font-bold tracking-wide text-gray-800 sm:text-3xl">
+              <h2 className="mb-2 text-xl font-bold tracking-wide text-gray-800 sm:text-2xl lg:text-3xl">
                 Exclusive Recommended
               </h2>
               <p className="text-gray-500"></p>
             </div>
 
-            <div className="flex items-center mt-4 space-x-3 sm:space-x-5 sm:mt-0">
+            <div className="flex items-center w-full sm:w-auto justify-between sm:justify-end mt-2 space-x-3 sm:space-x-5 sm:mt-0">
               <button
-                className="px-4 py-2 text-sm text-rose-700 bg-white my-border rounded-lg sm:px-6"
+                className="px-4 py-2 text-xs sm:text-sm text-rose-700 bg-white my-border rounded-lg sm:px-6"
                 onClick={handleClick}
               >
                 View All Properties
               </button>
 
-              <button
-                className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg"
-                onClick={() => sliderRef.current.slickPrev()}
-              >
-                <GoArrowLeft className="text-3xl text-black" />
-              </button>
+              <div className="hidden sm:flex items-center space-x-3">
+                <button
+                  className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg"
+                  onClick={() => sliderRef.current.slickPrev()}
+                >
+                  <GoArrowLeft className="text-2xl sm:text-3xl text-black" />
+                </button>
 
-              <button
-                className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg"
-                onClick={() => sliderRef.current.slickNext()}
-              >
-                <GoArrowRight className="text-3xl text-black" />
-              </button>
+                <button
+                  className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg"
+                  onClick={() => sliderRef.current.slickNext()}
+                >
+                  <GoArrowRight className="text-2xl sm:text-3xl text-black" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1884,8 +1870,8 @@ addStatusItem({
               ];
 
               return (
-                <div key={property._id} className="box-border p-2">
-                  <div className="overflow-hidden bg-white shadow-md rounded-2xl">
+                <div key={property._id} className="box-border h-full px-1.5 sm:px-2 pb-2">
+                  <div className="flex flex-col h-full overflow-hidden bg-white shadow-md rounded-2xl">
                     <div className="relative">
                       <Link
                         to={`/propertydetails/${property._id}?property_owner_id=${property.user_id}`}
@@ -1952,7 +1938,7 @@ addStatusItem({
                                 <img
                                   src={imgUrl}
                                   alt="Property"
-                                  className="object-cover w-full h-48 rounded-t-2xl"
+                                  className="object-cover w-full h-40 sm:h-44 md:h-48 rounded-t-2xl"
                                 />
                               </div>
                             ))}
@@ -1961,7 +1947,7 @@ addStatusItem({
                           <img
                             src={allImages[0] || defaultImage}
                             alt="Property"
-                            className="object-cover w-full h-48 rounded-t-2xl"
+                            className="object-cover w-full h-40 sm:h-44 md:h-48 rounded-t-2xl"
                           />
                         )}
                       </Link>
@@ -1971,7 +1957,7 @@ addStatusItem({
                         {property.virtual_tour_availability === "Yes" && (
                           <span className="flex items-center gap-1 px-2 py-1 text-xs font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm">
                             <PiCubeFocus className="text-sm text-white" />
-                            Virtual Tour
+                            <span className="hidden sm:inline">Virtual Tour</span>
                           </span>
                         )}
                         <button
@@ -2052,7 +2038,7 @@ addStatusItem({
 
                           return (
                             <span
-                              className={`text-white text-xs px-3 py-1 rounded-se-lg ${badgeColor}`}
+                              className={`text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-se-lg ${badgeColor}`}
                             >
                               {badgeText}
                             </span>
@@ -2063,7 +2049,7 @@ addStatusItem({
                       {/* FEATURED Tag (Bottom Right) */}
                       <div className="absolute bottom-0 right-0">
                         {property.mark_as_featured === "Yes" && (
-                          <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
+                          <span className="px-2 sm:px-3 py-1 text-[10px] sm:text-xs text-white bg-yellow-500 rounded-ss-lg">
                             FEATURED
                           </span>
                         )}
@@ -2072,15 +2058,15 @@ addStatusItem({
 
                     {/* Property Details — same design as AdvisorDashboard */}
                     <div className="flex flex-col flex-1 p-3 text-black bg-white">
-                      <div className="flex items-start justify-between gap-3 mb-0">
+                      <div className="flex items-start justify-between gap-2 sm:gap-3 mb-0">
                         <h3
-                          className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate"
+                          className="flex-1 min-w-0 m-0 text-base sm:text-lg font-semibold leading-6 text-gray-900 truncate"
                           title={property.property_name}
                         >
                           {property.property_name || "N/A"}
                         </h3>
                         <span
-                          className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-black sm:text-base whitespace-nowrap"
+                          className="flex-shrink-0 m-0 text-xs sm:text-sm font-medium leading-6 text-black whitespace-nowrap"
                           title={property.furnished_type}
                         >
                           {property.furnished_type || "Un-Furnished"}
@@ -2088,36 +2074,36 @@ addStatusItem({
                       </div>
 
                       <p
-                        className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate"
+                        className="mt-0 mb-1 text-xs sm:text-sm leading-5 text-gray-600 truncate"
                         title={subtitle}
                       >
                         {subtitle}
                       </p>
 
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center">
-                          <span className="text-2xl font-bold">
+                      <div className="flex flex-wrap items-center justify-between gap-y-1 mb-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-xl sm:text-2xl font-bold">
                             ₹{" "}
                             {property.property_category_type === "Rent"
                               ? formatPrice(property.rent)
                               : formatPrice(property.property_price)}
                           </span>
                           {property.property_category_type === "Rent" && (
-                            <span className="ml-1 text-sm text-gray-500">
+                            <span className="text-xs sm:text-sm text-gray-500">
                               / {property.rent_duration}
                             </span>
                           )}
                           {property.property_category_type?.includes("Buy") &&
                             property.possession_status === "Ready To Move" && (
-                              <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
-                                <MdApartment className="text-base text-green-700" />
-                                <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                              <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 bg-green-100 border border-green-200 rounded-full">
+                                <MdApartment className="text-sm sm:text-base text-green-700" />
+                                <span className="text-[10px] sm:text-xs font-semibold text-green-700 whitespace-nowrap">
                                   Ready to Move
                                 </span>
                               </div>
                             )}
                         </div>
-                        <div className="text-sm font-medium whitespace-nowrap">
+                        <div className="text-xs sm:text-sm font-medium whitespace-nowrap">
                           {property.property_category_type?.includes("Buy") &&
                             property.possession_status !== "Ready To Move" &&
                             property.possession_date && (
@@ -2136,10 +2122,10 @@ addStatusItem({
                       </div>
 
                       <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
-                        <div className="flex items-center gap-2 px-3 min-w-0">
-                          <MdApartment className="text-[22px] text-gray-700 flex-shrink-0" />
+                        <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 min-w-0">
+                          <MdApartment className="text-lg sm:text-[22px] text-gray-700 flex-shrink-0" />
                           <div className="flex flex-col justify-center min-w-0">
-                            <p className="m-0 text-sm font-semibold leading-4 truncate">
+                            <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
                               {property.building_type === "Commercial"
                                 ? property.property_type === "Office"
                                   ? "Office Space"
@@ -2152,7 +2138,7 @@ addStatusItem({
                                   ? `${property.bathroom || 0} Bathrooms`
                                   : property.bhk_type}
                             </p>
-                            <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                            <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
                               {property.building_type === "Commercial"
                                 ? "Property Type"
                                 : property.property_category_type?.includes(
@@ -2164,19 +2150,19 @@ addStatusItem({
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                        <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 border-l border-gray-200 min-w-0">
                           {property.property_category_type?.includes("PG") ? (
-                            <FaUser className="text-[20px] text-gray-700 flex-shrink-0" />
+                            <FaUser className="text-base sm:text-[20px] text-gray-700 flex-shrink-0" />
                           ) : (
-                            <FaBath className="text-[20px] text-gray-700 flex-shrink-0" />
+                            <FaBath className="text-base sm:text-[20px] text-gray-700 flex-shrink-0" />
                           )}
                           <div className="flex flex-col justify-center min-w-0">
-                            <p className="m-0 text-sm font-semibold leading-4 truncate">
+                            <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
                               {property.property_category_type?.includes("PG")
                                 ? property.available_for
                                 : `${property.bathroom || 0} Baths`}
                             </p>
-                            <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                            <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
                               {property.property_category_type?.includes("PG")
                                 ? "Available For"
                                 : "Bathrooms"}
@@ -2184,13 +2170,13 @@ addStatusItem({
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
-                          <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
+                        <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 border-l border-gray-200 min-w-0">
+                          <RiRuler2Line className="text-lg sm:text-[22px] text-gray-700 flex-shrink-0" />
                           <div className="flex flex-col justify-center min-w-0">
-                            <p className="m-0 text-sm font-semibold leading-4 truncate">
+                            <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
                               {property.area} {property.area_in}
                             </p>
-                            <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                            <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
                               Built Up Area
                             </p>
                           </div>
@@ -2199,7 +2185,7 @@ addStatusItem({
 
                       <hr className="my-1 border-gray-100" />
 
-                      <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
+                      <div className="flex flex-wrap items-center justify-between gap-y-1 pt-1 pb-2 text-[12px] sm:text-[13px] text-gray-600">
                         <div className="flex items-center flex-wrap min-w-0">
                           <div className="flex items-center">
                             <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
@@ -2235,9 +2221,9 @@ addStatusItem({
                         />
                       </div>
 
-                      <div className="flex items-center justify-between pt-3 gap-2">
+                      <div className="flex flex-wrap items-center justify-between mt-auto pt-3 gap-2">
                         <div className="flex items-center min-w-0">
-                          <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+                          <div className="flex items-center justify-center flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 overflow-hidden rounded-full bg-blue-100">
                             {property.property_owner_image ? (
                               <img
                                 src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
@@ -2248,24 +2234,24 @@ addStatusItem({
                               <AiOutlineUser className="text-blue-600" size={24} />
                             )}
                           </div>
-                          <div className="flex flex-col ml-3 min-w-0">
+                          <div className="flex flex-col ml-2 sm:ml-3 min-w-0">
                             <span
-                              className="text-sm font-semibold text-gray-900 truncate"
+                              className="text-xs sm:text-sm font-semibold text-gray-900 truncate"
                               title={property.connect_to_name}
                             >
                               {property.connect_to_name || "Owner"}
                             </span>
-                            <span className="text-xs text-gray-500 truncate">
+                            <span className="text-[10px] sm:text-xs text-gray-500 truncate">
                               {property.user_type || "Owner"}
                             </span>
                           </div>
                         </div>
 
                         {/* RIGHT SIDE - Buttons */}
-                        <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                           {/* Contact */}
                           <div
-                            className="flex items-center justify-center px-4 h-9 text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap"
+                            className="flex items-center justify-center px-3 sm:px-4 h-8 sm:h-9 text-xs sm:text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap"
                             onClick={() => {
                               const token =
                                 sessionStorage.getItem("accessToken");
@@ -2291,7 +2277,7 @@ addStatusItem({
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center justify-center w-9 h-9 text-white bg-green-500 rounded-md hover:bg-green-600"
+                            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 text-white bg-green-500 rounded-md hover:bg-green-600"
                           >
                             <FaWhatsapp />
                           </a>
@@ -2300,7 +2286,7 @@ addStatusItem({
                           <a
                             href={`tel:${property.connect_to_no}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center justify-center w-9 h-9 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 text-white bg-blue-500 rounded-md hover:bg-blue-600"
                           >
                             <FaPhone />
                           </a>
