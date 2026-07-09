@@ -2,7 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AiFillHome, AiOutlineUser } from "react-icons/ai";
-import { FaRupeeSign, FaCube, FaBath, FaWhatsapp, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
+import {
+  FaRupeeSign,
+  FaCube,
+  FaBath,
+  FaWhatsapp,
+  FaPhone,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
 import {
   MdOutlineBedroomParent,
   MdOutlineNavigateBefore,
@@ -51,17 +58,15 @@ const AgentDetail = () => {
   const [previousPage, setPreviousPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [totalCount, setTotalCount] = useState();
+
   const propertiesPerPage = 6;
   const [rentCount, setRentCount] = useState();
   const [buyCount, setBuyCount] = useState();
   const [commercialCount, setCommercialCount] = useState();
-
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [openContactModalAfterLogin, setOpenContactModalAfterLogin] =
     useState(false);
-
   const [activeTab, setActiveTab] = useState("Buy");
-
   const accessToken = sessionStorage.getItem("accessToken");
   const [currentShareUrl, setCurrentShareUrl] = useState("");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -80,7 +85,7 @@ const AgentDetail = () => {
     }
   }, [currentPage, activeTab, accessToken]);
 
-  // Scroll to top on page load -
+  // Scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
@@ -126,7 +131,6 @@ const AgentDetail = () => {
     }
   };
 
-  // useState(false);
   useEffect(() => {
     if (sessionStorage.getItem("accessToken") && openContactModalAfterLogin) {
       setIsContactModalOpen(true);
@@ -134,13 +138,12 @@ const AgentDetail = () => {
     }
   }, [openContactModalAfterLogin]);
 
-  //  Add to favorites
+  // Add to favorites
   const addToFavorites = async (PropertyId) => {
     if (!accessToken) {
       setIsLoginModalOpen(true);
       return;
     }
-
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/add_to_favorite`,
@@ -155,7 +158,7 @@ const AgentDetail = () => {
     }
   };
 
-  //  Remove to favorites
+  // Remove from favorites
   const removeFromFavorites = async (favoriteId) => {
     const formData = new FormData();
     formData.append("favorite_id", favoriteId);
@@ -165,7 +168,6 @@ const AgentDetail = () => {
         `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
         { data: formData },
       );
-
       if (response.data.status === 1) {
         fetchAgentProperties();
       } else {
@@ -213,21 +215,18 @@ const AgentDetail = () => {
 
   const formatPrice = (price) => {
     if (!price) return "";
-
     price = parseInt(price);
-
     const formatNumber = (num) => {
       return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2); // no decimals if whole number
     };
-
     if (price >= 10000000) {
-      return `₹ ${formatNumber(price / 10000000)} Cr`; // Crores
+      return `₹${formatNumber(price / 10000000)} Cr`; // Crores
     } else if (price >= 100000) {
-      return `₹ ${formatNumber(price / 100000)} L`; // Lakhs
+      return `₹${formatNumber(price / 100000)} L`; // Lakhs
     } else if (price >= 1000) {
-      return `₹ ${formatNumber(price / 1000)} K`; // Thousands
+      return `₹${formatNumber(price / 1000)} K`; // Thousands
     } else {
-      return `₹ ${price}`;
+      return `₹${price}`;
     }
   };
 
@@ -243,8 +242,8 @@ const AgentDetail = () => {
 
   return (
     <>
-      <div className="min-h-screen ">
-        <div className="bg-white shadow-lg rounded-2xl ">
+      <div className="min-h-screen">
+        <div className="bg-white shadow-lg rounded-2xl">
           <div className="relative w-full h-auto p-2 mb-4 rounded-lg shadow-sm bg-rose-50">
             {/* Agent Info */}
             <div className="flex items-center gap-4 pb-6 ml-4">
@@ -282,8 +281,8 @@ const AgentDetail = () => {
             {isContactModalOpen && (
               <ContactDetails
                 onClose={() => setIsContactModalOpen(false)}
-                fullName={userDetails.full_name} // pass user's name
-                mobile={userDetails.mobile_number} // pass user's mobile
+                fullName={userDetails.full_name}
+                mobile={userDetails.mobile_number}
               />
             )}
 
@@ -327,7 +326,8 @@ const AgentDetail = () => {
               </div>
             </div>
           </div>
-          <div className="ml-4 ">
+
+          <div className="ml-4">
             <p className="text-2xl font-medium text-black">Properties</p>
           </div>
 
@@ -338,19 +338,13 @@ const AgentDetail = () => {
                 key={category}
                 onClick={() => handleTabClick(category)}
                 className={`pb-1 ${activeTab === category
-                  ? "my-text border-b-2 border-rose-600"
-                  : "text-gray-600"
+                    ? "my-text border-b-2 border-rose-600"
+                    : "text-gray-600"
                   }`}
               >
                 {category}{" "}
                 <span className="px-2 py-1 text-xs text-white bg-green-500 rounded-full">
-                  <span className="px-2 py-1 text-xs text-white bg-green-500 rounded-full">
-                    {index === 0
-                      ? buyCount
-                      : index === 1
-                        ? rentCount
-                        : commercialCount}
-                  </span>
+                  {index === 0 ? buyCount : index === 1 ? rentCount : commercialCount}
                 </span>
               </button>
             ))}
@@ -358,7 +352,6 @@ const AgentDetail = () => {
 
           {/* Property List */}
           <div className="flex-1 p-4 border-white shadow-2xl">
-            {/* Property List: Adjust grid layout to show 3 items per row */}
             <div className="grid grid-cols-1 gap-6 px-4 sm:grid-cols-2 md:grid-cols-3">
               {properties.map((property) => {
                 let distance = null;
@@ -376,7 +369,7 @@ const AgentDetail = () => {
                     key={property._id}
                     className="block overflow-hidden no-underline shadow-md rounded-2xl hover:no-underline"
                   >
-                    {/* Property Slider */}
+                    {/* Property Image / Slider */}
                     <div className="relative">
                       <Link
                         to={`/propertydetails/${property._id}`}
@@ -446,7 +439,6 @@ const AgentDetail = () => {
                                 className="object-cover w-full h-48 rounded-t-2xl"
                               />
                             </div>
-
                             {/* Other property images */}
                             {(property.property_images || []).map((imgObj) => (
                               <div key={imgObj._id}>
@@ -467,9 +459,13 @@ const AgentDetail = () => {
                           />
                         )}
                       </Link>
-                      {/* Days on NoWayBroker Tag (Top Left) */}
+
+                      {/* "Recently" Tag (Top Left) */}
                       <span className="absolute px-2 py-1 text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm">
-                        {property.days_since_created} days ago
+                        {property.days_since_created === 0 ||
+                          property.days_since_created === "0"
+                          ? "Recently"
+                          : `${property.days_since_created} days ago`}
                       </span>
 
                       {/* Virtual Tour & Heart Icon (Top Right) */}
@@ -480,7 +476,6 @@ const AgentDetail = () => {
                             Virtual Tour
                           </span>
                         )}
-                        {/* <div className="absolute top-0 right-0 flex space-x-2"> */}
                         <button
                           className="p-1.5 rounded-full shadow bg-gray-800/60 backdrop-blur-sm"
                           onClick={() => {
@@ -501,27 +496,26 @@ const AgentDetail = () => {
                             color={
                               property.is_favorite
                                 ? "red"
-                                : "rgba(75, 85, 99, 0.4) "
+                                : "rgba(75, 85, 99, 0.4)"
                             }
                             fill={
                               property.is_favorite
                                 ? "red"
-                                : "rgba(75, 85, 99, 0.4) "
+                                : "rgba(75, 85, 99, 0.4)"
                             }
                             strokeWidth={2}
                           />
                         </button>
-                        {/* </div> */}
                       </div>
 
-                      {/* FOR BUY & FEATURED Tags (Bottom of the Image) */}
+                      {/* FOR BUY / RENT Tag (Bottom Left of Image) */}
                       <div className="absolute bottom-0 left-0">
                         <span
                           className={`text-white text-xs px-3 py-1 rounded-se-lg ${property.property_category_type === "Buy"
-                            ? "bg-green-500"
-                            : property.property_category_type === "Rent"
-                              ? "bg-blue-500"
-                              : "bg-gray-500"
+                              ? "bg-green-500"
+                              : property.property_category_type === "Rent"
+                                ? "bg-blue-500"
+                                : "bg-gray-500"
                             }`}
                         >
                           {property.property_category_type === "Buy"
@@ -531,6 +525,8 @@ const AgentDetail = () => {
                               : "UNKNOWN"}
                         </span>
                       </div>
+
+                      {/* FEATURED Tag (Bottom Right of Image) */}
                       <div className="absolute bottom-0 right-0">
                         {property.mark_as_featured === "Yes" && (
                           <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
@@ -540,7 +536,7 @@ const AgentDetail = () => {
                       </div>
                     </div>
 
-                    {/* Property Description (Spotlight style) */}
+                    {/* Property Description */}
                     <div className="p-4 bg-white">
                       {/* Row 1: Name + Furnished Type */}
                       <div className="flex items-start justify-between gap-3 mb-0">
@@ -561,41 +557,46 @@ const AgentDetail = () => {
                             closeShareModal={handleCloseShareModal}
                             copyLink={() => {
                               const url = currentShareUrl;
-
-                              if (navigator.clipboard && window.isSecureContext) {
+                              if (
+                                navigator.clipboard &&
+                                window.isSecureContext
+                              ) {
                                 navigator.clipboard
                                   .writeText(url)
                                   .then(() => {
                                     alert("Link copied!");
                                   })
                                   .catch((err) => {
-                                    console.error("Clipboard API failed:", err);
+                                    console.error(
+                                      "Clipboard API failed:",
+                                      err,
+                                    );
                                     fallbackCopyTextToClipboard(url);
                                   });
                               } else {
                                 fallbackCopyTextToClipboard(url);
                               }
-
                               function fallbackCopyTextToClipboard(text) {
                                 const textArea =
                                   document.createElement("textarea");
                                 textArea.value = text;
-                                textArea.style.position = "fixed"; // Avoid scrolling to bottom
+                                textArea.style.position = "fixed";
                                 textArea.style.left = "-9999px";
                                 document.body.appendChild(textArea);
                                 textArea.focus();
                                 textArea.select();
-
                                 try {
-                                  const successful = document.execCommand("copy");
+                                  const successful =
+                                    document.execCommand("copy");
                                   alert(
-                                    successful ? "Link copied!" : "Copy failed",
+                                    successful
+                                      ? "Link copied!"
+                                      : "Copy failed",
                                   );
                                 } catch (err) {
                                   console.error("Fallback copy failed:", err);
                                   alert("Copy failed");
                                 }
-
                                 document.body.removeChild(textArea);
                               }
                             }}
@@ -620,16 +621,16 @@ const AgentDetail = () => {
                         <span className="flex items-center text-xl font-bold">
                           <FaRupeeSign className="mr-1 text-base" />
                           {property.property_category_type === "Rent"
-                            ? `${formatPrice(property.rent).replace("₹ ", "")}${property.rent_duration
-                              ? ` / ${property.rent_duration}`
+                            ? `${formatPrice(property.rent).replace("₹", "")}${property.rent_duration
+                              ? `/${property.rent_duration}`
                               : ""
                             }`
                             : formatPrice(property.property_price).replace(
-                              "₹ ",
+                              "₹",
                               "",
                             )}
                         </span>
-                        {/* Ready to Move - Keep close to price */}
+
                         {property.property_category_type?.includes("Buy") &&
                           property.possession_status === "Ready To Move" && (
                             <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
@@ -681,15 +682,14 @@ const AgentDetail = () => {
                             </p>
                           </div>
                         </div>
+
                         <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
                           <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
-
                           <div className="flex flex-col justify-center min-w-0">
                             <p className="m-0 text-sm font-semibold leading-4 truncate">
                               {property.area_sq || property.area}{" "}
                               {property.area_in || "sq.ft"}
                             </p>
-
                             <p className="m-0 text-xs leading-4 text-gray-500 truncate">
                               Built Up Area
                             </p>
@@ -697,18 +697,23 @@ const AgentDetail = () => {
                         </div>
                       </div>
 
-                      {/* Row 5: Posted By + Share */}
-                      <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
+                      {/* Row 5: Posted By + Days + Distance + Share (moved directly below Property Details) */}
+                      <div className="flex items-center justify-between pt-2 pb-1 text-[13px] text-gray-600">
                         <div className="flex items-center flex-wrap min-w-0">
                           <span>Posted by {property.user_type || "Owner"}</span>
-                          {property.days_since_created && (
-                            <>
-                              <span className="mx-2 text-gray-400">•</span>
-                              <span className="whitespace-nowrap">
-                                {property.days_since_created} days ago
-                              </span>
-                            </>
-                          )}
+                          {(property.days_since_created === 0 ||
+                            property.days_since_created === "0" ||
+                            property.days_since_created) && (
+                              <>
+                                <span className="mx-2 text-gray-400">•</span>
+                                <span className="whitespace-nowrap">
+                                  {property.days_since_created === 0 ||
+                                    property.days_since_created === "0"
+                                    ? "Recently"
+                                    : `${property.days_since_created} days ago`}
+                                </span>
+                              </>
+                            )}
                           {distance && (
                             <>
                               <span className="mx-2 text-gray-400">•</span>
@@ -730,7 +735,7 @@ const AgentDetail = () => {
                         />
                       </div>
 
-                      {/* Row 6: Owner + Contact Buttons */}
+                      {/* Row 6: Owner Info + Contact Buttons (unchanged, now appears after posted info) */}
                       <div className="flex items-center justify-between pt-2 gap-2">
                         <div className="flex items-center min-w-0">
                           <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 overflow-hidden rounded-full bg-blue-100">
@@ -757,9 +762,8 @@ const AgentDetail = () => {
                           </div>
                         </div>
 
-                        {/* RIGHT SIDE - Buttons */}
+                        {/* Contact / WhatsApp / Call Buttons */}
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          {/* Contact */}
                           <div
                             className="flex items-center justify-center px-4 h-9 text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap"
                             onClick={() => handleContactClick(property)}
@@ -767,7 +771,6 @@ const AgentDetail = () => {
                             Contact
                           </div>
 
-                          {/* WhatsApp */}
                           <a
                             href={`https://wa.me/91${property.connect_to_no}?text=Hello, I am interested in your property`}
                             target="_blank"
@@ -778,7 +781,6 @@ const AgentDetail = () => {
                             <FaWhatsapp />
                           </a>
 
-                          {/* Call */}
                           <a
                             href={`tel:${property.connect_to_no}`}
                             onClick={(e) => e.stopPropagation()}
@@ -800,8 +802,8 @@ const AgentDetail = () => {
                 <button
                   onClick={handlePrev}
                   disabled={currentPage === 1}
-                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 
-          ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                 >
                   <MdOutlineNavigateBefore className="text-xl text-gray-700" />
                 </button>
@@ -810,8 +812,7 @@ const AgentDetail = () => {
                   <button
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors 
-            ${currentPage === i + 1
+                    className={`w-8 h-8 flex items-center justify-center rounded-full text-sm transition-colors ${currentPage === i + 1
                         ? "my-border text-black font-normal"
                         : "text-gray-700"
                       }`}
@@ -823,8 +824,10 @@ const AgentDetail = () => {
                 <button
                   onClick={handleNext}
                   disabled={currentPage === totalPages}
-                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 
-          ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === totalPages
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                    }`}
                 >
                   <MdOutlineNavigateNext className="text-xl text-gray-700" />
                 </button>
