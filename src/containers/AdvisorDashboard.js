@@ -366,14 +366,28 @@ const AdvisorDashboard = () => {
   };
 
   const DEFAULT_CENTER = [18.5204, 73.8567];
+  // const getMapCenter = () => {
+  //   if (
+  //     properties.length > 0 &&
+  //     properties[0].latitude &&
+  //     properties[0].longitude
+  //   ) {
+  //     return [properties[0].latitude, properties[0].longitude];
+  //   }
+  //   return DEFAULT_CENTER;
+  // };
   const getMapCenter = () => {
-    if (
-      properties.length > 0 &&
-      properties[0].latitude &&
-      properties[0].longitude
-    ) {
-      return [properties[0].latitude, properties[0].longitude];
+    const firstValid = properties.find((property) => {
+      const lat = Number(property.latitude);
+      const lng = Number(property.longitude);
+
+      return Number.isFinite(lat) && Number.isFinite(lng);
+    });
+
+    if (firstValid) {
+      return [Number(firstValid.latitude), Number(firstValid.longitude)];
     }
+
     return DEFAULT_CENTER;
   };
 
@@ -3640,10 +3654,20 @@ const AdvisorDashboard = () => {
                   style={{ width: "100%", height: "100%" }}
                 >
                   <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}" />
-                  {properties.map((property, index) => (
-                    <Marker
-                      key={property._id}
-                      position={[property.latitude, property.longitude]}
+                  {properties
+  .filter((property) => {
+                        const lat = Number(property.latitude);
+                        const lng = Number(property.longitude);
+  
+                        return Number.isFinite(lat) && Number.isFinite(lng);
+                      })
+                      .map((property) => (
+                        <Marker
+                          key={property._id}
+                          position={[
+                            Number(property.latitude),
+                            Number(property.longitude),
+                          ]}
                       icon={createCustomIcon(
                         property,
                         property._id === activePropertyId ||
