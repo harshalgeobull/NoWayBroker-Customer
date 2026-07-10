@@ -3166,10 +3166,11 @@ const PropertyDashboard = () => {
                   properties
                     .filter(
                       (property) =>
+                        property.available_status !== "Sold" &&
                         property.latitude !== null &&
                         property.longitude !== null &&
                         !isNaN(property.latitude) &&
-                        !isNaN(property.longitude),
+                        !isNaN(property.longitude)
                     )
                     .map((property) => {
                       const area = property.address_area || "";
@@ -3230,8 +3231,8 @@ const PropertyDashboard = () => {
                         <div
                           key={property._id}
                           className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${hoveredPropertyId === property._id
-                              ? "bg-green-200"
-                              : ""
+                            ? "bg-green-200"
+                            : ""
                             }`}
                           onMouseEnter={() =>
                             setHoveredPropertyId(property._id)
@@ -3994,8 +3995,8 @@ const PropertyDashboard = () => {
                         page !== "..." ? handlePageChange(page) : null
                       }
                       className={`px-3 py-1 text-sm transition-colors ${currentPage === page
-                          ? "rounded-full my-border w-8 h-8 flex items-center justify-center font-normal"
-                          : "text-gray-700"
+                        ? "rounded-full my-border w-8 h-8 flex items-center justify-center font-normal"
+                        : "text-gray-700"
                         }`}
                     >
                       {page}
@@ -4006,8 +4007,8 @@ const PropertyDashboard = () => {
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                     className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === totalPages
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
                       }`}
                   >
                     <MdOutlineNavigateNext className="text-xl text-gray-700" />
