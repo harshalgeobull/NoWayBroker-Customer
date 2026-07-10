@@ -62,6 +62,12 @@ const Profile = () => {
   const displayValue = (value) =>
     value !== null && value !== "" ? value : "N/A";
 
+  // Check if the logged-in user is a Builder (used to conditionally show Company Name)
+  const isBuilder =
+    (updatedData.user_type || profileData?.user_type || "")
+      .toString()
+      .toLowerCase() === "builder";
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUpdatedData({ ...updatedData, [name]: value });
@@ -82,6 +88,7 @@ const Profile = () => {
             proprietorship: updatedData.proprietorship,
             experience: updatedData.experience,
             city: updatedData.city,
+            company_name: updatedData.company_name,
           }),
         },
       );
@@ -309,6 +316,18 @@ const Profile = () => {
                   title="Please enter a valid email address"
                 />
               </label>
+              {isBuilder && (
+                <label className="block">
+                  <span className="text-gray-600">Company Name</span>
+                  <input
+                    type="text"
+                    name="company_name"
+                    className="w-full border rounded-md p-2"
+                    value={updatedData.company_name || ""}
+                    onChange={handleInputChange}
+                  />
+                </label>
+              )}
               <label className="block">
                 <span className="text-gray-600">City</span>
                 <input
