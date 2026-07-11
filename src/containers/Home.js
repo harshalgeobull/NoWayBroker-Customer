@@ -342,8 +342,6 @@ const Home = () => {
             currentShareUrl={currentShareUrl}
             fetchHomeData={fetchHomeData}
           />
-
-          <FeaturesSection />
           <Adviser data={homeData.adviser} />
           <ExploreServices />
         </div>

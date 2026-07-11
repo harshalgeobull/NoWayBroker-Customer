@@ -230,6 +230,7 @@ const Profile = () => {
               <p className="text-gray-800">
                 {displayValue(profileData.mobile_number)}
               </p>
+
               <p className="text-gray-600 mt-4">City</p>
               <p className="text-gray-800">{displayValue(profileData.city)}</p>
             </div>
@@ -243,6 +244,14 @@ const Profile = () => {
               <p className="text-gray-800 font-semibold">
                 {displayValue(profileData.proprietorship)}
               </p>
+              {isBuilder && (
+                <>
+                  <p className="text-gray-600 mt-4">Company Name</p>
+                  <p className="text-gray-800 font-semibold">
+                    {displayValue(profileData.company_name)}
+                  </p>
+                </>
+              )}
             </div>
           </div>
           <button
