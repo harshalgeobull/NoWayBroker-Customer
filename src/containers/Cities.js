@@ -70,7 +70,7 @@ const Cities = React.memo(({ data }) => {
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800 lg:text-3xl">
           Explore Real Estate in Popular Indian Cities
         </h1>
-        <p className="pb-3 text-sm sm:text-base text-gray-500">Go from browsing to buying</p>
+        <p className="pb-3 text-sm sm:text-base text-gray-500">Your dream property is just a few clicks away</p>
 
         {/* Desktop Grid */}
         <div className="hidden lg:grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 xl:gap-6">

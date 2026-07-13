@@ -258,7 +258,7 @@ const ManyMore = ({
                 Exclusive Recommended Properties
               </h2>
               <p className="text-sm text-gray-500 sm:text-base lg:text-lg">
-                Go from browsing to buying
+                Your dream property is just a few clicks away
               </p>
             </div>
 

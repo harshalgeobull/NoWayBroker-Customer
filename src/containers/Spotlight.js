@@ -92,20 +92,20 @@ const Spotlights = ({
   };
 
   const formatPrice = (price) => {
-  if (!price) return "";
+    if (!price) return "";
 
-  price = Number(price);
+    price = Number(price);
 
-  if (price >= 10000000) {
-    return `${(price / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
-  } else if (price >= 100000) {
-    return `${(price / 100000).toFixed(2).replace(/\.?0+$/, "")} L`;
-  } else if (price >= 1000) {
-    return `${(price / 1000).toFixed(2).replace(/\.?0+$/, "")} K`;
-  } else {
-    return price.toString();
-  }
-};
+    if (price >= 10000000) {
+      return `${(price / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
+    } else if (price >= 100000) {
+      return `${(price / 100000).toFixed(2).replace(/\.?0+$/, "")} L`;
+    } else if (price >= 1000) {
+      return `${(price / 1000).toFixed(2).replace(/\.?0+$/, "")} K`;
+    } else {
+      return price.toString();
+    }
+  };
 
   const getProjectDistance = (project) => {
     const projLat =
@@ -148,25 +148,25 @@ const Spotlights = ({
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
 
-     // Price Range
-  if (typeof price === "string" && price.includes("-")) {
-    const parts = price.split("-").map((p) => p.trim());
-
+    // Price Range
     if (typeof price === "string" && price.includes("-")) {
       const parts = price.split("-").map((p) => p.trim());
-      return (
-        <>
-          {parts.map((p, idx) => (
-            <span key={idx} className="inline-flex items-center">
-              <FaRupeeSign className="inline-block mr-1" />
-              {formatPrice(p)}
-              {idx === 0 && " - "}
-            </span>
-          ))}
-        </>
-      );
+
+      if (typeof price === "string" && price.includes("-")) {
+        const parts = price.split("-").map((p) => p.trim());
+        return (
+          <>
+            {parts.map((p, idx) => (
+              <span key={idx} className="inline-flex items-center">
+                <FaRupeeSign className="inline-block mr-1" />
+                {formatPrice(p)}
+                {idx === 0 && " - "}
+              </span>
+            ))}
+          </>
+        );
+      }
     }
-  }
 
     // price = parseInt(price);
     // if (isNaN(price)) return "";
@@ -254,7 +254,7 @@ const Spotlights = ({
           <h2 className="text-2xl font-bold text-gray-800 sm:text-3xl md:text-4xl">
             Builders Projects
           </h2>
-          <p className="text-gray-500">Go from browsing to buying</p>
+          <p className="text-gray-500">Your dream property is just a few clicks away</p>
         </div>
 
         <div className="flex items-center justify-between w-full gap-2 md:w-auto">

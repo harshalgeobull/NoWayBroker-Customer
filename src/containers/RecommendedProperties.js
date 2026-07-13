@@ -299,7 +299,7 @@ const RecommendedProperties = ({
               <h2 className="mb-2 text-xl font-bold tracking-wide text-gray-800 sm:text-2xl lg:text-3xl">
                 Featured Properties
               </h2>
-              <p className="text-sm text-gray-500 sm:text-base">Go from browsing to buying</p>
+              <p className="text-sm text-gray-500 sm:text-base">Your dream property is just a few clicks away</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 mt-2 lg:mt-0">
