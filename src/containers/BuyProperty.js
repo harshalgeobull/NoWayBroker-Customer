@@ -421,7 +421,30 @@ const BuyProperty = ({
                                                     {/* <span className="absolute px-2 py-1 text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm">
                           {property.days_since_created} days on NoWayBroker
                         </span> */}
+                                                    {/* Admin Approval Badge */}
+                                                    {/* {property.admin_approval === "Approved" && (
+                                                        <div className="absolute top-2 left-2 z-20">
+                                                            <span className="px-3 py-1 text-[10px] sm:text-xs font-semibold text-white bg-green-600 rounded-full shadow">
+                                                                Admin Approval
+                                                            </span>
+                                                        </div>
+                                                    )} */}
+                                                    {/* Admin Approval Badge */}
+                                                    {property.admin_approval === "Approved" && (
+                                                        <div className="absolute top-2 left-2 z-20">
+                                                            <div className="flex items-center bg-[#35A853] text-white rounded-md shadow-md overflow-hidden">
+                                                                {/* Tick Icon */}
+                                                                <div className="flex items-center justify-center px-2 bg-[#2D9448]">
+                                                                    ✓
+                                                                </div>
 
+                                                                {/* Text */}
+                                                                <div className="px-2 py-1 text-[10px] sm:text-xs font-semibold">
+                                                                    Admin Approval
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                     {/* Virtual Tour & Favorite Button */}
                                                     <div className="absolute flex items-center space-x-2 top-2 right-2">
                                                         {property.virtual_tour_availability === "Yes" && (
@@ -430,6 +453,7 @@ const BuyProperty = ({
                                                                 Virtual Tour
                                                             </span>
                                                         )}
+
                                                         <button
                                                             className="p-2 rounded-full shadow bg-gray-800/60 backdrop-blur-sm"
                                                             onClick={() => {
@@ -437,6 +461,7 @@ const BuyProperty = ({
                                                                     setIsLoginModalOpen(true);
                                                                     return;
                                                                 }
+
                                                                 if (property.is_favorite) {
                                                                     removeFromFavorites(property.favorite_id);
                                                                 } else {

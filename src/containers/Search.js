@@ -203,7 +203,7 @@ const Search = () => {
         }}
       ></div>
 
-      <div className="relative w-11/12 max-w-lg p-2 bg-transparent rounded-3xl sm:p-6 sm:max-w-5xl">
+      <div className="relative w-full max-w-6xl p-2 bg-transparent rounded-3xl mx-auto sm:p-6">
         {/* Heading Section */}
         <div className="mb-6 text-center sm:mb-11">
           <h1 className="text-2xl font-semibold tracking-widest text-white sm:text-2xl lg:text-3xl">
@@ -215,7 +215,7 @@ const Search = () => {
 
         {/* Search Form */}
         {/* Row 1 — Property Tabs & Search Form */}
-        <div className="flex flex-col bg-white rounded-2xl shadow-lg w-[120%] -ml-[10%]">
+        <div className="flex flex-col w-full bg-white rounded-2xl shadow-lg">
 
           {/* Top Tabs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-16 text-gray-700 font-semibold tracking-wider border-b border-gray-100 p-3">
@@ -252,30 +252,36 @@ const Search = () => {
           </div>
 
           {/* Bottom Search Inputs (Fixed: Removed duplicate background/shadows) */}
-          <div className="flex flex-col sm:flex-row items-center p-3 gap-2 sm:gap-4">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center p-3 gap-3 lg:gap-2">
 
-            {/* Search Field */}
-            <div className="relative flex items-center w-full flex-1 p-2">
-              <button className="p-1 my-text rounded-full focus:outline-none">
-                <FiSearch size={22} />
-              </button>
-              <input
-                ref={inputRef}
-                type="text"
-                id="search"
-                placeholder={placeholderTexts[placeholderIndex]}
-                className="w-full px-2 ml-2 text-sm text-gray-600 bg-transparent outline-none border-none sm:text-base"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            {/* Search Field + Dropdowns wrapper: stacks on mobile/tablet, row on desktop */}
+            <div className="flex flex-col md:flex-row items-stretch md:items-center w-full flex-1 gap-2 md:gap-0 md:divide-x md:divide-gray-100">
 
-
+              {/* Search Field */}
+              <div className="relative flex items-center w-full px-2 py-2 md:py-1 md:pr-3">
+                <button
+                  type="button"
+                  className="p-1 my-text rounded-full focus:outline-none shrink-0"
+                >
+                  <FiSearch size={22} />
+                </button>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  id="search"
+                  placeholder={placeholderTexts[placeholderIndex]}
+                  className="w-full min-w-0 px-2 ml-2 text-sm text-gray-600 bg-transparent outline-none border-none sm:text-base"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
 
               {/* City Dropdown */}
-              <div className="flex items-center sm:w-[330px] px-3 py-2">              <MdOutlineAddLocation className="my-text shrink-0" size={22} />
+              <div className="flex items-center w-full md:w-[220px] lg:w-[230px] px-2 py-2 md:px-3">
+                <MdOutlineAddLocation className="my-text shrink-0" size={22} />
                 <select
                   id="city"
-                  className="w-full ml-2 text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer"
+                  className="w-full min-w-0 ml-2 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer"
                   value={searchCity}
                   onChange={handleCityChange}
                 >
@@ -323,12 +329,12 @@ const Search = () => {
 
 
               {/* Type Dropdown */}
-              <div className="flex items-center min-w-[180px] px-2 py-2">
+              <div className="flex items-center w-full md:w-[190px] lg:w-[200px] px-2 py-2 md:px-3">
                 <RiHomeLine className="my-text shrink-0" size={22} />
 
                 <select
                   id="type"
-                  className="flex-1 ml-2 text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer"
+                  className="w-full min-w-0 ml-2 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer truncate"
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                 >
@@ -338,10 +344,11 @@ const Search = () => {
                 </select>
               </div>
               {/* Near Me Button */}
-              <div className="p-2 relative flex items-center justify-center group shrink-0 ml-1">
+              <div className="flex items-center justify-center md:justify-start p-2 relative group shrink-0">
                 <button
                   onClick={handleNearMeSearch}
                   disabled={isLoadingLocation}
+                  type="button"
                   className={`flex items-center justify-center p-2 transition rounded-full focus:outline-none ${isLoadingLocation
                     ? "bg-gray-100 text-gray-400 animate-pulse"
                     : "bg-rose-50 my-text hover:bg-rose-100"
@@ -363,11 +370,11 @@ const Search = () => {
 
             {/* Search Button */}
             <button
-              className="flex items-center justify-center w-full gap-2 px-6 py-2.5 text-white transition-all duration-300 my-bg rounded-lg sm:w-auto hover:opacity-90 font-medium shrink-0"
+              className="flex items-center justify-center w-full lg:w-auto gap-2 px-6 py-2.5 text-white transition-all duration-300 my-bg rounded-lg hover:opacity-90 font-medium shrink-0"
               onClick={handleSearch}
             >
               <FiSearch size={20} />
-              <span className="hidden sm:inline">Search</span>
+              <span className="inline">Search</span>
             </button>
           </div>
         </div>
