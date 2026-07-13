@@ -7,27 +7,27 @@ import SecurityIcon from "@mui/icons-material/Security";
 
 const features = [
     {
-        icon: <PercentIcon sx={{ fontSize: 34 }} />,
+        icon: <PercentIcon sx={{ fontSize: 28 }} />,
         title: "Zero Brokerage",
         subtitle: "No hidden charges",
     },
     {
-        icon: <VerifiedUserIcon sx={{ fontSize: 34 }} />,
+        icon: <VerifiedUserIcon sx={{ fontSize: 28 }} />,
         title: "Verified Owners",
         subtitle: "100% verified listings",
     },
     {
-        icon: <AutoAwesomeIcon sx={{ fontSize: 34 }} />,
+        icon: <AutoAwesomeIcon sx={{ fontSize: 28 }} />,
         title: "AI Property Match",
         subtitle: "Smart recommendation",
     },
     {
-        icon: <VideocamIcon sx={{ fontSize: 34 }} />,
+        icon: <VideocamIcon sx={{ fontSize: 28 }} />,
         title: "Virtual Tour",
         subtitle: "360° property view",
     },
     {
-        icon: <SecurityIcon sx={{ fontSize: 34 }} />,
+        icon: <SecurityIcon sx={{ fontSize: 28 }} />,
         title: "Secure & Safe",
         subtitle: "Fraud detection",
     },
@@ -35,41 +35,38 @@ const features = [
 
 const FeaturesSection = () => {
     return (
-        <section className="w-full mt-10 mb-10">
-            <div className="w-full max-w-[97%] mx-auto">
+        <section className="w-full mt-2 mb-2">
+            <div className="max-w-[94%] xl:max-w-[93%] mx-auto">
 
-                <div className="w-full overflow-hidden bg-white border border-gray-200 shadow-xl rounded-3xl">
+                <div className="overflow-hidden bg-white border border-gray-200 rounded-3xl shadow-sm">
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
 
                         {features.map((item, index) => (
                             <div
                                 key={index}
                                 className={`
-                  flex items-center gap-5
-                 px-8 py-10 lg:py-12
-                  transition-all duration-300
-                  hover:bg-gray-50
+                        flex items-center gap-4
+                        px-5 py-6
+                        transition-all duration-300
+                        hover:bg-[#FAFAFA]
 
-                  border-b border-gray-200
-                  xl:border-b-0
-
-                  ${index !== features.length - 1
-                                        ? "xl:border-r border-gray-200"
-                                        : ""
-                                    }
-                `}
+                        border-b lg:border-b-0 border-gray-200
+                        ${index !== features.length - 1 ? "lg:border-r" : ""}
+                    `}
                             >
-                                <div className="flex items-center justify-center flex-shrink-0 w-20 h-20 rounded-full bg-green-50 text-green-600">
+                                {/* Icon */}
+                                <div className="flex items-center justify-center flex-shrink-0 w-14 h-14 rounded-full bg-[#ECFDF5] text-[#16A34A]">
                                     {item.icon}
                                 </div>
 
+                                {/* Text */}
                                 <div>
-                                    <h3 className="text-xl font-semibold leading-6 text-gray-900">
+                                    <h3 className="text-[17px] font-semibold text-[#1E293B] leading-5">
                                         {item.title}
                                     </h3>
 
-                                    <p className="mt-2 text-sm text-gray-500">
+                                    <p className="mt-1 text-[12px] text-[#6B7280] leading-5">
                                         {item.subtitle}
                                     </p>
                                 </div>

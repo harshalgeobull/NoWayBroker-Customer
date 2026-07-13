@@ -65,8 +65,8 @@ const Cities = React.memo(({ data }) => {
   };
 
   return (
-    <section className="px-4 sm:px-6 lg:px-10 py-6 sm:py-8 pt-8 sm:pt-10 mx-auto bg-white lg:max-w-full">
-      <div className="p-4 sm:p-6 rounded-2xl bg-slate-100">
+    <section className="px-4 sm:px-6 lg:px-10 pt-2 pb-4 sm:pt-3 sm:pb-5 mx-auto bg-white lg:max-w-full">
+      <div className="p-4 sm:p-5 rounded-2xl bg-slate-100">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800 lg:text-3xl">
           Explore Real Estate in Popular Indian Cities
         </h1>
