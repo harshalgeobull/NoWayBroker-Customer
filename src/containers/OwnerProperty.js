@@ -448,6 +448,23 @@ const OwnerProperty = ({
                           {property.days_since_created} days on NoWayBroker
                         </span> */}
 
+
+                          {/* Admin Approval Badge */}
+                          {property.admin_approval === "Approved" && (
+                            <div className="absolute top-2 left-2 z-20">
+                              <div className="flex items-center bg-[#35A853] text-white rounded-md shadow-md overflow-hidden">
+                                {/* Tick Icon */}
+                                <div className="flex items-center justify-center px-2 bg-[#2D9448]">
+                                  ✓
+                                </div>
+
+                                {/* Text */}
+                                <div className="px-2 py-1 text-[10px] sm:text-xs font-semibold">
+                                  Admin Approval
+                                </div>
+                              </div>
+                            </div>
+                          )}
                           {/* Virtual Tour & Favorite Button */}
                           <div className="absolute flex items-center space-x-2 top-2 right-2">
                             {property.virtual_tour_availability === "Yes" && (
