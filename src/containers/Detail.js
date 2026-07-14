@@ -1249,8 +1249,8 @@ const Detail = ({ propertyData }) => {
             >
               <FiHeart
                 className={`text-2xl ${propertyDetails.is_favorite
-                    ? "text-red-600 fill-red-600"
-                    : "text-gray-600"
+                  ? "text-red-600 fill-red-600"
+                  : "text-gray-600"
                   }`}
               />
             </div>
@@ -1393,8 +1393,8 @@ const Detail = ({ propertyData }) => {
               <button
                 onClick={() => scrollToSection(overviewRef, "overview")}
                 className={`relative font-medium pb-1 ${activeSection === "overview"
-                    ? "text-red-600"
-                    : "hover:text-[#8A2432]"
+                  ? "text-red-600"
+                  : "hover:text-[#8A2432]"
                   }`}
               >
                 Overview
@@ -1408,8 +1408,8 @@ const Detail = ({ propertyData }) => {
                   scrollToSection(statusTimelineRef, "statusTimeline")
                 }
                 className={`relative font-medium pb-1 ${activeSection === "statusTimeline"
-                    ? "text-red-600"
-                    : "hover:text-[#8A2432]"
+                  ? "text-red-600"
+                  : "hover:text-[#8A2432]"
                   }`}
               >
                 Status & Timeline
@@ -1420,8 +1420,8 @@ const Detail = ({ propertyData }) => {
               <button
                 onClick={() => scrollToSection(moreDetailsRef, "moreDetails")}
                 className={`relative font-medium pb-1 ${activeSection === "moreDetails"
-                    ? "text-red-600"
-                    : "hover:text-[#8A2432]"
+                  ? "text-red-600"
+                  : "hover:text-[#8A2432]"
                   }`}
               >
                 More Details
@@ -1433,8 +1433,8 @@ const Detail = ({ propertyData }) => {
               <button
                 onClick={() => scrollToSection(amenitiesRef, "amenities")}
                 className={`relative font-medium pb-1 ${activeSection === "amenities"
-                    ? "text-red-600"
-                    : "hover:text-[#8A2432]"
+                  ? "text-red-600"
+                  : "hover:text-[#8A2432]"
                   }`}
               >
                 Amenities
@@ -1446,8 +1446,8 @@ const Detail = ({ propertyData }) => {
               <button
                 onClick={() => scrollToSection(aboutRef, "about")}
                 className={`relative font-medium pb-1 ${activeSection === "about"
-                    ? "text-red-600"
-                    : "hover:text-[#8A2432]"
+                  ? "text-red-600"
+                  : "hover:text-[#8A2432]"
                   }`}
               >
                 About Property
@@ -1459,8 +1459,8 @@ const Detail = ({ propertyData }) => {
               <button
                 onClick={() => scrollToSection(locationRef, "location")}
                 className={`relative font-medium pb-1 ${activeSection === "location"
-                    ? "text-red-600"
-                    : "hover:text-[#8A2432]"
+                  ? "text-red-600"
+                  : "hover:text-[#8A2432]"
                   }`}
               >
                 Location
@@ -1710,8 +1710,8 @@ const Detail = ({ propertyData }) => {
               {enquiryStatus && (
                 <div
                   className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
-                      ? "text-green-600"
-                      : "text-red-600"
+                    ? "text-green-600"
+                    : "text-red-600"
                     }`}
                 >
                   {enquiryStatus.message}
@@ -2066,7 +2066,7 @@ const Detail = ({ propertyData }) => {
                           {property.property_name || "N/A"}
                         </h3>
                         <span
-                          className="flex-shrink-0 m-0 text-xs sm:text-sm font-medium leading-6 text-black whitespace-nowrap"
+                          className="flex-shrink-0 m-0 text-xs font-medium leading-6 text-black sm:text-sm whitespace-nowrap"
                           title={property.furnished_type}
                         >
                           {property.furnished_type || "Un-Furnished"}

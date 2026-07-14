@@ -24,9 +24,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -157,44 +157,44 @@ const MyFavourite = () => {
   };
 
   const formatPrice = (price) => {
-  if (!price) return "";
+    if (!price) return "";
 
-  price = Number(price);
+    price = Number(price);
 
-  const formatNumber = (num) => {
-    return num.toFixed(2).replace(/\.?0+$/, "");
+    const formatNumber = (num) => {
+      return num.toFixed(2).replace(/\.?0+$/, "");
+    };
+
+    if (price >= 10000000) {
+      return `₹ ${formatNumber(price / 10000000)} Cr`;
+    } else if (price >= 100000) {
+      return `₹ ${formatNumber(price / 100000)} L`;
+    } else if (price >= 1000) {
+      return `₹ ${formatNumber(price / 1000)} K`;
+    } else {
+      return `₹ ${price}`;
+    }
   };
-
-  if (price >= 10000000) {
-    return `₹ ${formatNumber(price / 10000000)} Cr`;
-  } else if (price >= 100000) {
-    return `₹ ${formatNumber(price / 100000)} L`;
-  } else if (price >= 1000) {
-    return `₹ ${formatNumber(price / 1000)} K`;
-  } else {
-    return `₹ ${price}`;
-  }
-};
 
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
-if (typeof price === "string" && price.includes("-")) {
-    const parts = price.split("-").map((p) => p.trim());
     if (typeof price === "string" && price.includes("-")) {
       const parts = price.split("-").map((p) => p.trim());
-      return (
-        <>
-          {parts.map((p, idx) => (
-            <span key={idx} className="inline-flex items-center">
-              <FaRupeeSign className="inline-block mr-1" />
-              {formatPrice(p).replace("₹ ", "")}
-              {idx === 0 && " - "}
-            </span>
-          ))}
-        </>
-      );
+      if (typeof price === "string" && price.includes("-")) {
+        const parts = price.split("-").map((p) => p.trim());
+        return (
+          <>
+            {parts.map((p, idx) => (
+              <span key={idx} className="inline-flex items-center">
+                <FaRupeeSign className="inline-block mr-1" />
+                {formatPrice(p).replace("₹ ", "")}
+                {idx === 0 && " - "}
+              </span>
+            ))}
+          </>
+        );
+      }
     }
-  }
 
     // price = parseInt(price);
     // if (isNaN(price)) return "";
@@ -225,11 +225,10 @@ if (typeof price === "string" && price.includes("-")) {
       {/* Tabs */}
       <div className="flex gap-4 mb-6 border-b">
         <button
-          className={`px-4 py-2 font-semibold border-b-2 ${
-            activeTab === "property"
-              ? "border-rose-600 my-text"
-              : "border-transparent text-gray-500"
-          }`}
+          className={`px-4 py-2 font-semibold border-b-2 ${activeTab === "property"
+            ? "border-rose-600 my-text"
+            : "border-transparent text-gray-500"
+            }`}
           onClick={() => {
             setActiveTab("property");
             setCurrentPage(1);
@@ -238,11 +237,10 @@ if (typeof price === "string" && price.includes("-")) {
           Favorite Property
         </button>
         <button
-          className={`px-4 py-2 font-semibold border-b-2 ${
-            activeTab === "project"
-              ? "border-rose-600 my-text"
-              : "border-transparent text-gray-500"
-          }`}
+          className={`px-4 py-2 font-semibold border-b-2 ${activeTab === "project"
+            ? "border-rose-600 my-text"
+            : "border-transparent text-gray-500"
+            }`}
           onClick={() => {
             setActiveTab("project");
             setCurrentPage(1);
@@ -405,13 +403,12 @@ if (typeof price === "string" && price.includes("-")) {
                     {/* FOR BUY / FOR RENT tag */}
                     <div className="absolute bottom-0 left-0">
                       <span
-                        className={`text-white text-xs px-3 py-1 rounded-se-lg ${
-                          property.property_category_type === "Buy"
-                            ? "bg-green-500"
-                            : property.property_category_type === "Rent"
-                              ? "bg-blue-500"
-                              : "bg-gray-400"
-                        }`}
+                        className={`text-white text-xs px-3 py-1 rounded-se-lg ${property.property_category_type === "Buy"
+                          ? "bg-green-500"
+                          : property.property_category_type === "Rent"
+                            ? "bg-blue-500"
+                            : "bg-gray-400"
+                          }`}
                       >
                         {property.property_category_type === "Buy"
                           ? "FOR BUY"
@@ -439,7 +436,7 @@ if (typeof price === "string" && price.includes("-")) {
                         {property.property_name}
                       </h3>
                       {property.furnished_type && (
-                        <span className="flex-shrink-0 text-sm font-medium leading-6 text-red-500 whitespace-nowrap">
+                        <span className="flex-shrink-0 m-0 text-xs font-medium leading-6 text-black sm:text-sm whitespace-nowrap">
                           {property.furnished_type}
                         </span>
                       )}
@@ -462,27 +459,26 @@ if (typeof price === "string" && price.includes("-")) {
                       <span className="flex items-center text-xl font-bold text-black">
                         <FaRupeeSign className="mr-1 text-base" />
                         {property.property_category_type === "Rent"
-                          ? `${formatPrice(property.rent).replace("₹ ", "")}${
-                              property.rent_duration &&
-                              property.rent_duration !== "N/A"
-                                ? ` / ${property.rent_duration}`
-                                : ""
-                            }`
+                          ? `${formatPrice(property.rent).replace("₹ ", "")}${property.rent_duration &&
+                            property.rent_duration !== "N/A"
+                            ? ` / ${property.rent_duration}`
+                            : ""
+                          }`
                           : formatPrice(property.property_price).replace(
-                              "₹ ",
-                              "",
-                            )}
+                            "₹ ",
+                            "",
+                          )}
                       </span>
 
                       {(property.possession_status === "Ready To Move" ||
                         property.construction_status === "Ready To Move") && (
-                        <div className="flex items-center gap-2 px-3 py-1 bg-green-100 border border-green-200 rounded-full">
-                          <MdApartment className="text-base text-green-700" />
-                          <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
-                            Ready to Move
-                          </span>
-                        </div>
-                      )}
+                          <div className="flex items-center gap-2 px-3 py-1 bg-green-100 border border-green-200 rounded-full">
+                            <MdApartment className="text-base text-green-700" />
+                            <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                              Ready to Move
+                            </span>
+                          </div>
+                        )}
                     </div>
 
                     {/* Row 4: Features Grid */}
@@ -784,9 +780,9 @@ if (typeof price === "string" && price.includes("-")) {
                         ? project.congfigurations.includes("BHK")
                           ? project.congfigurations
                           : project.congfigurations
-                              .split(",")
-                              .map((c) => `${c.trim()} BHK`)
-                              .join(", ")
+                            .split(",")
+                            .map((c) => `${c.trim()} BHK`)
+                            .join(", ")
                         : ""}{" "}
                       {project.project_type} for Sale in{" "}
                       {project.address_area || ""}
@@ -797,26 +793,26 @@ if (typeof price === "string" && price.includes("-")) {
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-xl font-bold text-black">
                         {project.project_properties &&
-                        project.project_properties.length > 0
+                          project.project_properties.length > 0
                           ? (() => {
-                              const prices = project.project_properties.map(
-                                (p) => Number(p.price),
-                              );
-                              const minPrice = Math.min(...prices);
-                              const maxPrice = Math.max(...prices);
-                              return minPrice === maxPrice ? (
-                                formatAverageProjectPrice(minPrice)
-                              ) : (
-                                <>
-                                  {formatAverageProjectPrice(minPrice)}
-                                  <span className="mx-1">-</span>
-                                  {formatAverageProjectPrice(maxPrice)}
-                                </>
-                              );
-                            })()
+                            const prices = project.project_properties.map(
+                              (p) => Number(p.price),
+                            );
+                            const minPrice = Math.min(...prices);
+                            const maxPrice = Math.max(...prices);
+                            return minPrice === maxPrice ? (
+                              formatAverageProjectPrice(minPrice)
+                            ) : (
+                              <>
+                                {formatAverageProjectPrice(minPrice)}
+                                <span className="mx-1">-</span>
+                                {formatAverageProjectPrice(maxPrice)}
+                              </>
+                            );
+                          })()
                           : formatAverageProjectPrice(
-                              project.average_project_price,
-                            )}
+                            project.average_project_price,
+                          )}
                       </span>
                       {project.possession_status === "Ready To Move" && (
                         <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
@@ -878,7 +874,7 @@ if (typeof price === "string" && price.includes("-")) {
                     </div>
 
                     <hr className="my-1 border-gray-100" />
-        {/* Row 5 : Posted By | Days | | Share */}
+                    {/* Row 5 : Posted By | Days | | Share */}
                     <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
                       {/* Left */}
                       <div className="flex items-center flex-wrap min-w-0">
@@ -1072,11 +1068,10 @@ if (typeof price === "string" && price.includes("-")) {
               <button
                 key={index + 1}
                 onClick={() => setCurrentPage(index + 1)}
-                className={`w-10 h-10 flex items-center justify-center rounded-full border transition-all duration-200 ${
-                  currentPage === index + 1
-                    ? "border-rose-600 my-text font-semibold"
-                    : "border-gray-400 text-gray-600"
-                }`}
+                className={`w-10 h-10 flex items-center justify-center rounded-full border transition-all duration-200 ${currentPage === index + 1
+                  ? "border-rose-600 my-text font-semibold"
+                  : "border-gray-400 text-gray-600"
+                  }`}
               >
                 {index + 1}
               </button>

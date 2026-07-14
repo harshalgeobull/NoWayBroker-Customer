@@ -547,7 +547,7 @@ const AgentDetail = () => {
                             {property.property_name}
                           </h3>
                           {property.furnished_type && (
-                            <span className="flex-shrink-0 text-sm font-medium leading-6 text-red-500 whitespace-nowrap">
+                            <span className="flex-shrink-0 m-0 text-xs font-medium leading-6 text-black sm:text-sm whitespace-nowrap">
                               {property.furnished_type}
                             </span>
                           )}

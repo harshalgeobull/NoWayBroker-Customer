@@ -3321,7 +3321,7 @@ const AdvisorDashboard = () => {
                                 </h3>
 
                                 <span
-                                  className="flex-shrink-0 m-0 text-xs sm:text-sm font-medium leading-6 text-[#E85B6B] md:text-base whitespace-nowrap"
+                                  className="flex-shrink-0 m-0 text-xs font-medium leading-6 text-black sm:text-sm whitespace-nowrap"
                                   title={property.furnished_type}
                                 >
                                   {property.furnished_type || "Un-Furnished"}
