@@ -457,12 +457,6 @@ const ManyMore = ({
                                 <span className="text-[11px] font-semibold leading-none">
                                   Verified
                                 </span>
-
-                                {/* Info Icon */}
-                                <span className="ml-2 w-4 h-4 flex items-center justify-center rounded-full bg-white text-[#2DBE3F] text-[10px] font-bold">
-                                  i
-                                </span>
-
                               </div>
                             </div>
                           )}
@@ -480,15 +474,10 @@ const ManyMore = ({
                                 <span className="text-[11px] font-semibold leading-none">
                                   Verified
                                 </span>
-
-                                {/* Info Icon */}
-                                <span className="ml-2 w-4 h-4 flex items-center justify-center rounded-full bg-white text-[#2DBE3F] text-[10px] font-bold">
-                                  i
-                                </span>
-
                               </div>
                             </div>
                           )}
+
 
 
                           {/* Virtual Tour & Favorite Button */}

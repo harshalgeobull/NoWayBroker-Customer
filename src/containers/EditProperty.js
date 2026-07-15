@@ -862,11 +862,6 @@ const EditProperty = () => {
                     ? "Verified"
                     : propertyData.admin_approval || "Pending"}
                 </span>
-
-                {/* Info Icon */}
-                <span className="ml-2 flex items-center justify-center w-4 h-4 rounded-full border border-white text-[10px] font-bold">
-                  i
-                </span>
               </div>
             </div>
 
