@@ -777,19 +777,19 @@ const EditProperty = () => {
 
             {(propertyData.category_price_type === "Rent" ||
               propertyData.category_price_type === "PG") && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium">
-                  Safety Deposit
-                </label>
-                <input
-                  type="text"
-                  name="safety_deposit"
-                  value={propertyData.safety_deposit || ""}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full p-2 border rounded-md"
-                />
-              </div>
-            )}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium">
+                    Safety Deposit
+                  </label>
+                  <input
+                    type="text"
+                    name="safety_deposit"
+                    value={propertyData.safety_deposit || ""}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full p-2 border rounded-md"
+                  />
+                </div>
+              )}
 
             <div className="mb-4">
               <label className="block text-sm font-medium">Description</label>
@@ -848,16 +848,26 @@ const EditProperty = () => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium">
+              <label className="block text-sm font-medium mb-2">
                 Admin Approval
               </label>
-              <input
-                type="text"
-                name="admin_approval"
-                value={propertyData.admin_approval || ""}
-                onChange={handleInputChange}
-                className="mt-1 block w-full p-2 border rounded-md"
-              />
+
+              <div className="inline-flex items-center bg-[#2DBE3F] text-white rounded-md px-3 py-2 shadow-sm">
+                {/* Tick */}
+                <span className="mr-2 text-sm font-bold">✓</span>
+
+                {/* Text */}
+                <span className="text-sm font-semibold">
+                  {propertyData.admin_approval === "Approved"
+                    ? "Verified"
+                    : propertyData.admin_approval || "Pending"}
+                </span>
+
+                {/* Info Icon */}
+                <span className="ml-2 flex items-center justify-center w-4 h-4 rounded-full border border-white text-[10px] font-bold">
+                  i
+                </span>
+              </div>
             </div>
 
             <div className="mb-4">

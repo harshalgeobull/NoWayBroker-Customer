@@ -421,30 +421,31 @@ const BuyProperty = ({
                                                     {/* <span className="absolute px-2 py-1 text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm">
                           {property.days_since_created} days on NoWayBroker
                         </span> */}
-                                                    {/* Admin Approval Badge */}
-                                                    {/* {property.admin_approval === "Approved" && (
-                                                        <div className="absolute top-2 left-2 z-20">
-                                                            <span className="px-3 py-1 text-[10px] sm:text-xs font-semibold text-white bg-green-600 rounded-full shadow">
-                                                                Admin Approval
-                                                            </span>
-                                                        </div>
-                                                    )} */}
+
                                                     {/* Admin Approval Badge */}
                                                     {property.admin_approval === "Approved" && (
                                                         <div className="absolute top-2 left-2 z-20">
-                                                            <div className="flex items-center bg-[#35A853] text-white rounded-md shadow-md overflow-hidden">
-                                                                {/* Tick Icon */}
-                                                                <div className="flex items-center justify-center px-2 bg-[#2D9448]">
-                                                                    ✓
-                                                                </div>
+                                                            <div className="flex items-center bg-[#2DBE3F] text-white rounded-sm shadow-md px-2 py-1">
 
-                                                                {/* Text */}
-                                                                <div className="px-2 py-1 text-[10px] sm:text-xs font-semibold">
-                                                                    Admin Approval
-                                                                </div>
+                                                                {/* Tick Icon */}
+                                                                <span className="text-white text-xs font-bold mr-2">
+                                                                    ✓
+                                                                </span>
+
+                                                                {/* Verified Text */}
+                                                                <span className="text-[11px] font-semibold leading-none">
+                                                                    Verified
+                                                                </span>
+
+                                                                {/* Info Icon */}
+                                                                <span className="ml-2 w-4 h-4 flex items-center justify-center rounded-full bg-white text-[#2DBE3F] text-[10px] font-bold">
+                                                                    i
+                                                                </span>
+
                                                             </div>
                                                         </div>
                                                     )}
+
                                                     {/* Virtual Tour & Favorite Button */}
                                                     <div className="absolute flex items-center space-x-2 top-2 right-2">
                                                         {property.virtual_tour_availability === "Yes" && (
