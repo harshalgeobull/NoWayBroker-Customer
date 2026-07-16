@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import {
   HouseSimple,
@@ -7,7 +7,6 @@ import {
   User,
   CloudArrowUp,
 } from "@phosphor-icons/react";
-import { IoCloudUploadOutline } from "react-icons/io5"; // Updated icon
 import axios from "axios";
 
 const Profile = () => {
@@ -21,7 +20,7 @@ const Profile = () => {
   const [virtualTourCount, setVirtualTourCount] = useState(0);
   const accessToken = sessionStorage.getItem("accessToken");
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/cust_api/get_profile`,
@@ -51,14 +50,18 @@ const Profile = () => {
     } catch (error) {
       console.error("API Error:", error);
     }
-  };
+  }, [accessToken]);
 
+  // useEffect(() => {
+  //   if (accessToken) {
+  //     fetchProfile();
+  //   }
+  // }, [accessToken, profileImage]);
   useEffect(() => {
     if (accessToken) {
       fetchProfile();
     }
-  }, [accessToken, profileImage]);
-
+  }, [accessToken, fetchProfile]);
   const displayValue = (value) =>
     value !== null && value !== "" ? value : "N/A";
 
