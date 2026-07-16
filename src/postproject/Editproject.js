@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { IoIosInformationCircle } from "react-icons/io";
 import { ToWords } from "to-words";
 import { MdOutlineDriveFolderUpload } from "react-icons/md";
+import { Plus } from "lucide-react"; // ADDED — used by the "Add Property" button copied from AddNewProject.js
 import axios from "axios";
 import { Trash } from "@phosphor-icons/react";
 import { FaFilePdf } from "react-icons/fa";
@@ -107,6 +108,62 @@ const Editproject = () => {
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const { _id } = useParams();
   const [isModified, setIsModified] = useState(false);
+
+  // ADDED FROM AddNewProject.js — required for multi-property support
+  const emptyProjectProperty = {
+    project_type: "",
+    sub_project_type: "",
+    retail_location: "",
+    sub_sub_project_type: "",
+    price: "",
+    bhk_type: "",
+    carpet_area: "",
+    carpet_area_unit: "",
+    area: "",
+    area_in: "",
+    bathroom: "",
+    commercial_washroom: "",
+    total_floor: "",
+    project_floor: "",
+    no_of_cabines: "",
+    no_of_meeting_Rooms: "",
+    no_of_conference_room: "",
+    total_number_of_rooms: "",
+    facing: "",
+    property_dimensions_length: "",
+    property_dimensions_breadth: "",
+    age_of_property: "",
+    furnished_type: "",
+    balcony: "",
+    pantry_option: "",
+    central_AC: "",
+    reception_area: "",
+    personal_washroom: "",
+  };
+
+  const [projectProperties, setProjectProperties] = useState([
+    { ...emptyProjectProperty },
+  ]);
+  const handleProjectPropertyChange = (index, key, value) => {
+    setProjectProperties((prev) => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        [key]: value,
+      };
+      return updated;
+    });
+  };
+  const handleDeleteProjectProperty = (index) => {
+    if (projectProperties.length === 1) {
+      toast.error("At least one project property is required.");
+      return;
+    }
+
+    setProjectProperties((prev) =>
+      prev.filter((_, i) => i !== index)
+    );
+  };
 
   const options = [
     { value: "Pooja Room", label: "Pooja Room" },
@@ -251,6 +308,82 @@ Make it engaging, attractive, and human-like.
       setAllStates([]);
     }
   }, [country]);
+
+  // ADDED FROM AddNewProject.js — keeps "Price Range" in sync with all properties
+  useEffect(() => {
+    const prices = projectProperties
+      .map((property) => Number(property.price))
+      .filter((price) => !isNaN(price) && price > 0);
+
+    if (prices.length === 0) {
+      setAveragePrice("");
+      return;
+    }
+
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+
+    setAveragePrice(
+      minPrice === maxPrice
+        ? `${minPrice}`
+        : `${minPrice}-${maxPrice}`
+    );
+  }, [projectProperties]);
+
+  // ADDED FROM AddNewProject.js — keeps "Configurations" in sync with all properties
+  useEffect(() => {
+    const bhkOrder = [
+      "Studio/Single Room",
+      "1 BHK",
+      "1.5 BHK",
+      "2 BHK",
+      "2.5 BHK",
+      "3 BHK",
+      "3.5 BHK",
+      "4 BHK",
+      "5 BHK",
+      "6 BHK",
+      "6+ BHK",
+    ];
+
+    const selected = [
+      ...new Set(
+        projectProperties
+          .map((property) => property.bhk_type)
+          .filter(Boolean)
+      ),
+    ];
+
+    const sorted = bhkOrder.filter((bhk) => selected.includes(bhk));
+
+    const formatted = sorted.map((bhk) => {
+      if (bhk === "Studio/Single Room") return bhk;
+      return bhk.replace(" BHK", "");
+    });
+
+    if (formatted.length === 0) {
+      setConfigurations("");
+      return;
+    }
+
+    const hasStudio = formatted.includes("Studio/Single Room");
+    const onlyNumbers = formatted.filter((item) => item !== "Studio/Single Room");
+
+    let result = "";
+
+    if (hasStudio) {
+      result += "Studio/Single Room";
+      if (onlyNumbers.length) {
+        result += ", ";
+      }
+    }
+
+    if (onlyNumbers.length) {
+      result += `${onlyNumbers.join(", ")} BHK`;
+    }
+
+    setConfigurations(result);
+  }, [projectProperties]);
 
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
@@ -716,7 +849,7 @@ Make it engaging, attractive, and human-like.
 
         mark_as_featured:
           formData.mark_as_featured === true ||
-          formData.mark_as_featured === "Yes"
+            formData.mark_as_featured === "Yes"
             ? "Yes"
             : "No",
 
@@ -725,7 +858,14 @@ Make it engaging, attractive, and human-like.
         project_type: propertyType || "",
 
         // PRICE
-        average_project_price: formData.average_project_price || "",
+        // NOTE — was pulling from stale formData; now falls back to the
+        // live computed price range / primary property so it's never empty
+        // when properties have been added or edited.
+        average_project_price:
+          formData.average_project_price ||
+          averagePrice ||
+          projectProperties?.[0]?.price ||
+          "",
 
         all_inclusive_price: formData.all_inclusive_price || "",
 
@@ -754,18 +894,32 @@ Make it engaging, attractive, and human-like.
         longitude: longitude || "",
 
         // AREA
-        area: formData.area || "",
+        // *** FIX ***
+        // projectProperties[0] now takes priority over formData. formData's
+        // area / area_in / carpet_area / carpet_area_unit are populated once
+        // from the API on load (fetchProjectDetails) and NEVER updated again
+        // — only projectProperties gets updated when the user edits the
+        // dropdowns in "Project Details". So on submit the OLD/stale value
+        // from formData (e.g. "Sq Ft") was winning over the correct, current
+        // value (e.g. "sq.ft") picked in the UI, causing the backend's
+        // `{"area_in":["\"Sq Ft\" is not a valid choice."]}` 400 error.
+        area: projectProperties?.[0]?.area || formData.area || "",
 
-        area_in: formData.area_in || "",
+        area_in: projectProperties?.[0]?.area_in || formData.area_in || "",
 
-        carpet_area: formData.carpet_area || "",
+        carpet_area:
+          projectProperties?.[0]?.carpet_area || formData.carpet_area || "",
 
-        carpet_area_unit: formData.carpet_area_unit || "",
+        carpet_area_unit:
+          projectProperties?.[0]?.carpet_area_unit ||
+          formData.carpet_area_unit ||
+          "",
 
         total_project_size: totalProjectSize || "",
 
         // PROPERTY DETAILS
-        bhk_type: formData.bhk_type || "",
+        // *** FIX *** same stale-formData issue as area/area_in above.
+        bhk_type: projectProperties?.[0]?.bhk_type || formData.bhk_type || "",
 
         furnished_type: formData.furnished_type || "",
 
@@ -1223,6 +1377,64 @@ Make it engaging, attractive, and human-like.
 
       setImages(responseData?.project_images || []);
 
+      // ADDED — populate multi-property array (mirrors AddNewProject.js)
+      const rawProperties =
+        responseData?.project_properties ||
+        responseData?.properties ||
+        data?.project_properties ||
+        data?.properties ||
+        null;
+
+      if (Array.isArray(rawProperties) && rawProperties.length > 0) {
+        setProjectProperties(
+          rawProperties.map((p) => ({
+            ...emptyProjectProperty,
+            ...p,
+          }))
+        );
+      } else {
+        // FALLBACK: no separate properties array found in the API response.
+        // Build a single property entry from the flat project_details fields
+        // so existing single-property data still loads correctly.
+        setProjectProperties([
+          {
+            ...emptyProjectProperty,
+            project_type: data.project_type || "",
+            sub_project_type: data.sub_project_type || "",
+            retail_location: data.sub_sub_project_type || "",
+            sub_sub_project_type: data.sub_sub_project_type || "",
+            price: data.average_project_price || "",
+            bhk_type: data.bhk_type || "",
+            carpet_area: data.carpet_area || "",
+            carpet_area_unit: data.carpet_area_unit || "",
+            area: data.area || "",
+            area_in: data.area_in || "",
+            bathroom: data.bathroom || "",
+            commercial_washroom: data.washroom || "",
+            total_floor: data.total_floor || "",
+            project_floor: data.project_floor || "",
+            no_of_cabines: data.no_of_cabines || "",
+            no_of_meeting_Rooms: data.no_of_meeting_Rooms || "",
+            no_of_conference_room: data.no_of_conference_room || "",
+            total_number_of_rooms: data.total_beds || "",
+            facing: data.facing || "",
+            property_dimensions_length: data.property_dimensions_length || "",
+            property_dimensions_breadth: data.property_dimensions_breadth || "",
+            age_of_property: data.age_of_property || "",
+            furnished_type: data.furnished_type || "",
+            balcony: data.balcony || "",
+            pantry_option: data.pantry_option || "",
+            central_AC: data.central_AC || "",
+            reception_area: data.reception_area || "",
+            personal_washroom: "",
+          },
+        ]);
+        console.log(
+          "PROJECT PROPERTIES: no properties array key found — using flat project_details as single property. Raw response for reference:",
+          responseData
+        );
+      }
+
       console.log("PROJECT DETAILS:", data);
     } catch (error) {
       console.log("FETCH PROJECT ERROR:", error);
@@ -1369,31 +1581,53 @@ Make it engaging, attractive, and human-like.
     }
 
     if (activeStep === 2) {
-      if (!String(formData.average_project_price || "").trim()) {
+      // UPDATED — validate each entry in projectProperties instead of the
+      // old single formData fields, since Project Details is now a list.
+      if (
+        projectProperties.some(
+          (property) => !String(property.price || "").trim(),
+        )
+      ) {
         newErrors.price = "Price is required.";
       }
 
       if (
         buildingType !== "Commercial" &&
         propertyType !== "Plot/Land" &&
-        !formData.bhk_type
+        projectProperties.some((property) => !property.bhk_type)
       ) {
         newErrors.bhk_type = "BHK is required.";
       }
 
-      if (!String(formData.area || "").trim()) {
+      if (
+        projectProperties.some(
+          (property) => !String(property.area || "").trim(),
+        )
+      ) {
         newErrors.area = "Built-up area is required.";
       }
 
-      if (!String(formData.area_in || "").trim()) {
+      if (
+        projectProperties.some(
+          (property) => !String(property.area_in || "").trim(),
+        )
+      ) {
         newErrors.area_in = "Built-up area unit is required.";
       }
 
-      if (!String(formData.carpet_area || "").trim()) {
+      if (
+        projectProperties.some(
+          (property) => !String(property.carpet_area || "").trim(),
+        )
+      ) {
         newErrors.carpet_area = "Carpet area is required.";
       }
 
-      if (!String(formData.carpet_area_unit || "").trim()) {
+      if (
+        projectProperties.some(
+          (property) => !String(property.carpet_area_unit || "").trim(),
+        )
+      ) {
         newErrors.carpet_area_unit = "Carpet area unit is required.";
       }
     }
@@ -1449,13 +1683,12 @@ Make it engaging, attractive, and human-like.
             {steps.map((step, index) => (
               <button
                 key={index}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                  activeStep === index
-                    ? "bg-gray-200 my-text"
-                    : completedSteps.includes(index)
-                      ? "text-green-600"
-                      : "text-gray-600"
-                }`}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition ${activeStep === index
+                  ? "bg-gray-200 my-text"
+                  : completedSteps.includes(index)
+                    ? "text-green-600"
+                    : "text-gray-600"
+                  }`}
                 onClick={() => {
                   // Only allow clicking back to completed steps or current
                   if (completedSteps.includes(index) || index === activeStep) {
@@ -1503,11 +1736,10 @@ Make it engaging, attractive, and human-like.
                           project_name: alphaNumericOnly,
                         }));
                       }}
-                      className={`w-full p-3 rounded-lg outline-none focus:ring-2 focus:ring-rose-500 ${
-                        errors.projectName
-                          ? "border border-red-600"
-                          : "border border-gray-300"
-                      }`}
+                      className={`w-full p-3 rounded-lg outline-none focus:ring-2 focus:ring-rose-500 ${errors.projectName
+                        ? "border border-red-600"
+                        : "border border-gray-300"
+                        }`}
                     />
                     {errors.projectName && (
                       <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -1540,29 +1772,6 @@ Make it engaging, attractive, and human-like.
                       <IoIosInformationCircle className="text-yellow-500 ml-1 cursor-pointer text-lg" />
                     </label>
                   </div>
-                  {/* Featured Checkbox */}
-                  {/* <div className="flex items-center mb-4">
-                  <input
-                    type="checkbox"
-                    id="featured"
-                    className="mb-2 mr-2"
-                    checked={isFeatured}
-                    onChange={(e) => {
-                      if (e.target.checked && featureCount === 0) {
-                        setShowFeaturePopup(true);
-                      } else {
-                        setIsFeatured(e.target.checked);
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="featured"
-                    className="flex items-center text-gray-700"
-                  >
-                    Showcase Your Project in the Top Projects{" "}
-                    <IoIosInformationCircle className="ml-1 text-lg text-yellow-500 cursor-pointer" />
-                  </label>
-                </div> */}
 
                   {/* Building Type */}
                   <div className="mb-4">
@@ -1611,11 +1820,10 @@ Make it engaging, attractive, and human-like.
                               attached_bathroom: "",
                             }));
                           }}
-                          className={`px-4 py-2 rounded-full border ${
-                            buildingType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600"
-                          }`}
+                          className={`px-4 py-2 rounded-full border ${buildingType === type
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600"
+                            }`}
                         >
                           {type}
                         </button>
@@ -1623,33 +1831,6 @@ Make it engaging, attractive, and human-like.
                     </div>
                   </div>
 
-                  {/* Property Type */}
-                  <div className="mb-4">
-                    <label className="block mb-1 font-medium text-gray-700">
-                      Project Type{" "}
-                      <span className="text-xl font-bold text-red-500">*</span>
-                    </label>
-                    <div className="flex flex-wrap gap-1">
-                      <div className="flex flex-wrap gap-1">
-                        {(buildingType === "Residential"
-                          ? residentialTypes
-                          : commercialTypes
-                        ).map((type) => (
-                          <button
-                            key={type}
-                            onClick={() => setPropertyType(type)}
-                            className={`px-4 py-2 rounded-full border ${
-                              propertyType === type
-                                ? "bg-rose-100 text-rose-700 border-rose-500"
-                                : "border-gray-300 text-gray-600"
-                            }`}
-                          >
-                            {type === "Plot/Land" ? "Land" : type}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
                   {propertyType === "Hospitality" && (
                     <div className="mt-4">
                       <label className="block mb-1 font-medium text-gray-700">
@@ -1661,11 +1842,10 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${
-                              hospitalityType === type
-                                ? "bg-rose-100 text-rose-700 border-rose-500"
-                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                            }`}
+                            className={`px-4 py-2 rounded-full border transition ${hospitalityType === type
+                              ? "bg-rose-100 text-rose-700 border-rose-500"
+                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                              }`}
                             onClick={() => {
                               setHospitalityType(type);
 
@@ -1692,11 +1872,10 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${
-                              landType === type
-                                ? "bg-rose-100 text-rose-700 border-rose-500"
-                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                            }`}
+                            className={`px-4 py-2 rounded-full border transition ${landType === type
+                              ? "bg-rose-100 text-rose-700 border-rose-500"
+                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                              }`}
                             onClick={() => {
                               setLandType(type);
 
@@ -1723,11 +1902,10 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${
-                              industryType === type
-                                ? "bg-rose-100 text-rose-700 border-rose-500"
-                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                            }`}
+                            className={`px-4 py-2 rounded-full border transition ${industryType === type
+                              ? "bg-rose-100 text-rose-700 border-rose-500"
+                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                              }`}
                             onClick={() => {
                               setIndustryType(type);
 
@@ -1754,11 +1932,10 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${
-                              storageType === type
-                                ? "bg-rose-100 text-rose-700 border-rose-500"
-                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                            }`}
+                            className={`px-4 py-2 rounded-full border transition ${storageType === type
+                              ? "bg-rose-100 text-rose-700 border-rose-500"
+                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                              }`}
                             onClick={() => {
                               setStorageType(type);
 
@@ -1785,11 +1962,10 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${
-                              officeSubType === type
-                                ? "bg-rose-100 text-rose-700 border-rose-500"
-                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                            }`}
+                            className={`px-4 py-2 rounded-full border transition ${officeSubType === type
+                              ? "bg-rose-100 text-rose-700 border-rose-500"
+                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                              }`}
                             onClick={() => {
                               setOfficeSubType(type);
 
@@ -1816,11 +1992,10 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${
-                              RetailSubType === type
-                                ? "bg-rose-100 text-rose-700 border-rose-500"
-                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                            }`}
+                            className={`px-4 py-2 rounded-full border transition ${RetailSubType === type
+                              ? "bg-rose-100 text-rose-700 border-rose-500"
+                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                              }`}
                             onClick={() => {
                               setRetailSubType(type);
                               setFormData((prev) => ({
@@ -1846,11 +2021,10 @@ Make it engaging, attractive, and human-like.
                           <button
                             key={type}
                             type="button"
-                            className={`px-4 py-2 rounded-full border transition ${
-                              retailLocation === type
-                                ? "bg-rose-100 text-rose-700 border-rose-500"
-                                : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                            }`}
+                            className={`px-4 py-2 rounded-full border transition ${retailLocation === type
+                              ? "bg-rose-100 text-rose-700 border-rose-500"
+                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                              }`}
                             onClick={() => {
                               setRetailLocation(type);
                               setFormData((prev) => ({
@@ -1877,21 +2051,6 @@ Make it engaging, attractive, and human-like.
                     Place the listing pin on the map
                   </p>
                   <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
-                    {/* <div className="w-full overflow-hidden bg-gray-200 rounded-lg h-80">
-                             <LoadScript
-                               googleMapsApiKey={GOOGLE_MAPS_API_KEY}
-                               libraries={["places"]}
-                             >
-                               <GoogleMap
-                                 mapContainerStyle={{ width: "100%", height: "100%" }}
-                                 center={mapCenter}
-                                 zoom={14}
-                               >
-                                 <Marker position={mapCenter} />
-                               </GoogleMap>
-                             </LoadScript>
-                           </div> */}
-
                     <div className="grid grid-cols-2 gap-4">
                       <div className="col-span-2">
                         <label className="font-medium text-gray-700">
@@ -1900,10 +2059,6 @@ Make it engaging, attractive, and human-like.
                             *
                           </span>
                         </label>
-                        {/* <LoadScript
-                        googleMapsApiKey={GOOGLE_MAPS_API_KEY}
-                        libraries={["places"]}
-                      > */}
                         <Autocomplete
                           onLoad={(ac) => (autoCompleteRef.current = ac)}
                           onPlaceChanged={handlePlaceChanged}
@@ -1919,11 +2074,10 @@ Make it engaging, attractive, and human-like.
                                 address: e.target.value,
                               }));
                             }}
-                            className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                              errors.address
-                                ? "border-red-600"
-                                : "border-gray-300"
-                            }`}
+                            className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${errors.address
+                              ? "border-red-600"
+                              : "border-gray-300"
+                              }`}
                           />
                         </Autocomplete>
 
@@ -1933,7 +2087,6 @@ Make it engaging, attractive, and human-like.
                             {errors.address}
                           </p>
                         )}
-                        {/* </LoadScript> */}
                       </div>
 
                       {/* Country Dropdown */}
@@ -1956,11 +2109,10 @@ Make it engaging, attractive, and human-like.
                               state: "",
                             }));
                           }}
-                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                            errors.country
-                              ? "border-red-600"
-                              : "border-gray-300"
-                          }`}
+                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${errors.country
+                            ? "border-red-600"
+                            : "border-gray-300"
+                            }`}
                         >
                           <option value="">Select Country</option>
                           {allCountries.map((c) => (
@@ -1995,9 +2147,8 @@ Make it engaging, attractive, and human-like.
                               state: e.target.value,
                             }));
                           }}
-                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                            errors.state ? "border-red-600" : "border-gray-300"
-                          }`}
+                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${errors.state ? "border-red-600" : "border-gray-300"
+                            }`}
                         >
                           <option value="">Select State</option>
                           {allStates.map((s) => (
@@ -2033,9 +2184,8 @@ Make it engaging, attractive, and human-like.
                             }));
                           }}
                           placeholder="Enter City"
-                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                            errors.city ? "border-red-600" : "border-gray-300"
-                          }`}
+                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${errors.city ? "border-red-600" : "border-gray-300"
+                            }`}
                         />
                         {errors.city && (
                           <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -2044,35 +2194,6 @@ Make it engaging, attractive, and human-like.
                           </p>
                         )}
                       </div>
-                      {/* Locality */}
-                      {/* <div>
-                        <label className="font-medium text-gray-700">
-                          Locality{" "}
-                          <span className="invisible text-xl font-bold">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={locality}
-                          onChange={(e) => setLocality(e.target.value)}
-                          placeholder="Enter Locality"
-                          className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
-                        />
-                      </div> */}
-
-                      {/* Sub Locality */}
-                      {/* <div>
-                        <label className="font-medium text-gray-700">
-                          Sub Locality{" "}
-                          <span className="invisible text-xl font-bold">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={subLocality}
-                          onChange={(e) => setSubLocality(e.target.value)}
-                          placeholder="Enter Sub Locality"
-                          className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
-                        />
-                      </div> */}
                       {/* Zip Code */}
                       <div>
                         <label className="font-medium text-gray-700">
@@ -2094,11 +2215,10 @@ Make it engaging, attractive, and human-like.
                               }));
                             }
                           }}
-                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                            errors.zipCode
-                              ? "border-red-600"
-                              : "border-gray-300"
-                          }`}
+                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${errors.zipCode
+                            ? "border-red-600"
+                            : "border-gray-300"
+                            }`}
                         />
                         {errors.zipCode && (
                           <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -2124,410 +2244,1085 @@ Make it engaging, attractive, and human-like.
                       project Properties.
                     </p>
                   </div>
+                  {projectProperties.map((projectProperty, index) => (
+                    <div
+                      key={index}
+                      className="mb-6 border border-gray-200 rounded-xl p-4"
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold">
+                          Property {index + 1}
+                        </h3>
 
-                  <div className="grid items-start grid-cols-6 gap-4 p-4 mt-4 rounded-lg">
-                    {/* Property Price */}
-                    <div className="w-full">
-                      <label className="block mb-0 text-sm font-medium text-gray-700">
-                        Price{" "}
-                        <span className="text-xl font-bold text-red-500">
-                          *
-                        </span>
-                      </label>
-                      <input
-                        type="text"
-                        value={
-                          formData.average_project_price
-                            ? Number(
-                                formData.average_project_price,
-                              ).toLocaleString("en-IN")
-                            : ""
-                        }
-                        onChange={(e) => {
-                          const rawValue = e.target.value.replace(/,/g, "");
-
-                          if (/^\d{0,20}$/.test(rawValue)) {
-                            handleInputChange(
-                              "average_project_price",
-                              rawValue,
-                            );
-                          }
-                        }}
-                        placeholder="₹"
-                        className="w-full mt-1 p-3 border rounded-lg text-gray-700 outline-none focus:ring-2 focus:ring-rose-500"
-                      />
-                      {formData.average_project_price && (
-                        <p className="mt-2 text-sm font-medium text-gray-600">
-                          {toWords.convert(
-                            Number(formData.average_project_price),
-                          )}
-                        </p>
-                      )}
-                      {errors.price && (
-                        <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                          <MdErrorOutline className="text-lg" />
-                          {errors.price}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* BHK */}
-                    {!(
-                      buildingType === "Commercial" ||
-                      propertyType === "Plot/Land"
-                    ) && (
-                      <div className="w-full">
-                        <label className="block mb-1 text-sm font-medium text-gray-700">
-                          BHK{" "}
-                          <span className="text-xl font-bold text-red-500">
-                            *
-                          </span>
-                        </label>
-
-                        <select
-                          value={formData.bhk_type || ""}
-                          onChange={(e) => {
-                            handleInputChange("bhk_type", e.target.value);
-                          }}
-                          className="w-full mt-1 p-3 border rounded-lg text-gray-700 outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select BHK Type</option>
-                          {[
-                            "Studio/Single Room",
-                            "1 BHK",
-                            "1.5 BHK",
-                            "2 BHK",
-                            "2.5 BHK",
-                            "3 BHK",
-                            "3.5 BHK",
-                            "4 BHK",
-                            "5 BHK",
-                            "6 BHK",
-                            "6+ BHK",
-                          ].map((bhk) => (
-                            <option key={bhk} value={bhk}>
-                              {bhk}
-                            </option>
-                          ))}
-                        </select>
-
-                        {errors.bhk_type && (
-                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                            <MdErrorOutline className="text-lg" />
-                            {errors.bhk_type}
-                          </p>
+                        {projectProperties.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProjectProperty(index)}
+                            className="px-3 py-1 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600"
+                          >
+                            Delete
+                          </button>
                         )}
                       </div>
-                    )}
+                      <div className="grid items-start grid-cols-6 gap-4 p-4 mt-4 rounded-lg">
+                        <div className="col-span-6">
+                          <div className="mb-4">
+                            <label className="block mb-1 font-medium text-gray-700">
+                              Project Type{" "}
+                              <span className="text-xl font-bold text-red-500">*</span>
+                            </label>
+                            <div className="flex flex-wrap gap-1">
+                              <div className="flex flex-wrap gap-1">
+                                {(buildingType === "Residential"
+                                  ? residentialTypes
+                                  : commercialTypes
+                                ).map((type) => (
+                                  <button
+                                    key={type}
+                                    type="button"
+                                    onClick={() =>
+                                      handleProjectPropertyChange(index, "project_type", type)
+                                    }
+                                    className={`px-4 py-2 rounded-full border ${projectProperty.project_type === type
+                                      ? "bg-rose-100 text-rose-700 border-rose-500"
+                                      : "border-gray-300 text-gray-600"
+                                      }`}
+                                  >
+                                    {type === "Plot/Land" ? "Land" : type}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          {projectProperty.project_type === "Hospitality" && (
+                            <div className="mt-4">
+                              <label className="block mb-1 font-medium text-gray-700">
+                                What kind of hospitality?
+                              </label>
 
-                    {/* Carpet Area */}
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Carpet Area <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.carpet_area || ""}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^\d{0,10}$/.test(value)) {
-                            handleInputChange("carpet_area", value);
-                          }
-                        }}
-                        className="w-full mt-1 p-3 border rounded-lg"
-                      />
-                    </div>
+                              <div className="flex flex-wrap gap-2">
+                                {hospitalityOptions.map((type) => (
+                                  <button
+                                    key={type}
+                                    type="button"
+                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                      ? "bg-rose-100 text-rose-700 border-rose-500"
+                                      : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                                      }`}
+                                    onClick={() => {
+                                      handleProjectPropertyChange(index, "sub_project_type", type);
+                                    }}
+                                  >
+                                    {type}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {projectProperty.project_type === "Plot/Land" && (
+                            <div className="mt-4">
+                              <label className="block mb-1 font-medium text-gray-700">
+                                What kind of land?
+                              </label>
 
-                    <div>
-                      <label className="font-medium text-gray-700">Unit</label>
-                      <select
-                        value={formData.carpet_area_unit || ""}
-                        onChange={(e) =>
-                          handleInputChange("carpet_area_unit", e.target.value)
-                        }
-                        className="w-full mt-1 p-3 border rounded-lg"
-                      >
-                        <option value="">Select</option>
-                        <option value="sq.ft">sq.ft</option>
-                        <option value="sq.yards">sq.yards</option>
-                        <option value="sq.m">sq.m</option>
-                      </select>
-                    </div>
+                              <div className="flex flex-wrap gap-2">
+                                {landOptions.map((type) => (
+                                  <button
+                                    key={type}
+                                    type="button"
+                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                      ? "bg-rose-100 text-rose-700 border-rose-500"
+                                      : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                                      }`}
+                                    onClick={() => {
+                                      handleProjectPropertyChange(index, "sub_project_type", type);
+                                    }}
+                                  >
+                                    {type}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {projectProperty.project_type === "Industry" && (
+                            <div className="mt-4">
+                              <label className="block mb-1 font-medium text-gray-700">
+                                What kind of industry?
+                              </label>
 
-                    {/* Built-up Area */}
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Built-up Area <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.area || ""}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^\d{0,10}$/.test(value)) {
-                            handleInputChange("area", value);
-                          }
-                        }}
-                        className="w-full mt-1 p-3 border rounded-lg"
-                      />
-                    </div>
+                              <div className="flex flex-wrap gap-2">
+                                {industryOptions.map((type) => (
+                                  <button
+                                    key={type}
+                                    type="button"
+                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                      ? "bg-rose-100 text-rose-700 border-rose-500"
+                                      : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                                      }`}
+                                    onClick={() => {
+                                      handleProjectPropertyChange(index, "sub_project_type", type);
+                                    }}
+                                  >
+                                    {type}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {projectProperty.project_type === "Storage" && (
+                            <div className="mt-4">
+                              <label className="block mb-1 font-medium text-gray-700">
+                                What kind of storage?
+                              </label>
 
-                    <div>
-                      <label className="font-medium text-gray-700">Unit</label>
-                      <select
-                        value={formData.area_in || ""}
-                        onChange={(e) =>
-                          handleInputChange("area_in", e.target.value)
-                        }
-                        className="w-full mt-1 p-3 border rounded-lg"
-                      >
-                        <option value="">Select</option>
-                        <option value="sq.ft">sq.ft</option>
-                        <option value="sq.yards">sq.yards</option>
-                        <option value="sq.m">sq.m</option>
-                      </select>
-                    </div>
+                              <div className="flex flex-wrap gap-2">
+                                {storageOptions.map((type) => (
+                                  <button
+                                    key={type}
+                                    type="button"
+                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                      ? "bg-rose-100 text-rose-700 border-rose-500"
+                                      : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                                      }`}
+                                    onClick={() => {
+                                      handleProjectPropertyChange(index, "sub_project_type", type);
+                                    }}
+                                  >
+                                    {type}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {projectProperty.project_type === "Office" && (
+                            <div className="mt-4">
+                              <label className="block mb-1 font-medium text-gray-700">
+                                What kind of office?
+                              </label>
 
-                    {!(
-                      (buildingType === "Residential" &&
-                        propertyType === "Plot") ||
-                      (buildingType === "Commercial" &&
-                        [
-                          "Land",
-                          "Storage",
-                          "Hospitality",
-                          "Industry",
-                          "Retail",
-                          "Warehouse",
-                          "Plot/Land",
-                        ].includes(propertyType))
-                    ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Bathroom
-                        </label>
+                              <div className="flex flex-wrap gap-2">
+                                {officeOptions.map((type) => (
+                                  <button
+                                    key={type}
+                                    type="button"
+                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                      ? "bg-rose-100 text-rose-700 border-rose-500"
+                                      : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                                      }`}
+                                    onClick={() => {
+                                      handleProjectPropertyChange(index, "sub_project_type", type);
+                                    }}
+                                  >
+                                    {type}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {projectProperty.project_type === "Retail" && (
+                            <div className="mt-4">
+                              <label className="block mb-1 font-medium text-gray-700">
+                                What kind of retail?
+                              </label>
 
-                        <select
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                          value={formData.bathroom}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              bathroom: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="">Select Bathrooms</option>
-                          <option value="0">0</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
-                          <option value="4">4+</option>
-                        </select>
-                      </div>
-                    )}
-                    {buildingType === "Commercial" &&
-                      propertyType === "Retail" && (
-                        <div>
-                          <label className="font-medium text-gray-700">
-                            Washroom
+                              <div className="flex flex-wrap gap-2">
+                                {retailOptions.map((type) => (
+                                  <button
+                                    key={type}
+                                    type="button"
+                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                      ? "bg-rose-100 text-rose-700 border-rose-500"
+                                      : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                                      }`}
+                                    onClick={() => {
+                                      handleProjectPropertyChange(index, "sub_project_type", type);
+                                    }}
+                                  >
+                                    {type}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {projectProperty.project_type === "Retail" &&
+                            projectProperty.sub_project_type && (
+                              <div className="mt-4">
+                                <label className="block mb-1 font-medium text-gray-700">
+                                  Your Retail located inside?
+                                </label>
+
+                                <div className="flex flex-wrap gap-2">
+                                  {retailLocationOptions.map((type) => (
+                                    <button
+                                      key={type}
+                                      type="button"
+                                      className={`px-4 py-2 rounded-full border transition ${projectProperty.retail_location === type
+                                        ? "bg-rose-100 text-rose-700 border-rose-500"
+                                        : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                                        }`}
+                                      onClick={() => {
+                                        handleProjectPropertyChange(index, "retail_location", type);
+                                      }}
+                                    >
+                                      {type}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                        </div>
+                        {/* Property Price */}
+                        <div className="w-full">
+                          <label className="block mb-0 text-sm font-medium text-gray-700">
+                            Price{" "}
+                            <span className="text-xl font-bold text-red-500">*</span>
                           </label>
-
-                          <select
-                            value={retailWashroom}
+                          <input
+                            type="text"
+                            value={
+                              projectProperty.price
+                                ? Number(projectProperty.price).toLocaleString("en-IN")
+                                : ""
+                            }
                             onChange={(e) => {
-                              setRetailWashroom(e.target.value);
+                              const rawValue = e.target.value.replace(/,/g, "");
 
-                              setFormData((prev) => ({
-                                ...prev,
-                                commercial_washroom: e.target.value,
-                              }));
+                              if (/^\d{0,20}$/.test(rawValue)) {
+                                handleProjectPropertyChange(index, "price", rawValue);
+                              }
                             }}
-                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                          >
-                            <option value="">Select Washroom</option>
-                            <option value="Private Washrooms">
-                              Private Washrooms
-                            </option>
-                            <option value="Public Washrooms">
-                              Public Washrooms
-                            </option>
-                            <option value="Not Available">Not Available</option>
-                          </select>
+                            placeholder="₹"
+                            className="w-full mt-1 p-3 border rounded-lg text-gray-700 outline-none focus:ring-2 focus:ring-rose-500"
+                          />
+                          {projectProperty.price && (
+                            <p className="mt-2 text-sm font-medium text-gray-600">
+                              {toWords.convert(Number(projectProperty.price))}
+                            </p>
+                          )}
+                          {errors[`price_${index}`] && (
+                            <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                              <MdErrorOutline className="text-lg" />
+                              {errors[`price_${index}`]}
+                            </p>
+                          )}
                         </div>
-                      )}
-                    {buildingType === "Commercial" &&
-                      ["Storage", "Industry", "Hospitality"].includes(
-                        propertyType,
-                      ) && (
+
+                        {/* BHK */}
+                        {!(
+                          buildingType === "Commercial" ||
+                          propertyType.project_type === "Plot/Land"
+                        ) && (
+                            <div className="w-full">
+                              <label className="block mb-1 text-sm font-medium text-gray-700">
+                                BHK{" "}
+                                <span className="text-xl font-bold text-red-500">
+                                  *
+                                </span>
+                              </label>
+
+                              <select
+                                value={projectProperty.bhk_type || ""}
+                                onChange={(e) => {
+                                  handleProjectPropertyChange(index, "bhk_type", e.target.value);
+                                  setConfigurations(e.target.value);
+                                }}
+                                className="w-full mt-1 p-3 border rounded-lg text-gray-700 outline-none focus:ring-2 focus:ring-rose-500"
+                              >
+                                <option value="">Select BHK Type</option>
+
+                                {(propertyType.project_type === "1RK/Studio Apartment"
+                                  ? ["1 BHK"]
+                                  : [
+                                    "Studio/Single Room",
+                                    "1 BHK",
+                                    "1.5 BHK",
+                                    "2 BHK",
+                                    "2.5 BHK",
+                                    "3 BHK",
+                                    "3.5 BHK",
+                                    "4 BHK",
+                                    "5 BHK",
+                                    "6 BHK",
+                                    "6+ BHK",
+                                  ]
+                                ).map((bhk) => (
+                                  <option key={bhk} value={bhk}>
+                                    {bhk}
+                                  </option>
+                                ))}
+                              </select>
+
+                              {errors.bhk_type && (
+                                <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                                  <MdErrorOutline className="text-lg" />
+                                  {errors.bhk_type}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                        {/* Carpet Area */}
                         <div>
                           <label className="font-medium text-gray-700">
-                            Washrooms
+                            Carpet Area <span className="text-red-500">*</span>
                           </label>
+                          <input
+                            type="text"
+                            value={projectProperty.carpet_area || ""}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (/^\d{0,10}$/.test(value)) {
+                                handleProjectPropertyChange(index, "carpet_area", value);
+                              }
+                            }}
+                            className="w-full mt-1 p-3 border rounded-lg"
+                          />
+                        </div>
 
+                        <div>
+                          <label className="font-medium text-gray-700">Unit</label>
                           <select
-                            name="washroom"
-                            value={formData.washroom}
-                            onChange={handleInputChange}
-                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                            value={projectProperty.carpet_area_unit || ""}
+                            onChange={(e) =>
+                              handleProjectPropertyChange(index, "carpet_area_unit", e.target.value)
+                            }
+                            className="w-full mt-1 p-3 border rounded-lg"
                           >
-                            <option value="">Select Washrooms</option>
-                            <option value="None">None</option>
-                            <option value="Shared">Shared</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="4">4+</option>
+                            <option value="">Select</option>
+                            <option value="sq.ft">sq.ft</option>
+                            <option value="sq.yards">sq.yards</option>
+                            <option value="sq.m">sq.m</option>
+                            <option value="acre">acre</option>
+                            <option value="marla">marla</option>
+                            <option value="cents">cents</option>
+                            <option value="bigha">bigha</option>
+                            <option value="kottah">kottah</option>
+                            <option value="kanal">kanal</option>
+                            <option value="grounds">grounds</option>
+                            <option value="ares">ares</option>
+                            <option value="biswa">biswa</option>
+                            <option value="guntha">guntha</option>
+                            <option value="aankadam">aankadam</option>
+                            <option value="hectares">hectares</option>
+                            <option value="rood">rood</option>
+                            <option value="chataks">chataks</option>
+                            <option value="perch">perch</option>
                           </select>
                         </div>
-                      )}
 
-                    <div className="md:col-span-3 mt-2">
-                      <div className="flex flex-wrap gap-4 mt-2">
-                        {/* All Inclusive Price */}
-                        <label className="flex items-center gap-2">
+                        {/* Built-up Area */}
+                        <div>
+                          <label className="font-medium text-gray-700">
+                            Built-up Area <span className="text-red-500">*</span>
+                          </label>
                           <input
-                            type="checkbox"
-                            checked={formData.all_inclusive_price === "Yes"}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                all_inclusive_price: e.target.checked
-                                  ? "Yes"
-                                  : "No",
-                              })
-                            }
+                            type="text"
+                            value={projectProperty.area || ""}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (/^\d{0,10}$/.test(value)) {
+                                handleProjectPropertyChange(index, "area", value);
+                              }
+                            }}
+                            className="w-full mt-1 p-3 border rounded-lg"
                           />
-                          All Inclusive Price
-                        </label>
+                        </div>
 
-                        {/* Price Onwards */}
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={formData.price_onwards === "Yes"}
+                        <div>
+                          <label className="font-medium text-gray-700">Unit</label>
+                          <select
+                            value={projectProperty.area_in || ""}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                price_onwards: e.target.checked ? "Yes" : "No",
-                              })
+                              handleProjectPropertyChange(index, "area_in", e.target.value)
                             }
-                          />
-                          Price Onwards
-                        </label>
-                        {/* Price Negotiable */}
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={formData.price_negotiable === "Yes"}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                price_negotiable: e.target.checked
-                                  ? "Yes"
-                                  : "No",
-                              })
-                            }
-                          />
-                          Price Negotiable
-                        </label>
+                            className="w-full mt-1 p-3 border rounded-lg"
+                          >
+                            <option value="">Select</option>
+                            <option value="sq.ft">sq.ft</option>
+                            <option value="sq.yards">sq.yards</option>
+                            <option value="sq.m">sq.m</option>
+                            <option value="acre">acre</option>
+                            <option value="marla">marla</option>
+                            <option value="cents">cents</option>
+                            <option value="bigha">bigha</option>
+                            <option value="kottah">kottah</option>
+                            <option value="kanal">kanal</option>
+                            <option value="grounds">grounds</option>
+                            <option value="ares">ares</option>
+                            <option value="biswa">biswa</option>
+                            <option value="guntha">guntha</option>
+                            <option value="aankadam">aankadam</option>
+                            <option value="hectares">hectares</option>
+                            <option value="rood">rood</option>
+                            <option value="chataks">chataks</option>
+                            <option value="perch">perch</option>
+                          </select>
+                        </div>
 
-                        {/* Tax & Govt Charges */}
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={
-                              formData.tax_and_goverment_charges === "Yes"
-                            }
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                tax_and_goverment_charges: e.target.checked
-                                  ? "Yes"
-                                  : "No",
-                              })
-                            }
-                          />
-                          Tax & Government Charges Excluded
-                        </label>
+                        {!(
+                          (buildingType === "Residential" &&
+                            projectProperty.project_type === "Plot/Land") ||
+                          (buildingType === "Commercial" &&
+                            [
+                              "Land",
+                              "Storage",
+                              "Hospitality",
+                              "Industry",
+                              "Retail",
+                              "Warehouse",
+                              "Plot/Land",
+                            ].includes(projectProperty.project_type))
+                        ) && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                Bathroom
+                              </label>
+
+                              <select
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                                value={projectProperty.bathroom || ""}
+                                onChange={(e) =>
+                                  handleProjectPropertyChange(index, "bathroom", Number(e.target.value))
+                                }
+                              >
+                                <option value="">Select Bathrooms</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="4">+4</option>
+                              </select>
+                            </div>
+                          )}
+                        {buildingType === "Commercial" &&
+                          projectProperty.project_type === "Retail" && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                Washroom
+                              </label>
+
+                              <select
+                                value={projectProperty.commercial_washroom || ""}
+                                onChange={(e) =>
+                                  handleProjectPropertyChange(
+                                    index,
+                                    "commercial_washroom",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              >
+                                <option value="">Select Washroom</option>
+                                <option value="Private Washrooms">
+                                  Private Washrooms
+                                </option>
+                                <option value="Public Washrooms">
+                                  Public Washrooms
+                                </option>
+                                <option value="Not Available">Not Available</option>
+                              </select>
+                            </div>
+                          )}
+                        {buildingType === "Commercial" &&
+                          ["Storage", "Industry", "Hospitality"].includes(
+                            projectProperty.project_type
+                          ) && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                Washroom
+                              </label>
+
+                              <select
+                                value={projectProperty.commercial_washroom || ""}
+                                onChange={(e) =>
+                                  handleProjectPropertyChange(
+                                    index,
+                                    "commercial_washroom",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              >
+                                <option value="">Select Washrooms</option>
+                                <option value="None">None</option>
+                                <option value="Shared">Shared</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="4+">4+</option>
+                              </select>
+                            </div>
+                          )}
+                        {!(
+                          (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                          (buildingType === "Commercial" &&
+                            [
+                              "Land",
+                              "Plot/Land",
+                              "Warehouse",
+                              "Storage",
+                              "Industry",
+                              "Hospitality",
+                            ].includes(projectProperty.project_type))
+                        ) && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                Total Floor
+                              </label>
+
+                              <input
+                                type="text"
+                                name="total_floor"
+                                value={projectProperty.total_floor || ""}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
+                                    handleProjectPropertyChange(index, "total_floor", value);
+                                  }
+                                }}
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              />
+                            </div>
+                          )}
+                        {!(
+                          (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                          (buildingType === "Commercial" &&
+                            [
+                              "Land",
+                              "Plot/Land",
+                              "Warehouse",
+                              "Industry",
+                              "Storage",
+                              "Hospitality",
+                            ].includes(projectProperty.project_type))
+                        ) && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                Flat on the floor
+                              </label>
+
+                              <select
+                                name="project_floor"
+                                value={projectProperty.project_floor || ""}
+                                onChange={(e) => handleProjectPropertyChange(index, "project_floor", e.target.value)}
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              >
+                                <option value="">Select Floor</option>
+
+                                <option value="Lower Basement">Lower Basement</option>
+
+                                <option value="Basement">Basement</option>
+
+                                <option value="Lower Ground">Lower Ground</option>
+
+                                <option value="Ground">Ground</option>
+
+                                <option value="Rooftop/Terrace">Rooftop/Terrace</option>
+
+                                {[...Array(Number(projectProperty.total_floor) || 0)].map(
+                                  (_, floorIndex) => (
+                                    <option key={floorIndex + 1} value={`${floorIndex + 1}`}>
+                                      {floorIndex + 1}
+                                    </option>
+                                  ),
+                                )}
+                              </select>
+                            </div>
+                          )}
+                        {buildingType === "Commercial" &&
+                          projectProperty.project_type === "Office" && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                No. of Cabines
+                              </label>
+
+                              <select
+                                value={projectProperty.no_of_cabines || ""}
+                                onChange={(e) =>
+                                  handleProjectPropertyChange(
+                                    index,
+                                    "no_of_cabines",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              >
+                                <option value="">Select Cabines</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="10+">10+</option>
+                              </select>
+                            </div>
+                          )}
+                        {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                          <div>
+                            <label className="font-medium text-gray-700">
+                              No. of Meeting Rooms
+                            </label>
+
+                            <select
+                              value={projectProperty.no_of_meeting_Rooms || ""}
+                              onChange={(e) =>
+                                handleProjectPropertyChange(
+                                  index,
+                                  "no_of_meeting_Rooms",
+                                  e.target.value
+                                )
+                              }
+                              className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                            >
+                              <option value="">Select Meeting Rooms</option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                              <option value="3">3</option>
+                              <option value="4">4</option>
+                              <option value="5+">5+</option>
+                            </select>
+                          </div>
+                        )}
+                        {buildingType === "Commercial" &&
+                          projectProperty.project_type === "Office" && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                No. of Conference Room
+                              </label>
+
+                              <select
+                                value={projectProperty.no_of_conference_room || ""}
+                                onChange={(e) =>
+                                  handleProjectPropertyChange(
+                                    index,
+                                    "no_of_conference_room",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              >
+                                <option value="">Select Conference Room</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3+">3+</option>
+                              </select>
+                            </div>
+                          )}
+
+                        {buildingType === "Commercial" &&
+                          projectProperty.project_type === "Hospitality" && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                Total Number of Rooms
+                              </label>
+
+                              <input
+                                type="text"
+                                value={projectProperty.total_number_of_rooms || ""}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  if (/^\d*$/.test(value)) {
+                                    handleProjectPropertyChange(
+                                      index,
+                                      "total_number_of_rooms",
+                                      value
+                                    );
+                                  }
+                                }}
+                                placeholder="Enter Total Rooms"
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              />
+                            </div>
+                          )}
+                        {((buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                          (buildingType === "Commercial" &&
+                            ["Land", "Plot/Land"].includes(projectProperty.project_type))) && (
+                            <div>
+                              <label className="font-medium text-gray-700">Facing</label>
+
+                              <select
+
+                                value={projectProperty.facing || ""}
+                                onChange={(e) =>
+                                  handleProjectPropertyChange(index, "facing", e.target.value)
+                                }
+                                className="w-full p-3 mt-1 border rounded-lg"
+                              >
+                                <option value="">Select Facing</option>
+
+                                <option value="East">East</option>
+                                <option value="West">West</option>
+                                <option value="North">North</option>
+                                <option value="South">South</option>
+                                <option value="North East">North East</option>
+                                <option value="North West">North West</option>
+                                <option value="South East">South East</option>
+                                <option value="South West">South West</option>
+                              </select>
+                            </div>
+                          )}
+                        {((buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                          (buildingType === "Commercial" &&
+                            projectProperty.project_type === "Plot/Land")) && (
+                            <>
+                              {/* Length */}
+                              <div>
+                                <label className="font-medium text-gray-700">
+                                  Length of Plot (ft){" "}
+                                  <span className="text-red-500">*</span>
+                                </label>
+
+                                <input
+                                  type="text"
+                                  value={projectProperty.property_dimensions_length || ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (/^\d*$/.test(value)) {
+                                      handleProjectPropertyChange(
+                                        index,
+                                        "property_dimensions_length",
+                                        value
+                                      );
+                                    }
+                                  }}
+                                  placeholder="Enter Length"
+                                  className={`w-full p-3 mt-1 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${errors?.property_dimensions_length
+                                    ? "border-red-600"
+                                    : "border-gray-300"
+                                    }`}
+                                />
+
+                                {errors?.property_dimensions_length && (
+                                  <p className="text-sm text-red-500 mt-1">
+                                    {errors.property_dimensions_length}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Breadth */}
+                              <div>
+                                <label className="font-medium text-gray-700">
+                                  Breadth of Plot (ft){" "}
+                                  <span className="text-red-500">*</span>
+                                </label>
+
+                                <input
+                                  type="text"
+                                  value={projectProperty.property_dimensions_breadth || ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (/^\d*$/.test(value)) {
+                                      handleProjectPropertyChange(
+                                        index,
+                                        "property_dimensions_breadth",
+                                        value
+                                      );
+                                    }
+                                  }}
+                                  placeholder="Enter Breadth"
+                                  className={`w-full p-3 mt-1 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${errors?.property_dimensions_breadth
+                                    ? "border-red-600"
+                                    : "border-gray-300"
+                                    }`}
+                                />
+
+                                {errors?.property_dimensions_breadth && (
+                                  <p className="text-sm text-red-500 mt-1">
+                                    {errors.property_dimensions_breadth}
+                                  </p>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        {!(
+                          (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                          (buildingType === "Commercial" &&
+                            [
+                              //"Land",
+                              "Plot/Land",
+                              "Industry",
+                              "Storage",
+                              "Hospitality",
+                            ].includes(projectProperty.project_type)) ||
+                          formData.possession_status === "Under Construction"
+                        ) && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                Age of Property
+                              </label>
+
+                              <select
+                                value={projectProperty.age_of_property || ""}
+                                onChange={(e) =>
+                                  handleProjectPropertyChange(
+                                    index,
+                                    "age_of_property",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              >
+                                <option value="">Select Age of Property</option>
+                                <option value="0-1">0-1</option>
+                                <option value="2-4">2-4</option>
+                                <option value="5-7">5-7</option>
+                                <option value="8-10">8-10</option>
+                                <option value="10+">10+</option>
+                              </select>
+                            </div>
+                          )}
+                        {projectProperty.project_type !== "Plot/Land" && (
+                          <div>
+                            <label className="font-medium text-gray-700">
+                              Furnishing Type{" "}
+                              <span className="text-xl font-bold text-red-500">*</span>
+                            </label>
+
+                            <select
+                              value={projectProperty.furnished_type || ""}
+                              onChange={(e) =>
+                                handleProjectPropertyChange(
+                                  index,
+                                  "furnished_type",
+                                  e.target.value
+                                )
+                              }
+                              className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                            >
+                              <option value="">Select Furnishing Type</option>
+                              <option value="Furnished">Furnished</option>
+                              <option value="Semi-Furnished">Semi-Furnished</option>
+                              <option value="Unfurnished">Unfurnished</option>
+                            </select>
+
+                            {errors?.furnished_type && (
+                              <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                                <MdErrorOutline className="text-lg" />
+                                {errors.furnished_type}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        {buildingType === "Residential" && projectProperty.project_type !== "Plot" && (
+                          <div>
+                            <label className="font-medium text-gray-700">Balcony</label>
+
+                            <select
+
+                              value={projectProperty.balcony || ""}
+                              onChange={(e) =>
+                                handleProjectPropertyChange(
+                                  index,
+                                  "balcony",
+                                  e.target.value
+                                )
+                              }
+                              className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                            >
+                              <option value="">Select No. of Balconies</option>
+                              <option value="0">0</option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                              <option value="3">3</option>
+                              <option value="more than 3">More than 3</option>
+                            </select>
+                          </div>
+                        )}
+                        {buildingType === "Commercial" &&
+                          projectProperty.project_type === "Office" &&
+                          [
+                            "Bare shell office space",
+                            "Ready to move office space",
+                          ].includes(projectProperty.sub_project_type) && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                Pantry
+                              </label>
+
+                              <select
+                                value={projectProperty.pantry_option || ""}
+                                onChange={(e) =>
+                                  handleProjectPropertyChange(
+                                    index,
+                                    "pantry_option",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              >
+                                <option value="">Select Pantry</option>
+                                <option value="Wet">Wet</option>
+                                <option value="Dry">Dry</option>
+                                <option value="None">None</option>
+                              </select>
+                            </div>
+                          )}
+
+                        {buildingType === "Commercial" &&
+                          projectProperty.project_type === "Office" && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                Central AC
+                              </label>
+
+                              <select
+                                value={projectProperty.central_AC || ""}
+                                onChange={(e) =>
+                                  handleProjectPropertyChange(
+                                    index,
+                                    "central_AC",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              >
+                                <option value="">Select Option</option>
+
+                                {projectProperty.sub_project_type === "Ready to move office space" ? (
+                                  <>
+                                    <option value="Available">Available</option>
+
+                                    <option value="Not Available">Not Available</option>
+                                  </>
+                                ) : (
+                                  <>
+                                    <option value="Duct Only">Duct Only</option>
+
+                                    <option value="Available">Available</option>
+
+                                    <option value="Not Available">Not Available</option>
+                                  </>
+                                )}
+                              </select>
+                            </div>
+                          )}
+                        {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                          <div>
+                            <label className="font-medium text-gray-700">
+                              Reception Area
+                            </label>
+
+                            <select
+                              value={projectProperty.reception_area || ""}
+                              onChange={(e) =>
+                                handleProjectPropertyChange(
+                                  index,
+                                  "reception_area",
+                                  e.target.value
+                                )
+                              }
+                              className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                            >
+                              <option value="">Select Option</option>
+                              <option value="Yes">Yes</option>
+                              <option value="No">No</option>
+                            </select>
+                          </div>
+                        )}
+                        {buildingType === "Commercial" &&
+                          projectProperty.project_type === "Office" && (
+                            <div>
+                              <label className="font-medium text-gray-700">
+                                Personal Washroom
+                              </label>
+
+                              <select
+
+                                value={projectProperty.personal_washroom || ""}
+                                onChange={(e) =>
+                                  handleProjectPropertyChange(
+                                    index,
+                                    "personal_washroom",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              >
+                                <option value="">Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                              </select>
+                            </div>
+                          )}
+                      </div>
+                      <div className="flex justify-end mt-4">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setProjectProperties([
+                              ...projectProperties,
+                              { ...emptyProjectProperty },
+                            ])
+                          }
+                          className="flex items-center gap-2 px-4 py-2 text-white rounded-lg bg-rose-600 hover:bg-rose-700"
+                        >
+                          <Plus size={18} />
+                          Add Property
+                        </button>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="p-3 mx-auto mb-3 bg-white border max-w-7xl rounded-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/*  Header full width */}
-                  <div className="mb-6 col-span-1 md:col-span-2 lg:col-span-4">
-                    <h2 className="text-2xl font-semibold text-gray-900">
-                      More Details
-                    </h2>
-                    <p className="text-gray-500">
-                      Comprehensive overview covering scale, financials,
-                      features, timeline, and compliance of the project
-                    </p>
-                  </div>
+                  ))}
 
-                  {buildingType === "Commercial" &&
-                    !["Land", "Plot/Land"].includes(propertyType) && (
+                  <div className="p-3 mx-auto mb-3 bg-white border max-w-7xl rounded-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/*  Header full width */}
+                    <div className="mb-6 col-span-1 md:col-span-2 lg:col-span-4">
+                      <h2 className="text-2xl font-semibold text-gray-900">
+                        More Details
+                      </h2>
+                      <p className="text-gray-500">
+                        Comprehensive overview covering scale, financials, features,
+                        timeline, and compliance of the project
+                      </p>
+                    </div>
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Price Range
+                      </label>
+
+                      <input
+                        type="text"
+                        value={averagePrice}
+                        readOnly
+                        className="w-full p-3 mt-1 border rounded-lg bg-gray-100"
+                      />
+                    </div>
+                    {buildingType === "Residential" ? (
                       <div>
-                        <label className="font-medium text-gray-700">
-                          Security Deposit Amount{" "}
-                          <span className="text-xl font-bold text-red-500">
-                            *
-                          </span>
+                        <label className="block mb-2 font-medium text-gray-700">
+                          Configurations
                         </label>
 
                         <input
                           type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          value={
-                            formData.custom_deposit_amount
-                              ? Number(
-                                  formData.custom_deposit_amount,
-                                ).toLocaleString("en-IN")
-                              : ""
-                          }
-                          onChange={(e) => {
-                            const rawValue = e.target.value.replace(/,/g, "");
-
-                            if (/^\d*$/.test(rawValue)) {
-                              setFormData((prev) => ({
-                                ...prev,
-                                custom_deposit_amount: rawValue,
-                              }));
-                            }
-                          }}
-                          className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
-                            errors?.custom_deposit_amount
-                              ? "border-red-600"
-                              : "border-gray-300"
-                          }`}
+                          value={configurations}
+                          readOnly
+                          className="w-full p-3 text-gray-700 bg-gray-100 border rounded-md outline-none"
                         />
-                        {formData.custom_deposit_amount && (
-                          <p className="mt-2 text-sm font-medium text-gray-600">
-                            {toWords.convert(
-                              Number(formData.custom_deposit_amount),
-                            )}
-                          </p>
-                        )}
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block mb-2 font-medium text-gray-700">
+                          Available Property Types
+                        </label>
 
-                        {errors?.custom_deposit_amount && (
-                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                            <MdErrorOutline className="text-lg" />
-                            {errors.custom_deposit_amount}
-                          </p>
-                        )}
+                        <input
+                          type="text"
+                          value={[
+                            ...new Set(
+                              projectProperties
+                                .map((p) => p.project_type)
+                                .filter(Boolean)
+                            ),
+                          ].join(", ")}
+                          readOnly
+                          className="w-full p-3 text-gray-700 bg-gray-100 border rounded-md outline-none"
+                        />
                       </div>
                     )}
-                  {!(
-                    (buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      ["Land", "Plot/Land"].includes(propertyType))
-                  ) && (
                     <div>
                       <label className="font-medium text-gray-700">
                         Possession Status
@@ -2544,819 +3339,301 @@ Make it engaging, attractive, and human-like.
                         }
                       >
                         <option value="">Select Status</option>
+
                         <option value="Ready To Move">Ready To Move</option>
+
                         <option value="Under Construction">
                           Under Construction
                         </option>
                       </select>
-                    </div>
-                  )}
-                  {formData.possession_status === "Under Construction" && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Possession Date{" "}
-                        <span className="text-xl font-bold text-red-500">
-                          *
-                        </span>
-                      </label>
 
-                      <input
-                        type="date"
-                        name="possession_date"
-                        value={formData.possession_date || ""}
-                        min={new Date().toISOString().split("T")[0]}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            possession_date: e.target.value,
-                          })
-                        }
-                        className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
-                          errors?.possession_date
-                            ? "border-red-600"
-                            : "border-gray-300"
-                        }`}
-                      />
-
-                      {errors?.possession_date && (
+                      {errors?.possession_status && (
                         <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
                           <MdErrorOutline className="text-lg" />
-                          {errors.possession_date}
+                          {errors.possession_status}
                         </p>
                       )}
                     </div>
-                  )}
-                  {!(
-                    (buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      [
-                        "Land",
-                        "Plot/Land",
-                        "Warehouse",
-                        "Industry",
-                        "Storage",
-                        "Hospitality",
-                      ].includes(propertyType))
-                  ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Total Floor
-                      </label>
+                    {formData.possession_status === "Under Construction" && (
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Possession Date{" "}
+                        </label>
 
-                      <input
-                        type="text"
-                        name="total_floor"
-                        value={formData.total_floor || ""}
-                        onChange={(e) => {
-                          const value = e.target.value;
-
-                          // allow only numbers till 100
-                          if (/^\d{0,3}$/.test(value)) {
-                            const numericValue = Number(value);
-
-                            if (value === "" || numericValue <= 100) {
-                              setFormData((prev) => ({
-                                ...prev,
-                                total_floor: value,
-                              }));
-                            }
+                        <input
+                          type="date"
+                          value={formData.possession_date || ""}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              possession_date: e.target.value,
+                            })
                           }
-                        }}
-                        placeholder="Enter total floors"
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      />
-                    </div>
-                  )}
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                        />
 
-                  {!(
-                    (buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      [
-                        "Land",
-                        "Plot/Land",
-                        "Warehouse",
-                        "Industry",
-                        "Storage",
-                        "Hospitality",
-                      ].includes(propertyType))
-                  ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Flat on the floor
-                      </label>
-
-                      <select
-                        name="project_floor"
-                        value={formData.project_floor || ""}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            project_floor: e.target.value,
-                          }))
-                        }
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Floor</option>
-
-                        <option value="Lower Basement">Lower Basement</option>
-                        <option value="Basement">Basement</option>
-                        <option value="Lower Ground">Lower Ground</option>
-                        <option value="Ground">Ground</option>
-
-                        {Array.from(
-                          { length: Number(formData.total_floor || 0) },
-                          (_, i) => (
-                            <option key={i + 1} value={String(i + 1)}>
-                              {i + 1}
-                            </option>
-                          ),
+                        {errors?.possession_date && (
+                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <MdErrorOutline className="text-lg" />
+                            {errors.possession_date}
+                          </p>
                         )}
-
-                        <option value="Rooftop/Terrace">Rooftop/Terrace</option>
-                      </select>
-                    </div>
-                  )}
-
-                  {buildingType === "Commercial" &&
-                    propertyType === "Retail" && (
+                      </div>
+                    )}
+                    {buildingType === "Commercial" && propertyType === "Retail" && (
                       <div>
                         <label className="font-medium text-gray-700">
                           Parking Type
                         </label>
 
-                        <select
-                          value={parkingTypes}
-                          onChange={(e) => {
-                            setParkingTypes(e.target.value);
+                        <Select
+                          isMulti
+                          name="parking_types"
+                          options={[
+                            {
+                              value: "Private Parking",
+                              label: "Private Parking",
+                            },
+                            {
+                              value: "Public Parking",
+                              label: "Public Parking",
+                            },
+                            {
+                              value: "Multilevel Parking",
+                              label: "Multilevel Parking",
+                            },
+                            {
+                              value: "Not Available",
+                              label: "Not Available",
+                            },
+                          ]}
+                          value={[
+                            {
+                              value: "Private Parking",
+                              label: "Private Parking",
+                            },
+                            {
+                              value: "Public Parking",
+                              label: "Public Parking",
+                            },
+                            {
+                              value: "Multilevel Parking",
+                              label: "Multilevel Parking",
+                            },
+                          ].filter((opt) =>
+                            (formData.parking_types || "")
+                              .split(",")
+                              .includes(opt.value),
+                          )}
+                          onChange={(selectedOptions) => {
+                            const values = selectedOptions.map((opt) => opt.value);
 
-                            setFormData((prev) => ({
-                              ...prev,
-                              parking_types: e.target.value,
-                            }));
-                          }}
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Parking Type</option>
-                          <option value="Private Parking">
-                            Private Parking
-                          </option>
-                          <option value="Public Parking">Public Parking</option>
-                          <option value="Multilevel Parking">
-                            Multilevel Parking
-                          </option>
-                          <option value="Not Available">Not Available</option>
-                        </select>
-                      </div>
-                    )}
-                  {buildingType === "Commercial" &&
-                    propertyType === "Office" && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          No. of Cabines
-                        </label>
+                            let finalValues = values;
 
-                        <select
-                          value={formData.no_of_cabines || ""}
-                          onChange={(e) =>
-                            handleInputChange("no_of_cabines", e.target.value)
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Cabines</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
-                          <option value="5">5</option>
-                          <option value="10+">10+</option>
-                        </select>
-                      </div>
-                    )}
-                  {buildingType === "Commercial" &&
-                    propertyType === "Office" && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          No. of Meeting Rooms
-                        </label>
-
-                        <select
-                          value={formData.no_of_meeting_Rooms || ""}
-                          onChange={(e) =>
-                            handleInputChange(
-                              "no_of_meeting_Rooms",
-                              e.target.value,
-                            )
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Meeting Rooms</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
-                          <option value="5+">5+</option>
-                        </select>
-                      </div>
-                    )}
-                  {buildingType === "Commercial" &&
-                    propertyType === "Office" && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          No. of Conference Room
-                        </label>
-
-                        <select
-                          value={formData.no_of_conference_room || ""}
-                          onChange={(e) =>
-                            handleInputChange(
-                              "no_of_conference_room",
-                              e.target.value,
-                            )
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Conference Room</option>
-                          <option value="0">0</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3+">3+</option>
-                        </select>
-                      </div>
-                    )}
-
-                  {buildingType === "Commercial" &&
-                    propertyType === "Hospitality" && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Total Number of Rooms
-                        </label>
-
-                        <input
-                          type="text"
-                          value={formData.total_number_of_rooms || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^\d*$/.test(value)) {
-                              handleInputChange("total_number_of_rooms", value);
+                            if (values.includes("Not Available")) {
+                              finalValues = ["Not Available"];
                             }
+
+                            handleInputChange({
+                              target: {
+                                name: "parking_types",
+                                value: finalValues.join(","),
+                              },
+                            });
                           }}
-                          placeholder="Enter Total Rooms"
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          components={{ MultiValue: CustomMultiValue }}
+                          placeholder="Select Parking Type"
+                          classNamePrefix="react-select"
+                          styles={{
+                            control: (base, state) => ({
+                              ...base,
+                              minHeight: "60px",
+                              padding: "6px",
+                              borderColor: state.isFocused ? "#a855f7" : "#d1d5db",
+                              boxShadow: state.isFocused
+                                ? "0 0 0 2px #a855f7"
+                                : "none",
+                              borderRadius: "0.5rem",
+                              fontSize: "16px",
+                              display: "flex",
+                              flexWrap: "nowrap",
+                              overflowX: "auto",
+                            }),
+
+                            valueContainer: (base) => ({
+                              ...base,
+                              padding: "0 6px",
+                              display: "flex",
+                              flexWrap: "nowrap",
+                              gap: "6px",
+                              overflowX: "auto",
+                              scrollbarWidth: "thin",
+                              alignItems: "center",
+                            }),
+
+                            placeholder: (base) => ({
+                              ...base,
+                              color: "#1f2937",
+                              fontSize: "16px",
+                            }),
+
+                            multiValue: (base) => ({
+                              ...base,
+                              backgroundColor: "#ede9fe",
+                              borderRadius: "0.375rem",
+                              display: "flex",
+                              alignItems: "center",
+                              padding: "2px 6px",
+                              whiteSpace: "nowrap",
+                            }),
+
+                            multiValueLabel: (base) => ({
+                              ...base,
+                              color: "#6b21a8",
+                              fontWeight: "500",
+                            }),
+
+                            multiValueRemove: (base) => ({
+                              ...base,
+                              color: "#6b21a8",
+                              ":hover": {
+                                backgroundColor: "#ddd6fe",
+                                color: "#4c1d95",
+                              },
+                            }),
+                          }}
                         />
                       </div>
                     )}
-                  {buildingType === "Commercial" &&
-                    propertyType === "Hospitality" && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Quality Rating
-                        </label>
+                    {buildingType === "Commercial" &&
+                      propertyType === "Hospitality" && (
+                        <div>
+                          <label className="font-medium text-gray-700">
+                            Quality Rating
+                          </label>
 
-                        <select
-                          value={formData.quality_rating || ""}
-                          onChange={(e) =>
-                            handleInputChange("quality_rating", e.target.value)
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Rating</option>
-                          <option value="No Rating">No Rating</option>
-                          <option value="1 Star">1 Star</option>
-                          <option value="2 Star">2 Star</option>
-                          <option value="3 Star">3 Star</option>
-                          <option value="4 Star">4 Star</option>
-                          <option value="5 Star">5 Star</option>
-                          <option value="6 Star">6 Star</option>
-                          <option value="7 Star">7 Star</option>
-                        </select>
-                      </div>
-                    )}
-
-                  {!(
-                    (buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      [
-                        "Warehouse",
-                        "Industry",
-                        "Storage",
-                        "Hospitality",
-                        "Land",
-                        "Plot/Land",
-                      ].includes(propertyType))
-                  ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Facing
-                      </label>
-
-                      <select
-                        value={formData.facing || ""}
-                        onChange={(e) =>
-                          handleInputChange("facing", e.target.value)
-                        }
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Facing</option>
-                        <option value="East">East</option>
-                        <option value="West">West</option>
-                        <option value="North">North</option>
-                        <option value="South">South</option>
-                        <option value="North East">North East</option>
-                        <option value="North West">North West</option>
-                        <option value="South East">South East</option>
-                        <option value="South West">South West</option>
-                      </select>
-                    </div>
-                  )}
-                  {buildingType === "Residential" &&
-                    propertyType === "Independent/Builder Floor" && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Builder Floor Type{" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-
-                        <select
-                          value={formData.builder_floor_type || ""}
-                          onChange={(e) =>
-                            handleInputChange(
-                              "builder_floor_type",
-                              e.target.value,
-                            )
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Floor Type</option>
-                          {builderFloorOptions.map((item) => (
-                            <option key={item} value={item}>
-                              {item}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                  {((buildingType === "Residential" &&
-                    propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      propertyType === "Plot/Land")) && (
-                    <>
-                      {/* Length */}
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Length of Plot (ft){" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-
-                        <input
-                          type="text"
-                          value={formData.property_dimensions_length || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^\d*$/.test(value)) {
-                              handleInputChange(
-                                "property_dimensions_length",
-                                value,
-                              );
+                          <select
+                            value={formData.quality_rating || ""}
+                            onChange={(e) =>
+                              handleInputChange("quality_rating", e.target.value)
                             }
-                          }}
-                          placeholder="Enter Length"
-                          className={`w-full p-3 mt-1 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
-                            errors?.property_dimensions_length
-                              ? "border-red-600"
-                              : "border-gray-300"
-                          }`}
-                        />
-
-                        {errors?.property_dimensions_length && (
-                          <p className="text-sm text-red-500 mt-1">
-                            {errors.property_dimensions_length}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Breadth */}
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Breadth of Plot (ft){" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-
-                        <input
-                          type="text"
-                          value={formData.property_dimensions_breadth || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^\d*$/.test(value)) {
-                              handleInputChange(
-                                "property_dimensions_breadth",
-                                value,
-                              );
-                            }
-                          }}
-                          placeholder="Enter Breadth"
-                          className={`w-full p-3 mt-1 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
-                            errors?.property_dimensions_breadth
-                              ? "border-red-600"
-                              : "border-gray-300"
-                          }`}
-                        />
-
-                        {errors?.property_dimensions_breadth && (
-                          <p className="text-sm text-red-500 mt-1">
-                            {errors.property_dimensions_breadth}
-                          </p>
-                        )}
-                      </div>
-                    </>
-                  )}
-                  {((buildingType === "Residential" &&
-                    propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      propertyType === "Plot/Land")) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        No. of Open Sides
-                      </label>
-
-                      <select
-                        name="no_of_open_sides"
-                        value={formData.no_of_open_sides || ""}
-                        onChange={handleInputChange}
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Open Sides</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                      </select>
-                    </div>
-                  )}
-                  {((buildingType === "Residential" &&
-                    propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      propertyType === "Plot/Land")) && (
-                    <div>
-                      <label className="block mb-2 font-medium text-gray-700">
-                        Any Construction on Property
-                      </label>
-
-                      <select
-                        name="type_of_construction"
-                        value={formData.type_of_construction || ""}
-                        onChange={handleInputChange}
-                        className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Construction Type</option>
-                        {constructionOptions.map((item) => (
-                          <option key={item} value={item}>
-                            {item}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                  {((buildingType === "Residential" &&
-                    propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      propertyType === "Plot/Land")) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Possession By
-                      </label>
-
-                      <select
-                        value={formData.possession_by || ""}
-                        onChange={(e) =>
-                          handleInputChange("possession_by", e.target.value)
-                        }
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Possession</option>
-                        <option value="Immediate">Immediate</option>
-                        <option value="Within 3 Months">Within 3 Months</option>
-                        <option value="Within 6 Months">Within 6 Months</option>
-                        <option value="By 2026">By 2026</option>
-                        <option value="By 2027">By 2027</option>
-                        <option value="By 2028">By 2028</option>
-                        <option value="By 2029">By 2029</option>
-                        <option value="By 2030">By 2030</option>
-                        <option value="By 2031">By 2031</option>
-                        <option value="By 2032">By 2032</option>
-                      </select>
-                    </div>
-                  )}
-                  {!(
-                    (buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      [
-                        "Land",
-                        "Plot/Land",
-                        "Industry",
-                        "Storage",
-                        "Hospitality",
-                      ].includes(propertyType))
-                  ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Age of Property
-                      </label>
-
-                      <select
-                        value={formData.age_of_property || ""}
-                        onChange={(e) =>
-                          handleInputChange("age_of_property", e.target.value)
-                        }
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Age of Property</option>
-                        <option value="0-1">0-1</option>
-                        <option value="2-4">2-4</option>
-                        <option value="5-7">5-7</option>
-                        <option value="8-10">8-10</option>
-                        <option value="10+">10+</option>
-                      </select>
-                    </div>
-                  )}
-                  {!(
-                    (buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      ["Land"].includes(propertyType))
-                  ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Furnishing Type{" "}
-                        <span className="text-xl font-bold text-red-500">
-                          *
-                        </span>
-                      </label>
-
-                      <select
-                        value={formData.furnished_type || ""}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            furnished_type: e.target.value,
-                          }))
-                        }
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Furnishing Type</option>
-                        <option value="Furnished">Furnished</option>
-                        <option value="Semi-Furnished">Semi-Furnished</option>
-                        <option value="Unfurnished">Unfurnished</option>
-                      </select>
-
-                      {errors?.furnished_type && (
-                        <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                          <MdErrorOutline className="text-lg" />
-                          {errors.furnished_type}
-                        </p>
+                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          >
+                            <option value="">Select Rating</option>
+                            <option value="No Rating">No Rating</option>
+                            <option value="1 Star">1 Star</option>
+                            <option value="2 Star">2 Star</option>
+                            <option value="3 Star">3 Star</option>
+                            <option value="4 Star">4 Star</option>
+                            <option value="5 Star">5 Star</option>
+                            <option value="6 Star">6 Star</option>
+                            <option value="7 Star">7 Star</option>
+                          </select>
+                        </div>
                       )}
-                    </div>
-                  )}
+                    {buildingType === "Residential" &&
+                      propertyType === "Independent/Builder Floor" && (
+                        <div>
+                          <label className="font-medium text-gray-700">
+                            Builder Floor Type{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
 
-                  {/* {!(
-                  (buildingType === "Residential" && propertyType === "Plot") ||
-                  (buildingType === "Commercial" &&
-                    [
-                      "Land",
-                      "Plot/Land",
-                      "Warehouse",
-                      "Storage",
-                      "Industry",
-                      "Hospitality",
-                    ].includes(propertyType))
-                ) && (
-                  <div>
-                    <label className="font-medium text-gray-700">Balcony</label>
+                          <select
+                            value={formData.builder_floor_type || ""}
+                            onChange={(e) =>
+                              handleInputChange(
+                                "builder_floor_type",
+                                e.target.value,
+                              )
+                            }
+                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          >
+                            <option value="">Select Floor Type</option>
+                            {builderFloorOptions.map((item) => (
+                              <option key={item} value={item}>
+                                {item}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    {((buildingType === "Residential" && propertyType === "Plot/Land") ||
+                      (buildingType === "Commercial" &&
+                        propertyType === "Plot/Land")) && (
+                        <div>
+                          <label className="font-medium text-gray-700">
+                            No. of Open Sides
+                          </label>
 
-                    <select
-                      name="balcony"
-                      value={formData.balcony || ""}
-                      onChange={handleInputChange}
-                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                    >
-                      <option value="">Select No. of Balconies</option>
-                      <option value="0">0</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="more than 3">More than 3</option>
-                    </select>
-                  </div>
-                )} */}
-                  {buildingType === "Residential" &&
-                    propertyType !== "Plot" && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Balcony
-                        </label>
+                          <select
+                            name="no_of_open_sides"
+                            value={formData.no_of_open_sides || ""}
+                            onChange={handleInputChange}
+                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          >
+                            <option value="">Select Open Sides</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                          </select>
+                        </div>
+                      )}
+                    {((buildingType === "Residential" && propertyType === "Plot/Land") ||
+                      (buildingType === "Commercial" &&
+                        propertyType === "Plot/Land")) && (
+                        <div>
+                          <label className="block mb-2 font-medium text-gray-700">
+                            Any Construction on Property
+                          </label>
 
-                        <select
-                          name="balcony"
-                          value={formData.balcony || ""}
-                          onChange={handleInputChange}
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select No. of Balconies</option>
-                          <option value="0">0</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="more than 3">More than 3</option>
-                        </select>
-                      </div>
-                    )}
-                  {!(
-                    (buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      [
-                        "Land",
-                        "Plot/Land",
-                        "Warehouse",
-                        "Storage",
-                        "Industry",
-                        "Hospitality",
-                      ].includes(propertyType))
-                  ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Lift Availability
-                      </label>
+                          <select
+                            name="type_of_construction"
+                            value={formData.type_of_construction || ""}
+                            onChange={handleInputChange}
+                            className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          >
+                            <option value="">Select Construction Type</option>
+                            {constructionOptions.map((item) => (
+                              <option key={item} value={item}>
+                                {item}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    {!(
+                      (buildingType === "Residential" && propertyType === "Plot/Land") ||
+                      (buildingType === "Commercial" &&
+                        [
+                          "Land",
+                          "Plot/Land",
+                          "Warehouse",
+                          "Storage",
+                          "Industry",
+                          "Hospitality",
+                        ].includes(propertyType))
+                    ) && (
+                        <div>
+                          <label className="font-medium text-gray-700">
+                            Lift Availability
+                          </label>
 
-                      <select
-                        value={formData.lift_availability || ""}
-                        onChange={(e) =>
-                          handleInputChange("lift_availability", e.target.value)
-                        }
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Lift Availability</option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                      </select>
-                    </div>
-                  )}
-                  {!(
-                    (buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      [
-                        "Land",
-                        "Plot/Land",
-                        "Warehouse",
-                        "Industry",
-                        "Storage",
-                        "Hospitality",
-                      ].includes(propertyType))
-                  ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Pantry
-                      </label>
-
-                      <select
-                        value={formData.pantry_option || ""}
-                        onChange={(e) =>
-                          handleInputChange("pantry_option", e.target.value)
-                        }
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Pantry</option>
-                        <option value="Wet">Wet</option>
-                        <option value="Dry">Dry</option>
-                        <option value="None">None</option>
-                      </select>
-                    </div>
-                  )}
-
-                  {buildingType === "Commercial" &&
-                    propertyType === "Office" && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Central AC
-                        </label>
-
-                        <select
-                          value={formData.central_AC || ""}
-                          onChange={(e) =>
-                            handleInputChange("central_AC", e.target.value)
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Option</option>
-                          <option value="Duct Only">Duct Only</option>
-                          <option value="Available">Available</option>
-                          <option value="Not Available">Not Available</option>
-                        </select>
-                      </div>
-                    )}
-                  {buildingType === "Commercial" &&
-                    propertyType === "Office" && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Reception Area
-                        </label>
-
-                        <select
-                          value={formData.reception_area || ""}
-                          onChange={(e) =>
-                            handleInputChange("reception_area", e.target.value)
-                          }
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Option</option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
-                        </select>
-                      </div>
-                    )}
-
-                  {/* {buildingType === "Commercial" &&
-                  [
-                    "Office Space",
-                    "Retail",
-                    "Storage",
-                    "Industry",
-                    "Hospitality",
-                  ].includes(propertyType) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Investment Option
-                      </label>
-
-                      <select
-                        name="investment_options"
-                        value={formData.investment_options || ""}
-                        onChange={handleInputChange}
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Investment Option</option>
-                        <option value="Pre-Leased Spaces">
-                          Pre-Leased Spaces
-                        </option>
-                        <option value="Restaurants">Restaurants</option>
-                        <option value="SCO Plots">SCO Plots</option>
-                        <option value="Business Center">Business Center</option>
-                        <option value="Food Court">Food Court</option>
-                        <option value="Multiplex">Multiplex</option>
-                        <option value="Co-working">Co-working</option>
-                      </select>
-                    </div>
-                  )}
-                {buildingType === "Commercial" &&
-                  [
-                    "Office Space",
-                    "Retail",
-                    "Storage",
-                    "Industry",
-                    "Hospitality",
-                  ].includes(propertyType) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Purchase Type
-                      </label>
-
-                      <select
-                        name="purchase_type"
-                        value={formData.purchase_type || ""}
-                        onChange={handleInputChange}
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Purchase Type</option>
-                        <option value="Resale">Resale</option>
-                        <option value="New Bookings">New Bookings</option>
-                      </select>
-                    </div>
-                  )} */}
-                  {buildingType === "Commercial" &&
-                    ["Office Space", "Retail"].includes(propertyType) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Personal Washroom
-                        </label>
-
-                        <select
-                          name="personal_washroom"
-                          value={formData.personal_washroom || ""}
-                          onChange={handleInputChange}
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select</option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
-                        </select>
-                      </div>
-                    )}
-                  {buildingType === "Commercial" &&
-                    propertyType === "Office" && (
+                          <select
+                            value={formData.lift_availability || ""}
+                            onChange={(e) =>
+                              handleInputChange("lift_availability", e.target.value)
+                            }
+                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          >
+                            <option value="">Select Lift Availability</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                          </select>
+                        </div>
+                      )}
+                    {buildingType === "Commercial" && propertyType === "Office" && (
                       <div>
                         <label className="font-medium text-gray-700">
                           Number of Seats Available
@@ -3379,350 +3656,379 @@ Make it engaging, attractive, and human-like.
                         />
                       </div>
                     )}
-                  {buildingType === "Residential" && propertyType === "PG" && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Available For{" "}
-                        <span className="text-xl font-bold text-red-500">
-                          *
-                        </span>
-                      </label>
+                    {buildingType === "Residential" && propertyType === "PG" && (
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Available For{" "}
+                          <span className="text-xl font-bold text-red-500">*</span>
+                        </label>
 
-                      <select
-                        value={formData.available_for || ""}
-                        onChange={(e) =>
-                          handleInputChange("available_for", e.target.value)
-                        }
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Availability</option>
-                        <option value="Girls">Girls</option>
-                        <option value="Boys">Boys</option>
-                        <option value="Family">Family</option>
-                        <option value="Single women">Single women</option>
-                        <option value="Single Men">Single Men</option>
-                      </select>
+                        <select
+                          value={formData.available_for || ""}
+                          onChange={(e) =>
+                            handleInputChange("available_for", e.target.value)
+                          }
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                        >
+                          <option value="">Select Availability</option>
+                          <option value="Girls">Girls</option>
+                          <option value="Boys">Boys</option>
+                          <option value="Family">Family</option>
+                          <option value="Single women">Single women</option>
+                          <option value="Single Men">Single Men</option>
+                        </select>
 
-                      {errors?.available_for && (
-                        <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                          <MdErrorOutline className="text-lg" />
-                          {errors.available_for}
-                        </p>
+                        {errors?.available_for && (
+                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <MdErrorOutline className="text-lg" />
+                            {errors.available_for}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {buildingType === "Residential" && propertyType === "PG" && (
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Room Type <span className="text-red-500">*</span>
+                        </label>
+
+                        <select
+                          value={formData.room_type || ""}
+                          onChange={(e) =>
+                            handleInputChange("room_type", e.target.value)
+                          }
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                        >
+                          <option value="">Select Room Type</option>
+                          <option value="Private">Private</option>
+                          <option value="Sharing">Sharing</option>
+                        </select>
+
+                        {errors?.room_type && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.room_type}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {buildingType === "Residential" &&
+                      propertyType === "PG" &&
+                      formData.room_type === "Sharing" && (
+                        <div>
+                          <label className="block mb-1 font-medium text-gray-700">
+                            How many people can share this room?
+                          </label>
+
+                          <select
+                            value={formData.no_of_peoples || ""}
+                            onChange={(e) =>
+                              handleInputChange("no_of_peoples", e.target.value)
+                            }
+                            className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          >
+                            <option value="">Select</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="4">4+</option>
+                          </select>
+                        </div>
                       )}
-                    </div>
-                  )}
-                  {buildingType === "Residential" && propertyType === "PG" && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Room Type <span className="text-red-500">*</span>
-                      </label>
+                    {buildingType === "Residential" && propertyType === "PG" && (
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Total Beds
+                        </label>
 
-                      <select
-                        value={formData.room_type || ""}
-                        onChange={(e) =>
-                          handleInputChange("room_type", e.target.value)
-                        }
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Room Type</option>
-                        <option value="Private">Private</option>
-                        <option value="Sharing">Sharing</option>
-                      </select>
-
-                      {errors?.room_type && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {errors.room_type}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  {buildingType === "Residential" &&
-                    propertyType === "PG" &&
-                    formData.room_type === "Sharing" && (
+                        <input
+                          type="text"
+                          value={formData.total_beds || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^\d*$/.test(value)) {
+                              handleInputChange("total_beds", value);
+                            }
+                          }}
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                        />
+                      </div>
+                    )}
+                    {buildingType === "Residential" && propertyType === "PG" && (
                       <div>
                         <label className="block mb-1 font-medium text-gray-700">
-                          How many people can share this room?
+                          Available Beds
                         </label>
 
-                        <select
-                          value={formData.no_of_peoples || ""}
-                          onChange={(e) =>
-                            handleInputChange("no_of_peoples", e.target.value)
-                          }
+                        <input
+                          type="text"
+                          value={formData.available_beds || ""}
+                          placeholder="Enter Available Beds"
+                          onChange={(e) => {
+                            const value = e.target.value;
+
+                            if (/^\d*$/.test(value)) {
+                              handleInputChange("available_beds", value);
+                            }
+                          }}
                           className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
-                          <option value="4">4+</option>
-                        </select>
+                        />
                       </div>
                     )}
-                  {buildingType === "Residential" && propertyType === "PG" && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Total Beds
-                      </label>
+                    {buildingType === "Residential" && propertyType === "PG" && (
+                      <div className="md:col-span-3 mt-4">
+                        <div className="flex flex-wrap gap-4">
+                          {/* Attached Balcony */}
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.attached_balcony === "Yes"}
+                              onChange={(e) =>
+                                handleInputChange(
+                                  "attached_balcony",
+                                  e.target.checked ? "Yes" : "No",
+                                )
+                              }
+                            />
+                            Attached Balcony
+                          </label>
 
-                      <input
-                        type="text"
-                        value={formData.total_beds || ""}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^\d*$/.test(value)) {
-                            handleInputChange("total_beds", value);
-                          }
-                        }}
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      />
-                    </div>
-                  )}
-                  {buildingType === "Residential" && propertyType === "PG" && (
-                    <div>
-                      <label className="block mb-1 font-medium text-gray-700">
-                        Available Beds
-                      </label>
+                          {/* Attached Bathroom */}
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={formData.attached_bathroom === "Yes"}
+                              onChange={(e) =>
+                                handleInputChange(
+                                  "attached_bathroom",
+                                  e.target.checked ? "Yes" : "No",
+                                )
+                              }
+                            />
+                            Attached Bathroom
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                    {!(
+                      (buildingType === "Residential" && propertyType === "Plot/Land") ||
+                      (buildingType === "Commercial" &&
+                        [
+                          "Land",
+                          "Plot/Land",
+                          "Industry",
+                          "Storage",
+                          "Hospitality",
+                          "Retail",
+                        ].includes(propertyType))
+                    ) && (
+                        <div>
+                          <label className="font-medium text-gray-700">
+                            Parking Availability
+                          </label>
 
-                      <input
-                        type="text"
-                        value={formData.available_beds || ""}
-                        placeholder="Enter Available Beds"
-                        onChange={(e) => {
-                          const value = e.target.value;
+                          <select
+                            value={formData.parking_availability || ""}
+                            onChange={(e) =>
+                              handleInputChange(
+                                "parking_availability",
+                                e.target.value,
+                              )
+                            }
+                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          >
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                          </select>
+                        </div>
+                      )}
+                    {!(
+                      (buildingType === "Residential" && propertyType === "Plot/Land") ||
+                      (buildingType === "Commercial" &&
+                        [
+                          "Land",
+                          "Plot/Land",
+                          "Industry",
+                          "Storage",
+                          "Hospitality",
+                        ].includes(propertyType))
+                    ) &&
+                      formData.parking_availability === "Yes" && (
+                        <div>
+                          <label className="font-medium text-gray-700">
+                            Covered Car Parking
+                          </label>
 
-                          if (/^\d*$/.test(value)) {
-                            handleInputChange("available_beds", value);
-                          }
-                        }}
-                        className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      />
-                    </div>
-                  )}
-                  {buildingType === "Residential" && propertyType === "PG" && (
-                    <div className="md:col-span-3 mt-4">
-                      <div className="flex flex-wrap gap-4">
-                        {/* Attached Balcony */}
+                          <select
+                            value={formData.covered_parking || ""}
+                            onChange={(e) =>
+                              handleInputChange("covered_parking", e.target.value)
+                            }
+                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          >
+                            <option value="">Select Covered Car Parking</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="6+">6+</option>
+                            <option value="NA">NA</option>
+                          </select>
+                        </div>
+                      )}
+                    {!(
+                      (buildingType === "Residential" && propertyType === "Plot/Land") ||
+                      (buildingType === "Commercial" &&
+                        [
+                          "Land",
+                          "Plot/Land",
+                          "Industry",
+                          "Storage",
+                          "Hospitality",
+                        ].includes(propertyType))
+                    ) &&
+                      formData.parking_availability === "Yes" && (
+                        <div>
+                          <label className="font-medium text-gray-700">
+                            Open Car Parking
+                          </label>
+
+                          <select
+                            value={formData.uncovered_parking || ""}
+                            onChange={(e) =>
+                              handleInputChange("uncovered_parking", e.target.value)
+                            }
+                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          >
+                            <option value="">Select Open Car Parking</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="6+">6+</option>
+                            <option value="NA">NA</option>
+                          </select>
+                        </div>
+                      )}
+                    <div className="md:col-span-3 mt-2">
+                      <div className="flex flex-wrap gap-4 mt-2">
+                        {/* All Inclusive Price */}
                         <label className="flex items-center gap-2">
                           <input
                             type="checkbox"
-                            checked={formData.attached_balcony === "Yes"}
+                            checked={formData.all_inclusive_price === "Yes"}
                             onChange={(e) =>
-                              handleInputChange(
-                                "attached_balcony",
-                                e.target.checked ? "Yes" : "No",
-                              )
+                              setFormData({
+                                ...formData,
+                                all_inclusive_price: e.target.checked
+                                  ? "Yes"
+                                  : "No",
+                              })
                             }
                           />
-                          Attached Balcony
+                          All Inclusive Price
                         </label>
-
-                        {/* Attached Bathroom */}
+                        {/* Price Onwards */}
                         <label className="flex items-center gap-2">
                           <input
                             type="checkbox"
-                            checked={formData.attached_bathroom === "Yes"}
+                            checked={formData.price_onwards === "Yes"}
                             onChange={(e) =>
-                              handleInputChange(
-                                "attached_bathroom",
-                                e.target.checked ? "Yes" : "No",
-                              )
+                              setFormData({
+                                ...formData,
+                                price_onwards: e.target.checked ? "Yes" : "No",
+                              })
                             }
                           />
-                          Attached Bathroom
+                          Price Onwards
+                        </label>
+                        {/* Price Negotiable */}
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={formData.price_negotiable === "Yes"}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                price_negotiable: e.target.checked ? "Yes" : "No",
+                              })
+                            }
+                          />
+                          Price Negotiable
+                        </label>
+
+                        {/* Tax & Govt Charges */}
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={formData.tax_and_goverment_charges === "Yes"}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                tax_and_goverment_charges: e.target.checked
+                                  ? "Yes"
+                                  : "No",
+                              })
+                            }
+                          />
+                          Tax & Government Charges Excluded
                         </label>
                       </div>
                     </div>
-                  )}
-                  {[
-                    "Apartment",
-                    "1RK/Studio Apartment",
-                    "Service Apartment",
-                    "Office",
-                  ].includes(propertyType) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Parking Availability
-                      </label>
-
-                      <select
-                        value={formData.parking_availability || ""}
-                        onChange={(e) => {
-                          const value = e.target.value;
-
-                          setFormData((prev) => ({
-                            ...prev,
-
-                            parking_availability: value,
-
-                            covered_parking:
-                              value === "No" ? "NA" : prev.covered_parking,
-                            uncovered_parking:
-                              value === "No" ? "NA" : prev.uncovered_parking,
-                          }));
-                        }}
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Parking Availability</option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                      </select>
-                    </div>
-                  )}
-
-                  {!(
-                    (buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      [
-                        "Land",
-                        "Plot/Land",
-                        "Industry",
-                        "Storage",
-                        "Hospitality",
-                      ].includes(propertyType))
-                  ) &&
-                    formData.parking_availability === "Yes" && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Covered Car Parking
-                        </label>
-
-                        <select
-                          value={formData.covered_parking || ""}
-                          onChange={(e) => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              covered_parking: e.target.value,
-                            }));
-                          }}
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Covered Car Parking</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
-                          <option value="5">5</option>
-                          <option value="6">6</option>
-                          <option value="6+">6+</option>
-                          <option value="NA">NA</option>
-                        </select>
-                      </div>
-                    )}
-                  {!(
-                    (buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (buildingType === "Commercial" &&
-                      [
-                        "Land",
-                        "Plot/Land",
-                        "Industry",
-                        "Storage",
-                        "Hospitality",
-                      ].includes(propertyType))
-                  ) &&
-                    formData.parking_availability === "Yes" && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Open Car Parking
-                        </label>
-
-                        <select
-                          value={formData.uncovered_parking || ""}
-                          onChange={(e) => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              uncovered_parking: e.target.value,
-                            }));
-                          }}
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select Open Car Parking</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
-                          <option value="5">5</option>
-                          <option value="6">6</option>
-                          <option value="6+">6+</option>
-                          <option value="NA">NA</option>
-                        </select>
-                      </div>
-                    )}
-                </div>
-
-                <div className="p-3 mx-auto mb-16 bg-white border max-w-7xl rounded-xl">
-                  {/* Header Section */}
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-semibold text-gray-900">
-                      Project Info
-                    </h2>
-
-                    <p className="text-gray-500">
-                      Details about the project, including an overview and
-                      description that provides insight into the project's
-                      purpose, goals, and unique aspects.
-                    </p>
                   </div>
 
-                  {/* Form Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-[2.9fr_1fr] gap-4">
-                    {/* About Project */}
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <label className="block font-medium text-gray-700">
+                  <div className="p-3 mx-auto mb-16 bg-white border max-w-7xl rounded-xl">
+                    {/* Header Section */}
+                    <div className="mb-6">
+                      <h2 className="text-2xl font-semibold text-gray-900">
+                        Project Info
+                      </h2>
+                      <p className="text-gray-500">
+                        Details about the project, including an overview and
+                        description that provides insight into the project's
+                        purpose, goals, and unique aspects.
+                      </p>
+                    </div>
+
+                    {/* Form Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-[2.9fr_1fr]">
+                      {/* About Project  */}
+                      <div>
+                        <label className="block mb-2 font-medium text-gray-700">
                           About Project
                         </label>
-
-                        <button
-                          type="button"
-                          onClick={generateDescription}
-                          disabled={isGeneratingDescription}
-                          className="px-4 py-2 text-sm text-white transition rounded-lg bg-rose-500 hover:bg-rose-600 disabled:opacity-50"
-                        >
-                          {isGeneratingDescription
-                            ? "Generating..."
-                            : "Generate with AI"}
-                        </button>
-                      </div>
-
-                      <textarea
-                        value={description}
-                        onChange={(e) => {
-                          const value = e.target.value;
-
-                          setDescription(value);
-
-                          setFormData((prev) => ({
-                            ...prev,
-                            project_description: value,
-                          }));
-                        }}
-                        placeholder="Enter project description"
-                        className="w-full h-40 p-3 text-gray-700 border rounded-md outline-none focus:ring-2 focus:ring-rose-500"
-                      />
-
-                      <div className="flex justify-between mt-2">
-                        <p className="text-sm text-gray-500">
-                          AI generated professional real estate description
-                        </p>
-
-                        <p
-                          className={`text-sm ${
-                            description?.length > 700
-                              ? "text-red-500"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          {description?.length || 0}/700
-                        </p>
+                        <div className="flex justify-end mb-2">
+                          <button
+                            type="button"
+                            onClick={generateDescription}
+                            disabled={isGeneratingDescription}
+                            className="px-4 py-2 text-white rounded-lg bg-rose-500 hover:bg-rose-600 disabled:opacity-50"
+                          >
+                            {isGeneratingDescription
+                              ? "Generating..."
+                              : "Generate Description"}
+                          </button>
+                        </div>
+                        <textarea
+                          type="text"
+                          value={description}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setDescription(value);
+                          }}
+                          className="w-full h-40 p-3 text-gray-700 border rounded-md outline-none focus:ring-2 focus:ring-rose-500"
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
               </>
             )}
+
 
             {activeStep === 3 && (
               <>
@@ -4086,7 +4392,6 @@ Make it engaging, attractive, and human-like.
                         onChange={(e) => setVirtualTourLink(e.target.value)}
                         className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-lg"
                       >
-                        {/* <option value="">Select Virtual Tour Available?</option> */}
                         <option value="No">No</option>
                         <option value="Yes">Yes</option>
                       </select>
@@ -4164,9 +4469,8 @@ Make it engaging, attractive, and human-like.
 
             {/* Navigation Buttons - Fixed at Bottom */}
             <div
-              className={`fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md flex mx-32 ${
-                activeStep === 0 ? "justify-end" : "justify-between"
-              }`}
+              className={`fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md flex mx-32 ${activeStep === 0 ? "justify-end" : "justify-between"
+                }`}
             >
               {" "}
               {activeStep > 0 && (
