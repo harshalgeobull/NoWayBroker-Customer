@@ -52,7 +52,8 @@ const AddNewProject = () => {
 
   const [totalProjectSize, setTotalProjectSize] = useState("");
   const [averagePrice, setAveragePrice] = useState("");
-  const [configurations, setConfigurations] = useState([]);
+
+  const [configurations, setConfigurations] = useState("");
   const [launchDate, setLaunchDate] = useState("");
   const [possessionStart, setPossessionStart] = useState("");
   const [constructionStatus, setConstructionStatus] = useState("");
@@ -102,18 +103,76 @@ const AddNewProject = () => {
   const [completedSteps, setCompletedSteps] = useState([]);
   const [companyLogo, setCompanyLogo] = useState(null);
   const companyLogoInputRef = useRef(null);
-  const [officeSubType, setOfficeSubType] = useState("");
-  const [landType, setLandType] = useState("");
-  const [retailType, setRetailType] = useState("");
-  const [storageType, setStorageType] = useState("");
-  const [industryType, setIndustryType] = useState("");
-  const [hospitalityType, setHospitalityType] = useState("");
-  const [RetailSubType, setRetailSubType] = useState("");
-  const [retailLocation, setRetailLocation] = useState("");
+  //const [officeSubType, setOfficeSubType] = useState("");
+  //const [landType, setLandType] = useState("");
+  //const [retailType, setRetailType] = useState("");
+  // const [storageType, setStorageType] = useState("");
+  // const [industryType, setIndustryType] = useState("");
+  // const [hospitalityType, setHospitalityType] = useState("");
+  // const [RetailSubType, setRetailSubType] = useState("");
+  // const [retailLocation, setRetailLocation] = useState("");
   const [retailWashroom, setRetailWashroom] = useState("");
   const [totalNumberParking, setTotalNumberParking] = useState("");
   const [parkingTypes, setParkingTypes] = useState("");
   const [formErrors, setFormErrors] = useState({});
+  const emptyProjectProperty = {
+  project_type: "",
+  sub_project_type: "",
+  retail_location: "",
+  sub_sub_project_type: "",
+  price: "",
+  bhk_type: "",
+  carpet_area: "",
+  carpet_area_in: "",
+  area: "",
+  area_in: "",
+  bathroom: "",
+  commercial_washroom: "",
+  total_floor: "",
+  project_floor: "",
+  no_of_cabines: "",
+  no_of_meeting_Rooms: "",
+  no_of_conference_room: "",
+  total_number_of_rooms: "",
+  facing: "",
+  property_dimensions_length: "",
+  property_dimensions_breadth: "",
+  no_of_open_sides: "",                                       
+  parking_types: "",                  
+  number_of_seats_available: "",      
+  purchase_type: "",
+  age_of_property: "",
+  furnished_type: "",
+  balcony: "",
+  pantry_option: "",
+  central_AC: "",
+  reception_area: "",
+  personal_washroom: "",
+};
+
+  const [projectProperties, setProjectProperties] = useState([
+  { ...emptyProjectProperty },
+  ]);
+  const handleProjectPropertyChange = (index, key, value) => {
+  setProjectProperties((prev) => {
+    const updated = [...prev];
+    updated[index] = {
+      ...updated[index],
+      [key]: value,
+    };
+    return updated;
+  });
+};
+const handleDeleteProjectProperty = (index) => {
+  if (projectProperties.length === 1) {
+    toast.error("At least one project property is required.");
+    return;
+  }
+
+  setProjectProperties((prev) =>
+    prev.filter((_, i) => i !== index)
+  );
+};
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
   const buildPrompt = () => {
@@ -191,6 +250,7 @@ Make it engaging, attractive, and human-like.
   ];
   const builderFloorOptions = ["Single Floor", "Duplex", "Triplex"];
   const constructionOptions = ["Shed", "Rooms", "Washroom", "Others"];
+  
   const CustomMultiValue = (props) => {
     return (
       <div className="flex items-center bg-purple-100 text-purple-700 px-2 py-1 rounded">
@@ -245,6 +305,17 @@ Make it engaging, attractive, and human-like.
       });
     }
   };
+//   const handleProjectPropertyChange = (index, field, value) => {
+//   const updated = [...projectProperties];
+
+//   updated[index] = {
+//     ...updated[index],
+//     [field]: value,
+//   };
+
+//   setProjectProperties(updated);
+// };
+
   useEffect(() => {
     const countries = Country.getAllCountries();
     setAllCountries(countries);
@@ -258,6 +329,78 @@ Make it engaging, attractive, and human-like.
       setAllStates([]);
     }
   }, [country]);
+  useEffect(() => {
+  const prices = projectProperties
+    .map((property) => Number(property.price))
+    .filter((price) => !isNaN(price) && price > 0);
+
+  if (prices.length === 0) {
+    setAveragePrice("");
+    return;
+  }
+
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+
+  setAveragePrice(
+    minPrice === maxPrice
+      ? `${minPrice}`
+      : `${minPrice}-${maxPrice}`
+  );
+}, [projectProperties]);
+useEffect(() => {
+  const bhkOrder = [
+    "Studio/Single Room",
+    "1 BHK",
+    "1.5 BHK",
+    "2 BHK",
+    "2.5 BHK",
+    "3 BHK",
+    "3.5 BHK",
+    "4 BHK",
+    "5 BHK",
+    "6 BHK",
+    "6+ BHK",
+  ];
+
+  const selected = [
+    ...new Set(
+      projectProperties
+        .map((property) => property.bhk_type)
+        .filter(Boolean)
+    ),
+  ];
+
+  const sorted = bhkOrder.filter((bhk) => selected.includes(bhk));
+
+  const formatted = sorted.map((bhk) => {
+    if (bhk === "Studio/Single Room") return bhk;
+    return bhk.replace(" BHK", "");
+  });
+
+  if (formatted.length === 0) {
+    setConfigurations("");
+    return;
+  }
+
+  const hasStudio = formatted.includes("Studio/Single Room");
+  const onlyNumbers = formatted.filter((item) => item !== "Studio/Single Room");
+
+  let result = "";
+
+  if (hasStudio) {
+    result += "Studio/Single Room";
+    if (onlyNumbers.length) {
+      result += ", ";
+    }
+  }
+
+  if (onlyNumbers.length) {
+    result += `${onlyNumbers.join(", ")} BHK`;
+  }
+
+  setConfigurations(result);
+}, [projectProperties]);
 
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
@@ -454,7 +597,7 @@ Make it engaging, attractive, and human-like.
     area: "",
     area_in: "",
     carpet_area: "",
-    carpet_area_unit: "",
+    carpet_area_in: "",
 
     custom_deposit_amount: "",
     total_beds: "",
@@ -564,9 +707,10 @@ Make it engaging, attractive, and human-like.
 
     setIsSubmitting(true);
     const apiFormData = new FormData();
-    console.log("Furnished:", formData.furnished_type);
-    console.log("React State:", formData);
-    console.log("Furnished Value:", formData.furnished_type);
+    //const projectPropertyFormData = new FormData();
+    // console.log("Furnished:", formData.furnished_type);
+    // console.log("React State:", formData);
+    // console.log("Furnished Value:", formData.furnished_type);
     const projectData = {
       user_id: userId,
       user_type: user_type,
@@ -584,7 +728,7 @@ Make it engaging, attractive, and human-like.
       project_name: projectName,
       mark_as_featured: isFeatured ? "Yes" : "No",
       building_type: buildingType,
-      project_type: propertyType,
+      //project_type: propertyType,
       address: address,
       city_name: city,
       state: state,
@@ -634,10 +778,10 @@ Make it engaging, attractive, and human-like.
       purchase_type: formData.purchase_type,
       average_project_price: formData.average_project_price,
       bhk_type: formData.bhk_type,
-      area: formData.area,
+      area: 1,
       area_in: formData.area_in,
       carpet_area: formData.carpet_area,
-      carpet_area_unit: formData.carpet_area_unit,
+      carpet_area_in: formData.carpet_area_in,
       bathroom: formData.bathroom,
       all_inclusive_price: formData.all_inclusive_price,
       price_negotiable: formData.price_negotiable,
@@ -675,7 +819,7 @@ Make it engaging, attractive, and human-like.
     Object.entries(projectData).forEach(([key, value]) => {
       apiFormData.append(key, value ?? "");
     });
-
+    
     if (coverImage instanceof File) {
       apiFormData.append("cover_image", coverImage);
     }
@@ -695,25 +839,74 @@ Make it engaging, attractive, and human-like.
       apiFormData.append("address_area", addressArea);
     }
 
-    try {
-      const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/cust_api/post_project`,
-        {
-          method: "POST",
-          body: apiFormData,
-        },
-      );
+   try {
+    console.log([...apiFormData.entries()]);
+  const res = await fetch(
+    `${process.env.REACT_APP_API_URL}/cust_api/post_project`,
+    {
+      method: "POST",
+      body: apiFormData,
+    },
+  );
 
-      toast.success("Project Data Uploaded successfully.");
-      history.push({
-        pathname: "/dashboard",
-        state: { page: "myProjects" },
-      });
-    } catch (error) {
-      toast.error("An unexpected error occurred. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+  const result = await res.json();
+
+  if (result.status === "1") {
+    const projectId = result.data._id;
+
+    console.log("Project ID:", projectId);
+
+for (const property of projectProperties) {
+  const projectPropertyFormData = new FormData();
+
+  projectPropertyFormData.append("project_id", projectId);
+  projectPropertyFormData.append(
+  "price",
+  property.price ?? ""
+);
+
+Object.entries(property).forEach(([key, value]) => {
+  if (key !== "price") {
+    projectPropertyFormData.append(key, value ?? "");
+  }
+});
+
+  console.log(
+    "Project Property FormData:",
+    [...projectPropertyFormData.entries()]
+  );
+
+  const propertyRes = await fetch(
+    `${process.env.REACT_APP_API_URL}/cust_api/add_project_property`,
+    {
+      method: "POST",
+      body: projectPropertyFormData,
     }
+  );
+
+  const propertyResult = await propertyRes.json();
+
+  console.log(propertyResult);
+}
+
+
+
+
+    toast.success("Project Data Uploaded successfully.");
+
+    history.push({
+      pathname: "/dashboard",
+      state: { page: "myProjects" },
+    });
+  } else {
+    toast.error(result.msg || "Failed to upload project.");
+  }
+   
+} catch (error) {
+  toast.error("An unexpected error occurred. Please try again.");
+} finally {
+  setIsSubmitting(false);
+}
   };
 
   const handlePlaceChanged = () => {
@@ -840,42 +1033,47 @@ Make it engaging, attractive, and human-like.
     }
 
     if (activeStep === 2) {
-      if (!formData.average_project_price) {
-        newErrors.average_project_price = "Price is required";
-      }
+  projectProperties.forEach((property, index) => {
+    if (!property.price) {
+  newErrors[`price_${index}`] = "Price is required";
+}
 
-      if (buildingType !== "Commercial" && propertyType !== "Plot/Land") {
-        if (!formData.bhk_type) {
-          newErrors.bhk_type = "BHK is required";
-        }
-      }
-
-      if (!formData.carpet_area) {
-        newErrors.carpet_area = "Carpet area is required";
-      }
-
-      if (!formData.carpet_area_unit) {
-        newErrors.carpet_area_unit = "Carpet area unit is required";
-      }
-
-      if (!formData.area) {
-        newErrors.area = "Built-up area is required";
-      }
-
-      if (!formData.area_in) {
-        newErrors.area_in = "Built-up area unit is required";
-      }
-
-      if (!formData.possession_status) {
-        newErrors.possession_status = "Construction Status is required";
-      }
-
-      if (formData.possession_status === "Under Construction") {
-        if (!formData.possession_date) {
-          newErrors.possession_date = "Possession Date is required";
-        }
+    if (buildingType !== "Commercial" && propertyType !== "Plot/Land") {
+      if (!property.bhk_type) {
+        newErrors[`bhk_type_${index}`] = "BHK is required";
       }
     }
+
+    if (!property.carpet_area) {
+      newErrors[`carpet_area_${index}`] = "Carpet area is required";
+    }
+
+    if (!property.carpet_area_in) {
+      newErrors[`carpet_area_in_${index}`] = "Carpet area unit is required";
+    }
+
+    if (!property.area) {
+      newErrors[`area_${index}`] = "Built-up area is required";
+    }
+
+    if (!property.area_in) {
+      newErrors[`area_in_${index}`] = "Built-up area unit is required";
+    }
+
+    // if (!property.possession_status) {
+    //   newErrors[`possession_status_${index}`] =
+    //     "Construction Status is required";
+    // }
+
+    // if (
+    //   property.possession_status === "Under Construction" &&
+    //   !property.possession_date
+    // ) {
+    //   newErrors[`possession_date_${index}`] =
+    //     "Possession Date is required";
+    // }
+  });
+}
 
     if (activeStep === 3) {
       if (selectedAmenities.length === 0) {
@@ -898,7 +1096,7 @@ Make it engaging, attractive, and human-like.
         delete newErrors.companyLogo;
       }
     }
-
+    console.log("Validation Errors:", newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -1033,8 +1231,6 @@ Make it engaging, attractive, and human-like.
                           setFormData((prev) => ({
                             ...prev,
                             bhk_type: "",
-                            office_type: "",
-                            land_type: "",
                           }));
                         }}
                         className={`px-4 py-2 rounded-full border ${
@@ -1070,7 +1266,7 @@ Make it engaging, attractive, and human-like.
 )} */}
 
                 {/* Property Type */}
-                <div className="mb-4">
+                {/* <div className="mb-4">
                   <label className="block mb-1 font-medium text-gray-700">
                     Project Type{" "}
                     <span className="text-xl font-bold text-red-500">*</span>
@@ -1310,7 +1506,7 @@ Make it engaging, attractive, and human-like.
                       ))}
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
             </>
           )}
@@ -1556,8 +1752,241 @@ Make it engaging, attractive, and human-like.
                     project Properties.
                   </p>
                 </div>
+                {projectProperties.map((projectProperty, index) => (
+                  <div
+                      key={index}
+                      className="mb-6 border border-gray-200 rounded-xl p-4"
+                        >
+                          <div className="flex items-center justify-between mb-4">
+  <h3 className="text-lg font-semibold">
+    Property {index + 1}
+  </h3>
 
-                <div className="grid items-start grid-cols-6 gap-4 p-4 mt-4 rounded-lg">
+  {projectProperties.length > 1 && (
+    <button
+      type="button"
+      onClick={() => handleDeleteProjectProperty(index)}
+      className="px-3 py-1 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600"
+    >
+      Delete
+    </button>
+  )}
+</div>
+                  <div className="grid items-start grid-cols-6 gap-4 p-4 mt-4 rounded-lg">
+                    <div className="col-span-6">
+                    <div className="mb-4">
+                  <label className="block mb-1 font-medium text-gray-700">
+                    Project Type{" "}
+                    <span className="text-xl font-bold text-red-500">*</span>
+                  </label>
+                  <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1">
+                      {(buildingType === "Residential"
+  ? residentialTypes
+  : commercialTypes
+).map((type) => (
+  <button
+    key={type}
+    type="button"
+    onClick={() =>
+      handleProjectPropertyChange(index, "project_type", type)
+    }
+    className={`px-4 py-2 rounded-full border ${
+      projectProperty.project_type === type
+        ? "bg-rose-100 text-rose-700 border-rose-500"
+        : "border-gray-300 text-gray-600"
+    }`}
+  >
+    {type === "Plot/Land" ? "Land" : type}
+  </button>
+))}
+                    </div>
+                  </div>
+                </div>
+                {projectProperty.project_type === "Hospitality" && (
+                  <div className="mt-4">
+                    <label className="block mb-1 font-medium text-gray-700">
+                      What kind of hospitality?
+                    </label>
+
+                    <div className="flex flex-wrap gap-2">
+                      {hospitalityOptions.map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          className={`px-4 py-2 rounded-full border transition ${
+  projectProperty.sub_project_type === type
+    ? "bg-rose-100 text-rose-700 border-rose-500"
+    : "border-gray-300 text-gray-600 hover:bg-gray-100"
+}`}
+onClick={() => {
+  handleProjectPropertyChange(index, "sub_project_type", type);
+}}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {projectProperty.project_type === "Plot/Land" && (
+                  <div className="mt-4">
+                    <label className="block mb-1 font-medium text-gray-700">
+                      What kind of land?
+                    </label>
+
+                    <div className="flex flex-wrap gap-2">
+                      {landOptions.map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          className={`px-4 py-2 rounded-full border transition ${
+  projectProperty.sub_project_type === type
+    ? "bg-rose-100 text-rose-700 border-rose-500"
+    : "border-gray-300 text-gray-600 hover:bg-gray-100"
+}`}
+onClick={() => {
+  handleProjectPropertyChange(index, "sub_project_type", type);
+}}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {projectProperty.project_type === "Industry" && (
+                  <div className="mt-4">
+                    <label className="block mb-1 font-medium text-gray-700">
+                      What kind of industry?
+                    </label>
+
+                    <div className="flex flex-wrap gap-2">
+                      {industryOptions.map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          className={`px-4 py-2 rounded-full border transition ${
+  projectProperty.sub_project_type === type
+    ? "bg-rose-100 text-rose-700 border-rose-500"
+    : "border-gray-300 text-gray-600 hover:bg-gray-100"
+}`}
+onClick={() => {
+  handleProjectPropertyChange(index, "sub_project_type", type);
+}}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {projectProperty.project_type === "Storage" && (
+                  <div className="mt-4">
+                    <label className="block mb-1 font-medium text-gray-700">
+                      What kind of storage?
+                    </label>
+
+                    <div className="flex flex-wrap gap-2">
+                      {storageOptions.map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          className={`px-4 py-2 rounded-full border transition ${
+  projectProperty.sub_project_type === type
+    ? "bg-rose-100 text-rose-700 border-rose-500"
+    : "border-gray-300 text-gray-600 hover:bg-gray-100"
+}`}
+onClick={() => {
+  handleProjectPropertyChange(index, "sub_project_type", type);
+}}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {projectProperty.project_type === "Office" && (
+                  <div className="mt-4">
+                    <label className="block mb-1 font-medium text-gray-700">
+                      What kind of office?
+                    </label>
+
+                    <div className="flex flex-wrap gap-2">
+                      {officeOptions.map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          className={`px-4 py-2 rounded-full border transition ${
+  projectProperty.sub_project_type === type
+    ? "bg-rose-100 text-rose-700 border-rose-500"
+    : "border-gray-300 text-gray-600 hover:bg-gray-100"
+}`}
+onClick={() => {
+  handleProjectPropertyChange(index, "sub_project_type", type);
+}}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {projectProperty.project_type === "Retail" && (
+                  <div className="mt-4">
+                    <label className="block mb-1 font-medium text-gray-700">
+                      What kind of retail?
+                    </label>
+
+                    <div className="flex flex-wrap gap-2">
+                      {retailOptions.map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          className={`px-4 py-2 rounded-full border transition ${
+                            projectProperty.sub_project_type === type
+                              ? "bg-rose-100 text-rose-700 border-rose-500"
+                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                          }`}
+                          onClick={() => {
+                            handleProjectPropertyChange(index, "sub_project_type", type);
+                          }}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {projectProperty.project_type === "Retail" &&
+  projectProperty.sub_project_type && (
+                  <div className="mt-4">
+                    <label className="block mb-1 font-medium text-gray-700">
+                      Your Retail located inside?
+                    </label>
+
+                    <div className="flex flex-wrap gap-2">
+                      {retailLocationOptions.map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          className={`px-4 py-2 rounded-full border transition ${
+                            projectProperty.retail_location === type
+                              ? "bg-rose-100 text-rose-700 border-rose-500"
+                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                          }`}
+                          onClick={() => {
+                             handleProjectPropertyChange(index, "retail_location", type);
+                          }}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                </div>
                   {/* Property Price */}
                   <div className="w-full">
                     <label className="block mb-0 text-sm font-medium text-gray-700">
@@ -1567,33 +1996,29 @@ Make it engaging, attractive, and human-like.
                     <input
                       type="text"
                       value={
-                        formData.average_project_price
-                          ? Number(
-                              formData.average_project_price,
-                            ).toLocaleString("en-IN")
-                          : ""
-                      }
+  projectProperty.price
+    ? Number(projectProperty.price).toLocaleString("en-IN")
+    : ""
+}
                       onChange={(e) => {
                         const rawValue = e.target.value.replace(/,/g, "");
 
                         if (/^\d{0,20}$/.test(rawValue)) {
-                          handleInputChange("average_project_price", rawValue);
+                          handleProjectPropertyChange(index, "price", rawValue);
                         }
                       }}
                       placeholder="₹"
                       className="w-full mt-1 p-3 border rounded-lg text-gray-700 outline-none focus:ring-2 focus:ring-rose-500"
                     />
-                    {formData.average_project_price && (
-                      <p className="mt-2 text-sm font-medium text-gray-600">
-                        {toWords.convert(
-                          Number(formData.average_project_price),
-                        )}
-                      </p>
-                    )}
-                    {errors.average_project_price && (
+                    {projectProperty.price && (
+  <p className="mt-2 text-sm font-medium text-gray-600">
+    {toWords.convert(Number(projectProperty.price))}
+  </p>
+)}
+                    {errors[`price_${index}`] && (
                       <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
                         <MdErrorOutline className="text-lg" />
-                        {errors.average_project_price}
+                        {errors[`price_${index}`]}
                       </p>
                     )}
                   </div>
@@ -1601,7 +2026,7 @@ Make it engaging, attractive, and human-like.
                   {/* BHK */}
                   {!(
                     buildingType === "Commercial" ||
-                    propertyType === "Plot/Land"
+                    propertyType.project_type === "Plot/Land"
                   ) && (
                     <div className="w-full">
                       <label className="block mb-1 text-sm font-medium text-gray-700">
@@ -1612,16 +2037,16 @@ Make it engaging, attractive, and human-like.
                       </label>
 
                       <select
-                        value={formData.bhk_type || ""}
+                        value={projectProperty.bhk_type || ""}
                         onChange={(e) => {
-                          handleInputChange("bhk_type", e.target.value);
-                          setConfigurations(e.target.value);
-                        }}
+  handleProjectPropertyChange(index, "bhk_type", e.target.value);
+  setConfigurations(e.target.value);
+}}
                         className="w-full mt-1 p-3 border rounded-lg text-gray-700 outline-none focus:ring-2 focus:ring-rose-500"
                       >
                         <option value="">Select BHK Type</option>
 
-                        {(propertyType === "1RK/Studio Apartment"
+                        {(propertyType.project_type === "1RK/Studio Apartment"
                           ? ["1 BHK"]
                           : [
                               "Studio/Single Room",
@@ -1659,11 +2084,11 @@ Make it engaging, attractive, and human-like.
                     </label>
                     <input
                       type="text"
-                      value={formData.carpet_area || ""}
+                      value={projectProperty.carpet_area || ""}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (/^\d{0,10}$/.test(value)) {
-                          handleInputChange("carpet_area", value);
+                          handleProjectPropertyChange(index, "carpet_area", value);
                         }
                       }}
                       className="w-full mt-1 p-3 border rounded-lg"
@@ -1673,9 +2098,9 @@ Make it engaging, attractive, and human-like.
                   <div>
                     <label className="font-medium text-gray-700">Unit</label>
                     <select
-                      value={formData.carpet_area_unit || ""}
+                      value={projectProperty.carpet_area_in || ""}
                       onChange={(e) =>
-                        handleInputChange("carpet_area_unit", e.target.value)
+                        handleProjectPropertyChange(index, "carpet_area_in", e.target.value)
                       }
                       className="w-full mt-1 p-3 border rounded-lg"
                     >
@@ -1708,11 +2133,11 @@ Make it engaging, attractive, and human-like.
                     </label>
                     <input
                       type="text"
-                      value={formData.area || ""}
+                      value={projectProperty.area || ""}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (/^\d{0,10}$/.test(value)) {
-                          handleInputChange("area", value);
+                          handleProjectPropertyChange(index, "area", value);
                         }
                       }}
                       className="w-full mt-1 p-3 border rounded-lg"
@@ -1722,9 +2147,9 @@ Make it engaging, attractive, and human-like.
                   <div>
                     <label className="font-medium text-gray-700">Unit</label>
                     <select
-                      value={formData.area_in || ""}
+                      value={projectProperty.area_in || ""}
                       onChange={(e) =>
-                        handleInputChange("area_in", e.target.value)
+                        handleProjectPropertyChange(index, "area_in", e.target.value)
                       }
                       className="w-full mt-1 p-3 border rounded-lg"
                     >
@@ -1752,7 +2177,7 @@ Make it engaging, attractive, and human-like.
 
                   {!(
                     (buildingType === "Residential" &&
-                      propertyType === "Plot") ||
+                      projectProperty.project_type === "Plot/Land") ||
                     (buildingType === "Commercial" &&
                       [
                         "Land",
@@ -1762,7 +2187,7 @@ Make it engaging, attractive, and human-like.
                         "Retail",
                         "Warehouse",
                         "Plot/Land",
-                      ].includes(propertyType))
+                      ].includes(projectProperty.project_type))
                   ) && (
                     <div>
                       <label className="font-medium text-gray-700">
@@ -1771,12 +2196,9 @@ Make it engaging, attractive, and human-like.
 
                       <select
                         className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.bathroom || ""}
+                        value={projectProperty.bathroom || ""}
                         onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            bathroom: Number(e.target.value), // convert to integer
-                          })
+                          handleProjectPropertyChange(index, "bathroom", Number(e.target.value))
                         }
                       >
                         <option value="">Select Bathrooms</option>
@@ -1790,22 +2212,21 @@ Make it engaging, attractive, and human-like.
                     </div>
                   )}
                   {buildingType === "Commercial" &&
-                    propertyType === "Retail" && (
+                    projectProperty.project_type === "Retail" && (
                       <div>
                         <label className="font-medium text-gray-700">
                           Washroom
                         </label>
 
                         <select
-                          value={retailWashroom}
-                          onChange={(e) => {
-                            setRetailWashroom(e.target.value);
-
-                            setFormData((prev) => ({
-                              ...prev,
-                              commercial_washroom: e.target.value,
-                            }));
-                          }}
+                          value={projectProperty.commercial_washroom || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "commercial_washroom",
+    e.target.value
+  )
+}
                           className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                         >
                           <option value="">Select Washroom</option>
@@ -1821,19 +2242,24 @@ Make it engaging, attractive, and human-like.
                     )}
                   {buildingType === "Commercial" &&
                     ["Storage", "Industry", "Hospitality"].includes(
-                      propertyType,
-                    ) && (
+  projectProperty.project_type
+) && (
                       <div>
                         <label className="font-medium text-gray-700">
                           Washroom
                         </label>
 
                         <select
-                          name="commercial_washroom"
-                          value={formData.commercial_washroom}
-                          onChange={handleInputChange}
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
+  value={projectProperty.commercial_washroom || ""}
+  onChange={(e) =>
+    handleProjectPropertyChange(
+      index,
+      "commercial_washroom",
+      e.target.value
+    )
+  }
+  className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+>
                           <option value="">Select Washrooms</option>
                           <option value="None">None</option>
                           <option value="Shared">Shared</option>
@@ -1845,15 +2271,616 @@ Make it engaging, attractive, and human-like.
                         </select>
                       </div>
                     )}
+                  {!(
+                  (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                  (buildingType === "Commercial" &&
+                    [
+                      "Land",
+                      "Plot/Land",
+                      "Warehouse",
+                      "Storage",
+                      "Industry",
+                      "Hospitality",
+                    ].includes(projectProperty.project_type))
+                  ) && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      Total Floor
+                    </label>
 
-                  <div className="md:col-span-3 mt-2">
+                    <input
+                      type="text"
+                      name="total_floor"
+                      value={projectProperty.total_floor || ""}
+onChange={(e) => {
+  const value = e.target.value;
+  if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
+    handleProjectPropertyChange(index, "total_floor", value);
+  }
+}}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    />
+                  </div>
+                    )}
+                  {!(
+                  (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                  (buildingType === "Commercial" &&
+                    [
+                      "Land",
+                      "Plot/Land",
+                      "Warehouse",
+                      "Industry",
+                      "Storage",
+                      "Hospitality",
+                    ].includes(projectProperty.project_type))
+                  ) && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      Flat on the floor
+                    </label>
+
+                    <select
+                      name="project_floor"
+                      value={projectProperty.project_floor || ""}
+                      onChange={(e) => handleProjectPropertyChange(index, "project_floor", e.target.value)}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select Floor</option>
+
+                      <option value="Lower Basement">Lower Basement</option>
+
+                      <option value="Basement">Basement</option>
+
+                      <option value="Lower Ground">Lower Ground</option>
+
+                      <option value="Ground">Ground</option>
+
+                      <option value="Rooftop/Terrace">Rooftop/Terrace</option>
+
+                      {[...Array(Number(projectProperty.total_floor) || 0)].map(
+  (_, floorIndex) => (
+    <option key={floorIndex + 1} value={`${floorIndex + 1}`}>
+      {floorIndex + 1}
+    </option>
+  ),
+)}
+                    </select>
+                  </div>
+                  )}
+                 {buildingType === "Commercial" &&
+  projectProperty.project_type === "Office" && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      No. of Cabines
+                    </label>
+
+                    <select
+                      value={projectProperty.no_of_cabines || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "no_of_cabines",
+    e.target.value
+  )
+}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select Cabines</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="10+">10+</option>
+                    </select>
+                  </div>
+                  )}
+                  {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      No. of Meeting Rooms
+                    </label>
+
+                    <select
+                      value={projectProperty.no_of_meeting_Rooms || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "no_of_meeting_Rooms",
+    e.target.value
+  )
+}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select Meeting Rooms</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5+">5+</option>
+                    </select>
+                  </div>
+                 )}
+                 {buildingType === "Commercial" &&
+  projectProperty.project_type === "Office" && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      No. of Conference Room
+                    </label>
+
+                    <select
+                      value={projectProperty.no_of_conference_room || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "no_of_conference_room",
+    e.target.value
+  )
+}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select Conference Room</option>
+                      <option value="0">0</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3+">3+</option>
+                    </select>
+                  </div>
+                  )}
+
+                 {buildingType === "Commercial" &&
+  projectProperty.project_type === "Hospitality" && (
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Total Number of Rooms
+                      </label>
+
+                      <input
+                        type="text"
+                        value={projectProperty.total_number_of_rooms || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                           handleProjectPropertyChange(
+  index,
+  "total_number_of_rooms",
+  value
+);
+                          }
+                        }}
+                        placeholder="Enter Total Rooms"
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      />
+                    </div>
+                  )}
+                   {((buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                  (buildingType === "Commercial" &&
+                    ["Land", "Plot/Land"].includes(projectProperty.project_type))) && (
+                  <div>
+                    <label className="font-medium text-gray-700">Facing</label>
+
+                    <select
+                      
+                      value={projectProperty.facing || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(index, "facing", e.target.value)
+}
+                      className="w-full p-3 mt-1 border rounded-lg"
+                    >
+                      <option value="">Select Facing</option>
+
+                      <option value="East">East</option>
+                      <option value="West">West</option>
+                      <option value="North">North</option>
+                      <option value="South">South</option>
+                      <option value="North East">North East</option>
+                      <option value="North West">North West</option>
+                      <option value="South East">South East</option>
+                      <option value="South West">South West</option>
+                    </select>
+                  </div>
+                  )}
+                 {((buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                  (buildingType === "Commercial" &&
+                    projectProperty.project_type === "Plot/Land")) && (
+                  <>
+                    {/* Length */}
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Length of Plot (ft){" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+
+                      <input
+                        type="text"
+                        value={projectProperty.property_dimensions_length || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                            handleProjectPropertyChange(
+  index,
+  "property_dimensions_length",
+  value
+);
+                          }
+                        }}
+                        placeholder="Enter Length"
+                        className={`w-full p-3 mt-1 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+                          errors?.property_dimensions_length
+                            ? "border-red-600"
+                            : "border-gray-300"
+                        }`}
+                      />
+
+                      {errors?.property_dimensions_length && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.property_dimensions_length}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Breadth */}
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Breadth of Plot (ft){" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+
+                      <input
+                        type="text"
+                        value={projectProperty.property_dimensions_breadth || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+handleProjectPropertyChange(
+  index,
+  "property_dimensions_breadth",
+  value
+);
+                          }
+                        }}
+                        placeholder="Enter Breadth"
+                        className={`w-full p-3 mt-1 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+                          errors?.property_dimensions_breadth
+                            ? "border-red-600"
+                            : "border-gray-300"
+                        }`}
+                      />
+
+                      {errors?.property_dimensions_breadth && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.property_dimensions_breadth}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                  )}
+                  {!(
+                  (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                  (buildingType === "Commercial" &&
+                    [
+                      //"Land",
+                      "Plot/Land",
+                      "Industry",
+                      "Storage",
+                      "Hospitality",
+                    ].includes(projectProperty.project_type)) ||
+                  formData.possession_status === "Under Construction"
+                  ) && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      Age of Property
+                    </label>
+
+                    <select
+                      value={projectProperty.age_of_property || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "age_of_property",
+    e.target.value
+  )
+}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select Age of Property</option>
+                      <option value="0-1">0-1</option>
+                      <option value="2-4">2-4</option>
+                      <option value="5-7">5-7</option>
+                      <option value="8-10">8-10</option>
+                      <option value="10+">10+</option>
+                      {/* <option value="0-1">1 to 5 Years</option>
+                      <option value="2-4">5 to 10 Years</option>
+                      <option value="5-7">10 to 15 Years</option>
+                      <option value="8-10">15 to 20 Years</option>
+                      <option value="10+">Above 20 Years</option>
+                      <option value="10+">New Construction</option> */}
+                    </select>
+                  </div>
+                  )}
+                 {projectProperty.project_type !== "Plot/Land" && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      Furnishing Type{" "}
+                      <span className="text-xl font-bold text-red-500">*</span>
+                    </label>
+
+                    <select
+                      value={projectProperty.furnished_type || ""}
+                      onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "furnished_type",
+    e.target.value
+  )
+}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select Furnishing Type</option>
+                      <option value="Furnished">Furnished</option>
+                      <option value="Semi-Furnished">Semi-Furnished</option>
+                      <option value="Unfurnished">Unfurnished</option>
+                    </select>
+
+                    {errors?.furnished_type && (
+                      <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                        <MdErrorOutline className="text-lg" />
+                        {errors.furnished_type}
+                      </p>
+                    )}
+                  </div>
+                 )}
+                 {buildingType === "Residential" && projectProperty.project_type !== "Plot" && (
+                  <div>
+                    <label className="font-medium text-gray-700">Balcony</label>
+
+                    <select
+                      
+                      value={projectProperty.balcony || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "balcony",
+    e.target.value
+  )
+}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select No. of Balconies</option>
+                      <option value="0">0</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="more than 3">More than 3</option>
+                    </select>
+                  </div>
+                  )}
+                  {buildingType === "Commercial" &&
+  projectProperty.project_type === "Office" &&
+  [
+    "Bare shell office space",
+    "Ready to move office space",
+  ].includes(projectProperty.sub_project_type) && (
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Pantry
+                      </label>
+
+                      <select
+                        value={projectProperty.pantry_option || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "pantry_option",
+    e.target.value
+  )
+}
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select Pantry</option>
+                        <option value="Wet">Wet</option>
+                        <option value="Dry">Dry</option>
+                        <option value="None">None</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {buildingType === "Commercial" &&
+  projectProperty.project_type === "Office" && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      Central AC
+                    </label>
+
+                    <select
+                      value={projectProperty.central_AC || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "central_AC",
+    e.target.value
+  )
+}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select Option</option>
+
+                      {projectProperty.sub_project_type === "Ready to move office space" ? (
+                        <>
+                          <option value="Available">Available</option>
+
+                          <option value="Not Available">Not Available</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="Duct Only">Duct Only</option>
+
+                          <option value="Available">Available</option>
+
+                          <option value="Not Available">Not Available</option>
+                        </>
+                      )}
+                    </select>
+                  </div>
+                  )}
+                  {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      Reception Area
+                    </label>
+
+                    <select
+                      value={projectProperty.reception_area || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "reception_area",
+    e.target.value
+  )
+}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select Option</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+                 )}
+                  {buildingType === "Commercial" &&
+                  projectProperty.project_type === "Office" && (
+                    <div>
+                      <label className="font-medium text-gray-700">
+                        Personal Washroom
+                      </label>
+
+                      <select
+                        
+                        value={projectProperty.personal_washroom || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "personal_washroom",
+    e.target.value
+  )
+}
+                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                      >
+                        <option value="">Select</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                  )}
+                  {buildingType === "Commercial" &&
+  projectProperty.project_type === "Retail" && (
+    <div>
+      <label className="font-medium text-gray-700">
+        Parking Type
+      </label>
+
+      <Select
+        isMulti
+        name="parking_types"
+        options={[
+          { value: "Private Parking", label: "Private Parking" },
+          { value: "Public Parking", label: "Public Parking" },
+          { value: "Multilevel Parking", label: "Multilevel Parking" },
+          { value: "Not Available", label: "Not Available" },
+        ]}
+        value={[
+          { value: "Private Parking", label: "Private Parking" },
+          { value: "Public Parking", label: "Public Parking" },
+          { value: "Multilevel Parking", label: "Multilevel Parking" },
+          { value: "Not Available", label: "Not Available" },
+        ].filter((opt) =>
+          (projectProperty.parking_types || "")
+            .split(",")
+            .includes(opt.value)
+        )}
+        onChange={(selectedOptions) => {
+          const values = selectedOptions
+            ? selectedOptions.map((opt) => opt.value)
+            : [];
+
+          let finalValues = values;
+
+          if (values.includes("Not Available")) {
+            finalValues = ["Not Available"];
+          }
+
+          handleProjectPropertyChange(
+            index,
+            "parking_types",
+            finalValues.join(",")
+          );
+        }}
+        components={{ MultiValue: CustomMultiValue }}
+        placeholder="Select Parking Type"
+        classNamePrefix="react-select"
+        styles={{
+          control: (base, state) => ({
+            ...base,
+            minHeight: "60px",
+            padding: "6px",
+            borderColor: state.isFocused ? "#a855f7" : "#d1d5db",
+            boxShadow: state.isFocused
+              ? "0 0 0 2px #a855f7"
+              : "none",
+            borderRadius: "0.5rem",
+            fontSize: "16px",
+            display: "flex",
+            flexWrap: "nowrap",
+            overflowX: "auto",
+          }),
+          valueContainer: (base) => ({
+            ...base,
+            padding: "0 6px",
+            display: "flex",
+            flexWrap: "nowrap",
+            gap: "6px",
+            overflowX: "auto",
+            scrollbarWidth: "thin",
+            alignItems: "center",
+          }),
+          placeholder: (base) => ({
+            ...base,
+            color: "#1f2937",
+            fontSize: "16px",
+          }),
+          multiValue: (base) => ({
+            ...base,
+            backgroundColor: "#ede9fe",
+            borderRadius: "0.375rem",
+            display: "flex",
+            alignItems: "center",
+            padding: "2px 6px",
+            whiteSpace: "nowrap",
+          }),
+          multiValueLabel: (base) => ({
+            ...base,
+            color: "#6b21a8",
+            fontWeight: "500",
+          }),
+          multiValueRemove: (base) => ({
+            ...base,
+            color: "#6b21a8",
+            ":hover": {
+              backgroundColor: "#ddd6fe",
+              color: "#4c1d95",
+            },
+          }),
+        }}
+      />
+    </div>
+)}
+                  {/* <div className="md:col-span-3 mt-2"> */}
                     {/* <label className="font-medium text-gray-700">
                       Price Details
                     </label> */}
 
-                    <div className="flex flex-wrap gap-4 mt-2">
+                    {/* <div className="flex flex-wrap gap-4 mt-2"> */}
                       {/* All Inclusive Price */}
-                      <label className="flex items-center gap-2">
+                      {/* <label className="flex items-center gap-2">
                         <input
                           type="checkbox"
                           checked={formData.all_inclusive_price === "Yes"}
@@ -1867,9 +2894,9 @@ Make it engaging, attractive, and human-like.
                           }
                         />
                         All Inclusive Price
-                      </label>
+                      </label> */}
                       {/* Price Onwards */}
-                      <label className="flex items-center gap-2">
+                      {/* <label className="flex items-center gap-2">
                         <input
                           type="checkbox"
                           checked={formData.price_onwards === "Yes"}
@@ -1881,9 +2908,9 @@ Make it engaging, attractive, and human-like.
                           }
                         />
                         Price Onwards
-                      </label>
+                      </label> */}
                       {/* Price Negotiable */}
-                      <label className="flex items-center gap-2">
+                      {/* <label className="flex items-center gap-2">
                         <input
                           type="checkbox"
                           checked={formData.price_negotiable === "Yes"}
@@ -1895,10 +2922,10 @@ Make it engaging, attractive, and human-like.
                           }
                         />
                         Price Negotiable
-                      </label>
+                      </label> */}
 
                       {/* Tax & Govt Charges */}
-                      <label className="flex items-center gap-2">
+                      {/* <label className="flex items-center gap-2">
                         <input
                           type="checkbox"
                           checked={formData.tax_and_goverment_charges === "Yes"}
@@ -1913,11 +2940,29 @@ Make it engaging, attractive, and human-like.
                         />
                         Tax & Government Charges Excluded
                       </label>
-                    </div>
-                  </div>
+                    </div> */}
+                  {/* </div> */}
+                  
+                 </div>
+                  <div className="flex justify-end mt-4">
+  <button
+    type="button"
+    onClick={() =>
+      setProjectProperties([
+        ...projectProperties,
+        { ...emptyProjectProperty },
+      ])
+    }
+    className="flex items-center gap-2 px-4 py-2 text-white rounded-lg bg-rose-600 hover:bg-rose-700"
+  >
+    <Plus size={18} />
+    Add Property
+  </button>
+</div>
                 </div>
-              </div>
-
+                
+            ))}
+ 
               <div className="p-3 mx-auto mb-3 bg-white border max-w-7xl rounded-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/*  Header full width */}
                 <div className="mb-6 col-span-1 md:col-span-2 lg:col-span-4">
@@ -1929,7 +2974,51 @@ Make it engaging, attractive, and human-like.
                     timeline, and compliance of the project
                   </p>
                 </div>
+                <div>
+  <label className="font-medium text-gray-700">
+    Price Range
+  </label>
 
+  <input
+    type="text"
+    value={averagePrice}
+    readOnly
+    className="w-full p-3 mt-1 border rounded-lg bg-gray-100"
+  />
+</div>
+{buildingType === "Residential" ? (
+  <div>
+    <label className="block mb-2 font-medium text-gray-700">
+      Configurations
+    </label>
+
+    <input
+      type="text"
+      value={configurations}
+      readOnly
+      className="w-full p-3 text-gray-700 bg-gray-100 border rounded-md outline-none"
+    />
+  </div>
+) : (
+  <div>
+    <label className="block mb-2 font-medium text-gray-700">
+      Available Property Types
+    </label>
+
+    <input
+      type="text"
+      value={[
+        ...new Set(
+          projectProperties
+            .map((p) => p.project_type)
+            .filter(Boolean)
+        ),
+      ].join(", ")}
+      readOnly
+      className="w-full p-3 text-gray-700 bg-gray-100 border rounded-md outline-none"
+    />
+  </div>
+)}
                 {/* {buildingType === "Commercial" &&
                   !["Land", "Plot/Land"].includes(propertyType) && (
                     <div>
@@ -2020,8 +3109,8 @@ Make it engaging, attractive, and human-like.
                     )}
                   </div>
                 )}
-                {!(
-                  (buildingType === "Residential" && propertyType === "Plot") ||
+                {/* {!(
+                  (buildingType === "Residential" && propertyType === "Plot/Land") ||
                   (buildingType === "Commercial" &&
                     [
                       "Land",
@@ -2050,8 +3139,8 @@ Make it engaging, attractive, and human-like.
                       className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                     />
                   </div>
-                )}
-                {!(
+                )} */}
+                {/* {!(
                   (buildingType === "Residential" && propertyType === "Plot") ||
                   (buildingType === "Commercial" &&
                     [
@@ -2095,7 +3184,7 @@ Make it engaging, attractive, and human-like.
                       )}
                     </select>
                   </div>
-                )}
+                )} */}
                 {/* {[
                   "Apartment",
                   "1RK/Studio Apartment",
@@ -2250,7 +3339,7 @@ Make it engaging, attractive, and human-like.
                     />
                   </div>
                 )}
-                {buildingType === "Commercial" && propertyType === "Office" && (
+                {/* {buildingType === "Commercial" && propertyType === "Office" && (
                   <div>
                     <label className="font-medium text-gray-700">
                       No. of Cabines
@@ -2272,8 +3361,8 @@ Make it engaging, attractive, and human-like.
                       <option value="10+">10+</option>
                     </select>
                   </div>
-                )}
-                {buildingType === "Commercial" && propertyType === "Office" && (
+                )} */}
+                {/* {buildingType === "Commercial" && propertyType === "Office" && (
                   <div>
                     <label className="font-medium text-gray-700">
                       No. of Meeting Rooms
@@ -2294,8 +3383,8 @@ Make it engaging, attractive, and human-like.
                       <option value="5+">5+</option>
                     </select>
                   </div>
-                )}
-                {buildingType === "Commercial" && propertyType === "Office" && (
+                )} */}
+                {/* {buildingType === "Commercial" && propertyType === "Office" && (
                   <div>
                     <label className="font-medium text-gray-700">
                       No. of Conference Room
@@ -2318,9 +3407,9 @@ Make it engaging, attractive, and human-like.
                       <option value="3+">3+</option>
                     </select>
                   </div>
-                )}
+                )} */}
 
-                {buildingType === "Commercial" &&
+                {/* {buildingType === "Commercial" &&
                   propertyType === "Hospitality" && (
                     <div>
                       <label className="font-medium text-gray-700">
@@ -2340,7 +3429,7 @@ Make it engaging, attractive, and human-like.
                         className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                       />
                     </div>
-                  )}
+                  )} */}
                 {buildingType === "Commercial" &&
                   propertyType === "Hospitality" && (
                     <div>
@@ -2368,7 +3457,7 @@ Make it engaging, attractive, and human-like.
                     </div>
                   )}
 
-                {((buildingType === "Residential" && propertyType === "Plot") ||
+                {/* {((buildingType === "Residential" && propertyType === "Plot") ||
                   (buildingType === "Commercial" &&
                     ["Land", "Plot/Land"].includes(propertyType))) && (
                   <div>
@@ -2392,7 +3481,7 @@ Make it engaging, attractive, and human-like.
                       <option value="South West">South West</option>
                     </select>
                   </div>
-                )}
+                )} */}
                 {buildingType === "Residential" &&
                   propertyType === "Independent/Builder Floor" && (
                     <div>
@@ -2420,11 +3509,11 @@ Make it engaging, attractive, and human-like.
                       </select>
                     </div>
                   )}
-                {((buildingType === "Residential" && propertyType === "Plot") ||
+                {/* {((buildingType === "Residential" && propertyType === "Plot") ||
                   (buildingType === "Commercial" &&
                     propertyType === "Plot/Land")) && (
                   <>
-                    {/* Length */}
+                    
                     <div>
                       <label className="font-medium text-gray-700">
                         Length of Plot (ft){" "}
@@ -2458,7 +3547,7 @@ Make it engaging, attractive, and human-like.
                       )}
                     </div>
 
-                    {/* Breadth */}
+                    
                     <div>
                       <label className="font-medium text-gray-700">
                         Breadth of Plot (ft){" "}
@@ -2492,8 +3581,8 @@ Make it engaging, attractive, and human-like.
                       )}
                     </div>
                   </>
-                )}
-                {((buildingType === "Residential" && propertyType === "Plot") ||
+                )} */}
+                {((buildingType === "Residential" && propertyType === "Plot/Land") ||
                   (buildingType === "Commercial" &&
                     propertyType === "Plot/Land")) && (
                   <div>
@@ -2515,7 +3604,7 @@ Make it engaging, attractive, and human-like.
                     </select>
                   </div>
                 )}
-                {((buildingType === "Residential" && propertyType === "Plot") ||
+                {((buildingType === "Residential" && propertyType === "Plot/Land") ||
                   (buildingType === "Commercial" &&
                     propertyType === "Plot/Land")) && (
                   <div>
@@ -2567,7 +3656,7 @@ Make it engaging, attractive, and human-like.
                     </select>
                   </div>
                 )} */}
-                {!(
+                {/* {!(
                   (buildingType === "Residential" && propertyType === "Plot") ||
                   (buildingType === "Commercial" &&
                     [
@@ -2597,16 +3686,16 @@ Make it engaging, attractive, and human-like.
                       <option value="5-7">5-7</option>
                       <option value="8-10">8-10</option>
                       <option value="10+">10+</option>
-                      {/* <option value="0-1">1 to 5 Years</option>
+                      <option value="0-1">1 to 5 Years</option>
                       <option value="2-4">5 to 10 Years</option>
                       <option value="5-7">10 to 15 Years</option>
                       <option value="8-10">15 to 20 Years</option>
                       <option value="10+">Above 20 Years</option>
-                      <option value="10+">New Construction</option> */}
+                      <option value="10+">New Construction</option>
                     </select>
                   </div>
-                )}
-                {propertyType !== "Plot/Land" && (
+                )} */}
+                {/* {propertyType !== "Plot/Land" && (
                   <div>
                     <label className="font-medium text-gray-700">
                       Furnishing Type{" "}
@@ -2636,8 +3725,8 @@ Make it engaging, attractive, and human-like.
                       </p>
                     )}
                   </div>
-                )}
-                {buildingType === "Residential" && propertyType !== "Plot" && (
+                )} */}
+                {/* {buildingType === "Residential" && propertyType !== "Plot" && (
                   <div>
                     <label className="font-medium text-gray-700">Balcony</label>
 
@@ -2655,7 +3744,7 @@ Make it engaging, attractive, and human-like.
                       <option value="more than 3">More than 3</option>
                     </select>
                   </div>
-                )}
+                )} */}
 
                 {/* {!(
                   (buildingType === "Residential" && propertyType === "Plot") ||
@@ -2688,7 +3777,7 @@ Make it engaging, attractive, and human-like.
                   </div>
                 )} */}
                 {!(
-                  (buildingType === "Residential" && propertyType === "Plot") ||
+                  (buildingType === "Residential" && propertyType === "Plot/Land") ||
                   (buildingType === "Commercial" &&
                     [
                       "Land",
@@ -2717,7 +3806,7 @@ Make it engaging, attractive, and human-like.
                     </select>
                   </div>
                 )}
-                {buildingType === "Commercial" &&
+                {/* {buildingType === "Commercial" &&
                   propertyType === "Office" &&
                   [
                     "Bare shell office space",
@@ -2794,7 +3883,7 @@ Make it engaging, attractive, and human-like.
                       <option value="No">No</option>
                     </select>
                   </div>
-                )}
+                )} */}
 
                 {/* {buildingType === "Commercial" &&
                   [
@@ -2857,7 +3946,7 @@ Make it engaging, attractive, and human-like.
                     </select>
                   </div>
                 )} */}
-                {buildingType === "Commercial" &&
+                {/* {buildingType === "Commercial" &&
                   ["Office Space"].includes(propertyType) && (
                     <div>
                       <label className="font-medium text-gray-700">
@@ -2875,7 +3964,7 @@ Make it engaging, attractive, and human-like.
                         <option value="No">No</option>
                       </select>
                     </div>
-                  )}
+                  )} */}
                 {buildingType === "Commercial" && propertyType === "Office" && (
                   <div>
                     <label className="font-medium text-gray-700">
@@ -3053,7 +4142,7 @@ Make it engaging, attractive, and human-like.
                   </div>
                 )}
                 {!(
-                  (buildingType === "Residential" && propertyType === "Plot") ||
+                  (buildingType === "Residential" && propertyType === "Plot/Land") ||
                   (buildingType === "Commercial" &&
                     [
                       "Land",
@@ -3086,7 +4175,7 @@ Make it engaging, attractive, and human-like.
                   </div>
                 )}
                 {!(
-                  (buildingType === "Residential" && propertyType === "Plot") ||
+                  (buildingType === "Residential" && propertyType === "Plot/Land") ||
                   (buildingType === "Commercial" &&
                     [
                       "Land",
@@ -3122,7 +4211,7 @@ Make it engaging, attractive, and human-like.
                     </div>
                   )}
                 {!(
-                  (buildingType === "Residential" && propertyType === "Plot") ||
+                  (buildingType === "Residential" && propertyType === "Plot/Land") ||
                   (buildingType === "Commercial" &&
                     [
                       "Land",
@@ -3157,6 +4246,75 @@ Make it engaging, attractive, and human-like.
                       </select>
                     </div>
                   )}
+                    <div className="md:col-span-3 mt-2">
+                    {/* <label className="font-medium text-gray-700">
+                      Price Details
+                    </label> */}
+
+                    <div className="flex flex-wrap gap-4 mt-2">
+                      {/* All Inclusive Price */}
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.all_inclusive_price === "Yes"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              all_inclusive_price: e.target.checked
+                                ? "Yes"
+                                : "No",
+                            })
+                          }
+                        />
+                        All Inclusive Price
+                      </label>
+                      {/* Price Onwards */}
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.price_onwards === "Yes"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              price_onwards: e.target.checked ? "Yes" : "No",
+                            })
+                          }
+                        />
+                        Price Onwards
+                      </label>
+                      {/* Price Negotiable */}
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.price_negotiable === "Yes"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              price_negotiable: e.target.checked ? "Yes" : "No",
+                            })
+                          }
+                        />
+                        Price Negotiable
+                      </label>
+
+                      {/* Tax & Govt Charges */}
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.tax_and_goverment_charges === "Yes"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              tax_and_goverment_charges: e.target.checked
+                                ? "Yes"
+                                : "No",
+                            })
+                          }
+                        />
+                        Tax & Government Charges Excluded
+                      </label>
+                    </div>
+                  </div>
               </div>
 
               <div className="p-3 mx-auto mb-16 bg-white border max-w-7xl rounded-xl">
@@ -3203,6 +4361,7 @@ Make it engaging, attractive, and human-like.
                   </div>
                 </div>
               </div>
+               </div>
             </>
           )}
 
@@ -3249,6 +4408,7 @@ Make it engaging, attractive, and human-like.
                       </span>
                     </label>
                   ))}
+                 
                 </div>
               </div>
             </>

@@ -264,9 +264,7 @@ const MyProjects = () => {
           soldOut: false,
           image: item.cover_image || "https://via.placeholder.com/150",
           admin_approval: item.admin_approval,
-          bhk_type: item.congfigurations
-            ? `${item.congfigurations}`
-            : "BHK Not Mentioned",
+         bhk_type: item.display_configuration || "Not Mentioned",
           view_count: item.view_count,
           leads_count: item.leads_count,
           // ✅ Keep price-related fields
@@ -324,9 +322,7 @@ const MyProjects = () => {
             ? `${process.env.REACT_APP_API_URL}/${item.cover_image}`
             : "https://via.placeholder.com/150",
           admin_approval: item.admin_approval,
-          bhk_type: item.congfigurations
-            ? `${item.congfigurations}`
-            : "BHK Not Mentioned",
+          bhk_type: item.display_configuration || "Not Mentioned",
           view_count: item.view_count,
           leads_count: item.leads_count,
         }));
@@ -382,9 +378,7 @@ const MyProjects = () => {
             item.cover_image ||
             `${process.env.REACT_APP_API_URL}/${item.cover_image}`,
           admin_approval: item.admin_approval,
-          bhk_type: item.congfigurations
-            ? `${item.congfigurations}`
-            : "BHK Not Mentioned",
+          bhk_type: item.display_configuration || "Not Mentioned",
           view_count: item.view_count,
           leads_count: item.leads_count,
         }));

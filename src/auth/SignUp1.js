@@ -19,6 +19,7 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
   const [agreed, setAgreed] = useState(false);
   const [email, setEmail] = useState("");
   const [city, setCity] = useState(sessionStorage.getItem("cityName") || "");
+  const [companyName, setCompanyName] = useState("");
 
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -30,6 +31,7 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
     mobile: "",
     email: "",
     city: "",
+    companyName: "",
   });
 
   // Prevent background scrolling when modal is open
@@ -50,7 +52,13 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
 
   const handleSignUp = async () => {
     let hasError = false;
-    const newErrors = { name: "", mobile: "" };
+     const newErrors = {
+    name: "",
+    mobile: "",
+    email: "",
+    city: "",
+    companyName: "",
+  };
 
     if (!name.trim()) {
       newErrors.name = "Name is required";
@@ -78,6 +86,11 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
     if (!city.trim()) {
       newErrors.city = "City is required";
       hasError = true;
+    }
+
+    if (userType === "Builder" && !companyName.trim()) {
+    newErrors.companyName = "Company Name is required";
+    hasError = true;
     }
 
     if (!agreed) {
@@ -150,6 +163,7 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
           mobileNumber={mobile}
           countryCode={countryCode}
           fullName={name}
+          companyName={companyName}
           userType={userType}
           email={email}
           city={city}
@@ -232,6 +246,39 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                 {errors.name}
               </p>
             )}
+            {userType === "Builder" && (
+  <>
+    <label className="block mb-1 text-sm font-medium text-gray-700">
+      Company Name{" "}
+      <span className="text-xl font-bold text-red-500">*</span>
+    </label>
+
+    <div className="mb-1">
+      <input
+        type="text"
+        placeholder="Company Name"
+        value={companyName}
+        onChange={(e) => {
+          setCompanyName(e.target.value);
+          setErrors({
+            ...errors,
+            companyName: "",
+          });
+        }}
+        className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${
+          errors.companyName ? "border-red-500" : "border-gray-300"
+        }`}
+      />
+    </div>
+
+    {errors.companyName && (
+      <p className="flex items-center gap-1 mb-3 text-sm text-red-500">
+        <IoAlertCircleOutline size={16} />
+        {errors.companyName}
+      </p>
+    )}
+  </>
+)}
 
             {/* Email & City Row */}
             <div className="grid grid-cols-1 gap-3 mb-3 md:grid-cols-2">

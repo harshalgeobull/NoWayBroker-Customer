@@ -13,6 +13,7 @@ import axios from "axios";
 import ShareModal from "../containers/ShareModal";
 import BuyProperty from "./BuyProperty";
 import Commercial from "./Commercial";
+import FeaturesSection from "./FeaturesSection";
 const Home = () => {
   const [cityName, setCityName] = useState("");
   const [showShareModal, setShowShareModal] = useState(false);
@@ -279,10 +280,15 @@ const Home = () => {
         <meta name="description" content="sign up page" />
       </Helmet>
 
+
       <section className="">
         <Search />
+        <FeaturesSection />
+
         <div className="w-full mx-auto px-2 space-y-6 md:max-w-[97%]">
           <Cities data={homeData?.cities || []} />
+
+
           {/* <Shots /> */}
           <BuyProperty
             data={buyData}
@@ -336,7 +342,6 @@ const Home = () => {
             currentShareUrl={currentShareUrl}
             fetchHomeData={fetchHomeData}
           />
-
           <Adviser data={homeData.adviser} />
           <ExploreServices />
         </div>

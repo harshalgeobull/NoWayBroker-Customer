@@ -25,6 +25,8 @@ import { Heart } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
 import { Building2, Ruler, Bath } from "lucide-react";
+import { BadgeCheck, ShieldCheck, Handshake, Wallet } from "lucide-react";
+import { Hammer, CalendarDays, Car, ArrowUp, CheckCircle } from "lucide-react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { MdApartment } from "react-icons/md";
 import { RiRuler2Line } from "react-icons/ri";
@@ -36,9 +38,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-    Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -47,11 +49,12 @@ const ProjectDetail = () => {
   // const [showAllImages, setShowAllImages] = useState(false);
   const sliderRef = useRef(null);
   const history = useHistory();
-  const projectLocationSectionRef = useRef(null);
-  const overviewRef = useRef(null);
+  const configurationRef = useRef(null);
+  const statusTimelineRef = useRef(null);
   const amenitiesRef = useRef(null);
   const aboutPropertyRef = useRef(null);
   const locationRef = useRef(null);
+  const configurationCardRefs = useRef([]);
 
   // NEW
   const scrollToSection = (ref) => {
@@ -157,7 +160,22 @@ const ProjectDetail = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [projectId]);
+const equalizeCardHeights = () => {
+  const cards = document.querySelectorAll(".configuration-card");
 
+  if (!cards.length) return;
+
+  let maxHeight = 0;
+
+  cards.forEach((card) => {
+    card.style.height = "auto";
+    maxHeight = Math.max(maxHeight, card.offsetHeight);
+  });
+
+  cards.forEach((card) => {
+    card.style.height = `${maxHeight}px`;
+  });
+};
   // Fetch Project Data
   const fetchProjectDetails = async () => {
     try {
@@ -308,6 +326,9 @@ const ProjectDetail = () => {
         console.log("userdetails", userDetails);
 
         setProjects([result.data]);
+        setTimeout(() => {
+  equalizeCardHeights();
+}, 500);
       }
     } catch (error) {
       console.error("Failed to fetch project details:", error);
@@ -546,20 +567,20 @@ const ProjectDetail = () => {
   }, [openContactModalAfterLogin]);
 
   const formatPrice = (price) => {
-  if (!price) return "";
+    if (!price) return "";
 
-  price = Number(price);
+    price = Number(price);
 
-  if (price >= 10000000) {
-    return `${(price / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
-  } else if (price >= 100000) {
-    return `${(price / 100000).toFixed(2).replace(/\.?0+$/, "")} L`;
-  } else if (price >= 1000) {
-    return `${(price / 1000).toFixed(2).replace(/\.?0+$/, "")} K`;
-  } else {
-    return price.toString();
-  }
-};
+    if (price >= 10000000) {
+      return `${(price / 10000000).toFixed(2)} Cr`;
+    } else if (price >= 100000) {
+      return `${(price / 100000).toFixed(2)} L`;
+    } else if (price >= 1000) {
+      return `${(price / 1000).toFixed(2)} K`;
+    } else {
+      return price.toString();
+    }
+  };
 
   let userLocation = null;
   try {
@@ -610,27 +631,25 @@ const ProjectDetail = () => {
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
 
- if (typeof price === "string" && price.includes("-")) {
-    const parts = price.split("-").map((p) => p.trim());
-
-
-
-    // If it's a range (contains "-"), split and format both
     if (typeof price === "string" && price.includes("-")) {
       const parts = price.split("-").map((p) => p.trim());
-      return (
-        <>
-          {parts.map((p, idx) => (
-            <span key={idx} className="inline-flex items-center">
-              <FaRupeeSign className="inline-block mr-1" />
-              {formatPrice(p)}
-              {idx === 0 && " - "}
-            </span>
-          ))}
-        </>
-      );
+
+      // If it's a range (contains "-"), split and format both
+      if (typeof price === "string" && price.includes("-")) {
+        const parts = price.split("-").map((p) => p.trim());
+        return (
+          <>
+            {parts.map((p, idx) => (
+              <span key={idx} className="inline-flex items-center">
+                <FaRupeeSign className="inline-block mr-1" />
+                {formatPrice(p)}
+                {idx === 0 && " - "}
+              </span>
+            ))}
+          </>
+        );
+      }
     }
-  }
     // Normal number formatting
     // price = parseInt(price);
     // if (isNaN(price)) return "";
@@ -646,7 +665,9 @@ const ProjectDetail = () => {
     //   formatted = price.toString();
     // }
 
-    return <span className="inline-flex items-center">{formatPrice(price)}</span>;
+    return (
+      <span className="inline-flex items-center">{formatPrice(price)}</span>
+    );
   };
 
   //  Add to favorites
@@ -703,21 +724,99 @@ const ProjectDetail = () => {
       document.body.style.overflow = "auto";
     };
   }, [isModalOpen]);
+  useEffect(() => {
+  if (!projects.length) return;
+
+  const timer1 = setTimeout(equalizeCardHeights, 300);
+  const timer2 = setTimeout(equalizeCardHeights, 700);
+
+  return () => {
+    clearTimeout(timer1);
+    clearTimeout(timer2);
+  };
+}, [projects]);
 
   // Tabs shown right below the image gallery (Overview / Amenities / About Property / Location)
   const detailTabs = [
     {
-      key: "project_location",
-      label: "Project Location",
-      ref: projectLocationSectionRef,
+      key: "configurations",
+      label: "Configurations",
+      ref: configurationRef,
     },
-    { key: "overview", label: "Overview", ref: overviewRef },
-    { key: "amenities", label: "Amenities", ref: amenitiesRef },
-    { key: "about", label: "About Property", ref: aboutPropertyRef },
-    { key: "location", label: "Location", ref: locationRef },
+    {
+      key: "statusTimeline",
+      label: "Status & Timeline",
+      ref: statusTimelineRef,
+    },
+    {
+      key: "amenities",
+      label: "Amenities",
+      ref: amenitiesRef,
+    },
+    {
+      key: "aboutProject",
+      label: "About the Project",
+      ref: aboutPropertyRef,
+    },
+    {
+      key: "location",
+      label: "Location",
+      ref: locationRef,
+    },
   ];
   const [activeDetailTab, setActiveDetailTab] = useState("project_location");
+  // Hero Section Data
+  const project = projects?.[0]?.project_details || {};
+  const projectProperties = projects?.[0]?.project_properties || [];
 
+  // Residential BHKs
+  const residentialConfigurations = [
+  ...new Set(
+    projectProperties
+      .map((item) => item.bhk_type?.replace(" BHK", ""))
+      .filter(Boolean),
+  ),
+].join(", ")
+
+  // Commercial Types
+  const commercialConfigurations = [
+    ...new Set(
+      projectProperties.map((item) => item.project_type).filter(Boolean),
+    ),
+  ].join(", ");
+  // Location
+  const heroLocation = project.address_area || "";
+  // Hero Subtitle
+  const heroTitle =
+    project.building_type === "Residential"
+      ? `${residentialConfigurations} Apartments in ${heroLocation}`
+      : `Commercial ${commercialConfigurations} in ${heroLocation}`;
+
+  const prices = projectProperties
+    .map((item) => Number(item.price))
+    .filter((price) => !isNaN(price) && price > 0);
+
+  const minPrice = prices.length ? Math.min(...prices) : 0;
+  const maxPrice = prices.length ? Math.max(...prices) : 0;
+
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: true,
+  };
+  const sliderImages =
+    projects?.length > 0
+      ? [
+          projects[0]?.project_details?.cover_image,
+          ...(images || [])
+            .map((img) => img.image)
+            .filter((img) => img !== projects[0]?.project_details?.cover_image),
+        ]
+      : [];
+  console.log("sliderImages:", sliderImages);
   const handleDetailTabClick = (tab) => {
     setActiveDetailTab(tab.key);
     scrollToSection(tab.ref);
@@ -727,7 +826,7 @@ const ProjectDetail = () => {
       {/* Property Details Section */}
       <div className="relative p-4 mb-4 rounded-lg shadow-sm bg-rose-50">
         {/* Price Section - Moved to top on mobile */}
-        <div className="flex flex-col items-start mb-4 space-y-1 sm:absolute sm:top-4 sm:right-4 sm:items-end sm:mb-0">
+        {/* <div className="flex flex-col items-start mb-4 space-y-1 sm:absolute sm:top-4 sm:right-4 sm:items-end sm:mb-0">
           {loading ? (
             <p className="text-xl font-bold my-text sm:text-2xl">Loading...</p>
           ) : (
@@ -761,9 +860,9 @@ const ProjectDetail = () => {
                 })()}
 
               {projects[0]?.project_properties?.length > 0 &&
-                (() => {
-                  // Calculate price per sqft for each property
-                  const pricePerSqftList = projects[0].project_properties
+                (() => { */}
+        {/* Calculate price per sqft for each property */}
+        {/* const pricePerSqftList = projects[0].project_properties
                     .map((p) => {
                       const price = Number(p.price);
                       const area = Number(p.area);
@@ -797,17 +896,17 @@ const ProjectDetail = () => {
                 })()}
             </>
           )}
-        </div>
+        </div> */}
 
         {/* Property Title and Info */}
-        <div className="mt-0 ml-0 sm:ml-2 sm:mt-2">
+        {/* <div className="mt-0 ml-0 sm:ml-2 sm:mt-2">
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-normal sm:text-3xl">
               {projects[0]?.project_details?.project_name || "Project Name"}
-            </h2>
+            </h2> */}
 
-            {/* RERA badge  */}
-            {projects[0]?.project_details?.rera_id &&
+        {/* RERA badge  */}
+        {/* {projects[0]?.project_details?.rera_id &&
               projects[0]?.project_details?.rera_id !== "" && (
                 <div className="flex items-center gap-1 px-2 py-1 bg-white shadow-sm">
                   <div className="flex items-center justify-center w-6 h-6 bg-green-400 rounded-full">
@@ -870,13 +969,29 @@ const ProjectDetail = () => {
                 </p>
               </>
             )}
+        </div> */}
+        <div className="mt-1">
+          {/* Project Name */}
+          <h1 className="text-3xl font-bold text-gray-900">
+            {project.project_name}
+          </h1>
+
+          {/* Residential / Commercial */}
+          <p className="mt-2 text-xl font-semibold my-text">{heroTitle}</p>
+          <div className="flex items-start gap-2 mt-2 text-gray-600">
+            <FaMapMarkerAlt className="mt-1 text-red-500 flex-shrink-0" />
+
+            <p className="text-sm leading-6">
+              {projects[0]?.project_details?.address}
+            </p>
+          </div>
         </div>
 
         {/* Property Features */}
-        <div className="flex flex-col items-start justify-between w-full mt-4 md:flex-row md:items-center">
+        <div className="flex flex-col items-start justify-between w-full  md:flex-row md:items-center">
           <div className="flex flex-wrap justify-between w-full gap-3 sm:gap-4 sm:w-auto sm:justify-start">
             {/* Price */}
-            {projects[0]?.project_details?.average_project_price && (
+            {/* {projects[0]?.project_details?.average_project_price && (
               <div className="flex flex-col items-start pr-3 border-r-2 border-rose-100 sm:items-center">
                 <p className="flex items-center text-base sm:text-lg">
                   <FaRupeeSign className="mr-1 text-lg text-rose-700 sm:text-xl" />
@@ -890,10 +1005,30 @@ const ProjectDetail = () => {
                   Price
                 </span>
               </div>
-            )}
+            )} */}
+            <div className="flex items-center mt-1 text-2xl font-bold my-text">
+              <span className="mr-2 text-3xl font-semibold text-gray-700">
+                Price Range :
+              </span>
+
+              {minPrice === maxPrice ? (
+                <>
+                  <FaRupeeSign className="mr-1" />
+                  {formatPrice(minPrice)}
+                </>
+              ) : (
+                <>
+                  <FaRupeeSign className="mr-1" />
+                  {formatPrice(minPrice)}
+                  <span className="mx-2">-</span>
+                  <FaRupeeSign className="mr-1" />
+                  {formatPrice(maxPrice)}
+                </>
+              )}
+            </div>
 
             {/* BHK */}
-            {projects[0]?.project_details?.bhk_type && (
+            {/* {projects[0]?.project_details?.bhk_type && (
               <div className="flex flex-col items-start pr-3 border-r-2 border-rose-100 sm:items-center">
                 <p className="flex items-center text-base sm:text-lg">
                   <AiFillHome className="mt-1 mr-1 text-lg text-rose-700 sm:text-xl" />
@@ -905,10 +1040,10 @@ const ProjectDetail = () => {
                   BHK
                 </span>
               </div>
-            )}
+            )} */}
 
             {/* Area */}
-            {projects[0]?.project_details?.area && (
+            {/* {projects[0]?.project_details?.area && (
               <div className="flex flex-col items-start px-3 border-r-2 border-rose-100 sm:items-center">
                 <p className="flex items-center text-base sm:text-lg">
                   <BiShapeSquare className="text-lg text-rose-700 sm:text-xl" />
@@ -930,10 +1065,10 @@ const ProjectDetail = () => {
                   Area
                 </span>
               </div>
-            )}
+            )} */}
 
             {/* Carpet Area */}
-            {projects[0]?.project_details?.carpet_area && (
+            {/* {projects[0]?.project_details?.carpet_area && (
               <div className="flex flex-col items-start px-3 border-r-2 border-rose-100 sm:items-center">
                 <p className="flex items-center text-base sm:text-lg">
                   <BiShapeSquare className="text-lg text-rose-700 sm:text-xl" />
@@ -955,10 +1090,10 @@ const ProjectDetail = () => {
                   Carpet Area
                 </span>
               </div>
-            )}
+            )} */}
 
             {/* Possession */}
-            {projects[0]?.project_details?.possession_date && (
+            {/* {projects[0]?.project_details?.possession_date && (
               <div className="flex flex-col items-start pl-2 sm:pl-3 sm:items-center">
                 <p className="flex items-center text-base sm:text-lg">
                   <MdDateRange className="text-lg text-rose-700 sm:text-xl" />
@@ -978,48 +1113,49 @@ const ProjectDetail = () => {
                   Possession
                 </span>
               </div>
-            )}
+            )} */}
           </div>
 
           {/* Action Buttons */}
           <div className="flex flex-wrap w-full gap-2 mt-4 sm:gap-4 md:mt-0 sm:w-auto">
             {projects[0]?.project_details?.virtual_tour_availability ===
               "Yes" && (
-                <button
-                  className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
-                ${scheduledDateLabel === "Virtual Tour"
-                      ? "bg-white border my-text rounded-lg"
-                      : projects[0]?.tour_schedule?.[0]?.status === "Accepted"
-                        ? "bg-green-500 text-white rounded-full"
-                        : "bg-[#FFD700] text-black rounded-full"
-                    }`}
-                  onClick={() => {
-                    const token = sessionStorage.getItem("accessToken");
+              <button
+                className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
+                ${
+                  scheduledDateLabel === "Virtual Tour"
+                    ? "bg-white border my-text rounded-lg"
+                    : projects[0]?.tour_schedule?.[0]?.status === "Accepted"
+                      ? "bg-green-500 text-white rounded-full"
+                      : "bg-[#FFD700] text-black rounded-full"
+                }`}
+                onClick={() => {
+                  const token = sessionStorage.getItem("accessToken");
 
-                    if (scheduledDateLabel !== "Virtual Tour") {
-                      history.push({
-                        pathname: "/dashboard",
-                        state: { page: "myVirtualtour" },
-                      });
+                  if (scheduledDateLabel !== "Virtual Tour") {
+                    history.push({
+                      pathname: "/dashboard",
+                      state: { page: "myVirtualtour" },
+                    });
+                  } else {
+                    if (token) {
+                      setIsModalOpen(true);
                     } else {
-                      if (token) {
-                        setIsModalOpen(true);
-                      } else {
-                        setOpenVirtualTourAfterLogin(true);
-                        setIsLoginModalOpen(true);
-                      }
+                      setOpenVirtualTourAfterLogin(true);
+                      setIsLoginModalOpen(true);
                     }
-                  }}
-                >
-                  <PiCubeFocus size={20} />
+                  }
+                }}
+              >
+                <PiCubeFocus size={20} />
 
-                  {scheduledDateLabel}
+                {scheduledDateLabel}
 
-                  {scheduledDateLabel !== "Virtual Tour" && (
-                    <HiOutlineArrowRight size={16} />
-                  )}
-                </button>
-              )}
+                {scheduledDateLabel !== "Virtual Tour" && (
+                  <HiOutlineArrowRight size={16} />
+                )}
+              </button>
+            )}
 
             {isModalOpen && (
               <GetScheduleModal
@@ -1186,7 +1322,7 @@ const ProjectDetail = () => {
               // Case: No images → Cover takes full width
               <div className="w-full">
                 <img
-                  src={projects[0]?.project_details?.cover_image}
+                  src={sliderImages[1] || sliderImages[0]}
                   alt="Main"
                   className="rounded-2xl w-full h-64 md:h-[400px] object-cover"
                 />
@@ -1194,7 +1330,7 @@ const ProjectDetail = () => {
             ) : (
               <>
                 {/* Left Side - Main Image (Always shown) */}
-                <div className="md:basis-[60%]">
+                {/* <div className="md:basis-[60%]">
                   <div className="relative">
                     <img
                       src={projects[0]?.project_details?.cover_image}
@@ -1207,6 +1343,19 @@ const ProjectDetail = () => {
                       </span>
                     </div>
                   </div>
+                </div> */}
+                <div className="md:basis-[60%] w-full overflow-hidden border border-red-500">
+                  <Slider {...sliderSettings}>
+                    {sliderImages.map((image, index) => (
+                      <div key={index}>
+                        <img
+                          src={image}
+                          alt={`Project ${index + 1}`}
+                          className="w-full h-[400px] object-cover rounded-2xl"
+                        />
+                      </div>
+                    ))}
+                  </Slider>
                 </div>
 
                 {/* Right Side - Video and Other Images */}
@@ -1216,7 +1365,7 @@ const ProjectDetail = () => {
                     className="relative cursor-pointer"
                     onClick={() => setShowAllImages(true)}
                   >
-                    {images.length > 0 ? (
+                    {/* {images.length > 0 ? (
                       <div className="relative">
                         <img
                           src={images[0].image}
@@ -1233,7 +1382,20 @@ const ProjectDetail = () => {
                       <p className="mt-2 text-lg text-center text-gray-500">
                         No images available for this project.
                       </p>
-                    )}
+                    )} */}
+                    {/* <div className="w-full">
+                      <Slider {...sliderSettings}>
+                        {sliderImages.map((image, index) => (
+                      <div key={index}>
+                      <img
+                        src={image}
+                        alt={`Project ${index + 1}`}
+                        className="rounded-2xl w-full h-64 md:h-[400px] object-cover"
+                      />
+                      </div>
+                      ))}
+                      </Slider>
+                      </div> */}
                   </div>
 
                   {/* Property Images Section */}
@@ -1311,10 +1473,11 @@ const ProjectDetail = () => {
                   key={tab.key}
                   type="button"
                   onClick={() => handleDetailTabClick(tab)}
-                  className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeDetailTab === tab.key
-                    ? "border-rose-600 text-rose-600"
-                    : "border-transparent text-gray-600 hover:text-rose-600"
-                    }`}
+                  className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                    activeDetailTab === tab.key
+                      ? "border-rose-600 text-rose-600"
+                      : "border-transparent text-gray-600 hover:text-rose-600"
+                  }`}
                 >
                   {tab.label}
                 </button>
@@ -1340,7 +1503,7 @@ const ProjectDetail = () => {
                       }
                       className="px-5 py-3 text-sm font-medium hover:text-red-600"
                     >
-                      Project Location
+                      Configurations
                     </button>
 
                     <button
@@ -1409,25 +1572,8 @@ const ProjectDetail = () => {
             </div>
           )}
 
-          {/* About Property Section */}
-          {projects[0]?.project_details?.project_description && (
-            <div
-              ref={aboutPropertyRef}
-              className="p-4 mt-4 bg-white shadow-md rounded-2xl"
-            >
-              <h3 className="text-xl font-bold text-gray-700">
-                About{" "}
-                {projects[0]?.project_details?.project_name || "the Property"}
-              </h3>
-              <p className="mt-2 text-lg text-gray-600">
-                {projects[0]?.project_details?.project_description ||
-                  "No description available."}
-              </p>
-            </div>
-          )}
-
           {/* Property Location Section */}
-          {projects[0]?.project_details?.address && (
+          {/* {projects[0]?.project_details?.address && (
             <div
               ref={projectLocationSectionRef} // 👈 NEW (purvi projectLocationRef hota, to already top-level var sobat conflict karat hota)
               className="p-3 mt-6 bg-white rounded-lg shadow-sm"
@@ -1442,177 +1588,342 @@ const ProjectDetail = () => {
                 {projects[0].project_details.address}
               </p>
             </div>
-          )}
+          )} */}
 
-          {/* Overview Section */}
+          {/* Configurations Section */}
 
-          <div ref={overviewRef}>
-            <h3 className="mb-4 text-2xl font-bold">Overview</h3>
-            <div className="p-4 mt-4 bg-white rounded-lg shadow-sm">
+          <div ref={configurationRef}>
+            <h3 className="mb-6 text-3xl font-bold text-gray-900">
+  Configurations
+</h3>
+            <div className="p-4 mt-2 bg-white rounded-lg shadow-sm">
               {(() => {
                 const project = projects[0]?.project_details || {};
+                const projectProperties = projects[0]?.project_properties || [];
+                const equalizeCardHeights = () => {
+  const cards = document.querySelectorAll(".configuration-card");
+
+  let maxHeight = 0;
+
+  cards.forEach((card) => {
+    card.style.height = "auto";
+    maxHeight = Math.max(maxHeight, card.offsetHeight);
+  });
+
+  cards.forEach((card) => {
+    card.style.height = `${maxHeight}px`;
+  });
+};
+                const configurationSliderSettings = {
+  dots: false,
+  infinite: projectProperties.length > 3,
+  speed: 500,
+  slidesToShow: Math.min(3, projectProperties.length),
+  slidesToScroll: 1,
+  arrows: true,
+  onInit: () => {
+    setTimeout(equalizeCardHeights, 300);
+  },
+
+  afterChange: () => {
+    setTimeout(equalizeCardHeights, 100);
+  },
+  responsive: [
+    {
+      breakpoint: 1024,
+      settings: {
+        slidesToShow: Math.min(2, projectProperties.length),
+      },
+    },
+    {
+      breakpoint: 768,
+      settings: {
+        slidesToShow: 1,
+      },
+    },
+  ],
+};
+                const hiddenPropertyFields = [
+                  "_id",
+                  "project",
+                  "image",
+                  "created_at",
+                  "updated_at",
+                  "price",
+                  "bhk",
+                  "carpet_area_in",
+                  "area_in",
+                  "project_type",
+                ];
 
                 // 🔥 Add / Remove anything from here manually
                 // Whatever is here will show in UI
-                const overviewFields = {
-                  mark_as_featured: "Featured",
-                  project_type: "Project Type",
-                  furnished_type: "Furnishing",
-                  total_floor: "Total Floors",
-                  project_floor: "Project Floor",
-                  bathroom: "Bathrooms",
-                  balcony: "Balconies",
-                  additional_rooms: "Additional Rooms",
-                  number_of_minimum_bathrooms: "Minimum Bathrooms",
-                  parking_availability: "Parking Availability",
-                  total_number_parking: "Total Parking",
-                  covered_parking: "Covered Parking",
-                  uncovered_parking: "Open Parking",
-                  pantry_option: "Pantry Option",
-                  possession_status: "Possession Status",
-                  possession_date: "Possession Date",
-                  possession_start: "Possession Start",
-                  age_of_property: "Property Age",
-                  available_status: "Availability",
-                  all_inclusive_price: "All Inclusive Price",
-                  price_onwards: "Price Onwards",
-                  price_negotiable: "Price Negotiable",
-                  tax_and_goverment_charges: "Tax & Government Charges",
-                  maintenance_cost: "Maintenance Cost",
-                  maintenance_frequency: "Maintenance Frequency",
-                  maintenance_included: "Maintenance Included",
-                  facing: "Facing",
-                  view: "View",
-                  flooring: "Flooring",
-                  lift_availability: "Lift Availability",
-                  water_source: "Water Source",
-                  power_backup: "Power Backup",
-                  security_system: "Security System",
-                  construction_status: "Construction Status",
-                  constructionOnLand: "Construction On Land",
-                  launch_date: "Launch Date",
-                  near_landmark: "Nearby Landmark",
-                  property_no: "Property Number",
-                  plot_no: "Plot Number",
-                  block: "Block",
-                  land_type: "Land Type",
-                  breadthOfLand: "Land Breadth",
-                  length_of_land: "Land Length",
-                  area_type: "Area Type",
-                  type_of_construction: "Construction ",
-                  quality_rating: "Quality Rating",
-                  central_AC: "Central AC",
-                  office_type: "Office Type",
-                  office_space_type: "Office Space ",
-                  washroom_Check: "Washroom Available",
-                  washroom: "Washroom",
-                  commercial_washroom: "Commercial Washroom",
-                  personal_washroom: "Personal Washroom",
-                  selectedConstructionOnLand: "Construction On Land",
-                  openSidesOfLand: "Open Sides Of Land",
-                  no_of_open_sides: "Number Of Open Sides",
-                  property_dimensions_breadth: "Property Breadth",
-                  property_dimensions_length: "Property Length",
-                  room_type: "Room Type",
-                  attached_bathroom: "AttachedBathroom",
-                  attached_balcony: "Attached Balcony",
-                  transaction_type: "Transaction Type",
-                  suited_for: "Suited For",
-                  available_for: "Available For",
-                  available_from: "Available From",
-                  available_on: "Available On",
-                  rent_duration: "Rent Duration",
-                  available_for_company_lease: "Company Lease",
-                  loan_availability: "Loan Availability",
-                  virtual_tour_availability: "Virtual Tour",
-                  video_url: "Video URL",
-                  ups: "UPS",
-                  oxygenDuct: "Oxygen Duct",
-                  pantry: "Pantry",
-                  conferenceRoom: "Conference Room",
-                };
+                // const overviewFields = {
+                //   mark_as_featured: "Featured",
+                //   project_type: "Project Type",
+                //   furnished_type: "Furnishing",
+                //   total_floor: "Total Floors",
+                //   project_floor: "Project Floor",
+                //   bathroom: "Bathrooms",
+                //   balcony: "Balconies",
+                //   additional_rooms: "Additional Rooms",
+                //   number_of_minimum_bathrooms: "Minimum Bathrooms",
+                //   parking_availability: "Parking Availability",
+                //   total_number_parking: "Total Parking",
+                //   covered_parking: "Covered Parking",
+                //   uncovered_parking: "Open Parking",
+                //   pantry_option: "Pantry Option",
+                //   possession_status: "Possession Status",
+                //   possession_date: "Possession Date",
+                //   possession_start: "Possession Start",
+                //   age_of_property: "Property Age",
+                //   available_status: "Availability",
+                //   all_inclusive_price: "All Inclusive Price",
+                //   price_onwards: "Price Onwards",
+                //   price_negotiable: "Price Negotiable",
+                //   tax_and_goverment_charges: "Tax & Government Charges",
+                //   maintenance_cost: "Maintenance Cost",
+                //   maintenance_frequency: "Maintenance Frequency",
+                //   maintenance_included: "Maintenance Included",
+                //   facing: "Facing",
+                //   view: "View",
+                //   flooring: "Flooring",
+                //   lift_availability: "Lift Availability",
+                //   water_source: "Water Source",
+                //   power_backup: "Power Backup",
+                //   security_system: "Security System",
+                //   construction_status: "Construction Status",
+                //   constructionOnLand: "Construction On Land",
+                //   launch_date: "Launch Date",
+                //   near_landmark: "Nearby Landmark",
+                //   property_no: "Property Number",
+                //   plot_no: "Plot Number",
+                //   block: "Block",
+                //   land_type: "Land Type",
+                //   breadthOfLand: "Land Breadth",
+                //   length_of_land: "Land Length",
+                //   area_type: "Area Type",
+                //   type_of_construction: "Construction ",
+                //   quality_rating: "Quality Rating",
+                //   central_AC: "Central AC",
+                //   office_type: "Office Type",
+                //   office_space_type: "Office Space ",
+                //   washroom_Check: "Washroom Available",
+                //   washroom: "Washroom",
+                //   commercial_washroom: "Commercial Washroom",
+                //   personal_washroom: "Personal Washroom",
+                //   selectedConstructionOnLand: "Construction On Land",
+                //   openSidesOfLand: "Open Sides Of Land",
+                //   no_of_open_sides: "Number Of Open Sides",
+                //   property_dimensions_breadth: "Property Breadth",
+                //   property_dimensions_length: "Property Length",
+                //   room_type: "Room Type",
+                //   attached_bathroom: "AttachedBathroom",
+                //   attached_balcony: "Attached Balcony",
+                //   transaction_type: "Transaction Type",
+                //   suited_for: "Suited For",
+                //   available_for: "Available For",
+                //   available_from: "Available From",
+                //   available_on: "Available On",
+                //   rent_duration: "Rent Duration",
+                //   available_for_company_lease: "Company Lease",
+                //   loan_availability: "Loan Availability",
+                //   virtual_tour_availability: "Virtual Tour",
+                //   video_url: "Video URL",
+                //   ups: "UPS",
+                //   oxygenDuct: "Oxygen Duct",
+                //   pantry: "Pantry",
+                //   conferenceRoom: "Conference Room",
+                // };
 
-                //  THESE WILL NEVER SHOW
-                const hiddenFields = [
-                  "_id",
-                  "favorite_id",
-                  "is_favorite",
-                  "user_id",
-                  "cover_image",
-                  "logo",
-                  "brochure_doc",
-                  "property_video",
-                  "latitude",
-                  "longitude",
-                  "deleted_at",
-                  "property_owner_image",
-                ];
+                // const hiddenFields = [
+                //   "_id",
+                //   "favorite_id",
+                //   "is_favorite",
+                //   "user_id",
+                //   "cover_image",
+                //   "logo",
+                //   "brochure_doc",
+                //   "property_video",
+                //   "latitude",
+                //   "longitude",
+                //   "deleted_at",
+                //   "property_owner_image",
+                // ];
 
                 return (
-                  <div className="grid grid-cols-1 text-lg text-gray-700 md:grid-cols-2 gap-y-2 gap-x-4">
-                    {Object.entries(overviewFields).map(
-                      ([key, label], index) => {
-                        // skip hidden fields
-                        if (hiddenFields.includes(key)) return null;
+                  <Slider {...configurationSliderSettings}>
+  {projectProperties.map((property, index) => (
+    <div key={index} className="px-2 h-full">
+  <div
+  className="configuration-card flex flex-col p-5 bg-white border border-gray-200 rounded-xl shadow-sm"
+>
+        <h3 className="min-h-[56px] text-xl font-bold leading-7 text-gray-900">
+          {project.building_type === "Residential"
+            ? `${property.bhk_type || ""} ${property.project_type || ""}`.trim()
+            : property.project_type}
+        </h3>
 
-                        const value = project[key];
+        <p className="mt-1 text-3xl font-bold my-text">
+          {formatPrice(property.price)}
+        </p>
 
-                        // skip empty values
-                        if (
-                          value === null ||
-                          value === undefined ||
-                          value === "" ||
-                          value === "NA" ||
-                          value === "N/A" ||
-                          value === false
-                        ) {
-                          return null;
-                        }
+        <hr className="mt-3 mb-4 border-gray-200" />
 
-                        // format date
-                        let formattedValue = value;
+        <div className="space-y-2">
+          {Object.entries(property).map(([key, value]) => {
+            if (hiddenPropertyFields.includes(key)) return null;
 
-                        if (
-                          key.includes("date") ||
-                          key.includes("_at") ||
-                          key === "available_from" ||
-                          key === "available_on"
-                        ) {
-                          try {
-                            formattedValue = new Date(value).toLocaleDateString(
-                              "en-GB",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              },
-                            );
-                          } catch (e) { }
-                        }
+            if (
+              value === null ||
+              value === undefined ||
+              value === "" ||
+              value === "NA" ||
+              value === "N/A" ||
+              value === false ||
+              value === "No"
+            ) {
+              return null;
+            }
 
-                        // boolean handling
-                        if (typeof value === "boolean") {
-                          formattedValue = value ? "Yes" : "No";
-                        }
+            let label = key
+              .replace(/_/g, " ")
+              .replace(/([A-Z])/g, " $1")
+              .replace(/\b\w/g, (c) => c.toUpperCase());
+              if (key === "bhk_type") label = "Configuration";
+if (key === "project_floor") label = "Floor";
+if (key === "bathroom") label = "Bathrooms";
+if (key === "balcony") label = "Balconies";
+if (key === "furnished_type") label = "Furnishing";
+if (key === "age_of_property") label = "Property Age";
 
-                        return (
-                          <div
-                            key={index}
-                            className="flex justify-between gap-4 p-3 border-b border-gray-100"
-                          >
-                            <span className="w-1/2 text-gray-500">{label}</span>
+            return (
+              <div
+                key={key}
+                className="flex justify-between py-2 border-b border-gray-100"
+              >
+                <span className="text-gray-500">{label}</span>
 
-                            <span className="w-1/2 font-semibold text-black break-words text-right">
-                              {formattedValue}
-                            </span>
-                          </div>
-                        );
-                      },
-                    )}
-                  </div>
+                <span className="font-semibold text-right break-words">
+  {key === "carpet_area"
+    ? `${value} ${property.carpet_area_in || ""}`
+    : key === "area"
+    ? `${value} ${property.area_in || ""}`
+    : String(value)}
+</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  ))}
+</Slider>
                 );
               })()}
             </div>
+          </div>
+          {/* Status & Timeline */}
+          <div
+            ref={statusTimelineRef}
+            className="p-4 mt-4 bg-white rounded-lg shadow-sm"
+          >
+            <h3 className="mb-4 text-2xl font-bold">Status & Timeline</h3>
+
+            {(() => {
+              const project = projects[0]?.project_details || {};
+
+              const statusTimeline = [
+                {
+                  label: "Project Type",
+                  value: project.building_type,
+                  icon: <Building2 className="w-5 h-5 text-blue-600" />,
+                  bg: "bg-blue-100",
+                },
+                {
+                  label: "Status",
+                  value: project.possession_status,
+                  icon:
+                    project.possession_status === "Ready To Move" ? (
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <Hammer className="w-5 h-5 text-orange-600" />
+                    ),
+                  bg:
+                    project.possession_status === "Ready To Move"
+                      ? "bg-green-100"
+                      : "bg-orange-100",
+                },
+
+                ...(project.possession_status === "Under Construction" &&
+                project.possession_date
+                  ? [
+                      {
+                        label: "Possession",
+                        value: new Date(
+                          project.possession_date,
+                        ).toLocaleDateString("en-GB", {
+                          month: "short",
+                          year: "numeric",
+                        }),
+                        icon: (
+                          <CalendarDays className="w-5 h-5 text-purple-600" />
+                        ),
+                        bg: "bg-purple-100",
+                      },
+                    ]
+                  : []),
+
+                ...(project.lift_availability === "Yes"
+                  ? [
+                      {
+                        label: "Lift",
+                        value: "Available",
+                        icon: <ArrowUp className="w-5 h-5 text-indigo-600" />,
+                        bg: "bg-indigo-100",
+                      },
+                    ]
+                  : []),
+
+                ...(project.parking_availability === "Yes"
+                  ? [
+                      {
+                        label: "Parking",
+                        value: "Available",
+                        icon: <Car className="w-5 h-5 text-emerald-600" />,
+                        bg: "bg-emerald-100",
+                      },
+                    ]
+                  : []),
+              ];
+
+              return (
+                <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                  {statusTimeline.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 p-4 transition-all bg-white border border-gray-200 shadow-sm rounded-xl hover:shadow-md"
+                    >
+                      <div
+                        className={`w-12 h-12 rounded-full flex items-center justify-center ${item.bg}`}
+                      >
+                        {item.icon}
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                          {item.label}
+                        </p>
+
+                        <p className="mt-1 text-base font-semibold text-gray-900">
+                          {item.value}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
           {/* Amenities Section */}
           {amenitiesList.length > 0 && (
@@ -1690,6 +2001,22 @@ const ProjectDetail = () => {
               </div>
             );
           })}
+          {/* About Property Section */}
+          {projects[0]?.project_details?.project_description && (
+            <div
+              ref={aboutPropertyRef}
+              className="p-4 mt-4 bg-white shadow-md rounded-2xl"
+            >
+              <h3 className="text-xl font-bold text-gray-700">
+                About{" "}
+                {projects[0]?.project_details?.project_name || "the Property"}
+              </h3>
+              <p className="mt-2 text-lg text-gray-600">
+                {projects[0]?.project_details?.project_description ||
+                  "No description available."}
+              </p>
+            </div>
+          )}
 
           {/* Location Section with Map */}
           <div
@@ -1721,21 +2048,17 @@ const ProjectDetail = () => {
                   className="block overflow-hidden no-underline shadow-md rounded-2xl hover:no-underline"
                 >
                   <img
-                    src={
-                      userDetails.profile_image
-                        ? userDetails.profile_image
-                        : "/image/app.png"
-                    }
+                    src={userDetails?.profile_image || "/image/app.png"}
                     alt="Agent"
                     className="object-contain w-16 h-16 rounded-full"
                   />
                 </Link>
                 <div className="flex flex-col items-center">
                   <span className="text-lg font-semibold">
-                    {userDetails.full_name}
+                    {userDetails?.full_name || ""}
                   </span>
                   <span className="text-sm font-semibold">
-                    {userDetails.user_type}
+                    {userDetails?.user_type || ""}
                   </span>
                 </div>
               </div>
@@ -1780,10 +2103,11 @@ const ProjectDetail = () => {
 
             {enquiryStatus && (
               <div
-                className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
-                  ? "text-green-600"
-                  : "text-red-600"
-                  }`}
+                className={`text-center mt-4 text-lg ${
+                  enquiryStatus.type === "success"
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
               >
                 {enquiryStatus.message}
               </div>
@@ -1959,9 +2283,9 @@ const ProjectDetail = () => {
                         ? project.congfigurations.includes("BHK")
                           ? project.congfigurations
                           : project.congfigurations
-                            .split(",")
-                            .map((c) => `${c.trim()} BHK`)
-                            .join(", ")
+                              .split(",")
+                              .map((c) => `${c.trim()} BHK`)
+                              .join(", ")
                         : ""}{" "}
                       {project.project_type} for Sale in{" "}
                       {project.address_area || ""}
@@ -2028,7 +2352,7 @@ const ProjectDetail = () => {
                         <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
                         <div className="flex flex-col min-w-0 leading-tight">
                           <p className="m-0 text-sm font-semibold leading-4 truncate">
-                            {project.area ? `${project.area} Sq.ft` : "N/A"}
+                            {project.area ? `${project.area} sq.ft` : "N/A"}
                           </p>
                           <p className="m-0 text-xs leading-4 text-gray-500">
                             Built Up Area
@@ -2057,19 +2381,19 @@ const ProjectDetail = () => {
                         {/* Days */}
                         <span className="whitespace-nowrap">
                           {project.days_since_created !== undefined &&
-                            project.days_since_created !== null
+                          project.days_since_created !== null
                             ? project.days_since_created === 0
                               ? "Today"
                               : `${project.days_since_created} days ago`
                             : project.created_at
                               ? `${Math.max(
-                                0,
-                                Math.floor(
-                                  (Date.now() -
-                                    new Date(project.created_at).getTime()) /
-                                  (1000 * 60 * 60 * 24),
-                                ),
-                              )} days ago`
+                                  0,
+                                  Math.floor(
+                                    (Date.now() -
+                                      new Date(project.created_at).getTime()) /
+                                      (1000 * 60 * 60 * 24),
+                                  ),
+                                )} days ago`
                               : "Recently"}
                         </span>
 
@@ -2101,9 +2425,9 @@ const ProjectDetail = () => {
                     <div className="flex items-center pt-2">
                       <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
                         {project.property_owner_image &&
-                          !project.property_owner_image.includes(
-                            "default_profile",
-                          ) ? (
+                        !project.property_owner_image.includes(
+                          "default_profile",
+                        ) ? (
                           <img
                             src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
                             alt={project.connect_to_name || "Builder"}
@@ -2131,7 +2455,6 @@ const ProjectDetail = () => {
         </Slider>
       </div>
       {/* Other Projects Section End */}
-
     </div>
   );
 };

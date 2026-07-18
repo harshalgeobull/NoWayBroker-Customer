@@ -47,9 +47,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -637,24 +637,24 @@ const PropertyDashboard = () => {
   };
 
   const formatPrice = (price) => {
-  if (!price) return "";
+    if (!price) return "";
 
-  const formatNumber = (value, unit) => {
-    return `${value % 1 === 0
-      ? parseInt(value)
-      : value.toFixed(2).replace(/\.?0+$/, "")} ${unit}`;
+    const formatNumber = (value, unit) => {
+      return `${value % 1 === 0
+        ? parseInt(value)
+        : value.toFixed(2).replace(/\.?0+$/, "")} ${unit}`;
+    };
+
+    if (price >= 10000000) {
+      return formatNumber(price / 10000000, "Cr");
+    } else if (price >= 100000) {
+      return formatNumber(price / 100000, "L");
+    } else if (price >= 1000) {
+      return formatNumber(price / 1000, "K");
+    } else {
+      return price.toString();
+    }
   };
-
-  if (price >= 10000000) {
-    return formatNumber(price / 10000000, "Cr");
-  } else if (price >= 100000) {
-    return formatNumber(price / 100000, "L");
-  } else if (price >= 1000) {
-    return formatNumber(price / 1000, "K");
-  } else {
-    return price.toString();
-  }
-};
 
   useEffect(() => {
     setError(null);
@@ -1712,7 +1712,7 @@ const PropertyDashboard = () => {
                         <input
                           type={
                             propertyType === "Commercial Lease" &&
-                            buildingType === "Commercial"
+                              buildingType === "Commercial"
                               ? "radio"
                               : "checkbox"
                           }
@@ -1994,11 +1994,11 @@ const PropertyDashboard = () => {
                 <span className="block pr-8 truncate text-left">
                   {selectedAmenities.length > 0
                     ? amenitiesList
-                        .filter((item) =>
-                          selectedAmenities.includes(String(item._id)),
-                        )
-                        .map((item) => item.amenity_name)
-                        .join(", ")
+                      .filter((item) =>
+                        selectedAmenities.includes(String(item._id)),
+                      )
+                      .map((item) => item.amenity_name)
+                      .join(", ")
                     : "Amenities"}
                 </span>
 
@@ -3166,10 +3166,11 @@ const PropertyDashboard = () => {
                   properties
                     .filter(
                       (property) =>
+                        property.available_status !== "Sold" &&
                         property.latitude !== null &&
                         property.longitude !== null &&
                         !isNaN(property.latitude) &&
-                        !isNaN(property.longitude),
+                        !isNaN(property.longitude)
                     )
                     .map((property) => {
                       const area = property.address_area || "";
@@ -3195,9 +3196,8 @@ const PropertyDashboard = () => {
                           category === "Commercial Buy" ||
                           category === "Commercial Lease"
                         ) {
-                          return `${type} for ${
-                            category === "Commercial Buy" ? "Sale" : "Lease"
-                          } in ${location}`;
+                          return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
+                            } in ${location}`;
                         }
 
                         if (
@@ -3230,11 +3230,10 @@ const PropertyDashboard = () => {
                       return (
                         <div
                           key={property._id}
-                          className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${
-                            hoveredPropertyId === property._id
-                              ? "bg-green-200"
-                              : ""
-                          }`}
+                          className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${hoveredPropertyId === property._id
+                            ? "bg-green-200"
+                            : ""
+                            }`}
                           onMouseEnter={() =>
                             setHoveredPropertyId(property._id)
                           }
@@ -3246,7 +3245,7 @@ const PropertyDashboard = () => {
                               className="block overflow-hidden no-underline bg-white rounded-lg hover:no-underline"
                             >
                               {1 + (property?.property_images?.length || 0) >
-                              1 ? (
+                                1 ? (
                                 <Slider
                                   dots
                                   infinite
@@ -3319,7 +3318,7 @@ const PropertyDashboard = () => {
                                     <img
                                       src={property.cover_image}
                                       alt="Cover"
-                                      className="object-cover w-full h-48 rounded-t-2xl"
+                                      className="object-cover w-full h-44 sm:h-48 md:h-52 rounded-t-2xl"
                                     />
                                   </div>
 
@@ -3330,7 +3329,7 @@ const PropertyDashboard = () => {
                                         <img
                                           src={imgObj.image}
                                           alt="Property"
-                                          className="object-cover w-full h-48 rounded-t-2xl"
+                                          className="object-cover w-full h-44 sm:h-48 md:h-52 rounded-t-2xl"
                                         />
                                       </div>
                                     ),
@@ -3342,7 +3341,7 @@ const PropertyDashboard = () => {
                                   <img
                                     src={property.cover_image}
                                     alt="Cover"
-                                    className="object-cover w-full h-48 rounded-t-2xl"
+                                    className="object-cover w-full h-44 sm:h-48 md:h-52 rounded-t-2xl"
                                   />
                                 </div>
                               )}
@@ -3398,12 +3397,12 @@ const PropertyDashboard = () => {
 
                             {/* Property Details */}
                             {/* Property Details - Refined 99acres Style */}
-                            <div className="flex flex-col flex-1 p-3 text-black bg-white">
+                            <div className="flex flex-col flex-1 p-2 sm:p-3 text-black bg-white">
                               {/* Price Section */}
-                              <div className="flex items-start justify-between gap-3 mb-0">
+                              <div className="flex items-start justify-between gap-2 sm:gap-3 mb-0 flex-wrap">
                                 {/* Property Name */}
                                 <h3
-                                  className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate"
+                                  className="flex-1 min-w-0 m-0 text-base sm:text-lg font-semibold leading-6 text-gray-900 truncate"
                                   title={property.property_name}
                                 >
                                   {property.property_name || "N/A"}
@@ -3411,7 +3410,7 @@ const PropertyDashboard = () => {
 
                                 {/* Furnishing */}
                                 <span
-                                  className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-[#E85B6B] sm:text-base whitespace-nowrap"
+                                  className="flex-shrink-0 m-0 text-xs font-medium leading-6 text-black sm:text-sm whitespace-nowrap"
                                   title={property.furnished_type}
                                 >
                                   {property.furnished_type || "Un-Furnished"}
@@ -3424,31 +3423,31 @@ const PropertyDashboard = () => {
                               >
                                 {subtitle}
                               </p>
-                              <div className="flex items-center justify-between mb-1">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-1">
                                 {/* Left Side */}
-                                <div className="flex items-center">
-                                  <span className="text-2xl font-bold">
+                                <div className="flex items-center flex-wrap gap-2">
+                                  <span className="text-xl sm:text-2xl font-bold">
                                     ₹{" "}
                                     {property.property_category_type === "Rent" ||
-                                    property.property_category_type === "PG/Co-living"
+                                      property.property_category_type === "PG/Co-living"
                                       ? formatPrice(property.rent)
                                       : formatPrice(property.property_price)}
                                   </span>
 
                                   {(property.property_category_type ===
                                     "Rent" || property.property_category_type === "PG/Co-living") && (
-                                    <span className="ml-1 text-sm text-gray-500">
-    / {property.rent_duration || "Per Month"}
-  </span>
-                                  )}
+                                      <span className="text-xs sm:text-sm text-gray-500">
+                                        / {property.rent_duration || "Per Month"}
+                                      </span>
+                                    )}
 
                                   {/* Ready to Move - Keep close to price */}
                                   {property.property_category_type?.includes(
                                     "Buy",
                                   ) &&
                                     property.possession_status ===
-                                      "Ready To Move" && (
-                                      <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
+                                    "Ready To Move" && (
+                                      <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:ml-6 bg-green-100 border border-green-200 rounded-full">
                                         <MdApartment className="text-base text-green-700" />
                                         <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
                                           Ready to Move
@@ -3458,27 +3457,27 @@ const PropertyDashboard = () => {
                                 </div>
 
                                 {/* Right Side */}
-                                <div className="text-sm font-medium whitespace-nowrap">
+                                <div className="text-xs sm:text-sm font-medium whitespace-nowrap">
                                   {(property.property_category_type ===
-                                    "Rent" || property.property_category_type === "PG/Co-living")&& (
-                                    <>
-                                      <span className="text-gray-500">
-                                        Deposit:
-                                      </span>
-                                      <span className="ml-1 font-semibold">
-                                        ₹{" "}
-                                        {property.custom_deposit_amount?.toLocaleString(
-                                          "en-IN",
-                                        )}
-                                      </span>
-                                    </>
-                                  )}
+                                    "Rent" || property.property_category_type === "PG/Co-living") && (
+                                      <>
+                                        <span className="text-gray-500">
+                                          Deposit:
+                                        </span>
+                                        <span className="ml-1 font-semibold">
+                                          ₹{" "}
+                                          {property.custom_deposit_amount?.toLocaleString(
+                                            "en-IN",
+                                          )}
+                                        </span>
+                                      </>
+                                    )}
 
                                   {property.property_category_type?.includes(
                                     "Buy",
                                   ) &&
                                     property.possession_status !==
-                                      "Ready To Move" &&
+                                    "Ready To Move" &&
                                     property.possession_date && (
                                       <>
                                         <span className="text-gray-500">
@@ -3494,13 +3493,13 @@ const PropertyDashboard = () => {
                                 </div>
                               </div>
                               {/* Features Row */}
-                              <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+                              <div className="grid grid-cols-3 py-2 sm:py-3 border-t border-b border-gray-100">
                                 {/* First Column */}
-                                <div className="flex items-center gap-2 px-3 min-w-0">
-                                  <MdApartment className="text-[22px] text-gray-700 flex-shrink-0" />
+                                <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 min-w-0">
+                                  <MdApartment className="text-lg sm:text-[22px] text-gray-700 flex-shrink-0" />
 
                                   <div className="flex flex-col justify-center min-w-0">
-                                    <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                    <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
                                       {property.building_type === "Commercial"
                                         ? property.property_type === "Office"
                                           ? "Office Space"
@@ -3508,18 +3507,18 @@ const PropertyDashboard = () => {
                                             ? "Retail Space"
                                             : property.property_type
                                         : property.property_category_type?.includes(
-                                              "PG",
-                                            )
+                                          "PG",
+                                        )
                                           ? `${property.bathroom || 0} Bathrooms`
                                           : property.bhk_type}
                                     </p>
 
-                                    <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                    <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
                                       {property.building_type === "Commercial"
                                         ? "Property Type"
                                         : property.property_category_type?.includes(
-                                              "PG",
-                                            )
+                                          "PG",
+                                        )
                                           ? "Bathrooms"
                                           : property.property_type}
                                     </p>
@@ -3527,17 +3526,17 @@ const PropertyDashboard = () => {
                                 </div>
 
                                 {/* Second Column */}
-                                <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                                <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 border-l border-gray-200 min-w-0">
                                   {property.property_category_type?.includes(
                                     "PG",
                                   ) ? (
-                                    <FaUser className="text-[20px] text-gray-700 flex-shrink-0" />
+                                    <FaUser className="text-base sm:text-[20px] text-gray-700 flex-shrink-0" />
                                   ) : (
-                                    <FaBath className="text-[20px] text-gray-700 flex-shrink-0" />
+                                    <FaBath className="text-base sm:text-[20px] text-gray-700 flex-shrink-0" />
                                   )}
 
                                   <div className="flex flex-col justify-center min-w-0">
-                                    <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                    <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
                                       {property.property_category_type?.includes(
                                         "PG",
                                       )
@@ -3545,7 +3544,7 @@ const PropertyDashboard = () => {
                                         : `${property.bathroom || 0} Baths`}
                                     </p>
 
-                                    <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                    <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
                                       {property.property_category_type?.includes(
                                         "PG",
                                       )
@@ -3556,15 +3555,15 @@ const PropertyDashboard = () => {
                                 </div>
 
                                 {/* Third Column */}
-                                <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
-                                  <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
+                                <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 border-l border-gray-200 min-w-0">
+                                  <RiRuler2Line className="text-lg sm:text-[22px] text-gray-700 flex-shrink-0" />
 
                                   <div className="flex flex-col justify-center min-w-0">
-                                    <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                    <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
                                       {property.area} {property.area_in}
                                     </p>
 
-                                    <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                    <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
                                       Built Up Area
                                     </p>
                                   </div>
@@ -3574,7 +3573,7 @@ const PropertyDashboard = () => {
                               <hr className="my-1 border-gray-100" />
 
                               {/* Row 5 : Posted By | Days | Distance | Share */}
-                              <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
+                              <div className="flex items-center justify-between pt-1 pb-2 text-xs sm:text-[13px] text-gray-600 flex-wrap gap-1">
                                 {/* Left */}
                                 <div className="flex items-center flex-wrap min-w-0">
                                   {/* Posted By */}
@@ -3629,15 +3628,15 @@ const PropertyDashboard = () => {
                                 property.property_owner_image,
                               )}
                               {/* Row 6 : Owner Details */}
-                              <div className="flex items-center justify-between pt-3">
+                              <div className="flex flex-col xs:flex-row sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 pt-3">
                                 {/* Left Side */}
-                                <div className="flex items-center">
+                                <div className="flex items-center min-w-0">
                                   {/* Avatar */}
-                                  <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+                                  <div className="flex items-center justify-center flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 overflow-hidden rounded-full bg-blue-100">
                                     {property.property_owner_image &&
-                                    !property.property_owner_image.includes(
-                                      "default_profile",
-                                    ) ? (
+                                      !property.property_owner_image.includes(
+                                        "default_profile",
+                                      ) ? (
                                       <>
                                         <img
                                           src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
@@ -3665,25 +3664,25 @@ const PropertyDashboard = () => {
                                   </div>
 
                                   {/* Name & User Type */}
-                                  <div className="flex flex-col justify-center ml-3 leading-tight">
+                                  <div className="flex flex-col justify-center min-w-0 ml-2 sm:ml-3 leading-tight">
                                     <span
-                                      className="text-sm font-semibold text-gray-900"
+                                      className="text-xs sm:text-sm font-semibold text-gray-900 truncate"
                                       title={property.connect_to_name}
                                     >
                                       {property.connect_to_name || "Owner"}
                                     </span>
 
-                                    <span className="text-xs text-gray-500">
+                                    <span className="text-[10px] sm:text-xs text-gray-500 truncate">
                                       {property.user_type || "Owner"}
                                     </span>
                                   </div>
                                 </div>
 
                                 {/* RIGHT SIDE - Buttons */}
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
                                   {/* Contact */}
                                   <div
-                                    className="flex items-center justify-center w-24 h-9 text-sm text-white rounded-lg cursor-pointer my-bg"
+                                    className="flex items-center justify-center flex-1 sm:flex-none sm:w-24 h-9 text-xs sm:text-sm text-white rounded-lg cursor-pointer my-bg"
                                     onClick={() => handleContactClick(property)}
                                   >
                                     Contact
@@ -3695,7 +3694,7 @@ const PropertyDashboard = () => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
-                                    className="flex items-center justify-center w-9 h-9 text-white bg-green-500 rounded-lg hover:bg-green-600"
+                                    className="flex items-center justify-center w-9 h-9 flex-shrink-0 text-white bg-green-500 rounded-lg hover:bg-green-600"
                                   >
                                     <FaWhatsapp />
                                   </a>
@@ -3704,7 +3703,7 @@ const PropertyDashboard = () => {
                                   <a
                                     href={`tel:${property.connect_to_no}`}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="flex items-center justify-center w-9 h-9 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                                    className="flex items-center justify-center w-9 h-9 flex-shrink-0 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
                                   >
                                     <FaPhone />
                                   </a>
@@ -3982,9 +3981,8 @@ const PropertyDashboard = () => {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${
-                      currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     <MdOutlineNavigateBefore className="text-xl text-gray-700" />
                   </button>
@@ -3996,11 +3994,10 @@ const PropertyDashboard = () => {
                       onClick={() =>
                         page !== "..." ? handlePageChange(page) : null
                       }
-                      className={`px-3 py-1 text-sm transition-colors ${
-                        currentPage === page
-                          ? "rounded-full my-border w-8 h-8 flex items-center justify-center font-normal"
-                          : "text-gray-700"
-                      }`}
+                      className={`px-3 py-1 text-sm transition-colors ${currentPage === page
+                        ? "rounded-full my-border w-8 h-8 flex items-center justify-center font-normal"
+                        : "text-gray-700"
+                        }`}
                     >
                       {page}
                     </button>
@@ -4009,11 +4006,10 @@ const PropertyDashboard = () => {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${
-                      currentPage === totalPages
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === totalPages
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                      }`}
                   >
                     <MdOutlineNavigateNext className="text-xl text-gray-700" />
                   </button>
@@ -4055,7 +4051,7 @@ const PropertyDashboard = () => {
                         icon={createCustomIcon(
                           property.property_price,
                           property._id === activePropertyId ||
-                            property._id === hoveredPropertyId,
+                          property._id === hoveredPropertyId,
                         )}
                         eventHandlers={{
                           mouseover: () => setHoveredPropertyId(property._id),
