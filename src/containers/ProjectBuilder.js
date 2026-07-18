@@ -229,6 +229,19 @@ const ProjectBuilder = () => {
         setCurrentPage(response.data.current_page || 0);
         setNextPages(response.data.next_page || 0);
         setPreviousPage(response.data.previous_page || 0);
+
+        // 👇 DEBUG: same as ProjectList.js — verify project_properties/price
+        // fields coming from this endpoint. Remove once confirmed working.
+        if (response.data.data.length > 0) {
+          console.log(
+            "PROJECTBUILDER — first project raw object:",
+            response.data.data[0],
+          );
+          console.log(
+            "PROJECTBUILDER — first project's project_properties:",
+            response.data.data[0].project_properties,
+          );
+        }
       } else {
         console.error("Unexpected response:", response);
       }

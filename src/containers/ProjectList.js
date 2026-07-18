@@ -234,7 +234,20 @@ const ProjectList = () => {
         },
       );
 
-      setProjects(Array.isArray(response.data.data) ? response.data.data : []);
+      const list = Array.isArray(response.data.data) ? response.data.data : [];
+      setProjects(list);
+
+      // 👇 DEBUG: keep this while you verify prices are coming through, then
+      // remove it. It logs the raw project_properties array for the first
+      // project so you can see exactly what field names your API sends
+      // (bhk_type vs project_type, price vs property_price, etc).
+      if (list.length > 0) {
+        console.log("PROJECTLIST — first project raw object:", list[0]);
+        console.log(
+          "PROJECTLIST — first project's project_properties:",
+          list[0].project_properties,
+        );
+      }
     } catch (error) {
       console.error("Error fetching projects:", error);
       setProjects([]);
@@ -432,39 +445,58 @@ const ProjectList = () => {
                     ? project.commercial_units
                     : [];
 
-                // Each card shows its own price exactly as provided by the API:
-                // when `residential_units` includes a per-BHK price, that price is
-                // used as-is. Only when the API sends just a comma list of BHK
-                // types with no per-unit pricing do all cards fall back to the
-                // project's average price — a data-availability fallback, not
-                // fabricated UI.
+                /* ====================================================================
+                   FIX (was the bug): this used to read `project.residential_units`,
+                   a field the API never sends. The Network tab confirms the real
+                   per-unit data — including a real `price` field — lives in
+                   `project.project_properties`, exactly like Spotlights.js already
+                   uses. Also added the same computedRangePrice fallback Spotlights.js
+                   has, so if a project has no top-level price field at all, we still
+                   derive a min–max range straight from project_properties prices.
+                   ==================================================================== */
+
+                // Fallback: compute a min–max range from project_properties prices
+                // if no top-level price field exists on the project.
+                const propertyPrices = (project.project_properties || [])
+                  .map((p) => Number(p.price))
+                  .filter((p) => !isNaN(p) && p > 0);
+
+                const computedRangePrice =
+                  propertyPrices.length === 0
+                    ? null
+                    : propertyPrices.length === 1
+                      ? propertyPrices[0]
+                      : `${Math.min(...propertyPrices)} - ${Math.max(...propertyPrices)}`;
+
                 // Resolves the project's overall/starting price from whichever
-                // field name the backend actually sends — some responses use
-                // average_project_price, others use starting_price / min_price /
-                // avg_price. Tries each in order and returns the first real value.
+                // field name the backend actually sends — tries each in order
+                // and returns the first real value.
                 const resolvedProjectPrice =
                   project.average_project_price ||
                   project.starting_price ||
                   project.min_price ||
                   project.avg_price ||
                   project.price ||
+                  computedRangePrice ||
                   null;
 
+                // 👇 Now sourced from `project_properties` (matches Spotlights.js),
+                // with the same fallback chain to `congfigurations` when a project
+                // has no property-level breakdown at all.
                 const residentialUnits =
-                  project.residential_units &&
-                    project.residential_units.length > 0
-                    ? project.residential_units.map((u) => ({
+                  project.project_properties && project.project_properties.length > 0
+                    ? project.project_properties.map((u) => ({
                       ...u,
-                      // Per-unit price, falling back through common alternate
-                      // field names in case this particular unit object doesn't
-                      // use `price` — never silently drops to blank if any of
-                      // these has a real value.
+                      type: u.bhk_type || u.project_type,
                       price:
-                        u.price ||
-                        u.unit_price ||
-                        u.configuration_price ||
-                        u.amount ||
-                        resolvedProjectPrice,
+                        Number(
+                          u.price ||
+                          u.property_price ||
+                          u.unit_price ||
+                          u.configuration_price ||
+                          u.amount ||
+                          resolvedProjectPrice
+                        ),
                     }))
                     : project.congfigurations
                       ? project.congfigurations.split(",").map((c) => ({
@@ -688,9 +720,6 @@ const ProjectList = () => {
 
                         {/* Spacer pushes builder + buttons to the bottom of the card */}
                         <div className="mt-auto flex-shrink-0">
-                          {/* ==================== BUILDER SECTION (fixed height) ====================
-                              Builder name stays on the left; distance-from-you sits
-                              on the right, vertically centered with the builder block. */}
                           {/* ==================== BUILDER SECTION ====================
                               Icon + "Builder" label sit on their own line; the
                               Builder Name and the distance-from-you sit together
