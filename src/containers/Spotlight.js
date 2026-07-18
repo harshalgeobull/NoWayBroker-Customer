@@ -49,18 +49,14 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
    configs beyond what's visible (e.g. swiping from 1/2/3 BHK to 2/3/4 BHK).
    No visible arrows, no dots — pure swipe. Visible count is responsive:
    3 on desktop, 2 on tablet, 1-2 on mobile depending on available width.
-   ==================================================================== */
-//* ====================================================================
-// ConfigCarousel — dynamically renders one card per available residential
-// configuration(BHK for residential, unit type for commercial) — never
-// hardcoded, always driven by the `units` array's actual length. Built on
-// react - slick so users can swipe / drag horizontally to reveal further
-//    configs beyond what's visible (e.g. swiping from 1/2/3 BHK to 2/3/4 BHK).
-//    Small circular Prev / Next buttons sit fully on the outer left / right edges
-//   (flex layout, not overlapping), controlling this inner slider only —
-//    swipe still works, and the buttons auto - hide when there's just one
-//    configuration to show.
-//    ====================================================================
+    ==================================================================== */
+/* ====================================================================
+ONLY CHANGE: inside ConfigCarousel in Spotlights.js
+Replace the existing `showNavButtons` line + both <button> blocks with
+the code below. Nothing else in the file (slider settings, card UI,
+swipe behavior, spacing, styling) changes.
+==================================================================== */
+
 const ConfigCarousel = ({
   units,
   isCommercial,
@@ -77,6 +73,32 @@ const ConfigCarousel = ({
   const smallMobileVisible = Math.min(1, units.length);
 
   const showNavButtons = units.length > 1;
+
+  /* Nav buttons should only ever be visible at a given screen width when
+     scrolling is actually required there — i.e. when units.length exceeds
+     the number of slides visible at that breakpoint (desktop cap 3,
+     tablet/mobile cap 2, small mobile ≤380px cap 1). Since
+     desktopVisible/tabletVisible/mobileVisible/smallMobileVisible above
+     are all Math.min(N, units.length), scrolling is needed at a given
+     breakpoint exactly when units.length still exceeds that cap:
+       - units.length >= 4  -> overflows everywhere -> always show
+       - units.length === 3 -> fits at desktop (cap 3), overflows at
+         tablet/mobile/small-mobile (cap 2/2/1) -> show only <=1024px
+       - units.length === 2 -> fits at desktop/tablet/mobile (cap 3/2/2),
+         overflows only at small mobile (cap 1) -> show only <=380px
+       - units.length <= 1  -> never overflows -> showNavButtons is false,
+         so this class never even gets applied
+     Using "hidden" as the base class plus a max-width variant means the
+     buttons are removed from layout/tab order until that width is
+     actually reached — swipe still works regardless of button visibility. */
+  const navVisibilityClass =
+    units.length >= 4
+      ? "flex"
+      : units.length === 3
+        ? "hidden max-[1024px]:flex"
+        : "hidden max-[380px]:flex";
+
+  const navButtonClass = `flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] items-center justify-center transition-shadow duration-200 ${navVisibilityClass}`;
 
   const sliderSettings = {
     dots: false,
@@ -106,7 +128,7 @@ const ConfigCarousel = ({
             e.stopPropagation();
             innerSliderRef.current?.slickPrev();
           }}
-          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] flex items-center justify-center transition-shadow duration-200"
+          className={navButtonClass}
         >
           <FaChevronLeft className="text-[#A70D2A] text-[10px] sm:text-xs" />
         </button>
@@ -151,7 +173,7 @@ const ConfigCarousel = ({
             e.stopPropagation();
             innerSliderRef.current?.slickNext();
           }}
-          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] flex items-center justify-center transition-shadow duration-200"
+          className={navButtonClass}
         >
           <FaChevronRight className="text-[#A70D2A] text-[10px] sm:text-xs" />
         </button>

@@ -51,6 +51,32 @@ const ConfigCarousel = ({ units, formatAverageProjectPrice }) => {
 
   const showNavButtons = units.length > 1;
 
+  /* Nav buttons should only ever be visible at a given screen width when
+     scrolling is actually required at that width — i.e. when units.length
+     exceeds the number of slides visible there (desktop: 3, tablet/mobile:
+     2, small mobile: 380px and below: 1). Since desktopVisible/tabletVisible/
+     mobileVisible/smallMobileVisible above are all Math.min(N, units.length),
+     scrolling is needed at a given breakpoint exactly when units.length is
+     still larger than that breakpoint's cap:
+       - units.length >= 4  -> more configs than fit anywhere -> always show
+       - units.length === 3 -> fits at desktop (cap 3), overflows at
+         tablet/mobile/small-mobile (cap 2/2/1) -> show only <=1024px
+       - units.length === 2 -> fits at desktop/tablet/mobile (cap 3/2/2),
+         overflows only at small mobile (cap 1) -> show only <=380px
+       - units.length <= 1  -> never overflows -> showNavButtons is false,
+         so this class is never applied
+     "hidden" as the base class plus a max-width variant means the buttons
+     stay out of the flow (and out of the tab order) until that width is
+     actually reached — swipe still works regardless of button visibility. */
+  const navVisibilityClass =
+    units.length >= 4
+      ? "flex"
+      : units.length === 3
+        ? "hidden max-[1024px]:flex"
+        : "hidden max-[380px]:flex";
+
+  const navButtonClass = `flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] items-center justify-center transition-shadow duration-200 ${navVisibilityClass}`;
+
   const sliderSettings = {
     dots: false,
     arrows: false,
@@ -79,7 +105,7 @@ const ConfigCarousel = ({ units, formatAverageProjectPrice }) => {
             e.stopPropagation();
             innerSliderRef.current?.slickPrev();
           }}
-          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] flex items-center justify-center transition-shadow duration-200"
+          className={navButtonClass}
         >
           <FaMapMarkerAlt className="hidden" />
           <svg width="8" height="8" viewBox="0 0 320 512" className="text-[#A70D2A]" fill="currentColor">
@@ -121,7 +147,7 @@ const ConfigCarousel = ({ units, formatAverageProjectPrice }) => {
             e.stopPropagation();
             innerSliderRef.current?.slickNext();
           }}
-          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] flex items-center justify-center transition-shadow duration-200"
+          className={navButtonClass}
         >
           <svg width="8" height="8" viewBox="0 0 320 512" className="text-[#A70D2A]" fill="currentColor">
             <path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.6 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z" />
@@ -762,26 +788,63 @@ const MyFavourite = () => {
                 ).toFixed(1);
               }
 
+              /* ----------------------------------------------------------------
+                 PRICE FIX: previously this only checked
+                 `project.average_project_price`, and passed it straight into
+                 Number(...) with no fallback — so if the favorites API used a
+                 different field name (starting_price / min_price / avg_price /
+                 price) or sent nothing at all, Number(undefined) -> NaN, which
+                 is falsy, so ConfigCarousel rendered the blank placeholder
+                 instead of a price. This now mirrors the same resolution
+                 chain used on Spotlights/ProjectBuilder, and only converts to
+                 Number when that produces a real value — otherwise it keeps
+                 the original (possibly string/range) value so
+                 formatAverageProjectPrice can still render it.
+                 ---------------------------------------------------------------- */
+              const propertyPrices = (project.project_properties || [])
+                .map((p) => Number(p.price))
+                .filter((p) => !isNaN(p) && p > 0);
+
+              const computedRangePrice =
+                propertyPrices.length === 0
+                  ? null
+                  : propertyPrices.length === 1
+                    ? propertyPrices[0]
+                    : `${Math.min(...propertyPrices)} - ${Math.max(...propertyPrices)}`;
+
+              const resolvedProjectPrice =
+                project.average_project_price ||
+                project.starting_price ||
+                project.min_price ||
+                project.avg_price ||
+                project.price ||
+                computedRangePrice ||
+                null;
+
               // Built the same way Spotlights builds its `units` array: one
               // card per project_properties entry (falls back to a parsed
               // congfigurations string when no per-unit pricing exists).
               const units =
                 project.project_properties && project.project_properties.length > 0
-                  ? project.project_properties.map((u) => ({
-                    type: u.bhk_type || u.project_type,
-                    price: Number(
+                  ? project.project_properties.map((u) => {
+                    const rawPrice =
                       u.price ||
                       u.property_price ||
                       u.unit_price ||
                       u.configuration_price ||
                       u.amount ||
-                      project.average_project_price,
-                    ),
-                  }))
+                      resolvedProjectPrice;
+                    const numPrice = Number(rawPrice);
+                    return {
+                      type: u.bhk_type || u.project_type,
+                      price:
+                        !isNaN(numPrice) && numPrice > 0 ? numPrice : rawPrice,
+                    };
+                  })
                   : project.congfigurations
                     ? project.congfigurations.split(",").map((c) => ({
                       type: c.trim().includes("BHK") ? c.trim() : `${c.trim()} BHK`,
-                      price: project.average_project_price,
+                      price: resolvedProjectPrice,
                     }))
                     : [];
 
@@ -843,7 +906,6 @@ const MyFavourite = () => {
                           strokeWidth={2}
                         />
                       </button>
-
 
                     </div>
 

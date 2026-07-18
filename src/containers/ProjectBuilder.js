@@ -42,14 +42,13 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
-
 /* ====================================================================
-   ConfigCarousel — same component used on Spotlights. Renders one card
-   per available configuration (BHK for residential, unit type for
-   commercial), swipeable via react-slick, with small circular Prev/Next
-   buttons on the outer edges. Reused as-is so ProjectBuilder cards match
-   Spotlights pixel-for-pixel.
+   ONLY CHANGE: inside ConfigCarousel in ProjectBuilder.js
+   Replace the existing `showNavButtons` line + both <button> blocks with
+   the code below. Nothing else in the file (slider settings, price logic,
+   card UI, swipe behavior, spacing, styling, pagination) changes.
    ==================================================================== */
+
 const ConfigCarousel = ({
   units,
   isCommercial,
@@ -66,6 +65,32 @@ const ConfigCarousel = ({
   const smallMobileVisible = Math.min(1, units.length);
 
   const showNavButtons = units.length > 1;
+
+  /* Nav buttons should only ever be visible at a given screen width when
+     scrolling is actually required there — i.e. when units.length exceeds
+     the number of slides visible at that breakpoint (desktop cap 3,
+     tablet/mobile cap 2, small mobile ≤380px cap 1). Since
+     desktopVisible/tabletVisible/mobileVisible/smallMobileVisible above
+     are all Math.min(N, units.length), scrolling is needed at a given
+     breakpoint exactly when units.length still exceeds that cap:
+       - units.length >= 4  -> overflows everywhere -> always show
+       - units.length === 3 -> fits at desktop (cap 3), overflows at
+         tablet/mobile/small-mobile (cap 2/2/1) -> show only <=1024px
+       - units.length === 2 -> fits at desktop/tablet/mobile (cap 3/2/2),
+         overflows only at small mobile (cap 1) -> show only <=380px
+       - units.length <= 1  -> never overflows -> showNavButtons is false,
+         so this class never even gets applied
+     Using "hidden" as the base class plus a max-width variant means the
+     buttons are removed from layout/tab order until that width is
+     actually reached — swipe still works regardless of button visibility. */
+  const navVisibilityClass =
+    units.length >= 4
+      ? "flex"
+      : units.length === 3
+        ? "hidden max-[1024px]:flex"
+        : "hidden max-[380px]:flex";
+
+  const navButtonClass = `flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] items-center justify-center transition-shadow duration-200 ${navVisibilityClass}`;
 
   const sliderSettings = {
     dots: false,
@@ -94,7 +119,7 @@ const ConfigCarousel = ({
             e.stopPropagation();
             innerSliderRef.current?.slickPrev();
           }}
-          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] flex items-center justify-center transition-shadow duration-200"
+          className={navButtonClass}
         >
           <FaChevronLeft className="text-[#A70D2A] text-[10px] sm:text-xs" />
         </button>
@@ -135,7 +160,7 @@ const ConfigCarousel = ({
             e.stopPropagation();
             innerSliderRef.current?.slickNext();
           }}
-          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] flex items-center justify-center transition-shadow duration-200"
+          className={navButtonClass}
         >
           <FaChevronRight className="text-[#A70D2A] text-[10px] sm:text-xs" />
         </button>

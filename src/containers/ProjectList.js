@@ -57,17 +57,6 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
    No visible arrows, no dots — pure swipe. Visible count is responsive:
    3 on desktop, 2 on tablet, 1-2 on mobile depending on available width.
    ==================================================================== */
-/* ====================================================================
-   ConfigCarousel — dynamically renders one card per available residential
-   configuration (BHK for residential, unit type for commercial) — never
-   hardcoded, always driven by the `units` array's actual length. Built on
-   react-slick so users can swipe/drag horizontally to reveal further
-   configs beyond what's visible (e.g. swiping from 1/2/3 BHK to 2/3/4 BHK).
-   Small circular Prev/Next buttons sit fully on the outer left/right edges
-   (flex layout, not overlapping), controlling this inner slider only —
-   swipe still works, and the buttons auto-hide when there's just one
-   configuration to show.
-   ==================================================================== */
 const ConfigCarousel = ({
   units,
   isCommercial,
@@ -76,6 +65,19 @@ const ConfigCarousel = ({
 }) => {
   const innerSliderRef = useRef(null);
 
+  // Tracks viewport width so we know exactly how many cards are visible
+  // right now, at the current breakpoint — mirrors the breakpoints used
+  // in `sliderSettings.responsive` below so the two stay in sync.
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1024,
+  );
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   if (!units || units.length === 0) return null;
 
   const desktopVisible = Math.min(3, units.length);
@@ -83,7 +85,22 @@ const ConfigCarousel = ({
   const mobileVisible = Math.min(2, units.length);
   const smallMobileVisible = Math.min(1, units.length);
 
-  const showNavButtons = units.length > 1;
+  // Resolve how many cards are actually visible at the current window
+  // width, using the same breakpoint thresholds (380 / 640 / 1024) as
+  // `sliderSettings.responsive`. Slick applies the smallest matching
+  // max-width breakpoint, so we check from narrowest to widest.
+  let currentVisible = desktopVisible;
+  if (windowWidth <= 380) {
+    currentVisible = smallMobileVisible;
+  } else if (windowWidth <= 640) {
+    currentVisible = mobileVisible;
+  } else if (windowWidth <= 1024) {
+    currentVisible = tabletVisible;
+  }
+
+  // Only show nav buttons when there are actually more configs than can
+  // fit on screen at once — i.e. scrolling is genuinely required.
+  const showNavButtons = units.length > currentVisible;
 
   const sliderSettings = {
     dots: false,
@@ -119,9 +136,6 @@ const ConfigCarousel = ({
         </button>
       )}
 
-      {/* Slider track sits between the two buttons via flex — cards can
-          never be covered by the buttons since they're separate flex items,
-          not absolutely positioned on top of the track. */}
       <div className="flex-1 min-w-0 h-full flex items-center [&_.slick-list]:overflow-hidden [&_.slick-track]:flex [&_.slick-track]:items-stretch [&_.slick-slide]:h-auto [&_.slick-slide>div]:h-full">
         <Slider ref={innerSliderRef} {...sliderSettings} className="w-full">
           {units.map((unit, i) => {
@@ -154,6 +168,7 @@ const ConfigCarousel = ({
         <button
           type="button"
           aria-label="Next configuration"
+
           onClick={(e) => {
             e.stopPropagation();
             innerSliderRef.current?.slickNext();
