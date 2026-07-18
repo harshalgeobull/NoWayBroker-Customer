@@ -5,18 +5,27 @@ import axios from "axios";
 import { GoArrowLeft, GoArrowRight } from "react-icons/go";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { Heart } from "lucide-react";
 import { toast } from "react-toastify";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
-import { FaRupeeSign, FaMapMarkerAlt, FaBath } from "react-icons/fa";
-import { Building2 } from "lucide-react";
-import { RiRuler2Line } from "react-icons/ri";
-import { AiOutlineClockCircle } from "react-icons/ai";
-import { AiOutlineUser } from "react-icons/ai";
+import {
+  FaRupeeSign,
+  FaMapMarkerAlt,
+  FaDownload,
+  FaStore,
+  FaWarehouse,
+  FaVideo,
+  FaBed,
+  FaHeart,
+  FaHardHat,
+  FaHotel,
+  FaArrowRight,
+  FaChevronLeft,   // 👈 new
+  FaChevronRight,  // 👈 new
+} from "react-icons/fa";
+import { BsBuildings } from "react-icons/bs";
+import { HiOutlineOfficeBuilding } from "react-icons/hi";
+import { MdOutlineStoreMallDirectory, MdFiberNew } from "react-icons/md";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
-import { MdApartment } from "react-icons/md";
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
@@ -32,6 +41,124 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
+/* ====================================================================
+   ConfigCarousel — dynamically renders one card per available residential
+   configuration (BHK for residential, unit type for commercial) — never
+   hardcoded, always driven by the `units` array's actual length. Built on
+   react-slick so users can swipe/drag horizontally to reveal further
+   configs beyond what's visible (e.g. swiping from 1/2/3 BHK to 2/3/4 BHK).
+   No visible arrows, no dots — pure swipe. Visible count is responsive:
+   3 on desktop, 2 on tablet, 1-2 on mobile depending on available width.
+   ==================================================================== */
+//* ====================================================================
+// ConfigCarousel — dynamically renders one card per available residential
+// configuration(BHK for residential, unit type for commercial) — never
+// hardcoded, always driven by the `units` array's actual length. Built on
+// react - slick so users can swipe / drag horizontally to reveal further
+//    configs beyond what's visible (e.g. swiping from 1/2/3 BHK to 2/3/4 BHK).
+//    Small circular Prev / Next buttons sit fully on the outer left / right edges
+//   (flex layout, not overlapping), controlling this inner slider only —
+//    swipe still works, and the buttons auto - hide when there's just one
+//    configuration to show.
+//    ====================================================================
+const ConfigCarousel = ({
+  units,
+  isCommercial,
+  formatAverageProjectPrice,
+  getCommercialIcon,
+}) => {
+  const innerSliderRef = useRef(null);
+
+  if (!units || units.length === 0) return null;
+
+  const desktopVisible = Math.min(3, units.length);
+  const tabletVisible = Math.min(2, units.length);
+  const mobileVisible = Math.min(2, units.length);
+  const smallMobileVisible = Math.min(1, units.length);
+
+  const showNavButtons = units.length > 1;
+
+  const sliderSettings = {
+    dots: false,
+    arrows: false,
+    infinite: units.length > smallMobileVisible,
+    speed: 400,
+    slidesToShow: desktopVisible,
+    slidesToScroll: 1,
+    swipe: true,
+    swipeToSlide: true,
+    touchThreshold: 8,
+    responsive: [
+      { breakpoint: 1024, settings: { slidesToShow: tabletVisible } },
+      { breakpoint: 640, settings: { slidesToShow: mobileVisible } },
+      { breakpoint: 380, settings: { slidesToShow: smallMobileVisible } },
+    ],
+  };
+
+  return (
+    <div className="w-full h-full flex items-center gap-1.5">
+      {/* ==================== LEFT NAV BUTTON (outer left edge) ==================== */}
+      {showNavButtons && (
+        <button
+          type="button"
+          aria-label="Previous configuration"
+          onClick={(e) => {
+            e.stopPropagation();
+            innerSliderRef.current?.slickPrev();
+          }}
+          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] flex items-center justify-center transition-shadow duration-200"
+        >
+          <FaChevronLeft className="text-[#A70D2A] text-[10px] sm:text-xs" />
+        </button>
+      )}
+
+      {/* Slider track sits between the two buttons via flex — cards can
+          never be covered by the buttons since they're separate flex items,
+          not absolutely positioned on top of the track. */}
+      <div className="flex-1 min-w-0 h-full flex items-center [&_.slick-list]:overflow-hidden [&_.slick-track]:flex [&_.slick-track]:items-stretch [&_.slick-slide]:h-auto [&_.slick-slide>div]:h-full">
+        <Slider ref={innerSliderRef} {...sliderSettings} className="w-full">
+          {units.map((unit, i) => {
+            const Icon = isCommercial ? getCommercialIcon(unit.type) : FaBed;
+            return (
+              <div key={i} className="h-full px-1">
+                <div className="h-full flex flex-col items-center justify-center border border-gray-200 rounded-lg px-2 py-2.5 text-center bg-white">
+                  <Icon className="text-sm mb-1 text-gray-700" />
+                  <h3 className="font-semibold text-[10.5px] sm:text-[11px] text-gray-900 truncate leading-tight">
+                    {unit.type}
+                  </h3>
+                  {unit.price ? (
+                    <h2 className="text-[#A70D2A] font-bold text-[15px] sm:text-base lg:text-[18px] mt-1.5 text-center truncate leading-tight">
+                      {formatAverageProjectPrice(unit.price)}
+                    </h2>
+                  ) : (
+                    <h2 className="text-gray-300 font-bold text-[15px] sm:text-base lg:text-[18px] mt-1.5 text-center">
+                      &nbsp;
+                    </h2>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </Slider>
+      </div>
+
+      {/* ==================== RIGHT NAV BUTTON (outer right edge) ==================== */}
+      {showNavButtons && (
+        <button
+          type="button"
+          aria-label="Next configuration"
+          onClick={(e) => {
+            e.stopPropagation();
+            innerSliderRef.current?.slickNext();
+          }}
+          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] flex items-center justify-center transition-shadow duration-200"
+        >
+          <FaChevronRight className="text-[#A70D2A] text-[10px] sm:text-xs" />
+        </button>
+      )}
+    </div>
+  );
+};
 const Spotlights = ({
   data,
   openSpotlightShareModal,
@@ -57,6 +184,8 @@ const Spotlights = ({
   useEffect(() => {
     if (data && data.status === 1 && Array.isArray(data.data)) {
       setProjectList(data.data);
+      const prime = data.data.find(p => p.project_name === "Prime Office Centre");
+      console.log("SPOTLIGHTS ACTUAL DATA for Prime Office Centre:", prime);
     } else {
       setProjectList([]);
       console.log("No projects found");
@@ -71,23 +200,27 @@ const Spotlights = ({
     history.push(`/projectdetail/${encodeURIComponent(projectId)}`);
   };
 
+  // Outer project carousel — 4 cards on desktop/laptop, 2 on tablet, 1 on mobile.
+  // Cards fill the slide width (no fixed max-width on the card itself), which is
+  // what keeps the gap between cards tight and consistent, matching the
+  // Featured Properties section.
   const settings = {
     infinite: true,
     speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 3500,
     arrows: false,
     dots: false,
     adaptiveHeight: false,
 
     responsive: [
-      { breakpoint: 1536, settings: { slidesToShow: 4 } },
-      { breakpoint: 1280, settings: { slidesToShow: 3 } },
+      { breakpoint: 1280, settings: { slidesToShow: 4 } },
       { breakpoint: 1024, settings: { slidesToShow: 2 } },
       { breakpoint: 768, settings: { slidesToShow: 2 } },
       { breakpoint: 640, settings: { slidesToShow: 1 } },
+      { breakpoint: 480, settings: { slidesToShow: 1 } },
     ],
   };
 
@@ -145,42 +278,26 @@ const Spotlights = ({
     }
     return null;
   };
+
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
 
     // Price Range
     if (typeof price === "string" && price.includes("-")) {
       const parts = price.split("-").map((p) => p.trim());
-
-      if (typeof price === "string" && price.includes("-")) {
-        const parts = price.split("-").map((p) => p.trim());
-        return (
-          <>
-            {parts.map((p, idx) => (
-              <span key={idx} className="inline-flex items-center">
-                <FaRupeeSign className="inline-block mr-1" />
-                {formatPrice(p)}
-                {idx === 0 && " - "}
-              </span>
-            ))}
-          </>
-        );
-      }
+      return (
+        <>
+          {parts.map((p, idx) => (
+            <span key={idx} className="inline-flex items-center">
+              <FaRupeeSign className="inline-block mr-1" />
+              {formatPrice(p)}
+              {idx === 0 && " - "}
+            </span>
+          ))}
+        </>
+      );
     }
 
-    // price = parseInt(price);
-    // if (isNaN(price)) return "";
-
-    // let formatted;
-    // if (price >= 10000000) {
-    //   formatted = parseFloat((price / 10000000).toFixed(1)) + " Cr";
-    // } else if (price >= 100000) {
-    //   formatted = parseFloat((price / 100000).toFixed(1)) + " L";
-    // } else if (price >= 1000) {
-    //   formatted = parseFloat((price / 1000).toFixed(1)) + " K";
-    // } else {
-    //   formatted = price.toString();
-    // }
     return (
       <span className="inline-flex items-center">
         <FaRupeeSign className="inline-block mr-1" />
@@ -247,31 +364,43 @@ const Spotlights = ({
     }
   };
 
+  // Maps a commercial unit "type" string to its React Icon, per spec
+  const getCommercialIcon = (type = "") => {
+    if (/office|co-?working/i.test(type)) return HiOutlineOfficeBuilding;
+    if (/retail/i.test(type)) return MdOutlineStoreMallDirectory;
+    if (/hotel/i.test(type)) return FaHotel;
+    if (/shop/i.test(type)) return FaStore;
+    if (/warehouse/i.test(type)) return FaWarehouse;
+    return BsBuildings;
+  };
+
   return (
-    <div className="px-3 py-4 bg-white rounded-2xl sm:px-4 md:px-6 lg:px-10">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="px-3 py-4 bg-white sm:px-4 md:px-6 lg:px-10">
+      <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col text-center sm:text-left">
           <h2 className="text-2xl font-bold text-gray-800 sm:text-3xl md:text-4xl">
             Builders Projects
           </h2>
-          <p className="text-gray-500">Your dream property is just a few clicks away</p>
+          <p className="text-gray-500">
+            Your dream property is just a few clicks away
+          </p>
         </div>
 
         <div className="flex items-center justify-between w-full gap-2 md:w-auto">
           <button
-            className="px-4 py-2 text-xs bg-white rounded-lg sm:text-sm md:text-base my-border my-text whitespace-nowrap"
+            className="px-4 py-2 text-xs bg-white border border-[#A70D2A]/30 text-[#A70D2A] rounded-full sm:text-sm md:text-base whitespace-nowrap font-semibold hover:bg-[#A70D2A]/5 transition-colors duration-200"
             onClick={handleClick}
           >
             View All Projects
           </button>
           <button
-            className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg"
+            className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg transition-shadow duration-200"
             onClick={() => sliderRef.current.slickPrev()}
           >
             <GoArrowLeft className="text-xl text-black md:text-2xl" />
           </button>
           <button
-            className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg"
+            className="p-2 text-lg font-semibold text-gray-700 bg-white rounded-full shadow-md sm:text-2xl hover:shadow-lg transition-shadow duration-200"
             onClick={() => sliderRef.current.slickNext()}
           >
             <GoArrowRight className="text-3xl text-black" />
@@ -279,221 +408,339 @@ const Spotlights = ({
         </div>
       </div>
 
-      <Slider ref={sliderRef} {...settings} className="mx-auto">
-        {projectList.map((project, index) => (
-          <div key={index} className="px-2 md:px-3">
-            <div className="w-full overflow-hidden bg-white shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300">
-              <div className="relative">
-                <img
-                  src={project.cover_image}
-                  alt={project.project_name}
-                  className="w-full h-[220px] sm:h-[260px] md:h-[300px] lg:h-[320px] object-cover rounded-t-2xl cursor-pointer"
-                  onClick={() => handleProjectClick(project._id)}
-                />
+      {/* slick-track uses flexbox here so every slide (and therefore every
+          card wrapper) stretches to the row's tallest item automatically.
+          -mx-2 / px-2 on the slide gives a tight, consistent 16px gap between
+          cards (8px on each side) instead of the old, uneven wide gap. */}
+      <Slider
+        ref={sliderRef}
+        {...settings}
+        className="mx-auto -mx-2 [&_.slick-track]:flex [&_.slick-track]:items-stretch [&_.slick-slide]:h-auto [&_.slick-slide>div]:h-full"
+      >
+        {projectList.map((project, index) => {
+          const isCommercial =
+            project.property_category === "Commercial" ||
+            (project.commercial_units && project.commercial_units.length > 0);
 
-                {/* Heart + Share */}
-                <div className="absolute top-2 right-2 flex items-center space-x-2">
+          const commercialUnits =
+            project.commercial_units && project.commercial_units.length > 0
+              ? project.commercial_units
+              : [];
+
+          // Each card shows its own price exactly as provided by the API:
+          // when `residential_units` includes a per-BHK price, that price is
+          // used as-is (no two cards share a value unless the data does).
+          // Only when the API sends just a comma list of BHK types with no
+          // per-unit pricing do all cards fall back to the project's average
+          // price — this is a data-availability fallback, not fabricated UI.
+          // Resolves the project's overall/starting price from whichever
+          // field name the backend actually sends — some responses use
+          // average_project_price, others use starting_price / min_price /
+          // avg_price. Tries each in order and returns the first real value.
+
+
+          // Fallback: jar top-level price fields nastil, tar ProjectDetail.js sarkha
+          // project_properties chya price madhun min–max range calculate kar
+          const propertyPrices = (project.project_properties || [])
+            .map((p) => Number(p.price))
+            .filter((p) => !isNaN(p) && p > 0);
+
+          const computedRangePrice =
+            propertyPrices.length === 0
+              ? null
+              : propertyPrices.length === 1
+                ? propertyPrices[0]
+                : `${Math.min(...propertyPrices)} - ${Math.max(...propertyPrices)}`;
+
+          const resolvedProjectPrice =
+            project.average_project_price ||
+            project.starting_price ||
+            project.min_price ||
+            project.avg_price ||
+            project.price ||
+            computedRangePrice ||
+            null;
+
+          const residentialUnits =
+            project.project_properties && project.project_properties.length > 0
+              ? project.project_properties.map((u) => ({
+                ...u,
+                type: u.bhk_type || u.project_type,
+                price:
+                  Number(
+                    u.price ||
+                    u.property_price ||
+                    u.unit_price ||
+                    u.configuration_price ||
+                    u.amount ||
+                    resolvedProjectPrice
+                  ),
+              }))
+              : project.congfigurations
+                ? project.congfigurations.split(",").map((c) => ({
+                  type: c.trim().includes("BHK")
+                    ? c.trim()
+                    : `${c.trim()} BHK`,
+                  price: resolvedProjectPrice,
+                }))
+                : [];
+          // Location, used both to compose the subtitle and to compute distance.
+          // De-duplicated so the city name is never repeated twice (e.g. when
+          // address_area already reads "Bavdhan, Pune" and city_name is "Pune").
+          const addressArea = project.address_area?.trim();
+          const cityName = project.city_name?.trim();
+          let locationText = "";
+          if (addressArea && cityName) {
+            locationText = addressArea
+              .toLowerCase()
+              .includes(cityName.toLowerCase())
+              ? addressArea
+              : `${addressArea}, ${cityName}`;
+          } else {
+            locationText = addressArea || cityName || "";
+          }
+
+          const distanceKm = getProjectDistance(project);
+
+          // Subtitle now carries the location inline, e.g.
+          // "1,2,3,4 BHK Apartments in Baner, Pune"
+          const subtitle = isCommercial
+            ? (() => {
+              const unitSummary =
+                [
+                  ...new Set(
+                    commercialUnits.map((u) => u.type).filter(Boolean),
+                  ),
+                ].join(", ") ||
+                project.project_type ||
+                "Commercial Space";
+              return locationText
+                ? `${unitSummary} in ${locationText}`
+                : unitSummary;
+            })()
+            : project.congfigurations
+              ? (() => {
+                const bhkSummary = project.congfigurations
+                  .split(",")
+                  .map((c) => c.trim().replace(/\s*BHK/i, ""))
+                  .join(",");
+                return locationText
+                  ? `${bhkSummary} BHK Apartments in ${locationText}`
+                  : `${bhkSummary} BHK Apartments`;
+              })()
+              : locationText
+                ? `Apartments in ${locationText}`
+                : "Apartments";
+
+          return (
+            <div key={index} className="h-full px-2">
+              {/* ==================== CARD — equal height across the row, flex column ====================
+                  No fixed pixel width / max-width / mx-auto on the card: it simply fills
+                  the slide's width (driven by slidesToShow), which is what removes the
+                  extra whitespace between cards. min-h keeps every card tall enough that
+                  the builder row and both buttons are never clipped; slick's flex-stretch
+                  (added on the Slider above) then equalizes every card in the row to the
+                  tallest one. */}
+              <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-[0_6px_24px_rgba(17,24,39,0.08)] hover:shadow-[0_18px_48px_rgba(17,24,39,0.16)] transition-all duration-300 flex flex-col h-full min-h-[440px] sm:min-h-[460px] lg:min-h-[480px] w-full">
+                {/* ==================== IMAGE SECTION (fixed height) ==================== */}
+                <div className="relative overflow-hidden flex-shrink-0 h-[150px] sm:h-[165px] lg:h-[180px]">
+                  <img
+                    src={project.cover_image}
+                    alt={project.project_name || ""}
+                    className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform duration-500 ease-out"
+                    onClick={() => handleProjectClick(project._id)}
+                  />
+
+                  {/* Top Left badge — always "New Booking", premium green-gradient pill */}
+                  <div className="absolute top-2 left-2 z-10">
+                    <div className="bg-gradient-to-r from-green-500 to-green-600 text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(22,163,74,0.4)]">
+                      <MdFiberNew size={11} />
+                      <span>New Booking</span>
+                    </div>
+                  </div>
+
+                  {/* Wishlist Heart - Top Right */}
                   <button
-                    className="bg-gray-800/60 backdrop-blur-sm p-2 rounded-full shadow"
-                    onClick={() => {
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 backdrop-blur flex items-center justify-center hover:scale-110 transition-transform duration-200"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       if (!sessionStorage.getItem("accessToken")) {
                         setIsLoginModalOpen(true);
                         return;
                       }
                       if (project.is_favorite) {
-                        removeFromFavoritesRecommendedProperty(project.favorite_id, project._id);
+                        removeFromFavoritesRecommendedProperty(
+                          project.favorite_id,
+                          project._id,
+                        );
                       } else {
                         addToFavoritesRecommendedProperty(project._id);
                       }
                     }}
                   >
-                    <Heart
-                      size={20}
-                      stroke={project.is_favorite ? "none" : "white"}
-                      color={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"}
-                      fill={project.is_favorite ? "red" : "rgba(75, 85, 99, 0.4)"}
-                      strokeWidth={2}
+                    <FaHeart
+                      size={11}
+                      className={
+                        project.is_favorite ? "text-red-500" : "text-white"
+                      }
                     />
                   </button>
-                </div>
 
-                {/* Logo + Project Name overlay */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[90%] sm:w-[85%] md:w-[80%] h-[110px] md:h-[120px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
-                  <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
-                    <img src={project.logo} alt="Project Logo" className="object-cover w-full h-full" />
-                  </div>
-                  <h3 className="text-center text-white text-lg md:text-2xl font-bold line-clamp-2 min-h-[48px] mt-4">
-                    {project.project_name || "No Project Name Available"}
-                  </h3>
-                </div>
-              </div>
-              {/* Card Body */}
-              <div
-                className="p-4 bg-white rounded-b-2xl cursor-pointer"
-                onClick={() => handleProjectClick(project._id)}
-              >
-                {/* Row 1: Project Name + Furnished Type */}
-                <div className="flex items-start justify-between gap-3 mb-0">
-                  <h3 className="flex-1 m-0 text-base font-bold leading-6 text-gray-900 truncate">
-                    {project.project_name || ""}
-                  </h3>
-                  {project.furnished_type && (
-                    <span className="flex-shrink-0 text-sm font-medium leading-6 text-black whitespace-nowrap">
-                      {project.furnished_type}
-                    </span>
+                  {/* Virtual Tour - Black Glassmorphism, right of heart */}
+                  {project.virtual_tour && (
+                    <a
+                      href={
+                        typeof project.virtual_tour === "string"
+                          ? project.virtual_tour
+                          : undefined
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute top-2 right-10 bg-black/40 backdrop-blur-md border border-white/20 text-white px-1.5 py-1 rounded-lg flex items-center gap-1 text-[9px] font-medium"
+                    >
+                      <FaVideo size={10} />
+                      <span className="hidden sm:inline">Virtual Tour</span>
+                    </a>
                   )}
-                </div>
 
-                {/* Row 2: Subtitle */}
-                <p className="mt-0 mb-2 text-sm leading-5 text-gray-500 truncate">
-                  {project.congfigurations
-                    ? project.congfigurations.includes("BHK")
-                      ? project.congfigurations
-                      : project.congfigurations.split(",").map((c) => `${c.trim()} BHK`).join(", ")
-                    : ""}{" "}
-                  {project.project_type} for Sale in {project.address_area || ""}
-                  {project.city_name ? `, ${project.city_name}` : ""}
-                </p>
-
-                {/* Row 3: Price + Status */}
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-xl font-bold">
-                    {formatAverageProjectPrice(project.average_project_price)}
-                  </span>
-                  {project.possession_status === "Ready To Move" && (
-                    <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
-                      <MdApartment className="text-base text-green-700" />
-                      <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
-                        Ready to Move
-                      </span>
+                  {/* Property Type Ribbon - Bottom Left */}
+                  {project.property_for && (
+                    <div className="absolute bottom-0 left-0 bg-blue-700 text-white px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wide">
+                      {project.property_for}
                     </div>
                   )}
                 </div>
 
-                {/* Row 4: Features Grid */}
-                <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
-                  <div className="flex items-center gap-2 px-1 min-w-0">
-                    <Building2 size={20} className="text-gray-700 flex-shrink-0" />
-                    <div className="flex flex-col min-w-0 leading-tight">
-                      <p className="m-0 text-sm font-semibold leading-4 truncate">
-                        {project.congfigurations
-                          ? project.congfigurations.includes("BHK")
-                            ? project.congfigurations.split(",")[0].trim()
-                            : `${project.congfigurations.split(",")[0].trim()} BHK`
-                          : ""}
-                      </p>
-                      <p className="m-0 text-xs leading-4 text-gray-500">{project.project_type || "Apartment"}</p>
-                    </div>
+                {/* ==================== CARD BODY (fills remaining height) ==================== */}
+                <div
+                  className="cursor-pointer flex flex-col flex-1 min-h-0"
+                  onClick={() => handleProjectClick(project._id)}
+                >
+                  {/* Project Name + Subtitle (BHK + location combined) */}
+                  <div className="px-3.5 pt-3 flex-shrink-0">
+                    <h2 className="text-xl sm:text-[22px] lg:text-2xl leading-tight font-bold text-[#111827] line-clamp-2">
+                      {project.project_name || "No Project Name Available"}
+                    </h2>
+                    <p className="mt-1 text-gray-500 text-[11px] sm:text-xs lg:text-sm line-clamp-2">
+                      {subtitle}
+                    </p>
                   </div>
 
-                  <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
-                    <FaBath size={18} className="text-gray-700 flex-shrink-0" />
-                    <div className="flex flex-col min-w-0 leading-tight">
-                      <p className="m-0 text-sm font-semibold text-gray-900 truncate">
-                        {project.bathroom || 0} Baths
-                      </p>
-                      <p className="m-0 text-xs text-gray-500 truncate">Bathrooms</p>
+                  {/* Commercial Property label — only for commercial cards, sits
+                      right above the configuration section */}
+                  {isCommercial && (
+                    <div className="px-3.5 mt-2 flex-shrink-0 flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-gray-700">
+                      <HiOutlineOfficeBuilding className="text-[#A70D2A]" size={13} />
+                      <span>Commercial Property</span>
                     </div>
+                  )}
+
+                  {/* ==================== CONFIGURATION SECTION (fixed height, identical for both types) ====================
+                      Three config cards visible at a time (BHK for residential, unit
+                      type for commercial). No visible arrows/dots — swipe to reveal more. */}
+                  <div
+                    className={`px-3.5 flex-shrink-0 h-[74px] flex items-center ${isCommercial ? "mt-2" : "mt-2.5"
+                      }`}
+                  >
+                    <ConfigCarousel
+                      units={residentialUnits}
+                      isCommercial={isCommercial}
+                      formatAverageProjectPrice={formatAverageProjectPrice}
+                      getCommercialIcon={getCommercialIcon}
+                    />
                   </div>
 
-                  <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
-                    <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
-                    <div className="flex flex-col min-w-0 leading-tight">
-                      <p className="m-0 text-sm font-semibold leading-4 truncate">
-                        {project.area ? `${project.area} Sq.ft` : "N/A"}
-                      </p>
-                      <p className="m-0 text-xs leading-4 text-gray-500">Built Up Area</p>
-                    </div>
-                  </div>
-                </div>
+                  {/* Spacer pushes builder + buttons to the bottom of the card (margin-top:auto) */}
+                  <div className="mt-auto flex-shrink-0">
+                    {/* ==================== BUILDER SECTION (fixed height) ====================
+                        Builder name stays on the left; distance-from-you now replaces
+                        the plain location line and sits on the right, vertically
+                        centered with the builder block. flex-nowrap + truncation keeps
+                        both sides from wrapping or clipping each other. */}
+                    {/* ==================== BUILDER SECTION ====================
+                        Icon + "Builder" label sit on their own line; the
+                        Builder Name and the distance-from-you sit together on
+                        the next line, aligned on the same baseline, with a
+                        clean 8px gap beneath the label and generous top/bottom
+                        padding so the row no longer crowds the divider above it. */}
+                    <div className="mx-3.5 pt-3.5 sm:pt-4 pb-3.5 sm:pb-4 border-t border-gray-100 flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0 overflow-hidden self-center">
+                        {project.property_owner_image &&
+                          !project.property_owner_image.includes(
+                            "default_profile",
+                          ) ? (
+                          <img
+                            src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
+                            alt={project.connect_to_name || "Builder"}
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <FaHardHat className="text-xs text-yellow-700" />
+                        )}
+                      </div>
 
-                <hr className="my-1 border-gray-100" />
-
-                {/* Row 5 : Posted By | Days | Distance | Share */}
-                <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
-                  {/* Left */}
-                  <div className="flex items-center flex-wrap min-w-0">
-                    {/* Posted By */}
-                    <div className="flex items-center">
-                      <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
-                      <span className="truncate">
-                        Posted by {project.user_type || "Builder"}
-                      </span>
-                    </div>
-
-                    {/* Dot */}
-                    <span className="mx-2 text-gray-400">•</span>
-
-                    {/* Days */}
-                    <span className="whitespace-nowrap">
-                      {project.days_since_created !== undefined &&
-                        project.days_since_created !== null
-                        ? project.days_since_created === 0
-                          ? "Today"
-                          : `${project.days_since_created} days ago`
-                        : project.created_at
-                          ? `${Math.max(
-                            0,
-                            Math.floor(
-                              (Date.now() - new Date(project.created_at).getTime()) /
-                              (1000 * 60 * 60 * 24),
-                            ),
-                          )} days ago`
-                          : "Recently"}
-                    </span>
-
-                    {/* Distance */}
-                    {getProjectDistance(project) && (
-                      <>
-                        <span className="mx-2 text-gray-400">•</span>
-                        <div className="flex items-center whitespace-nowrap">
-                          <FaMapMarkerAlt className="mr-1 text-red-500" />
-                          {getProjectDistance(project)} km from you
+                      <div className="min-w-0 flex-1 flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex flex-col justify-center">
+                          <p className="text-xs text-gray-500 leading-none mb-0">
+                            Builder
+                          </p>
+                          <h3 className="text-base font-semibold leading-tight text-[#111827] mt-0.5 truncate">
+                            {project.connect_to_name || "Builder"}
+                          </h3>
                         </div>
-                      </>
-                    )}
-                  </div>
 
-                  {/* Share */}
-                  <FontAwesomeIcon
-                    icon={faShareNodes}
-                    className="ml-2 text-[17px] text-gray-500 transition-colors cursor-pointer hover:text-blue-500"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      openSpotlightShareModal(project._id);
-                    }}
-                  />
-                </div>
-                {/* Row 6: Owner Details */}
-                <div className="flex items-center pt-2">
-                  <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
-                    {project.property_owner_image &&
-                      !project.property_owner_image.includes("default_profile") ? (
-                      <img
-                        src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
-                        alt={project.connect_to_name || "Builder"}
-                        className="object-cover w-full h-full rounded-full"
-                      />
-                    ) : (
-                      <AiOutlineUser className="text-xl text-blue-600" />
-                    )}
-                  </div>
+                        {distanceKm && (
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <FaMapMarkerAlt
+                              className="text-red-600 flex-shrink-0"
+                              size={12}
+                            />
+                            <span className="text-gray-500 text-sm whitespace-nowrap">
+                              {distanceKm} km from you
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* ==================== BOTTOM BUTTONS (fixed height, always pinned to bottom) ====================
+                        grid-cols-2 keeps Brochure and View Details the same width and height
+                        so they never overlap or get hidden. */}
+                    <div className="grid grid-cols-2 gap-2 px-3.5 py-3">
+                      <button
+                        className="border-2 border-[#A70D2A] text-[#A70D2A] rounded-lg h-9 text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 hover:bg-[#A70D2A]/5 transition-colors duration-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (project.brochure) {
+                            window.open(
+                              project.brochure,
+                              "_blank",
+                              "noopener,noreferrer",
+                            );
+                          }
+                        }}
+                      >
+                        <FaDownload size={11} />
+                        Brochure
+                      </button>
 
-                  <div className="flex items-center ml-4">
-                    <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                      {project.connect_to_name || "Builder"}
-                    </span>
-                    <div className="w-px h-4 mx-4 bg-gray-300"></div>
-                    <span className="text-sm text-gray-500 whitespace-nowrap">
-                      {project.user_type || "Builder"}
-                    </span>
+                      <button
+                        className="bg-[#A70D2A] rounded-lg text-white text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 h-9 hover:bg-[#8a0a22] hover:shadow-lg transition-all duration-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleProjectClick(project._id);
+                        }}
+                      >
+                        View Details
+                        <FaArrowRight size={11} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </Slider>
 
       <div
