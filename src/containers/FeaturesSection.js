@@ -7,7 +7,7 @@ import SecurityIcon from "@mui/icons-material/Security";
 
 const features = [
     {
-        icon: <PercentIcon sx={{ fontSize: 28 }} />,
+        icon: <PercentIcon sx={{ fontSize: 28, color: "#8B1E3F" }} />,
         title: "Zero Brokerage",
         subtitle: "No hidden charges",
     },
@@ -18,7 +18,7 @@ const features = [
     },
     {
         icon: <AutoAwesomeIcon sx={{ fontSize: 28 }} />,
-        title: "AI Property Match",
+        title: "AI Technology Match",
         subtitle: "Smart recommendation",
     },
     {
@@ -56,7 +56,7 @@ const FeaturesSection = () => {
                     `}
                             >
                                 {/* Icon */}
-                                <div className="flex items-center justify-center flex-shrink-0 w-14 h-14 rounded-full bg-[#ECFDF5] text-[#16A34A]">
+                                <div className="flex items-center justify-center flex-shrink-0 w-14 h-14 rounded-full bg-[#FDECEC] text-[#8B1E3F]">
                                     {item.icon}
                                 </div>
 
