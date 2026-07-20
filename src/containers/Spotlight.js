@@ -206,11 +206,8 @@ const Spotlights = ({
   useEffect(() => {
     if (data && data.status === 1 && Array.isArray(data.data)) {
       setProjectList(data.data);
-      const prime = data.data.find(p => p.project_name === "Prime Office Centre");
-      console.log("SPOTLIGHTS ACTUAL DATA for Prime Office Centre:", prime);
     } else {
       setProjectList([]);
-      console.log("No projects found");
     }
   }, [data]);
 

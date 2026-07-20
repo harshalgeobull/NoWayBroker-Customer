@@ -305,7 +305,7 @@ const ProjectDetail = () => {
         if (result.data.user_details) {
           setuserDetails(result.data.user_details[0]);
         }
-        console.log("userdetails", userDetails);
+        // console.log("userdetails", userDetails);
 
         setProjects([result.data]);
       }
@@ -337,7 +337,7 @@ const ProjectDetail = () => {
         )
         .then((res) => {
           if (res.data?.status === 1) {
-            console.log("View property recorded");
+            // console.log("View property recorded");
           }
         })
         .catch((err) => {

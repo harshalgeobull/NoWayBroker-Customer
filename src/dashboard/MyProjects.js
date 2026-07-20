@@ -76,43 +76,43 @@ const MyProjects = () => {
   ];
 
   const formatPrice = (price) => {
-  if (!price) return "";
+    if (!price) return "";
 
-  price = Number(price);
+    price = Number(price);
 
-  const formatNumber = (num) =>
-    num.toFixed(2).replace(/\.?0+$/, "");
+    const formatNumber = (num) =>
+      num.toFixed(2).replace(/\.?0+$/, "");
 
-  if (price >= 10000000) {
-    return `${formatNumber(price / 10000000)} Cr`;
-  } else if (price >= 100000) {
-    return `${formatNumber(price / 100000)} L`;
-  } else if (price >= 1000) {
-    return `${formatNumber(price / 1000)} K`;
-  } else {
-    return price.toString();
-  }
-};
+    if (price >= 10000000) {
+      return `${formatNumber(price / 10000000)} Cr`;
+    } else if (price >= 100000) {
+      return `${formatNumber(price / 100000)} L`;
+    } else if (price >= 1000) {
+      return `${formatNumber(price / 1000)} K`;
+    } else {
+      return price.toString();
+    }
+  };
 
- const formatAverageProjectPrice = (price) => {
-  if (!price) return "";
+  const formatAverageProjectPrice = (price) => {
+    if (!price) return "";
 
-  // Price Range
-  if (typeof price === "string" && price.includes("-")) {
-    const parts = price.split("-").map((p) => p.trim());
+    // Price Range
+    if (typeof price === "string" && price.includes("-")) {
+      const parts = price.split("-").map((p) => p.trim());
 
-    return (
-      <>
-        {parts.map((p, idx) => (
-          <span key={idx} className="inline-flex items-center">
-            <FaRupeeSign className="inline-block mr-1" />
-            {formatPrice(Number(p))}
-            {idx === 0 && " - "}
-          </span>
-        ))}
-      </>
-    );
-  }
+      return (
+        <>
+          {parts.map((p, idx) => (
+            <span key={idx} className="inline-flex items-center">
+              <FaRupeeSign className="inline-block mr-1" />
+              {formatPrice(Number(p))}
+              {idx === 0 && " - "}
+            </span>
+          ))}
+        </>
+      );
+    }
 
     // Normal number formatting
     // price = parseInt(price);
@@ -246,7 +246,7 @@ const MyProjects = () => {
       );
 
       // Log the response for debugging
-      console.log(response.data);
+      // console.log(response.data);
 
       if (response.data.status === 1) {
         const transformed = response.data.data.map((item) => ({
@@ -255,10 +255,10 @@ const MyProjects = () => {
           location: item.address_area,
           date: item.created_at
             ? new Date(item.created_at).toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-              })
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })
             : "N/A",
           status: "Project Sold Out",
           soldOut: false,
@@ -275,7 +275,7 @@ const MyProjects = () => {
         }));
 
         // Log transformed data
-        console.log("Transformed projects:", transformed);
+        // console.log("Transformed projects:", transformed);
 
         setProjects(transformed);
         setTotalCount(response.data.total_count);
@@ -304,7 +304,7 @@ const MyProjects = () => {
         `${process.env.REACT_APP_API_URL}/cust_api/my_project_search`,
         formData,
       );
-      console.log("Search API Response:", response.data);
+      // console.log("Search API Response:", response.data);
 
       if (response.data.status === 1) {
         const transformed = response.data.data.map((item) => ({
@@ -313,10 +313,10 @@ const MyProjects = () => {
           location: item.address_area,
           date: item.created_at
             ? new Date(item.created_at).toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-              })
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })
             : "N/A",
           status: "Project Sold Out",
           soldOut: false,
@@ -362,7 +362,7 @@ const MyProjects = () => {
         formData,
       );
 
-      console.log("Search API Response:", response.data);
+      // console.log("Search API Response:", response.data);
 
       if (response.data.status === 1) {
         const transformed = response.data.data.map((item) => ({
@@ -371,10 +371,10 @@ const MyProjects = () => {
           location: item.address_area,
           date: item.created_at
             ? new Date(item.created_at).toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-              })
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })
             : "N/A",
           status: "Project Sold Out",
           soldOut: false,
@@ -550,27 +550,25 @@ const MyProjects = () => {
               <div
                 key={project.id}
                 className={`bg-white shadow-sm rounded-lg p-4 flex flex-col md:flex-row items-start md:items-center justify-between relative
-                  ${
-                    project.admin_approval === "Approved"
-                      ? "border-2 border-green-500"
-                      : project.admin_approval === "Rejected"
-                        ? "border-2 border-red-500"
-                        : project.admin_approval === "Pending"
-                          ? "border-2 border-yellow-500"
-                          : "border border-gray-300"
+                  ${project.admin_approval === "Approved"
+                    ? "border-2 border-green-500"
+                    : project.admin_approval === "Rejected"
+                      ? "border-2 border-red-500"
+                      : project.admin_approval === "Pending"
+                        ? "border-2 border-yellow-500"
+                        : "border border-gray-300"
                   }`}
               >
                 {/* Published Badge (Top Left Corner) */}
                 <div
                   className={`absolute top-2 left-6 text-xs font-medium px-3 py-1 rounded-md 
-                    ${
-                      project.admin_approval === "Approved"
-                        ? "bg-green-200 text-green-700 border border-green-700"
-                        : project.admin_approval === "Rejected"
-                          ? "bg-red-200 text-red-700 border border-red-700"
-                          : project.admin_approval === "Pending"
-                            ? "bg-yellow-200 text-yellow-700 border border-yellow-700"
-                            : "bg-gray-300 text-gray-600 border border-gray-600"
+                    ${project.admin_approval === "Approved"
+                      ? "bg-green-200 text-green-700 border border-green-700"
+                      : project.admin_approval === "Rejected"
+                        ? "bg-red-200 text-red-700 border border-red-700"
+                        : project.admin_approval === "Pending"
+                          ? "bg-yellow-200 text-yellow-700 border border-yellow-700"
+                          : "bg-gray-300 text-gray-600 border border-gray-600"
                     }`}
                 >
                   {project.admin_approval === "Approved"
@@ -693,11 +691,10 @@ const MyProjects = () => {
         {totalPages > 1 && (
           <div className="flex items-center justify-center mt-6 space-x-3">
             <button
-              className={`px-3 py-2 border rounded-full ${
-                currentPage === 1
+              className={`px-3 py-2 border rounded-full ${currentPage === 1
                   ? "text-gray-400 cursor-not-allowed"
                   : "hover:bg-gray-100"
-              }`}
+                }`}
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
@@ -707,11 +704,10 @@ const MyProjects = () => {
             {[...Array(totalPages)].map((_, index) => (
               <button
                 key={index}
-                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-medium ${
-                  currentPage === index + 1
+                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-medium ${currentPage === index + 1
                     ? "my-border my-text"
                     : "text-gray-500 hover:bg-gray-100"
-                }`}
+                  }`}
                 onClick={() => setCurrentPage(index + 1)}
               >
                 {index + 1}
@@ -719,11 +715,10 @@ const MyProjects = () => {
             ))}
 
             <button
-              className={`px-3 py-2 border rounded-full ${
-                currentPage === totalPages
+              className={`px-3 py-2 border rounded-full ${currentPage === totalPages
                   ? "text-gray-400 cursor-not-allowed"
                   : "hover:bg-gray-100"
-              }`}
+                }`}
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }

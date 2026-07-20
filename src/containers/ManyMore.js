@@ -32,7 +32,7 @@ import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
-console.log(userLocation);
+// console.log(userLocation);
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
@@ -105,7 +105,6 @@ const ManyMore = ({
         setProperties(data.data);
       } else {
         setProperties([]);
-        console.log("No projects found");
       }
     } catch (error) {
       console.error("Error fetching recommended properties:", error);
@@ -126,72 +125,32 @@ const ManyMore = ({
       toast.error("Please log in to save properties to your favorites.");
       return;
     }
-
-    // Optimistic update - UI instantly update, API background madhe
-    setProperties((prev) =>
-      prev.map((item) =>
-        item._id === propertyId ? { ...item, is_favorite: true } : item,
-      ),
-    );
+    const data = { user_id: userId, property_id: propertyId };
 
     try {
-      const response = await axios.post(
+      await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/add_to_favorite`,
-        { user_id: userId, property_id: propertyId },
+        data,
       );
-
-      if (response.data.status === 1) {
-        setProperties((prev) =>
-          prev.map((item) =>
-            item._id === propertyId
-              ? { ...item, is_favorite: true, favorite_id: response.data.favorite_id }
-              : item,
-          ),
-        );
-      } else {
-        setProperties((prev) =>
-          prev.map((item) =>
-            item._id === propertyId ? { ...item, is_favorite: false } : item,
-          ),
-        );
-      }
+      fetchHomeData();
     } catch (error) {
-      console.log("Failed to save the property. Please try again.");
-      setProperties((prev) =>
-        prev.map((item) =>
-          item._id === propertyId ? { ...item, is_favorite: false } : item,
-        ),
-      );
+      fetchHomeData();
     }
   };
 
   // Remove property from favorites
-  const removeFromFavorites = async (favoriteId) => {
+  const removeFromFavorites = async (FavoriteId) => {
     if (!userId) {
       toast.error("Please log in to remove properties from your favorites.");
       return;
     }
-
-    // Optimistic update - UI instantly update
-    setProperties((prev) =>
-      prev.map((item) =>
-        item.favorite_id === favoriteId
-          ? { ...item, is_favorite: false, favorite_id: null }
-          : item,
-      ),
-    );
-
     try {
-      const response = await axios.delete(
+      await axios.delete(
         `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
-        { data: { favorite_id: favoriteId } },
+        { data: { favorite_id: FavoriteId } },
       );
-
-      if (response.data.status !== 1) {
-        toast.error("Failed to remove favorite. Please try again.");
-      }
+      fetchHomeData();
     } catch (error) {
-      console.log("Failed to remove the property. Please try again.");
       toast.error("Failed to remove favorite. Please try again.");
     }
   };
@@ -841,10 +800,10 @@ const ManyMore = ({
                             />
                           </div>
 
-                          {console.log(
+                          {/* {console.log(
                             property.connect_to_name,
                             property.property_owner_image,
-                          )}
+                          )} */}
 
                           {/* Row 6: Owner Details */}
                           <div className="flex items-center pt-3">

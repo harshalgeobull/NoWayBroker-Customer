@@ -32,7 +32,7 @@ import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
-console.log(userLocation);
+// console.log(userLocation);
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
@@ -70,22 +70,20 @@ const Commercial = ({
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
 
   // Fetch Commercial properties (data already filtered by parent with property_category_type: "Commercial Buy"/"Commercial Lease")
-  const fetchCommercialProperties = async () => {
+  const fetchRecommendedProperties = async () => {
     try {
-      console.log("Commercial received data prop:", data); // debug
       if (data && data.status === 1 && Array.isArray(data.data)) {
         setProperties(data.data);
       } else {
         setProperties([]);
-        console.log("No projects found");
       }
     } catch (error) {
-      console.error("Error fetching commercial properties:", error);
+      console.error("Error fetching recommended properties:", error);
     }
   };
 
   useEffect(() => {
-    fetchCommercialProperties();
+    fetchRecommendedProperties();
   }, [data]);
 
   const handleClick = () => {
@@ -98,84 +96,35 @@ const Commercial = ({
       toast.error("Please log in to save properties to your favorites.");
       return;
     }
-
-    // Optimistic update - UI instantly update, API background madhe
-    setProperties((prev) =>
-      prev.map((item) =>
-        item._id === propertyId ? { ...item, is_favorite: true } : item,
-      ),
-    );
-
+    const data = { user_id: userId, property_id: propertyId };
     try {
-      const response = await axios.post(
+      await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/add_to_favorite`,
-        {
-          user_id: userId,
-          property_id: propertyId,
-        },
+        data,
       );
-
-      if (response.data.status === 1) {
-        setProperties((prev) =>
-          prev.map((item) =>
-            item._id === propertyId
-              ? {
-                ...item,
-                is_favorite: true,
-                favorite_id: response.data.favorite_id,
-              }
-              : item,
-          ),
-        );
-      } else {
-        // Revert if API failed
-        setProperties((prev) =>
-          prev.map((item) =>
-            item._id === propertyId ? { ...item, is_favorite: false } : item,
-          ),
-        );
-      }
+      fetchHomeData();
     } catch (error) {
-      console.log("Failed to save the property. Please try again.");
-      // Revert on error
-      setProperties((prev) =>
-        prev.map((item) =>
-          item._id === propertyId ? { ...item, is_favorite: false } : item,
-        ),
-      );
+      fetchHomeData();
     }
   };
 
   // Remove property from favorites
-  const removeFromFavorites = async (favoriteId) => {
+  const removeFromFavorites = async (FavoriteId) => {
     if (!userId) {
       toast.error("Please log in to remove properties from your favorites.");
       return;
     }
-
-    // Optimistic update - UI instantly update
-    setProperties((prev) =>
-      prev.map((item) =>
-        item.favorite_id === favoriteId
-          ? { ...item, is_favorite: false, favorite_id: null }
-          : item,
-      ),
-    );
-
     try {
-      const response = await axios.delete(
+      await axios.delete(
         `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
-        { data: { favorite_id: favoriteId } },
+        { data: { favorite_id: FavoriteId } },
       );
-
-      if (response.data.status !== 1) {
-        toast.error("Failed to remove favorite. Please try again.");
-      }
+      fetchHomeData();
     } catch (error) {
-      console.log("Failed to remove the property. Please try again.");
-      toast.error("Failed to remove favorite. Please try again.");
+      fetchHomeData();
     }
   };
+
   const convertToSqFt = (area, unit) => {
     if (!area || !unit) return null;
     const areaNum = parseFloat(area);
@@ -391,7 +340,7 @@ const Commercial = ({
                           >
                             {allImages.length > 1 ? (
                               <Slider
-                                key={`${property._id}-${allImages.length}`}
+                                key={`${property._id}-${allImages.length}-${Date.now()}`}
                                 className="h-40 sm:h-44 md:h-48"
                                 dots
                                 infinite
@@ -495,7 +444,6 @@ const Commercial = ({
                               </span>
                             )}
                             <button
-                              type="button"
                               className="p-2 rounded-full shadow bg-gray-800/60 backdrop-blur-sm"
                               onClick={() => {
                                 if (!userId) {
@@ -821,10 +769,10 @@ const Commercial = ({
                           />
                         </div>
 
-                        {console.log(
+                        {/* {console.log(
                           property.connect_to_name,
                           property.property_owner_image,
-                        )}
+                        )} */}
 
                         {/* Row 6: Owner Details */}
                         <div className="flex items-center pt-3 mt-auto">

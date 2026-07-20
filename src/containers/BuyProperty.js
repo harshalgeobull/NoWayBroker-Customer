@@ -32,8 +32,6 @@ import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
-console.log(userLocation);
-
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371; // Earth radius in km
     const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -71,18 +69,15 @@ const BuyProperty = ({
 
     // Fetch Buy properties (data already filtered by parent with property_category_type: "Buy")
     const fetchBuyProperties = () => {
-        console.log("Full Data :", data);
         if (data?.status === 1 && Array.isArray(data.data)) {
-            console.log("API Data :", data.data);
             const buyProperties = data.data.filter(
                 (item) =>
                     item.property_category_type &&
-                    item.property_category_type.toLowerCase() === "buy",
+                    item.property_category_type.toLowerCase() === "buy"
             );
-            console.log("Buy Properties :", buyProperties);
+
             setProperties(buyProperties);
         } else {
-            console.log("No Buy Data");
             setProperties([]);
         }
     };
@@ -138,11 +133,13 @@ const BuyProperty = ({
                 );
             }
         } catch (error) {
-            console.log(error);
-            // Revert on error
+            console.error("Add favorite failed:", error);
+
             setProperties((prev) =>
                 prev.map((item) =>
-                    item._id === propertyId ? { ...item, is_favorite: false } : item
+                    item._id === propertyId
+                        ? { ...item, is_favorite: false }
+                        : item
                 )
             );
         }
@@ -178,7 +175,7 @@ const BuyProperty = ({
                 toast.error("Failed to remove favorite. Please try again.");
             }
         } catch (error) {
-            console.log(error);
+            console.error("Remove favorite failed:", error);
             toast.error("Failed to remove favorite. Please try again.");
         }
     };
@@ -795,10 +792,10 @@ const BuyProperty = ({
                                                     />
                                                 </div>
 
-                                                {console.log(
+                                                {/* {console.log(
                                                     property.connect_to_name,
                                                     property.property_owner_image,
-                                                )}
+                                                )} */}
 
                                                 {/* Row 6: Owner Details */}
                                                 <div className="flex items-center pt-3 mt-auto">
