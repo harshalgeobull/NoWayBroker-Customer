@@ -95,40 +95,91 @@ const BuyProperty = ({
         history.push("/advisordashboard?label=Buy");
     };
 
-    // Add property to favorites
     const addToFavorites = async (propertyId) => {
         if (!userId) {
             toast.error("Please log in to save properties to your favorites.");
             return;
         }
-        const data = { user_id: userId, property_id: propertyId };
+
+        // Optimistic update - UI instantly update, API background madhe
+        setProperties((prev) =>
+            prev.map((item) =>
+                item._id === propertyId ? { ...item, is_favorite: true } : item
+            )
+        );
+
         try {
-            await axios.post(
+            const response = await axios.post(
                 `${process.env.REACT_APP_API_URL}/cust_api/add_to_favorite`,
-                data,
+                {
+                    user_id: userId,
+                    property_id: propertyId,
+                }
             );
-            fetchHomeData();
+
+            if (response.data.status === 1) {
+                setProperties((prev) =>
+                    prev.map((item) =>
+                        item._id === propertyId
+                            ? {
+                                ...item,
+                                is_favorite: true,
+                                favorite_id: response.data.favorite_id,
+                            }
+                            : item
+                    )
+                );
+            } else {
+                // Revert if API failed
+                setProperties((prev) =>
+                    prev.map((item) =>
+                        item._id === propertyId ? { ...item, is_favorite: false } : item
+                    )
+                );
+            }
         } catch (error) {
-            console.log("Failed to save the property. Please try again.");
-            fetchHomeData();
+            console.log(error);
+            // Revert on error
+            setProperties((prev) =>
+                prev.map((item) =>
+                    item._id === propertyId ? { ...item, is_favorite: false } : item
+                )
+            );
         }
     };
 
     // Remove property from favorites
-    const removeFromFavorites = async (FavoriteId) => {
+    const removeFromFavorites = async (favoriteId) => {
         if (!userId) {
             toast.error("Please log in to remove properties from your favorites.");
             return;
         }
+
+        // Optimistic update - UI instantly update
+        setProperties((prev) =>
+            prev.map((item) =>
+                item.favorite_id === favoriteId
+                    ? { ...item, is_favorite: false, favorite_id: null }
+                    : item
+            )
+        );
+
         try {
-            await axios.delete(
+            const response = await axios.delete(
                 `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
-                { data: { favorite_id: FavoriteId } },
+                {
+                    data: {
+                        favorite_id: favoriteId,
+                    },
+                }
             );
-            fetchHomeData();
+
+            if (response.data.status !== 1) {
+                toast.error("Failed to remove favorite. Please try again.");
+            }
         } catch (error) {
-            console.log("Failed to remove the property. Please try again.");
-            fetchHomeData();
+            console.log(error);
+            toast.error("Failed to remove favorite. Please try again.");
         }
     };
 
@@ -451,6 +502,7 @@ const BuyProperty = ({
                                                         )}
 
                                                         <button
+                                                            type="button"
                                                             className="p-2 rounded-full shadow bg-gray-800/60 backdrop-blur-sm"
                                                             onClick={() => {
                                                                 if (!userId) {

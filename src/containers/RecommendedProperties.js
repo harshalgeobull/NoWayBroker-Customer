@@ -136,11 +136,19 @@ const RecommendedProperties = ({
   };
 
   //  Add to favorites
+  //  Add to favorites
   const addToFavorites = async (PropertyId) => {
     if (!accessToken) {
       setIsLoginModalOpen(true);
       return;
     }
+
+    // Optimistic update - UI instantly update, API background madhe
+    setProperties((prev) =>
+      prev.map((item) =>
+        item._id === PropertyId ? { ...item, is_favorite: true } : item,
+      ),
+    );
 
     try {
       const response = await axios.post(
@@ -150,15 +158,45 @@ const RecommendedProperties = ({
           property_id: PropertyId,
         },
       );
-      fetchHomeData();
-      // toast.success("Property added to favorites successfuly!");
+
+      if (response.data.status === 1) {
+        setProperties((prev) =>
+          prev.map((item) =>
+            item._id === PropertyId
+              ? { ...item, is_favorite: true, favorite_id: response.data.favorite_id }
+              : item,
+          ),
+        );
+      } else {
+        // Revert if API failed
+        setProperties((prev) =>
+          prev.map((item) =>
+            item._id === PropertyId ? { ...item, is_favorite: false } : item,
+          ),
+        );
+      }
     } catch (error) {
       console.error("Error adding property to favorites:", error);
+      // Revert on error
+      setProperties((prev) =>
+        prev.map((item) =>
+          item._id === PropertyId ? { ...item, is_favorite: false } : item,
+        ),
+      );
     }
   };
-
+  //  Remove to favorites
   //  Remove to favorites
   const removeFromFavorites = async (favoriteId) => {
+    // Optimistic update - UI instantly update
+    setProperties((prev) =>
+      prev.map((item) =>
+        item.favorite_id === favoriteId
+          ? { ...item, is_favorite: false, favorite_id: null }
+          : item,
+      ),
+    );
+
     const formData = new FormData();
     formData.append("favorite_id", favoriteId);
 
@@ -168,18 +206,13 @@ const RecommendedProperties = ({
         { data: formData },
       );
 
-      if (response.data.status === 1) {
-        fetchHomeData();
-        // toast.success("Property removed to favorites successfuly!");
-      } else {
-        fetchHomeData();
+      if (response.data.status !== 1) {
         console.error("Failed to remove:", response.data.message);
       }
     } catch (error) {
       console.error("Error unfavoriting:", error);
     }
   };
-
   // Slider settings
   const [activeIndexes, setActiveIndexes] = useState({});
   const BASE_URL = process.env.REACT_APP_API_URL;
@@ -496,6 +529,7 @@ const RecommendedProperties = ({
                               </span>
                             )}
                             <button
+                              type="button"
                               className="flex items-center justify-center w-10 h-10 rounded-full shadow bg-gray-900/60 backdrop-blur-md"
                               onClick={() => {
                                 if (!accessToken) {

@@ -69,36 +69,7 @@ const OwnerProperty = ({
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
 
-  // useEffect(() => {
-  //   if (userId) {
-  //     setIsLoggedIn(true);
-  //     fetchSavedProperties(userId);
-  //   } else {
-  //     setIsLoggedIn(false);
-  //   }
-  // }, []);
-
-  // const fetchSavedProperties = async () => {
-  //   try {
-  //     const response = await axios.post(
-  //       `${process.env.REACT_APP_API_URL}/cust_api/get_favorite_properties`,
-  //       {
-  //         user_id: userId,
-  //       }
-  //     );
-  //     if (response.data.status === 1 && Array.isArray(response.data.data)) {
-  //       const savedIds = response.data.data.map((prop) => prop._id);
-  //       setSavedProperties(savedIds);
-  //     } else {
-  //       setSavedProperties([]);
-  //       toast.error("No saved properties found.");
-  //     }
-  //   } catch (error) {
-  //     toast.error("Error fetching saved properties:", error);
-  //   }
-  // };
-
-  // Fetch recommended properties
+  // Fetch owner properties (data already filtered by parent)
   const fetchRecommendedProperties = async () => {
     try {
       if (data && data.status === 1 && Array.isArray(data.data)) {
@@ -126,34 +97,83 @@ const OwnerProperty = ({
       toast.error("Please log in to save properties to your favorites.");
       return;
     }
-    const data = { user_id: userId, property_id: propertyId };
+
+    // Optimistic update - UI instantly update, API background madhe
+    setProperties((prev) =>
+      prev.map((item) =>
+        item._id === propertyId ? { ...item, is_favorite: true } : item,
+      ),
+    );
+
     try {
-      await axios.post(
+      const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/add_to_favorite`,
-        data,
+        {
+          user_id: userId,
+          property_id: propertyId,
+        },
       );
-      fetchHomeData();
+
+      if (response.data.status === 1) {
+        // Confirm with real favorite_id from server
+        setProperties((prev) =>
+          prev.map((item) =>
+            item._id === propertyId
+              ? {
+                ...item,
+                is_favorite: true,
+                favorite_id: response.data.favorite_id,
+              }
+              : item,
+          ),
+        );
+      } else {
+        // Revert if API failed
+        setProperties((prev) =>
+          prev.map((item) =>
+            item._id === propertyId ? { ...item, is_favorite: false } : item,
+          ),
+        );
+      }
     } catch (error) {
       console.log("Failed to save the property. Please try again.");
-      fetchHomeData();
+      // Revert on error
+      setProperties((prev) =>
+        prev.map((item) =>
+          item._id === propertyId ? { ...item, is_favorite: false } : item,
+        ),
+      );
     }
   };
 
   // Remove property from favorites
-  const removeFromFavorites = async (FavoriteId) => {
+  const removeFromFavorites = async (favoriteId) => {
     if (!userId) {
       toast.error("Please log in to remove properties from your favorites.");
       return;
     }
+
+    // Optimistic update - UI instantly update
+    setProperties((prev) =>
+      prev.map((item) =>
+        item.favorite_id === favoriteId
+          ? { ...item, is_favorite: false, favorite_id: null }
+          : item,
+      ),
+    );
+
     try {
-      await axios.delete(
+      const response = await axios.delete(
         `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
-        { data: { favorite_id: FavoriteId } },
+        { data: { favorite_id: favoriteId } },
       );
-      fetchHomeData();
+
+      if (response.data.status !== 1) {
+        toast.error("Failed to remove favorite. Please try again.");
+      }
     } catch (error) {
       console.log("Failed to remove the property. Please try again.");
-      fetchHomeData();
+      toast.error("Failed to remove favorite. Please try again.");
     }
   };
 
@@ -372,7 +392,7 @@ const OwnerProperty = ({
                           >
                             {allImages.length > 1 ? (
                               <Slider
-                                key={`${property._id}-${allImages.length}-${Date.now()}`}
+                                key={`${property._id}-${allImages.length}`}
                                 className="h-40 sm:h-44 md:h-48"
                                 dots
                                 infinite
@@ -443,12 +463,6 @@ const OwnerProperty = ({
                             )}
                           </Link>
 
-                          {/* Days on nowaybroker */}
-                          {/* <span className="absolute px-2 py-1 text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm">
-                          {property.days_since_created} days on NoWayBroker
-                        </span> */}
-
-
                           {/* Admin Approval Badge */}
                           {property.admin_approval === "Approved" && (
                             <div className="absolute top-2 left-2 z-20">
@@ -475,6 +489,7 @@ const OwnerProperty = ({
                               </span>
                             )}
                             <button
+                              type="button"
                               className="p-2 rounded-full shadow bg-gray-800/60 backdrop-blur-sm"
                               onClick={() => {
                                 if (!userId) {
@@ -567,7 +582,6 @@ const OwnerProperty = ({
                       </div>
 
                       {/* Property Details */}
-                      {/* Property Details - Refined 99acres Style */}
                       <div className="flex flex-col flex-1 p-3 text-black bg-white">
                         {/* Price Section */}
                         <div className="flex items-start justify-between gap-2 mb-0 sm:gap-3">
@@ -659,37 +673,6 @@ const OwnerProperty = ({
                               )}
                           </div>
                         </div>
-
-                        {/* <div className="flex items-center h-10 mb-1">
-                        <h3 className="flex items-center text-lg font-bold">
-                          <FaRupeeSign className="mr-0.5 text-sm" />
-                          {property.property_category_type === "Rent"
-                            ? formatPrice(property.rent)
-                            : formatPrice(property.property_price)}
-                          {property.property_category_type === "Rent" &&
-                            property.rent_duration && (
-                              <span className="ml-1 text-xs font-normal text-gray-500">
-                                /{property.rent_duration}
-                              </span>
-                            )}
-                        </h3>
-                      </div> */}
-                        {/* BHK and Property Type
-                      <div className="mb-1">
-                        <p className="text-sm font-semibold text-gray-800">
-                          {property.bhk_type} {property.property_type},{" "}
-                          {property.bathrooms || "2"} Baths
-                        </p>
-                      </div> */}
-                        {/* Address / Locality */}
-                        {/* <div className="flex items-start mb-2">
-                        <p className="text-xs text-gray-500 line-clamp-1">
-                          In{" "}
-                          <span className="font-medium text-gray-700">
-                            {property.address_area || property.property_name}
-                          </span>
-                        </p>
-                      </div> */}
 
                         {/* Features Row */}
                         <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
