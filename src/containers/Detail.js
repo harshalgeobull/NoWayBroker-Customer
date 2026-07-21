@@ -32,6 +32,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "../styles/RecommendedProperties.css";
+import "../styles/DetailResponsive.css";
 import { BsHouseDoorFill, BsArrowsFullscreen } from "react-icons/bs";
 import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
 import { useHistory } from "react-router-dom"; // import for routing
@@ -1053,11 +1054,11 @@ const Detail = ({ propertyData }) => {
 
   return (
     <>
-      <div className="max-w-full px-4 mx-auto sm:px-16">
+      <div className="max-w-full px-4 mx-auto sm:px-16 detail-page-container">
         {/* Property Details Section */}
-        <div className="relative w-full h-auto p-2 mb-4 rounded-lg shadow-sm bg-rose-50">
+        <div className="relative w-full h-auto p-2 mb-4 rounded-lg shadow-sm bg-rose-50 detail-header-card">
           {(propertyDetails?.property_price || propertyDetails?.rent) && (
-            <div className="absolute top-4 right-4 flex flex-col items-end">
+            <div className="absolute top-4 right-4 flex flex-col items-end detail-price-block">
               <p className="flex items-center mt-5 text-3xl font-bold my-text">
                 <FaRupeeSign className="mr-2" />
                 {propertyDetails?.property_category_type === "Rent" ||
@@ -1092,13 +1093,13 @@ const Detail = ({ propertyData }) => {
               : ""}
           </h2> */}
 
-          <h2 className="mt-2 ml-6 text-3xl font-normal">
+          <h2 className="mt-2 ml-6 text-3xl font-normal detail-title">
             {propertyDetails?.property_name
               ? `${propertyDetails.property_name} `
               : ""}
           </h2>
 
-          <p className="ml-6 text-xl font-bold text-gray-700 break-words whitespace-normal max-w-[80ch]">
+          <p className="ml-6 text-xl font-bold text-gray-700 break-words whitespace-normal max-w-[80ch] detail-address">
             <img
               src="/image/address_icon.png"
               alt="Address Icon"
@@ -1106,7 +1107,7 @@ const Detail = ({ propertyData }) => {
             />
             {propertyDetails?.address || "Address N/A"}
           </p>
-          <div className="flex items-center mt-6 ml-5 space-x-8">
+          <div className="flex items-center mt-6 ml-5 space-x-8 detail-info-row">
             {propertyDetails?.bhk_type && (
               <div className="flex items-center space-x-2">
                 <FaBed className="text-2xl my-text" />
@@ -1135,10 +1136,10 @@ const Detail = ({ propertyData }) => {
             )}
           </div>
 
-          <div className="flex justify-end mt-6 space-x-4">
+          <div className="flex justify-end mt-6 space-x-4 detail-actions-row">
             {propertyDetails.virtual_tour_availability === "Yes" && (
               <button
-                className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
+                className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center detail-action-btn
       ${tourSchedule?.[0]?.status === "Accepted"
                     ? "bg-green-500 text-white rounded-full"
                     : scheduledDateLabel === "Virtual Tour"
@@ -1180,7 +1181,7 @@ const Detail = ({ propertyData }) => {
               />
             )}
             <div
-              className="w-full px-3 py-1 text-sm text-white my-bg rounded-lg cursor-pointer sm:px-4 sm:py-2 sm:text-lg sm:w-auto"
+              className="w-full px-3 py-1 text-sm text-white my-bg rounded-lg cursor-pointer sm:px-4 sm:py-2 sm:text-lg sm:w-auto detail-action-btn detail-contact-btn"
               onClick={() => {
                 const token = sessionStorage.getItem("accessToken");
                 if (token) {
@@ -1236,7 +1237,7 @@ const Detail = ({ propertyData }) => {
                 />
               )}
             <div
-              className="flex items-center justify-center w-10 h-10 bg-white rounded-md cursor-pointer"
+              className="flex items-center justify-center w-10 h-10 bg-white rounded-md cursor-pointer detail-icon-btn"
               onClick={() => {
                 if (propertyDetails.is_favorite) {
                   removeFromFavoritesRecommendedProperty(
@@ -1256,7 +1257,7 @@ const Detail = ({ propertyData }) => {
             </div>
 
             <div
-              className="flex items-center justify-center w-8 h-8 bg-white rounded-md cursor-pointer sm:w-10 sm:h-10"
+              className="flex items-center justify-center w-8 h-8 bg-white rounded-md cursor-pointer sm:w-10 sm:h-10 detail-icon-btn"
               onClick={() => {
                 setIsShareModalOpen(true);
               }}
@@ -1267,17 +1268,17 @@ const Detail = ({ propertyData }) => {
         </div>
 
         {/* Image Section & Contact Form */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 h-auto md:h-[550px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 h-auto md:h-[550px] detail-main-grid">
           {/* Left Side Image Section */}
-          <div className="grid grid-cols-1 col-span-2 gap-1 md:grid-cols-1">
+          <div className="grid grid-cols-1 col-span-2 gap-1 md:grid-cols-1 detail-left-col">
             {/* Image Section */}
-            <div className="flex flex-col gap-2 mt-6 md:flex-row">
+            <div className="flex flex-col gap-2 mt-6 md:flex-row detail-image-row">
               {propertyImages.length === 0 ? (
                 <div className="w-full relative">
                   <img
                     src={propertyDetails?.cover_image}
                     alt="Main"
-                    className="rounded-2xl w-full h-64 md:h-[400px] object-cover"
+                    className="rounded-2xl w-full h-64 md:h-[400px] object-cover detail-cover-image"
                   />
                   {/* Watermark */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -1294,7 +1295,7 @@ const Detail = ({ propertyData }) => {
                       <img
                         src={propertyDetails.cover_image}
                         alt="Main"
-                        className="rounded-2xl w-full h-64 md:h-[400px] object-cover"
+                        className="rounded-2xl w-full h-64 md:h-[400px] object-cover detail-cover-image"
                       />
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <span className="text-2xl font-bold text-white rotate-[-30deg] opacity-60">
@@ -1316,7 +1317,7 @@ const Detail = ({ propertyData }) => {
                           <img
                             src={propertyImages[0].image}
                             alt="Preview"
-                            className="rounded-2xl w-full h-48 md:h-[195px] object-cover"
+                            className="rounded-2xl w-full h-48 md:h-[195px] object-cover detail-gallery-image"
                           />
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <span className="text-2xl font-bold text-white rotate-[-30deg] opacity-60">
@@ -1355,7 +1356,7 @@ const Detail = ({ propertyData }) => {
                                 <img
                                   src={filteredImages[1]?.image}
                                   alt="Preview"
-                                  className="rounded-2xl w-full h-48 md:h-[190px] object-cover"
+                                  className="rounded-2xl w-full h-48 md:h-[190px] object-cover detail-gallery-image"
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                   <span className="text-2xl font-bold text-white rotate-[-30deg] opacity-60">
@@ -1389,10 +1390,10 @@ const Detail = ({ propertyData }) => {
               )}
             </div>
             {/* Navigation Tabs */}
-            <div className="sticky top-0 z-20 flex items-center gap-8 px-6 py-4 mb-4 bg-white rounded-lg shadow-sm">
+            <div className="sticky top-0 z-20 flex items-center gap-8 px-6 py-4 mb-4 bg-white rounded-lg shadow-sm detail-tabs">
               <button
                 onClick={() => scrollToSection(overviewRef, "overview")}
-                className={`relative font-medium pb-1 ${activeSection === "overview"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "overview"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1407,7 +1408,7 @@ const Detail = ({ propertyData }) => {
                 onClick={() =>
                   scrollToSection(statusTimelineRef, "statusTimeline")
                 }
-                className={`relative font-medium pb-1 ${activeSection === "statusTimeline"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "statusTimeline"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1419,7 +1420,7 @@ const Detail = ({ propertyData }) => {
               </button>
               <button
                 onClick={() => scrollToSection(moreDetailsRef, "moreDetails")}
-                className={`relative font-medium pb-1 ${activeSection === "moreDetails"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "moreDetails"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1432,7 +1433,7 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(amenitiesRef, "amenities")}
-                className={`relative font-medium pb-1 ${activeSection === "amenities"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "amenities"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1445,7 +1446,7 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(aboutRef, "about")}
-                className={`relative font-medium pb-1 ${activeSection === "about"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "about"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1458,7 +1459,7 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(locationRef, "location")}
-                className={`relative font-medium pb-1 ${activeSection === "location"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "location"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1637,11 +1638,11 @@ const Detail = ({ propertyData }) => {
             </div>
           </div>
           {/* Right Side Contact Form with Increased Height */}
-          <div className="sticky top-0 flex flex-col max-h-screen pt-4 overflow-auto">
-            <div className="bg-white shadow-lg rounded-2xl p-4 min-h-[650px] flex flex-col justify-between">
+          <div className="sticky top-0 flex flex-col max-h-screen pt-4 overflow-auto detail-enquiry-col">
+            <div className="bg-white shadow-lg rounded-2xl p-4 min-h-[650px] flex flex-col justify-between detail-enquiry-card">
               <div>
                 <h3 className="mb-5 text-xl font-semibold">Make an Enquiry</h3>
-                <div className="flex items-center pb-3 mb-6 space-x-6 border-b-2 border-black">
+                <div className="flex items-center pb-3 mb-6 space-x-6 border-b-2 border-black detail-agent-row">
                   <Link
                     to={`/agentdetail/${userDetails?._id}`}
                     onClick={() =>
@@ -1951,47 +1952,6 @@ const Detail = ({ propertyData }) => {
                           />
                         )}
                       </Link>
-                      {/* Admin Approval Badge */}
-                      {property.admin_approval === "Approved" && (
-                        <div className="absolute top-2 left-2 z-20">
-                          <div className="flex items-center bg-[#2DBE3F] text-white rounded-sm shadow-md px-2 py-1">
-
-                            {/* Tick Icon */}
-                            <span className="text-white text-xs font-bold mr-2">
-                              ✓
-                            </span>
-
-                            {/* Verified Text */}
-                            <span className="text-[11px] font-semibold leading-none">
-                              Verified
-                            </span>
-
-                            {/* Info Icon */}
-                            <span className="ml-2 w-4 h-4 flex items-center justify-center rounded-full bg-white text-[#2DBE3F] text-[10px] font-bold">
-                              i
-                            </span>
-
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Admin Approval Badge */}
-                      {property.admin_approval === "Approved" && (
-                        <div className="absolute top-2 left-2 z-20">
-                          <div className="flex items-center bg-[#2DBE3F] text-white rounded-sm shadow-md px-2 py-1">
-
-                            {/* Tick Icon */}
-                            <span className="text-white text-xs font-bold mr-2">
-                              ✓
-                            </span>
-
-                            {/* Verified Text */}
-                            <span className="text-[11px] font-semibold leading-none">
-                              Verified
-                            </span>
-                          </div>
-                        </div>
-                      )}
 
                       {/* Virtual Tour & Favorite Button */}
                       <div className="absolute flex items-center space-x-2 top-2 right-2">
