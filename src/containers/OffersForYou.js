@@ -56,7 +56,7 @@ const OffersForYou = ({ data }) => {
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
             Hot, Deals, Discount & Offers
           </h2>
-          <p className="text-gray-500 text-md">Your dream property is just a few clicks away</p>
+          <p className="text-gray-500 text-md">Go from browsing to buying</p>
         </div>
 
         {/* Navigation Buttons */}

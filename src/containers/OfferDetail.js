@@ -139,19 +139,19 @@ const OfferDetail = () => {
     };
 
     const formatPrice = (price) => {
-      if (!price) return "";
+  if (!price) return "";
 
-      price = Number(price);
+  price = Number(price);
 
-      const formatNumber = (num) =>
-        num.toFixed(2).replace(/\.?0+$/, "");
+  const formatNumber = (num) =>
+     num.toFixed(2).replace(/\.?0+$/, "");
 
-      if (price >= 10000000) return `₹ ${formatNumber(price / 10000000)} Cr`;
-      if (price >= 100000) return `₹ ${formatNumber(price / 100000)} L`;
-      if (price >= 1000) return `₹ ${formatNumber(price / 1000)} K`;
+  if (price >= 10000000) return `₹ ${formatNumber(price / 10000000)} Cr`;
+  if (price >= 100000) return `₹ ${formatNumber(price / 100000)} L`;
+  if (price >= 1000) return `₹ ${formatNumber(price / 1000)} K`;
 
-      return `₹ ${price}`;
-    };
+  return `₹ ${price}`;
+};
 
     const handleCall = (e) => {
       if (!phoneNumber) {

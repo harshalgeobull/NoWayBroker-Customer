@@ -29,7 +29,7 @@ const Adviser = ({ data }) => {
         animateCount(owner_property_count, setOwnerPropertyCount);
         animateCount(agent_property_count, setAgentPropertyCount);
         animateCount(builder_property_count, setBuilderPropertyCount);
-        animateCount(20, setUpcomingProjectCount);
+        animateCount(20, setUpcomingProjectCount); 
       }
     } catch (error) {
       console.error("Error fetching property counts:", error);
@@ -149,7 +149,7 @@ const Adviser = ({ data }) => {
               </p>
             </div>
           </Link> */}
-
+        
           {/* adviser 3 */}
           <Link
             to={`/advisordashboard?label=Builder`}
@@ -194,62 +194,62 @@ const Adviser = ({ data }) => {
 
           {/* adviser 3 - Upcoming Projects */}
 
-          <Link
-            to={`/advisordashboard?label=Builder`}
-            className="flex items-center bg-slate-100 rounded-2xl transform hover:scale-105 p-3 no-underline text-gray-800 hover:no-underline"
-          >
-            <div className="w-1/3">
+<Link
+  to={`/advisordashboard?label=Builder`}
+  className="flex items-center bg-slate-100 rounded-2xl transform hover:scale-105 p-3 no-underline text-gray-800 hover:no-underline"
+>
+  <div className="w-1/3">
 
-              <div className="w-full h-16 mb-2">
-                <img
-                  src="/image/BuilderProject.jpg"
-                  alt="Upcoming Projects"
-                  className="w-full h-full object-cover rounded-2xl"
-                />
-              </div>
+    <div className="w-full h-16 mb-2">
+      <img
+        src="/image/BuilderProject.jpg"
+        alt="Upcoming Projects"
+        className="w-full h-full object-cover rounded-2xl"
+      />
+    </div>
 
-              <div className="flex gap-2">
+    <div className="flex gap-2">
 
-                <div className="w-1/2 h-16">
-                  <img
-                    src="/image/BuilderProject.jpg"
-                    alt=""
-                    className="w-full h-full object-cover rounded-2xl"
-                  />
-                </div>
+      <div className="w-1/2 h-16">
+        <img
+          src="/image/BuilderProject.jpg"
+          alt=""
+          className="w-full h-full object-cover rounded-2xl"
+        />
+      </div>
 
-                <div className="w-1/2 h-16">
-                  <img
-                    src="/image/BuilderProject.jpg"
-                    alt=""
-                    className="w-full h-full object-cover rounded-2xl"
-                  />
-                </div>
+      <div className="w-1/2 h-16">
+        <img
+          src="/image/BuilderProject.jpg"
+          alt=""
+          className="w-full h-full object-cover rounded-2xl"
+        />
+      </div>
 
-              </div>
+    </div>
 
-            </div>
+  </div>
 
-            <div className="ml-4 w-1/2">
+  <div className="ml-4 w-1/2">
 
-              <h3 className="text-3xl font-semibold text-rose-800 mb-2">
-                {upcomingProjectCount}{typeof upcomingProjectCount === "number" && upcomingProjectCount === 20 ? "+" : ""}
-              </h3>
+  <h3 className="text-3xl font-semibold text-rose-800 mb-2">
+  {upcomingProjectCount}{typeof upcomingProjectCount === "number" && upcomingProjectCount === 20 ? "+" : ""}
+</h3>
 
-              <p className="text-md text-gray-700 font-bold">
-                Upcoming Projects
-              </p>
+    <p className="text-md text-gray-700 font-bold">
+      Upcoming Projects
+    </p>
 
-              <p className="text-lg my-text flex items-center">
-                Explore
-                <span className="ml-2 text-rose-800">
-                  →
-                </span>
-              </p>
+    <p className="text-lg my-text flex items-center">
+      Explore
+      <span className="ml-2 text-rose-800">
+        →
+      </span>
+    </p>
 
-            </div>
+  </div>
 
-          </Link>
+</Link>
         </div>
       </div>
     </div>

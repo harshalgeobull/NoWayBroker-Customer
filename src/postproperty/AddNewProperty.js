@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+// File ke top mein, component function ke BAHAR
+
 import { IoIosInformationCircle } from "react-icons/io";
 import { ToWords } from "to-words";
 import { Trash } from "lucide-react"; // Using Lucide Icons for delete button
@@ -20,6 +22,7 @@ import "primeicons/primeicons.css";
 import { MdErrorOutline } from "react-icons/md";
 import Select, { components } from "react-select";
 import { Country, State } from "country-state-city";
+const GOOGLE_MAPS_LIBRARIES = ["places"];
 
 const AddNewProperty = () => {
   const [mapCenter, setMapCenter] = useState({ lat: 18.5204, lng: 73.8567 });
@@ -37,9 +40,13 @@ const AddNewProperty = () => {
   const [longitude, setLongitude] = useState(null);
   const autoCompleteRef = useRef(null);
   const GOOGLE_MAPS_API_KEY = "AIzaSyAUCNwxnNo52kFWJNGhRVj-AnkoffmzYe0";
+  // const { isLoaded } = useJsApiLoader({
+  //   googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+  //   libraries: ["places"],
+  // });
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: ["places"],
+    libraries: GOOGLE_MAPS_LIBRARIES,   
   });
 
   const userId = sessionStorage.getItem("accessToken");
@@ -1124,7 +1131,6 @@ Make it engaging, attractive, and human-like.
         },
       );
 
-
       const propertyData = response.data;
       const property_id = propertyData?.data?._id;
 
@@ -1153,16 +1159,7 @@ Make it engaging, attractive, and human-like.
       });
     } catch (error) {
       console.error("Error posting property:", error);
-      console.error(
-        "Backend response data:",
-        error?.response?.data || "No response data from server",
-      );
-      console.error("Status code:", error?.response?.status);
-      toast.error(
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        "Failed to post property.",
-      );
+      toast.error("Failed to post property.");
       history.push({
         pathname: "/dashboard",
         state: { page: "myProperties" },
@@ -4566,12 +4563,11 @@ Make it engaging, attractive, and human-like.
                           }
                         >
                           <option value="">Select Age of Property</option>
-                          <option value="New Construction">New Construction</option>
-                          <option value="1 to 5 Years">1 to 5 Years</option>
-                          <option value="5 to 10 Years">5 to 10 Years</option>
-                          <option value="10 to 15 Years">10 to 15 Years</option>
-                          <option value="15 to 20 Years">15 to 20 Years</option>
-                          <option value="Above 20 Years">Above 20 Years</option>
+                          <option value="0-1">0-1</option>
+                          <option value="2-4">2-4</option>
+                          <option value="5-7">5-7</option>
+                          <option value="8-10">8-10</option>
+                          <option value="10+">10+</option>
                         </select>
                       </div>
                     )}

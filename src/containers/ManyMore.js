@@ -125,87 +125,32 @@ const ManyMore = ({
       toast.error("Please log in to save properties to your favorites.");
       return;
     }
-
-    // Optimistic update - UI instantly update, API background madhe
-    setProperties((prev) =>
-      prev.map((item) =>
-        item._id === propertyId ? { ...item, is_favorite: true } : item
-      )
-    );
+    const data = { user_id: userId, property_id: propertyId };
 
     try {
-      const response = await axios.post(
+      await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/add_to_favorite`,
-        {
-          user_id: userId,
-          property_id: propertyId,
-        }
+        data,
       );
-
-      if (response.data.status === 1) {
-        setProperties((prev) =>
-          prev.map((item) =>
-            item._id === propertyId
-              ? {
-                ...item,
-                is_favorite: true,
-                favorite_id: response.data.favorite_id,
-              }
-              : item
-          )
-        );
-      } else {
-        // Revert if API failed
-        setProperties((prev) =>
-          prev.map((item) =>
-            item._id === propertyId ? { ...item, is_favorite: false } : item
-          )
-        );
-      }
+      fetchHomeData();
     } catch (error) {
-      console.error("Add favorite failed:", error);
-
-      setProperties((prev) =>
-        prev.map((item) =>
-          item._id === propertyId
-            ? { ...item, is_favorite: false }
-            : item
-        )
-      );
+      fetchHomeData();
     }
   };
 
   // Remove property from favorites
-  const removeFromFavorites = async (favoriteId) => {
+  const removeFromFavorites = async (FavoriteId) => {
     if (!userId) {
       toast.error("Please log in to remove properties from your favorites.");
       return;
     }
-
-    // Optimistic update - UI instantly update
-    setProperties((prev) =>
-      prev.map((item) =>
-        item.favorite_id === favoriteId
-          ? { ...item, is_favorite: false, favorite_id: null }
-          : item
-      )
-    );
-
     try {
-      const response = await axios.delete(
+      await axios.delete(
         `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
-        {
-          data: {
-            favorite_id: favoriteId,
-          },
-        }
+        { data: { favorite_id: FavoriteId } },
       );
-
-      if (response.data.status !== 1) {
-        toast.error("Failed to remove favorite. Please try again.");
-      }
+      fetchHomeData();
     } catch (error) {
-      console.error("Remove favorite failed:", error);
       toast.error("Failed to remove favorite. Please try again.");
     }
   };

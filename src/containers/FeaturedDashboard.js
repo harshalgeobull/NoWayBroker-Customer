@@ -50,9 +50,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-    Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -84,19 +84,17 @@ const FeaturedDashboard = () => {
   const [activePropertyId, setActivePropertyId] = useState(null);
   const { searchCity } = useCity();
   const accessToken = sessionStorage.getItem("accessToken");
-
-  // pagination logic
+  //pagination logic
   const [currentIndex, setCurrentIndex] = useState(0);
   const [propertyImages, setPropertyImages] = useState([]);
-  const [currentPropertyType, setCurrentPropertyType] =
-    useState("Residential");
+  const [currentPropertyType, setCurrentPropertyType] = useState("Residential");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [totalPages, setTotalPages] = useState(1);
-
   // Modal open states
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+
   const [postedBy, setPostedBy] = useState("");
   const [constructionStatus, setConstructionStatus] = useState([]);
   const [constructionOpen, setConstructionOpen] = useState(false);
@@ -110,6 +108,7 @@ const FeaturedDashboard = () => {
   const [areaIn, setAreaIn] = useState("sq.ft");
   const [sharingType, setSharingType] = useState([]);
   const [availableFrom, setAvailableFrom] = useState([]);
+
   const [sharingTypeOpen, setSharingTypeOpen] = useState(false);
   const [availableFromOpen, setAvailableFromOpen] = useState(false);
   const [availableFor, setAvailableFor] = useState([]);
@@ -119,134 +118,123 @@ const FeaturedDashboard = () => {
   const [investmentOptions, setInvestmentOptions] = useState([]);
   const [purchaseType, setPurchaseType] = useState("");
   const [investmentOpen, setInvestmentOpen] = useState(false);
+
   const [plotLandTypes, setPlotLandTypes] = useState([]);
   const [plotLandOpen, setPlotLandOpen] = useState(false);
+
   const [officeType, setOfficeType] = useState([]);
   const [retailType, setRetailType] = useState([]);
   const [otherCommercialType, setOtherCommercialType] = useState([]);
+
   const [officeTypeOpen, setOfficeTypeOpen] = useState(false);
   const [retailTypeOpen, setRetailTypeOpen] = useState(false);
   const [otherCommercialOpen, setOtherCommercialOpen] = useState(false);
+
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [buildingType, setBuildingType] = useState("");
   const [propertyType2, setPropertyType2] = useState([]);
   const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
   const propertyTypeButtonRef = useRef(null);
-
-  // Property Portal
+  //Property Portal
   const [propertyTypeDropdownPos, setPropertyTypeDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 260,
   });
-
   // Budget Portal
   const budgetButtonRef = useRef(null);
+
   const [budgetDropdownPos, setBudgetDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 260,
   });
-
-  // Construction Portal
+  //Construction Portal
   const constructionButtonRef = useRef(null);
+
   const [constructionDropdownPos, setConstructionDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 260,
   });
-
-  // Amenities Portal
+  //Amenities Portal
   const amenitiesButtonRef = useRef(null);
   const [amenitiesDropdownPos, setAmenitiesDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 260,
   });
-
-  // Area Portal
+  //Area Portal
   const areaButtonRef = useRef(null);
   const [areaDropdownPos, setAreaDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 260,
   });
-
-  // Sharing Type Portal
+  //Sharing Type Portal
   const sharingTypeButtonRef = useRef(null);
   const [sharingTypeDropdownPos, setSharingTypeDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 260,
   });
-
-  // Available From Portal
+  //Available Portal
   const availableFromButtonRef = useRef(null);
   const [availableFromDropdownPos, setAvailableFromDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 260,
   });
-
-  // Available For Portal
+  //Available for Portal
   const availableForButtonRef = useRef(null);
   const [availableForDropdownPos, setAvailableForDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 260,
   });
-
-  // Capacity Portal
+  //Capacity Portal
   const capacityButtonRef = useRef(null);
   const [capacityDropdownPos, setCapacityDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 260,
   });
-
-  // Investment Portal
+  //Invesment Portal
   const investmentButtonRef = useRef(null);
   const [investmentDropdownPos, setInvestmentDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 260,
   });
-
-  // Plot Land Type
+  //Plot Land Type
   const plotLandButtonRef = useRef(null);
   const [plotLandDropdownPos, setPlotLandDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 0,
   });
-
-  // Office Type
+  //Office Type
   const officeTypeButtonRef = useRef(null);
   const [officeTypeDropdownPos, setOfficeTypeDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 0,
   });
-
-  // Retail Type
+  //Retail Type
   const retailTypeButtonRef = useRef(null);
   const [retailTypeDropdownPos, setRetailTypeDropdownPos] = useState({
     top: 0,
     left: 0,
     width: 0,
   });
-
-  // Other Commercial Type
+  //Other Commercial Type
   const otherCommercialButtonRef = useRef(null);
-  const [otherCommercialDropdownPos, setOtherCommercialDropdownPos] = useState(
-    {
-      top: 0,
-      left: 0,
-      width: 0,
-    },
-  );
-
+  const [otherCommercialDropdownPos, setOtherCommercialDropdownPos] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
   const [filterTrigger, setFilterTrigger] = useState(0);
   const [freeViewCount, setFreeViewCount] = useState(0);
   const [paidViewCount, setPaidViewCount] = useState(0);
@@ -330,6 +318,7 @@ const FeaturedDashboard = () => {
     8500000, // 85 Lakh
     9000000, // 90 Lakh
     9500000, // 95 Lakh
+
     10000000, // 1 Crore
     12500000, // 1.25 Crore
     15000000, // 1.5 Crore
@@ -340,6 +329,7 @@ const FeaturedDashboard = () => {
     40000000, // 4 Crore
     50000000, // 5 Crore
     75000000, // 7.5 Crore
+
     100000000, // 10 Crore
     150000000, // 15 Crore
     200000000, // 20 Crore
@@ -351,6 +341,7 @@ const FeaturedDashboard = () => {
     700000000, // 70 Crore
     750000000, // 75 Crore
     900000000, // 90 Crore
+
     1000000000, // 100 Crore
     1500000000, // 150 Crore
     2000000000, // 200 Crore
@@ -362,6 +353,7 @@ const FeaturedDashboard = () => {
     7000000000, // 700 Crore
     7500000000, // 750 Crore
     9000000000, // 900 Crore
+
     10000000000, // 1000 Crore (10 Billion)
   ];
 
@@ -387,16 +379,28 @@ const FeaturedDashboard = () => {
   ];
 
   const DEFAULT_CENTER = [18.5204, 73.8567];
-
+  // const getMapCenter = () => {
+  //   if (
+  //     properties.length > 0 &&
+  //     properties[0].latitude &&
+  //     properties[0].longitude
+  //   ) {
+  //     return [properties[0].latitude, properties[0].longitude];
+  //   }
+  //   return DEFAULT_CENTER;
+  // };
   const getMapCenter = () => {
     const firstValid = properties.find((property) => {
       const lat = Number(property.latitude);
       const lng = Number(property.longitude);
+
       return Number.isFinite(lat) && Number.isFinite(lng);
     });
+
     if (firstValid) {
       return [Number(firstValid.latitude), Number(firstValid.longitude)];
     }
+
     return DEFAULT_CENTER;
   };
 
@@ -405,6 +409,7 @@ const FeaturedDashboard = () => {
   };
 
   const [priceDropdownOpen, setPriceDropdownOpen] = useState(false);
+
   const togglePriceDropdown = () => {
     setPriceDropdownOpen((prev) => !prev);
   };
@@ -413,6 +418,7 @@ const FeaturedDashboard = () => {
   const getPaginationRange = () => {
     const range = [];
     const groupSize = 3;
+
     const groupStart =
       Math.floor((currentPage - 1) / groupSize) * groupSize + 1;
     const groupEnd = Math.min(groupStart + groupSize - 1, totalPages);
@@ -454,10 +460,12 @@ const FeaturedDashboard = () => {
   const fetchAmenities = async () => {
     try {
       const formData = new FormData();
+
       const response = await axios.post(
         "https://api.nowaybroker.com/cust_api/get_amenities",
         formData,
       );
+
       if (response.data.status === 1) {
         setAmenitiesList(response.data.data);
       }
@@ -468,7 +476,9 @@ const FeaturedDashboard = () => {
 
   const toggleAmenity = (id) => {
     const value = String(id);
+
     setCurrentPage(1);
+
     setSelectedAmenities((prev) =>
       prev.includes(value)
         ? prev.filter((item) => item !== value)
@@ -478,6 +488,7 @@ const FeaturedDashboard = () => {
 
   const togglePropertyType = (type) => {
     setCurrentPage(1);
+
     setPropertyType2((prev) =>
       prev.includes(type)
         ? prev.filter((item) => item !== type)
@@ -508,7 +519,9 @@ const FeaturedDashboard = () => {
       setBathrooms("");
       return;
     }
+
     const numericValue = parseInt(value);
+
     if (!isNaN(numericValue) && numericValue >= 0 && numericValue <= 20) {
       setBathrooms(String(numericValue));
     }
@@ -530,10 +543,12 @@ const FeaturedDashboard = () => {
         margin-bottom: 50px !important;
         padding: 0 !important;
       }
+      
       .leaflet-popup-content {
         margin: 0 !important;
         padding: 0 !important;
       }
+
       .leaflet-container a.leaflet-popup-close-button {
         z-index: 1000;
         top: 5px !important;
@@ -544,10 +559,12 @@ const FeaturedDashboard = () => {
         cursor: pointer;
         border-radius: 50%;
       }
+
       .leaflet-container a.leaflet-popup-close-button:hover {
         background-color: rgba(0, 0, 0, 0.9);
         color: white;
       }
+
       .leaflet-container .leaflet-popup-heart-button {
         z-index: 1000;
         position: absolute;
@@ -565,19 +582,23 @@ const FeaturedDashboard = () => {
         justify-content: center;
         padding: 1px;
       }
+
       .leaflet-container .leaflet-popup-heart-button:hover {
         background-color: rgba(0, 0, 0, 0.9);
         color: white;
       }
+      
       .marker-wrapper {
         position: relative;
         display: flex;
         justify-content: center;
         align-items: center;
       }
+
       .custom-marker.active .marker-wrapper .price-tooltip{
-        background-color: green;
+         background-color: green;
       }
+
       .price-tooltip {
         background: white;
         color: black;
@@ -591,10 +612,12 @@ const FeaturedDashboard = () => {
         white-space: nowrap;
         z-index: 10;
       }
+
       .price-tooltip:hover {
         background-color: gray;
         color: white;
       }
+
       .price-tooltip .pointer {
         position: absolute;
         bottom: -8px;
@@ -607,6 +630,8 @@ const FeaturedDashboard = () => {
         border-top: 8px solid white;
         background-color: lightgray;
       }
+      
+
       .custom-marker {
         display: flex;
         align-items: center;
@@ -617,9 +642,11 @@ const FeaturedDashboard = () => {
         -webkit-appearance: none;
         margin: 0;
       }
+
       input[type="number"] {
         -moz-appearance: textfield;
       }
+
       .custom-button {
         font-family: "Arial", sans-serif;
         font-size: 1.5rem;
@@ -628,6 +655,7 @@ const FeaturedDashboard = () => {
         text-align: center;
         cursor: pointer;
       }
+
       .custom-button:hover {
         background-color: #f0f0f0;
         color: #333;
@@ -639,6 +667,7 @@ const FeaturedDashboard = () => {
   const loadProperties = async () => {
     setLoading(true);
     setError(null);
+
     try {
       let response;
 
@@ -654,6 +683,7 @@ const FeaturedDashboard = () => {
         formData.append("customer_id", accessToken || "");
         formData.append("page", currentPage);
         formData.append("page_size", itemsPerPage);
+
         if (search) formData.append("area", search);
         if (searchCity) formData.append("city_name", searchCity);
 
@@ -681,6 +711,7 @@ const FeaturedDashboard = () => {
         // ====================================
         // PROPERTY TYPE MAPPING
         // ====================================
+
         // COMMERCIAL LEASE
         if (
           propertyType === "Commercial Lease" &&
@@ -693,12 +724,15 @@ const FeaturedDashboard = () => {
             otherCommercialType,
             plotLandTypes,
           });
+
           if (mapped.property_type.length > 0) {
             formData.append("property_type", mapped.property_type.join(","));
           }
+
           if (mapped.office_type.length > 0) {
             formData.append("office_type", mapped.office_type.join(","));
           }
+
           if (mapped.sub_sub_property_type.length > 0) {
             formData.append(
               "sub_sub_property_type",
@@ -706,18 +740,22 @@ const FeaturedDashboard = () => {
             );
           }
         }
+
         // COMMERCIAL BUY
         else if (
           propertyType === "Commercial Buy" &&
           buildingType === "Commercial"
         ) {
           const mapped = mapCommercialTypes(propertyType2);
+
           if (mapped.property_type.length > 0) {
             formData.append("property_type", mapped.property_type.join(","));
           }
+
           if (mapped.office_type.length > 0) {
             formData.append("office_type", mapped.office_type.join(","));
           }
+
           if (mapped.sub_sub_property_type.length > 0) {
             formData.append(
               "sub_sub_property_type",
@@ -725,6 +763,7 @@ const FeaturedDashboard = () => {
             );
           }
         }
+
         // NORMAL PROPERTY TYPES
         else {
           if (propertyType2.length > 0) {
@@ -738,24 +777,31 @@ const FeaturedDashboard = () => {
         if (bhkType) {
           formData.append("bhk_type", bhkType);
         }
+
         if (furnishedStatus) {
           formData.append("furnished_type", furnishedStatus);
         }
+
         if (minPrice) {
           formData.append("min_price", minPrice);
         }
+
         if (maxPrice) {
           formData.append("max_price", maxPrice);
         }
+
         if (minSquareFt) {
           formData.append("min_area", minSquareFt);
         }
+
         if (maxSquareFt) {
           formData.append("max_area", maxSquareFt);
         }
+
         if ((minSquareFt || maxSquareFt) && areaIn) {
           formData.append("area_in", areaIn);
         }
+
         if (postedBy) {
           formData.append("user_type", postedBy);
         }
@@ -764,10 +810,7 @@ const FeaturedDashboard = () => {
         // CONSTRUCTION STATUS
         // ====================================
         if (constructionStatus.length > 0) {
-          formData.append(
-            "construction_status",
-            constructionStatus.join(","),
-          );
+          formData.append("construction_status", constructionStatus.join(","));
         }
 
         // ====================================
@@ -783,12 +826,15 @@ const FeaturedDashboard = () => {
         if (bathrooms) {
           formData.append("no_of_bathrooms", bathrooms);
         }
+
         if (facing) {
           formData.append("facing", facing);
         }
+
         if (withPhoto) {
           formData.append("with_photo", withPhoto);
         }
+
         if (withVideos) {
           formData.append("with_videos", withVideos);
         }
@@ -799,12 +845,15 @@ const FeaturedDashboard = () => {
         if (availableFor.length > 0) {
           formData.append("available_for", availableFor.join(","));
         }
+
         if (sharingType.length > 0) {
           formData.append("sharing_type", sharingType.join(","));
         }
+
         if (availableFrom.length > 0) {
           formData.append("available_from", availableFrom.join(","));
         }
+
         if (capacity.length > 0) {
           formData.append("available_beds", mapCapacityToBeds(capacity));
         }
@@ -815,6 +864,7 @@ const FeaturedDashboard = () => {
         if (investmentOptions.length > 0) {
           formData.append("investment_options", investmentOptions.join(","));
         }
+
         if (purchaseType) {
           formData.append("purchase_type", purchaseType);
         }
@@ -832,6 +882,7 @@ const FeaturedDashboard = () => {
           },
         );
       }
+
       // =========================
       // DEFAULT RECOMMENDED API
       // =========================
@@ -866,11 +917,13 @@ const FeaturedDashboard = () => {
       }
     } catch (error) {
       console.error("Error loading properties:", error);
+
       setProperties([]);
       setTotalPages(1);
+
       setError(
         error?.response?.data?.message ||
-        "Failed to load properties. Please try again.",
+          "Failed to load properties. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -888,7 +941,7 @@ const FeaturedDashboard = () => {
     filterTrigger,
   ]);
 
-  // Add to favorites
+  //  Add to favorites
   const addToFavorites = async (PropertyId) => {
     if (!userId) {
       alert("Please log in to save properties to your favorites.");
@@ -915,11 +968,13 @@ const FeaturedDashboard = () => {
       alert("Please log in to save properties to your favorites.");
       return;
     }
+
     try {
       await axios.delete(
         `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
         { data: { favorite_id: FavoriteId } },
       );
+
       toast.success("Property removed from your favorites.");
       loadProperties();
     } catch (error) {
@@ -933,18 +988,21 @@ const FeaturedDashboard = () => {
 
   const formatPrice = (price) => {
     if (price === null || price === undefined || price === "") return "";
+
     price = Number(price);
+
     const formatNumber = (num) => {
       return num % 1 === 0 ? num.toFixed(0) : num.toFixed(2);
     };
+
     if (price >= 10000000) {
-      return `₹${formatNumber(price / 10000000)} Cr`;
+      return `₹ ${formatNumber(price / 10000000)} Cr`;
     } else if (price >= 100000) {
-      return `₹${formatNumber(price / 100000)} L`;
+      return `₹ ${formatNumber(price / 100000)} L`;
     } else if (price >= 1000) {
-      return `₹${formatNumber(price / 1000)} K`;
+      return `₹ ${formatNumber(price / 1000)} K`;
     } else {
-      return `₹${price}`;
+      return `₹ ${price}`;
     }
   };
 
@@ -974,32 +1032,42 @@ const FeaturedDashboard = () => {
 
   const handleButtonClick = async () => {
     setError(null);
+
     if (filtersApplied) {
       // RESET FILTERS
       setSearch("");
       setPropertyType("");
       setBuildingType("");
       setPropertyType2([]);
+
       setBhkType("");
       setFurnishedStatus("");
+
       setMinPrice("");
       setMaxPrice("");
+
       setMinSquareFt("");
       setMaxSquareFt("");
+
       setPostedBy("");
       setConstructionStatus([]);
       setSelectedAmenities([]);
+
       setBathrooms("");
       setFacing("");
+
       setWithPhoto("");
       setWithVideos("");
       setAreaIn("sq.ft");
+
       setAvailableFor([]);
       setSharingType([]);
       setAvailableFrom([]);
       setCapacity([]);
+
       setInvestmentOptions([]);
       setPurchaseType("");
+
       setPlotLandTypes([]);
       setOfficeType([]);
       setRetailType([]);
@@ -1008,17 +1076,23 @@ const FeaturedDashboard = () => {
       // CLOSE DROPDOWNS
       setPriceDropdownOpen(false);
       setSquareFtDropdownOpen(false);
+
       setAmenitiesOpen(false);
       setConstructionOpen(false);
+
       setPropertyTypeOpen(false);
       setPlotLandOpen(false);
+
       setOfficeTypeOpen(false);
       setRetailTypeOpen(false);
       setOtherCommercialOpen(false);
+
       setAvailableForOpen(false);
       setAvailableFromOpen(false);
+
       setSharingTypeOpen(false);
       setCapacityOpen(false);
+
       setInvestmentOpen(false);
 
       // IMPORTANT
@@ -1039,7 +1113,9 @@ const FeaturedDashboard = () => {
       alert("Please log in to save properties to your favorites.");
       return;
     }
+
     const data = { user_id: userId, property_id: propertyId };
+
     try {
       if (!isFavorited) {
         await axios.post(
@@ -1081,6 +1157,7 @@ const FeaturedDashboard = () => {
       setIsLoginModalOpen(true);
       return;
     }
+
     try {
       const propertyIds = [];
       const propertyNames = [];
@@ -1125,10 +1202,13 @@ const FeaturedDashboard = () => {
           otherCommercialType,
           plotLandTypes,
         });
+
         if (mapped.property_type.length)
           formData.append("property_type", mapped.property_type.join(","));
+
         if (mapped.office_type.length)
           formData.append("office_type", mapped.office_type.join(","));
+
         if (mapped.sub_sub_property_type.length)
           formData.append(
             "sub_sub_property_type",
@@ -1136,10 +1216,13 @@ const FeaturedDashboard = () => {
           );
       } else if (propertyType === "Commercial Buy") {
         const mapped = mapCommercialTypes(propertyType2);
+
         if (mapped.property_type.length)
           formData.append("property_type", mapped.property_type.join(","));
+
         if (mapped.office_type.length)
           formData.append("office_type", mapped.office_type.join(","));
+
         if (mapped.sub_sub_property_type.length)
           formData.append(
             "sub_sub_property_type",
@@ -1171,6 +1254,7 @@ const FeaturedDashboard = () => {
       if (constructionStatus.length > 0) {
         formData.append("construction_status", constructionStatus.join(","));
       }
+
       if (selectedAmenities.length > 0) {
         formData.append("amenities", selectedAmenities.join(","));
       }
@@ -1182,21 +1266,27 @@ const FeaturedDashboard = () => {
       if (facing) formData.append("facing", facing);
       if (withPhoto) formData.append("with_photo", withPhoto);
       if (withVideos) formData.append("with_videos", withVideos);
+
       if (availableFor.length > 0) {
         formData.append("available_for", availableFor.join(","));
       }
+
       if (sharingType.length > 0) {
         formData.append("sharing_type", sharingType.join(","));
       }
+
       if (availableFrom.length > 0) {
         formData.append("available_from", availableFrom.join(","));
       }
+
       if (capacity.length > 0) {
         formData.append("available_beds", mapCapacityToBeds(capacity));
       }
+
       if (investmentOptions.length > 0) {
         formData.append("investment_options", investmentOptions.join(","));
       }
+
       if (purchaseType) {
         formData.append("purchase_type", purchaseType);
       }
@@ -1211,6 +1301,7 @@ const FeaturedDashboard = () => {
           body: formData,
         },
       );
+
       const result = await response.json();
 
       if (response.ok && result.status === 1) {
@@ -1240,6 +1331,7 @@ const FeaturedDashboard = () => {
     if (propertyType === "Commercial Buy" || buildingType === "Commercial") {
       return commercialPropertyOptions;
     }
+
     if (propertyType === "Buy") {
       return [
         "Flat/Apartment",
@@ -1251,6 +1343,7 @@ const FeaturedDashboard = () => {
         "1RK/Studio Apartment",
       ];
     }
+
     if (propertyType === "Rent") {
       return [
         "Flat/Apartment",
@@ -1261,6 +1354,7 @@ const FeaturedDashboard = () => {
         "Farmhouse",
       ];
     }
+
     if (propertyType === "PG/Co-living") {
       return [
         "Flat/Apartment",
@@ -1270,6 +1364,7 @@ const FeaturedDashboard = () => {
         "Service Apartment",
       ];
     }
+
     // Default
     return [
       "Apartment",
@@ -1293,6 +1388,7 @@ const FeaturedDashboard = () => {
 
   const toggleAvailableFor = (value) => {
     setCurrentPage(1);
+
     setAvailableFor((prev) =>
       prev.includes(value)
         ? prev.filter((item) => item !== value)
@@ -1304,14 +1400,17 @@ const FeaturedDashboard = () => {
     if (propertyType === "Rent") {
       return ["Family", "Single Women", "Single Men", "Company Guest House"];
     }
+
     if (propertyType === "PG/Co-living") {
       return ["Boys", "Girls", "Working"];
     }
+
     return [];
   };
 
   const toggleSharingType = (value) => {
     setCurrentPage(1);
+
     setSharingType((prev) =>
       prev.includes(value)
         ? prev.filter((item) => item !== value)
@@ -1321,15 +1420,16 @@ const FeaturedDashboard = () => {
 
   const toggleAvailableFrom = (value) => {
     setCurrentPage(1);
+
     setAvailableFrom((prev) =>
       prev.includes(value)
         ? prev.filter((item) => item !== value)
         : [...prev, value],
     );
   };
-
   const toggleCapacity = (value) => {
     setCurrentPage(1);
+
     setCapacity((prev) =>
       prev.includes(value)
         ? prev.filter((item) => item !== value)
@@ -1344,11 +1444,13 @@ const FeaturedDashboard = () => {
       "4-10 guest": "4-10",
       "10+ guest": "10+",
     };
+
     return capacityArr.map((item) => mapping[item]).join(",");
   };
 
   const toggleInvestmentOption = (value) => {
     setCurrentPage(1);
+
     setInvestmentOptions((prev) =>
       prev.includes(value)
         ? prev.filter((item) => item !== value)
@@ -1358,6 +1460,7 @@ const FeaturedDashboard = () => {
 
   const togglePlotLandType = (value) => {
     setCurrentPage(1);
+
     setPlotLandTypes((prev) =>
       prev.includes(value)
         ? prev.filter((item) => item !== value)
@@ -1367,6 +1470,7 @@ const FeaturedDashboard = () => {
 
   const toggleConstructionStatus = (value) => {
     setCurrentPage(1);
+
     setConstructionStatus((prev) =>
       prev.includes(value)
         ? prev.filter((item) => item !== value)
@@ -1387,8 +1491,10 @@ const FeaturedDashboard = () => {
 
     selectedTypes.forEach((item) => {
       const val = item.trim();
+
       if (val === "Plot/Land") {
         property_type.push("Plot/Land");
+
         if (plotLandTypes.length > 0) {
           office_type.push(...plotLandTypes);
         }
@@ -1416,17 +1522,19 @@ const FeaturedDashboard = () => {
     let sub_sub_property_type = [];
 
     propertyType2.forEach((type) => {
-      // OFFICE SPACE
+      //  OFFICE SPACE
       if (type === "Office Space") {
         property_type.push("Office");
         office_type.push(...officeType);
       }
-      // RETAIL
+
+      //  RETAIL
       else if (type === "Retail Shops/Showrooms") {
         property_type.push("Retail");
         sub_sub_property_type.push(...retailType);
       }
-      // OTHER COMMERCIAL
+
+      //  OTHER COMMERCIAL
       else if (type === "Other Commercial spaces") {
         otherCommercialType.forEach((item) => {
           if (item === "Others") {
@@ -1436,9 +1544,11 @@ const FeaturedDashboard = () => {
           }
         });
       }
-      // PLOT/LAND (same as before)
+
+      //  PLOT/LAND (same as before)
       else if (type === "Plot/Land") {
         property_type.push("Plot/Land");
+
         // send plot sub-types in office_type (same as Buy logic)
         if (plotLandTypes.length > 0) {
           office_type.push(...plotLandTypes);
@@ -1466,6 +1576,7 @@ const FeaturedDashboard = () => {
     try {
       const profileForm = new FormData();
       profileForm.append("user_id", accessToken);
+
       const profileResponse = await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/get_profile`,
         profileForm,
@@ -1475,7 +1586,9 @@ const FeaturedDashboard = () => {
           },
         },
       );
+
       const countData = profileResponse?.data?.count_data;
+
       if (countData) {
         setFreeViewCount(countData.free_view_count || 0);
         setPaidViewCount(countData.paid_view_count || 0);
@@ -1494,11 +1607,13 @@ const FeaturedDashboard = () => {
   const handleAddCount = async (updatedCount) => {
     try {
       const addCountFormData = new FormData();
+
       if (freeViewCount > 0) {
         addCountFormData.append("free_view_count", -1);
       } else {
         addCountFormData.append("paid_view_count", -1);
       }
+
       addCountFormData.append("user_id", accessToken);
 
       const response = await fetch(
@@ -1508,7 +1623,9 @@ const FeaturedDashboard = () => {
           body: addCountFormData,
         },
       );
+
       const data = await response.json();
+
       if (response.ok) {
         checkPostLimits();
       } else {
@@ -1524,11 +1641,13 @@ const FeaturedDashboard = () => {
       setIsLoginModalOpen(true);
       return;
     }
+
     setSelectedProperty(property);
 
     // CASE 1 -> FREE VIEWS AVAILABLE
     if (freeViewCount > 0) {
       await handleAddCount(freeViewCount);
+
       setShowUpgradePrompt(false);
       setIsContactModalOpen(true);
       return;
@@ -1537,6 +1656,7 @@ const FeaturedDashboard = () => {
     // CASE 2 -> PAID VIEWS AVAILABLE
     if (paidViewCount > 0) {
       await handleAddCount(paidViewCount);
+
       setShowUpgradePrompt(false);
       setIsContactModalOpen(true);
       return;
@@ -1568,7 +1688,9 @@ const FeaturedDashboard = () => {
     const handleScroll = () => {
       closeAllDropdowns();
     };
+
     window.addEventListener("scroll", handleScroll);
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -1581,12 +1703,14 @@ const FeaturedDashboard = () => {
   const getCategoryBadge = (property) => {
     const rawCategory = property.property_category_type || "";
     const buildingTypeRaw = property.building_type || "";
+
     const normalizedCategory = rawCategory
       .replace(/\s+/g, " ")
       .replace(/-/g, " ")
       .replace(/\//g, " ")
       .trim()
       .toLowerCase();
+
     const normalizedBuilding = buildingTypeRaw.trim().toLowerCase();
 
     let badgeText = "";
@@ -1636,7 +1760,9 @@ const FeaturedDashboard = () => {
                 value={propertyType}
                 onChange={(e) => {
                   const val = e.target.value;
+
                   setPropertyType(val);
+
                   setPropertyType2([]);
                   setOfficeType([]);
                   setRetailType([]);
@@ -1648,6 +1774,7 @@ const FeaturedDashboard = () => {
                   setCapacity([]);
                   setInvestmentOptions([]);
                   setPurchaseType("");
+
                   // Auto-set building type
                   if (val === "Commercial Buy" || val === "Commercial Lease") {
                     setBuildingType("Commercial");
@@ -1685,7 +1812,7 @@ const FeaturedDashboard = () => {
               <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
             </div>
 
-            {/* Property Type */}
+            {/*Property Type*/}
             <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
               <button
                 ref={propertyTypeButtonRef}
@@ -1693,6 +1820,7 @@ const FeaturedDashboard = () => {
                 onClick={() => {
                   const rect =
                     propertyTypeButtonRef.current.getBoundingClientRect();
+
                   setPropertyTypeDropdownPos({
                     top: rect.bottom + 4,
                     left: rect.left,
@@ -1711,8 +1839,10 @@ const FeaturedDashboard = () => {
                     ? propertyType2.join(", ")
                     : "Property Type"}
                 </span>
+
                 <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
               </button>
+
               {propertyTypeOpen &&
                 createPortal(
                   <div
@@ -1739,7 +1869,7 @@ const FeaturedDashboard = () => {
                         <input
                           type={
                             propertyType === "Commercial Lease" &&
-                              buildingType === "Commercial"
+                            buildingType === "Commercial"
                               ? "radio"
                               : "checkbox"
                           }
@@ -1747,9 +1877,11 @@ const FeaturedDashboard = () => {
                           checked={propertyType2.includes(type)}
                           onChange={() => togglePropertyType(type)}
                         />
+
                         <span>{type}</span>
                       </label>
                     ))}
+
                     <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                       <button
                         onClick={() => setPropertyType2([])}
@@ -1757,6 +1889,7 @@ const FeaturedDashboard = () => {
                       >
                         Clear
                       </button>
+
                       <button
                         onClick={() => setPropertyTypeOpen(false)}
                         className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -1797,8 +1930,10 @@ const FeaturedDashboard = () => {
                         ? `Below ${formatPriceMinMax(maxPrice)}`
                         : "Budget"}
                 </span>
+
                 <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
               </button>
+
               {priceDropdownOpen &&
                 createPortal(
                   <div
@@ -1833,6 +1968,7 @@ const FeaturedDashboard = () => {
                             </option>
                           ))}
                       </select>
+
                       <label className="text-sm text-gray-600">Max Price</label>
                       <select
                         value={maxPrice}
@@ -1932,8 +2068,10 @@ const FeaturedDashboard = () => {
                     ? constructionStatus.join(", ")
                     : "Construction Status"}
                 </span>
+
                 <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
               </button>
+
               {constructionOpen &&
                 createPortal(
                   <div
@@ -1967,6 +2105,7 @@ const FeaturedDashboard = () => {
                         </label>
                       ),
                     )}
+
                     <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                       <button
                         onClick={() => setConstructionStatus([])}
@@ -1974,6 +2113,7 @@ const FeaturedDashboard = () => {
                       >
                         Clear
                       </button>
+
                       <button
                         onClick={() => setConstructionOpen(false)}
                         className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -1986,7 +2126,7 @@ const FeaturedDashboard = () => {
                 )}
             </div>
 
-            {/* Amenities */}
+            {/*Amenities */}
             <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
               <button
                 ref={amenitiesButtonRef}
@@ -1994,6 +2134,7 @@ const FeaturedDashboard = () => {
                 onClick={() => {
                   const rect =
                     amenitiesButtonRef.current.getBoundingClientRect();
+
                   setAmenitiesDropdownPos({
                     top: rect.bottom + 4,
                     left: rect.left,
@@ -2010,15 +2151,17 @@ const FeaturedDashboard = () => {
                 <span className="block pr-8 truncate text-left">
                   {selectedAmenities.length > 0
                     ? amenitiesList
-                      .filter((item) =>
-                        selectedAmenities.includes(String(item._id)),
-                      )
-                      .map((item) => item.amenity_name)
-                      .join(", ")
+                        .filter((item) =>
+                          selectedAmenities.includes(String(item._id)),
+                        )
+                        .map((item) => item.amenity_name)
+                        .join(", ")
                     : "Amenities"}
                 </span>
+
                 <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
               </button>
+
               {amenitiesOpen &&
                 createPortal(
                   <div
@@ -2047,9 +2190,11 @@ const FeaturedDashboard = () => {
                           checked={selectedAmenities.includes(String(item._id))}
                           onChange={() => toggleAmenity(item._id)}
                         />
+
                         <span>{item.amenity_name}</span>
                       </label>
                     ))}
+
                     <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                       <button
                         onClick={() => setSelectedAmenities([])}
@@ -2057,6 +2202,7 @@ const FeaturedDashboard = () => {
                       >
                         Clear
                       </button>
+
                       <button
                         onClick={() => setAmenitiesOpen(false)}
                         className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -2069,7 +2215,7 @@ const FeaturedDashboard = () => {
                 )}
             </div>
 
-            {/* Bathroom */}
+            {/*Bathroom*/}
             <div className={`${FILTER_WIDTH} flex-shrink-0`}>
               <div className="flex items-center h-16 overflow-hidden bg-white border-2 border-gray-300 rounded-md">
                 <button
@@ -2079,6 +2225,7 @@ const FeaturedDashboard = () => {
                 >
                   -
                 </button>
+
                 <input
                   type="number"
                   min="0"
@@ -2088,6 +2235,7 @@ const FeaturedDashboard = () => {
                   placeholder="Bathrooms"
                   className="w-full h-full text-center focus:outline-none"
                 />
+
                 <button
                   type="button"
                   onClick={incrementBathrooms}
@@ -2116,11 +2264,12 @@ const FeaturedDashboard = () => {
                   <option value="South">South</option>
                   <option value="South-West">South-West</option>
                 </select>
+
                 <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
               </div>
             )}
 
-            {/* With Photo */}
+            {/*Set Photos*/}
             <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
               <select
                 value={withPhoto}
@@ -2134,7 +2283,7 @@ const FeaturedDashboard = () => {
               <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
             </div>
 
-            {/* With Video */}
+            {/*Set Video*/}
             <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
               <select
                 value={withVideos}
@@ -2165,6 +2314,7 @@ const FeaturedDashboard = () => {
                     left,
                     width: rect.width,
                   });
+
                   const wasOpen = squareFtDropdownOpen;
                   closeAllDropdowns();
                   setTimeout(() => {
@@ -2178,8 +2328,10 @@ const FeaturedDashboard = () => {
                     ? `${minSquareFt || 0} - ${maxSquareFt || "Any"} ${areaIn}`
                     : "Area"}
                 </span>
+
                 <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
               </button>
+
               {squareFtDropdownOpen &&
                 createPortal(
                   <div
@@ -2210,6 +2362,7 @@ const FeaturedDashboard = () => {
                         </option>
                       ))}
                     </select>
+
                     <label className="text-sm text-gray-600">Min Area</label>
                     <input
                       type="number"
@@ -2218,6 +2371,7 @@ const FeaturedDashboard = () => {
                       className="w-full p-2 mb-3 border-2 border-gray-300 rounded-md focus:outline-none"
                       placeholder="Min"
                     />
+
                     <label className="text-sm text-gray-600">Max Area</label>
                     <input
                       type="number"
@@ -2231,7 +2385,7 @@ const FeaturedDashboard = () => {
                 )}
             </div>
 
-            {/* Sharing Type */}
+            {/*Sharing Type */}
             {propertyType === "PG/Co-living" && (
               <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
                 <button
@@ -2243,6 +2397,7 @@ const FeaturedDashboard = () => {
                     let left = rect.left;
                     const overflow =
                       rect.left + DROPDOWN_WIDTH - window.innerWidth;
+
                     if (overflow > 0) {
                       left = rect.left - overflow - 10;
                     }
@@ -2264,8 +2419,10 @@ const FeaturedDashboard = () => {
                       ? sharingType.join(", ")
                       : "Sharing Type"}
                   </span>
+
                   <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                 </button>
+
                 {sharingTypeOpen &&
                   createPortal(
                     <div
@@ -2284,21 +2441,24 @@ const FeaturedDashboard = () => {
                           <IoClose size={20} />
                         </button>
                       </div>
-                      {["Private Rooms", "2 Per Room", "More than 2 per room"].map(
-                        (option) => (
-                          <label
-                            key={option}
-                            className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={sharingType.includes(option)}
-                              onChange={() => toggleSharingType(option)}
-                            />
-                            <span>{option}</span>
-                          </label>
-                        ),
-                      )}
+                      {[
+                        "Private Rooms",
+                        "2 Per Room",
+                        "More than 2 per room",
+                      ].map((option) => (
+                        <label
+                          key={option}
+                          className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={sharingType.includes(option)}
+                            onChange={() => toggleSharingType(option)}
+                          />
+                          <span>{option}</span>
+                        </label>
+                      ))}
+
                       <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                         <button
                           onClick={() => setSharingType([])}
@@ -2306,6 +2466,7 @@ const FeaturedDashboard = () => {
                         >
                           Clear
                         </button>
+
                         <button
                           onClick={() => setSharingTypeOpen(false)}
                           className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -2319,7 +2480,7 @@ const FeaturedDashboard = () => {
               </div>
             )}
 
-            {/* Available From */}
+            {/*Available Form*/}
             {propertyType === "Rent" && (
               <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
                 <button
@@ -2352,8 +2513,10 @@ const FeaturedDashboard = () => {
                       ? availableFrom.join(", ")
                       : "Available From"}
                   </span>
+
                   <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                 </button>
+
                 {availableFromOpen &&
                   createPortal(
                     <div
@@ -2392,6 +2555,7 @@ const FeaturedDashboard = () => {
                           <span>{option}</span>
                         </label>
                       ))}
+
                       <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                         <button
                           onClick={() => setAvailableFrom([])}
@@ -2399,6 +2563,7 @@ const FeaturedDashboard = () => {
                         >
                           Clear
                         </button>
+
                         <button
                           onClick={() => setAvailableFromOpen(false)}
                           className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -2412,7 +2577,7 @@ const FeaturedDashboard = () => {
               </div>
             )}
 
-            {/* Available For */}
+            {/*Available For*/}
             {(propertyType === "Rent" || propertyType === "PG/Co-living") && (
               <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
                 <button
@@ -2421,6 +2586,7 @@ const FeaturedDashboard = () => {
                   onClick={() => {
                     const rect =
                       availableForButtonRef.current.getBoundingClientRect();
+
                     let left = rect.left;
                     const overflow =
                       rect.left + DROPDOWN_WIDTH - window.innerWidth;
@@ -2432,6 +2598,7 @@ const FeaturedDashboard = () => {
                       left,
                       width: rect.width,
                     });
+
                     const wasOpen = availableForOpen;
                     closeAllDropdowns();
                     setTimeout(() => {
@@ -2445,8 +2612,10 @@ const FeaturedDashboard = () => {
                       ? availableFor.join(", ")
                       : "Available For"}
                   </span>
+
                   <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                 </button>
+
                 {availableForOpen &&
                   createPortal(
                     <div
@@ -2478,6 +2647,7 @@ const FeaturedDashboard = () => {
                           <span>{option}</span>
                         </label>
                       ))}
+
                       <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                         <button
                           onClick={() => setAvailableFor([])}
@@ -2485,6 +2655,7 @@ const FeaturedDashboard = () => {
                         >
                           Clear
                         </button>
+
                         <button
                           onClick={() => setAvailableForOpen(false)}
                           className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -2498,7 +2669,7 @@ const FeaturedDashboard = () => {
               </div>
             )}
 
-            {/* Total Capacity */}
+            {/*Set Capacity */}
             {propertyType === "PG/Co-living" && (
               <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
                 <button
@@ -2507,6 +2678,7 @@ const FeaturedDashboard = () => {
                   onClick={() => {
                     const rect =
                       capacityButtonRef.current.getBoundingClientRect();
+
                     let left = rect.left;
                     const overflow =
                       rect.left + DROPDOWN_WIDTH - window.innerWidth;
@@ -2520,6 +2692,7 @@ const FeaturedDashboard = () => {
                     });
                     const wasOpen = capacityOpen;
                     closeAllDropdowns();
+
                     setTimeout(() => {
                       setCapacityOpen(!wasOpen);
                     }, 0);
@@ -2527,10 +2700,14 @@ const FeaturedDashboard = () => {
                   className="relative flex items-center w-full h-16 p-2 bg-white border-2 border-gray-300 rounded-md text-left"
                 >
                   <span className="block pr-8 truncate text-left">
-                    {capacity.length > 0 ? capacity.join(", ") : "Total Capacity"}
+                    {capacity.length > 0
+                      ? capacity.join(", ")
+                      : "Total Capacity"}
                   </span>
+
                   <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                 </button>
+
                 {capacityOpen &&
                   createPortal(
                     <div
@@ -2549,21 +2726,26 @@ const FeaturedDashboard = () => {
                           <IoClose size={20} />
                         </button>
                       </div>
-                      {["1-2 guest", "2-4 guest", "4-10 guest", "10+ guest"].map(
-                        (option) => (
-                          <label
-                            key={option}
-                            className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={capacity.includes(option)}
-                              onChange={() => toggleCapacity(option)}
-                            />
-                            <span>{option}</span>
-                          </label>
-                        ),
-                      )}
+
+                      {[
+                        "1-2 guest",
+                        "2-4 guest",
+                        "4-10 guest",
+                        "10+ guest",
+                      ].map((option) => (
+                        <label
+                          key={option}
+                          className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-100"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={capacity.includes(option)}
+                            onChange={() => toggleCapacity(option)}
+                          />
+                          <span>{option}</span>
+                        </label>
+                      ))}
+
                       <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                         <button
                           onClick={() => setCapacity([])}
@@ -2571,6 +2753,7 @@ const FeaturedDashboard = () => {
                         >
                           Clear
                         </button>
+
                         <button
                           onClick={() => setCapacityOpen(false)}
                           className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -2584,7 +2767,7 @@ const FeaturedDashboard = () => {
               </div>
             )}
 
-            {/* Investment Options */}
+            {/*Investment Option */}
             {propertyType === "Commercial Buy" && (
               <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
                 <button
@@ -2593,6 +2776,7 @@ const FeaturedDashboard = () => {
                   onClick={() => {
                     const rect =
                       investmentButtonRef.current.getBoundingClientRect();
+
                     let left = rect.left;
                     const overflow =
                       rect.left + DROPDOWN_WIDTH - window.innerWidth;
@@ -2619,6 +2803,7 @@ const FeaturedDashboard = () => {
                   </span>
                   <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                 </button>
+
                 {investmentOpen &&
                   createPortal(
                     <div
@@ -2650,6 +2835,7 @@ const FeaturedDashboard = () => {
                           <span>{option}</span>
                         </label>
                       ))}
+
                       <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                         <button
                           onClick={() => setInvestmentOptions([])}
@@ -2657,6 +2843,7 @@ const FeaturedDashboard = () => {
                         >
                           Clear
                         </button>
+
                         <button
                           onClick={() => setInvestmentOpen(false)}
                           className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -2670,7 +2857,7 @@ const FeaturedDashboard = () => {
               </div>
             )}
 
-            {/* Purchase Type */}
+            {/*Resale*/}
             {propertyType === "Commercial Buy" && (
               <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
                 <select
@@ -2701,19 +2888,24 @@ const FeaturedDashboard = () => {
                     onClick={() => {
                       const rect =
                         plotLandButtonRef.current.getBoundingClientRect();
+
                       let left = rect.left;
                       const overflow =
                         rect.left + DROPDOWN_WIDTH - window.innerWidth;
+
                       if (overflow > 0) {
                         left = rect.left - overflow - 10;
                       }
+
                       setPlotLandDropdownPos({
                         top: rect.bottom + 4,
                         left,
                         width: DROPDOWN_WIDTH,
                       });
+
                       const wasOpen = plotLandOpen;
                       closeAllDropdowns();
+
                       setTimeout(() => {
                         setPlotLandOpen(!wasOpen);
                       }, 0);
@@ -2725,8 +2917,10 @@ const FeaturedDashboard = () => {
                         ? plotLandTypes.join(", ")
                         : "Plot/Land Type"}
                     </span>
+
                     <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                   </button>
+
                   {plotLandOpen &&
                     createPortal(
                       <div
@@ -2745,6 +2939,7 @@ const FeaturedDashboard = () => {
                             <IoClose size={20} />
                           </button>
                         </div>
+
                         {plotLandOptions.map((option) => (
                           <label
                             key={option}
@@ -2758,6 +2953,7 @@ const FeaturedDashboard = () => {
                             <span>{option}</span>
                           </label>
                         ))}
+
                         <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                           <button
                             onClick={() => setPlotLandTypes([])}
@@ -2765,6 +2961,7 @@ const FeaturedDashboard = () => {
                           >
                             Clear
                           </button>
+
                           <button
                             onClick={() => setPlotLandOpen(false)}
                             className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -2789,19 +2986,24 @@ const FeaturedDashboard = () => {
                     onClick={() => {
                       const rect =
                         officeTypeButtonRef.current.getBoundingClientRect();
+
                       let left = rect.left;
                       const overflow =
                         rect.left + DROPDOWN_WIDTH - window.innerWidth;
+
                       if (overflow > 0) {
                         left = rect.left - overflow - 10;
                       }
+
                       setOfficeTypeDropdownPos({
                         top: rect.bottom + 4,
                         left,
                         width: DROPDOWN_WIDTH,
                       });
+
                       const wasOpen = officeTypeOpen;
                       closeAllDropdowns();
+
                       setTimeout(() => {
                         setOfficeTypeOpen(!wasOpen);
                       }, 0);
@@ -2813,8 +3015,10 @@ const FeaturedDashboard = () => {
                         ? officeType.join(", ")
                         : "Office Type"}
                     </span>
+
                     <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                   </button>
+
                   {officeTypeOpen &&
                     createPortal(
                       <div
@@ -2833,6 +3037,7 @@ const FeaturedDashboard = () => {
                             <IoClose size={20} />
                           </button>
                         </div>
+
                         {officeTypeOptions.map((option) => (
                           <label
                             key={option}
@@ -2852,6 +3057,7 @@ const FeaturedDashboard = () => {
                             <span>{option}</span>
                           </label>
                         ))}
+
                         <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                           <button
                             onClick={() => setOfficeType([])}
@@ -2859,6 +3065,7 @@ const FeaturedDashboard = () => {
                           >
                             Clear
                           </button>
+
                           <button
                             onClick={() => setOfficeTypeOpen(false)}
                             className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -2883,19 +3090,24 @@ const FeaturedDashboard = () => {
                     onClick={() => {
                       const rect =
                         retailTypeButtonRef.current.getBoundingClientRect();
+
                       let left = rect.left;
                       const overflow =
                         rect.left + DROPDOWN_WIDTH - window.innerWidth;
+
                       if (overflow > 0) {
                         left = rect.left - overflow - 10;
                       }
+
                       setRetailTypeDropdownPos({
                         top: rect.bottom + 4,
                         left,
                         width: DROPDOWN_WIDTH,
                       });
+
                       const wasOpen = retailTypeOpen;
                       closeAllDropdowns();
+
                       setTimeout(() => {
                         setRetailTypeOpen(!wasOpen);
                       }, 0);
@@ -2907,8 +3119,10 @@ const FeaturedDashboard = () => {
                         ? retailType.join(", ")
                         : "Retail Type"}
                     </span>
+
                     <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                   </button>
+
                   {retailTypeOpen &&
                     createPortal(
                       <div
@@ -2927,6 +3141,7 @@ const FeaturedDashboard = () => {
                             <IoClose size={20} />
                           </button>
                         </div>
+
                         {retailTypeOptions.map((option) => (
                           <label
                             key={option}
@@ -2946,6 +3161,7 @@ const FeaturedDashboard = () => {
                             <span>{option}</span>
                           </label>
                         ))}
+
                         <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                           <button
                             onClick={() => setRetailType([])}
@@ -2953,6 +3169,7 @@ const FeaturedDashboard = () => {
                           >
                             Clear
                           </button>
+
                           <button
                             onClick={() => setRetailTypeOpen(false)}
                             className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -2977,19 +3194,24 @@ const FeaturedDashboard = () => {
                     onClick={() => {
                       const rect =
                         otherCommercialButtonRef.current.getBoundingClientRect();
+
                       let left = rect.left;
                       const overflow =
                         rect.left + DROPDOWN_WIDTH - window.innerWidth;
+
                       if (overflow > 0) {
                         left = rect.left - overflow - 10;
                       }
+
                       setOtherCommercialDropdownPos({
                         top: rect.bottom + 4,
                         left,
                         width: DROPDOWN_WIDTH,
                       });
+
                       const wasOpen = otherCommercialOpen;
                       closeAllDropdowns();
+
                       setTimeout(() => {
                         setOtherCommercialOpen(!wasOpen);
                       }, 0);
@@ -3001,8 +3223,10 @@ const FeaturedDashboard = () => {
                         ? otherCommercialType.join(", ")
                         : "Other Commercial Type"}
                     </span>
+
                     <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                   </button>
+
                   {otherCommercialOpen &&
                     createPortal(
                       <div
@@ -3021,6 +3245,7 @@ const FeaturedDashboard = () => {
                             <IoClose size={20} />
                           </button>
                         </div>
+
                         {otherCommercialOptions.map((option) => (
                           <label
                             key={option}
@@ -3040,6 +3265,7 @@ const FeaturedDashboard = () => {
                             <span>{option}</span>
                           </label>
                         ))}
+
                         <div className="sticky bottom-0 flex gap-2 p-2 bg-white border-t">
                           <button
                             onClick={() => setOtherCommercialType([])}
@@ -3047,6 +3273,7 @@ const FeaturedDashboard = () => {
                           >
                             Clear
                           </button>
+
                           <button
                             onClick={() => setOtherCommercialOpen(false)}
                             className="w-1/2 py-2 text-white bg-rose-500 rounded-md"
@@ -3063,7 +3290,7 @@ const FeaturedDashboard = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-4 mt-4 sm:flex-row sm:justify-end">
+        <div className="flex flex-col gap-4 mt-4 sm:flex-row sm:justify-end ">
           <button
             onClick={handleButtonClick}
             className="w-40 p-3 text-rose-700 my-border rounded-md hover:bg-gray-300 focus:outline-none"
@@ -3087,562 +3314,577 @@ const FeaturedDashboard = () => {
               className="z-10 flex-1 p-4 border-white no-scrollbar"
               style={{ scrollbarWidth: "none" }}
             >
-              {/* Right: Properties — ONLY the card itself is made responsive below */}
+              {/* Right: Properties (AdvisorDashboard-style cards) */}
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                 {properties.length > 0 ? (
-                  properties
-                    .filter((property) => property.available_status !== "Sold")
-                    .map((property) => {
-                      let distance = null;
-                      if (
-                        userLocation &&
-                        property.latitude &&
-                        property.longitude
-                      ) {
-                        distance = calculateDistance(
-                          userLocation.latitude,
-                          userLocation.longitude,
-                          parseFloat(property.latitude),
-                          parseFloat(property.longitude),
-                        ).toFixed(1);
-                      }
+                  properties.map((property) => {
+                    let distance = null;
+                    if (
+                      userLocation &&
+                      property.latitude &&
+                      property.longitude
+                    ) {
+                      distance = calculateDistance(
+                        userLocation.latitude,
+                        userLocation.longitude,
+                        parseFloat(property.latitude),
+                        parseFloat(property.longitude),
+                      ).toFixed(1);
+                    }
 
-                      const subtitle = (() => {
-                        const area =
-                          property.address_area || property.address || "";
-                        const city = property.city_name || "";
-                        const loc = area.toLowerCase().includes(city.toLowerCase())
-                          ? area
-                          : city
-                            ? `${area}, ${city}`
-                            : area;
-                        const type =
-                          property.property_type === "Office"
-                            ? "Office Space"
-                            : property.property_type === "Retail"
-                              ? "Retail Space"
-                              : property.property_type ||
+                    const subtitle = (() => {
+                      const area =
+                        property.address_area || property.address || "";
+                      const city = property.city_name || "";
+
+                      const loc = area
+                        .toLowerCase()
+                        .includes(city.toLowerCase())
+                        ? area
+                        : city
+                          ? `${area}, ${city}`
+                          : area;
+
+                      const type =
+                        property.property_type === "Office"
+                          ? "Office Space"
+                          : property.property_type === "Retail"
+                            ? "Retail Space"
+                            : property.property_type ||
                               property.building_type ||
                               "Property";
-                        const category = property.property_category_type || "";
 
-                        if (
-                          category === "Commercial Buy" ||
-                          category === "Commercial Lease"
-                        ) {
-                          return `${type} for ${category === "Commercial Buy" ? "Sale" : "Lease"
-                            } in ${loc}`;
-                        }
-                        if (
-                          category.includes("PG") ||
-                          category.includes("Co-Living") ||
-                          category.includes("Coliving")
-                        ) {
-                          return `${type} for Rent in ${loc}`;
-                        }
-                        const action = category === "Buy" ? "Sale" : category || "Sale";
-                        return `${property.bhk_type ? property.bhk_type + " " : ""
-                          }${type} for ${action} in ${loc}`;
-                      })();
+                      const category = property.property_category_type || "";
 
-                      return (
-                        <div
-                          key={property._id}
-                          className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${hoveredPropertyId === property._id
+                      if (
+                        category === "Commercial Buy" ||
+                        category === "Commercial Lease"
+                      ) {
+                        return `${type} for ${
+                          category === "Commercial Buy" ? "Sale" : "Lease"
+                        } in ${loc}`;
+                      }
+
+                      if (
+                        category.includes("PG") ||
+                        category.includes("Co-Living") ||
+                        category.includes("Coliving")
+                      ) {
+                        return `${type} for Rent in ${loc}`;
+                      }
+
+                      const action =
+                        category === "Buy" ? "Sale" : category || "Sale";
+
+                      return `${
+                        property.bhk_type ? property.bhk_type + " " : ""
+                      }${type} for ${action} in ${loc}`;
+                    })();
+
+                    return (
+                      <div
+                        key={property._id}
+                        className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${
+                          hoveredPropertyId === property._id
                             ? "bg-green-200"
                             : ""
-                            }`}
-                          onMouseEnter={() => setHoveredPropertyId(property._id)}
-                          onMouseLeave={() => setHoveredPropertyId(null)}
-                        >
-                          <div className="relative" key={property._id}>
-                            <Link
-                              to={`/propertydetails/${property._id}`}
-                              className="block overflow-hidden no-underline bg-white border-2 rounded-lg hover:no-underline"
-                            >
-                              {1 + (property?.property_images?.length || 0) >
-                                1 ? (
-                                <Slider
-                                  dots
-                                  infinite
-                                  speed={500}
-                                  slidesToShow={1}
-                                  slidesToScroll={1}
-                                  arrows
-                                  autoplay
-                                  autoplaySpeed={2000}
-                                  beforeChange={(current, next) =>
-                                    setActiveIndexes((prev) => ({
-                                      ...prev,
-                                      [property._id]: next,
-                                    }))
-                                  }
-                                  initialSlide={activeIndexes[property._id] || 0}
-                                  customPaging={(i) => {
-                                    const activeSlide =
-                                      activeIndexes[property._id] || 0;
-                                    const totalImages =
-                                      1 +
-                                      (property?.property_images?.length || 0);
-                                    const isActive =
-                                      i === activeSlide % totalImages;
-                                    return (
-                                      <div
-                                        style={{
-                                          width: "10px",
-                                          height: "10px",
-                                          borderRadius: "50%",
-                                          background: isActive
-                                            ? "#fff"
-                                            : "#888",
-                                          margin: "0 5px",
-                                          cursor: "pointer",
-                                        }}
-                                      />
-                                    );
-                                  }}
-                                  appendDots={(dots) => {
-                                    const totalImages =
-                                      1 +
-                                      (property?.property_images?.length || 0);
-                                    const visibleDots = dots.slice(
-                                      0,
-                                      totalImages,
-                                    );
-                                    return (
-                                      <div
-                                        style={{
-                                          position: "absolute",
-                                          bottom: "10px",
-                                          left: "50%",
-                                          transform: "translateX(-50%)",
-                                          display: "flex",
-                                          justifyContent: "center",
-                                          width: "100%",
-                                        }}
-                                      >
-                                        {visibleDots}
-                                      </div>
-                                    );
-                                  }}
-                                  className="rounded-t-2xl"
-                                >
-                                  {/* First slide: cover image (responsive height) */}
-                                  <div key={`cover-${property._id}`}>
-                                    <img
-                                      src={property.cover_image}
-                                      alt="Cover"
-                                      className="object-cover w-full h-40 sm:h-48 md:h-52 rounded-t-2xl"
+                        }`}
+                        onMouseEnter={() => setHoveredPropertyId(property._id)}
+                        onMouseLeave={() => setHoveredPropertyId(null)}
+                      >
+                        <div className="relative" key={property._id}>
+                          <Link
+                            to={`/propertydetails/${property._id}`}
+                            className="block overflow-hidden no-underline bg-white border-2 rounded-lg hover:no-underline"
+                          >
+                            {1 + (property?.property_images?.length || 0) >
+                            1 ? (
+                              <Slider
+                                dots
+                                infinite
+                                speed={500}
+                                slidesToShow={1}
+                                slidesToScroll={1}
+                                arrows
+                                autoplay
+                                autoplaySpeed={2000}
+                                beforeChange={(current, next) =>
+                                  setActiveIndexes((prev) => ({
+                                    ...prev,
+                                    [property._id]: next,
+                                  }))
+                                }
+                                initialSlide={activeIndexes[property._id] || 0}
+                                customPaging={(i) => {
+                                  const activeSlide =
+                                    activeIndexes[property._id] || 0;
+                                  const totalImages =
+                                    1 +
+                                    (property?.property_images?.length || 0);
+                                  const isActive =
+                                    i === activeSlide % totalImages;
+                                  return (
+                                    <div
+                                      style={{
+                                        width: "10px",
+                                        height: "10px",
+                                        borderRadius: "50%",
+                                        background: isActive ? "#fff" : "#888",
+                                        margin: "0 5px",
+                                        cursor: "pointer",
+                                      }}
                                     />
-                                  </div>
-                                  {/* Other property images (responsive height) */}
-                                  {(property?.property_images || []).map(
-                                    (imgObj) => (
-                                      <div key={imgObj._id}>
-                                        <img
-                                          src={imgObj.image}
-                                          alt="Property"
-                                          className="object-cover w-full h-40 sm:h-48 md:h-52 rounded-t-2xl"
-                                        />
-                                      </div>
-                                    ),
-                                  )}
-                                </Slider>
-                              ) : (
-                                <div>
+                                  );
+                                }}
+                                appendDots={(dots) => {
+                                  const totalImages =
+                                    1 +
+                                    (property?.property_images?.length || 0);
+                                  const visibleDots = dots.slice(
+                                    0,
+                                    totalImages,
+                                  );
+                                  return (
+                                    <div
+                                      style={{
+                                        position: "absolute",
+                                        bottom: "10px",
+                                        left: "50%",
+                                        transform: "translateX(-50%)",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        width: "100%",
+                                      }}
+                                    >
+                                      {visibleDots}
+                                    </div>
+                                  );
+                                }}
+                                className="rounded-t-2xl"
+                              >
+                                {/* First slide: cover image */}
+                                <div key={`cover-${property._id}`}>
                                   <img
                                     src={property.cover_image}
                                     alt="Cover"
-                                    className="object-cover w-full h-40 sm:h-48 md:h-52 rounded-t-2xl"
+                                    className="object-cover w-full h-48 rounded-t-2xl"
                                   />
                                 </div>
-                              )}
-                            </Link>
 
-                            {/* Virtual Tour & Favorite Button */}
-                            <div className="absolute flex items-center space-x-2 top-2 right-2">
-                              {property.virtual_tour_availability === "Yes" && (
-                                <span className="flex items-center gap-1 px-2 py-1 text-[10px] sm:text-xs font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm">
-                                  <PiCubeFocus className="text-sm text-white" />
-                                  Virtual Tour
-                                </span>
-                              )}
-                              <button
-                                className="bg-gray-800/60 backdrop-blur-sm p-1.5 rounded-full shadow"
-                                onClick={(e) => {
-                                  if (!accessToken) {
-                                    setIsLoginModalOpen(true);
-                                    return;
-                                  }
-                                  e.preventDefault();
-                                  if (property.is_favorite) {
-                                    removeFromFavorites(property.favorite_id);
-                                  } else {
-                                    addToFavorites(property._id);
-                                  }
-                                }}
-                              >
-                                <Heart
-                                  size={20}
-                                  stroke={
-                                    property.is_favorite ? "none" : "white"
-                                  }
-                                  color={
-                                    property.is_favorite
-                                      ? "red"
-                                      : "rgba(75, 85, 99, 0.4)"
-                                  }
-                                  fill={
-                                    property.is_favorite
-                                      ? "red"
-                                      : "rgba(75, 85, 99, 0.4)"
-                                  }
-                                  strokeWidth={2}
+                                {/* Other property images */}
+                                {(property?.property_images || []).map(
+                                  (imgObj) => (
+                                    <div key={imgObj._id}>
+                                      <img
+                                        src={imgObj.image}
+                                        alt="Property"
+                                        className="object-cover w-full h-48 rounded-t-2xl"
+                                      />
+                                    </div>
+                                  ),
+                                )}
+                              </Slider>
+                            ) : (
+                              <div>
+                                <img
+                                  src={property.cover_image}
+                                  alt="Cover"
+                                  className="object-cover w-full h-48 rounded-t-2xl"
                                 />
-                              </button>
-                            </div>
+                              </div>
+                            )}
+                          </Link>
 
-                            {/* Category Tag (Bottom Left) */}
-                            <div className="absolute bottom-0 left-0">
-                              {(() => {
-                                const { badgeText, badgeColor } =
-                                  getCategoryBadge(property);
-                                if (!badgeText) return null;
-                                return (
-                                  <span
-                                    className={`text-white text-[10px] sm:text-xs px-3 py-1 rounded-se-lg ${badgeColor}`}
-                                  >
-                                    {badgeText}
-                                  </span>
-                                );
-                              })()}
-                            </div>
+                          {/* Virtual Tour & Favorite Button */}
+                          <div className="absolute flex items-center space-x-2 top-2 right-2">
+                            {property.virtual_tour_availability === "Yes" && (
+                              <span className="flex items-center gap-1 px-2 py-1 text-xs font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm">
+                                <PiCubeFocus className="text-sm text-white" />
+                                Virtual Tour
+                              </span>
+                            )}
+                            <button
+                              className="bg-gray-800/60 backdrop-blur-sm p-1.5 rounded-full shadow"
+                              onClick={(e) => {
+                                if (!accessToken) {
+                                  setIsLoginModalOpen(true);
+                                  return;
+                                }
+                                e.preventDefault();
+                                if (property.is_favorite) {
+                                  removeFromFavorites(property.favorite_id);
+                                } else {
+                                  addToFavorites(property._id);
+                                }
+                              }}
+                            >
+                              <Heart
+                                size={20}
+                                stroke={property.is_favorite ? "none" : "white"}
+                                color={
+                                  property.is_favorite
+                                    ? "red"
+                                    : "rgba(75, 85, 99, 0.4) "
+                                }
+                                fill={
+                                  property.is_favorite
+                                    ? "red"
+                                    : "rgba(75, 85, 99, 0.4) "
+                                }
+                                strokeWidth={2}
+                              />
+                            </button>
+                          </div>
 
-                            {/* FEATURED Tag (Bottom Right) */}
-                            <div className="absolute bottom-0 right-0">
-                              {property.mark_as_featured === "Yes" && (
-                                <span className="px-3 py-1 text-[10px] sm:text-xs text-white bg-yellow-500 rounded-ss-lg">
-                                  FEATURED
+                          {/* Category Tag (Bottom Left) */}
+                          <div className="absolute bottom-0 left-0">
+                            {(() => {
+                              const { badgeText, badgeColor } =
+                                getCategoryBadge(property);
+                              if (!badgeText) return null;
+                              return (
+                                <span
+                                  className={`text-white text-xs px-3 py-1 rounded-se-lg ${badgeColor}`}
+                                >
+                                  {badgeText}
+                                </span>
+                              );
+                            })()}
+                          </div>
+
+                          {/* FEATURED Tag (Bottom Right) */}
+                          <div className="absolute bottom-0 right-0">
+                            {property.mark_as_featured === "Yes" && (
+                              <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
+                                FEATURED
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Property Details */}
+                        <div className="flex flex-col flex-1 p-3 text-black bg-white">
+                          <div className="flex items-start justify-between gap-3 mb-0">
+                            <h3
+                              className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate"
+                              title={property.property_name}
+                            >
+                              {property.property_name || "N/A"}
+                            </h3>
+                            <span
+                              className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-black sm:text-base whitespace-nowrap"
+                              title={property.furnished_type}
+                            >
+                              {property.furnished_type || "Un-Furnished"}
+                            </span>
+                          </div>
+
+                          <p
+                            className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate"
+                            title={subtitle}
+                          >
+                            {subtitle}
+                          </p>
+
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center">
+                              <span className="text-2xl font-bold">
+                                ₹{" "}
+                                {property.property_category_type === "Rent" ||
+                                property.property_category_type ===
+                                  "PG/Co-living"
+                                  ? formatPrice(property.rent).replace("₹ ", "")
+                                  : formatPrice(
+                                      property.property_price,
+                                    ).replace("₹ ", "")}
+                              </span>
+                              {(property.property_category_type === "Rent" ||
+                                property.property_category_type ===
+                                  "PG/Co-living") && (
+                                <span className="ml-1 text-sm text-gray-500">
+                                  / {property.rent_duration || "Per Month"}
                                 </span>
                               )}
+                              {property.property_category_type?.includes(
+                                "Buy",
+                              ) &&
+                                property.possession_status ===
+                                  "Ready To Move" && (
+                                  <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
+                                    <MdApartment className="text-base text-green-700" />
+                                    <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                                      Ready to Move
+                                    </span>
+                                  </div>
+                                )}
+                            </div>
+                            <div className="text-sm font-medium whitespace-nowrap">
+                              {(property.property_category_type === "Rent" ||
+                                property.property_category_type ===
+                                  "PG/Co-living") && (
+                                <>
+                                  <span className="text-gray-500">
+                                    Deposit:
+                                  </span>
+                                  <span className="ml-1 font-semibold">
+                                    ₹{" "}
+                                    {property.custom_deposit_amount
+                                      ? property.custom_deposit_amount.toLocaleString(
+                                          "en-IN",
+                                        )
+                                      : "0"}
+                                  </span>
+                                </>
+                              )}
+                              {property.property_category_type?.includes(
+                                "Buy",
+                              ) &&
+                                property.possession_status !==
+                                  "Ready To Move" &&
+                                property.possession_date && (
+                                  <>
+                                    <span className="text-gray-500">
+                                      Possession:
+                                    </span>
+                                    <span className="ml-1 font-semibold">
+                                      {new Date(
+                                        property.possession_date,
+                                      ).toLocaleDateString("en-IN")}
+                                    </span>
+                                  </>
+                                )}
                             </div>
                           </div>
 
-                          {/* Property Details (responsive padding, text sizes, spacing) */}
-                          <div className="flex flex-col flex-1 p-2 sm:p-3 text-black bg-white">
-                            <div className="flex items-start justify-between gap-2 sm:gap-3 mb-0 flex-wrap">
-                              <h3
-                                className="flex-1 min-w-0 m-0 text-base sm:text-lg font-semibold leading-6 text-gray-900 truncate"
-                                title={property.property_name}
-                              >
-                                {property.property_name || "N/A"}
-                              </h3>
-                              <span
-                                className="flex-shrink-0 m-0 text-xs sm:text-sm font-medium leading-6 text-black md:text-base whitespace-nowrap"
-                                title={property.furnished_type}
-                              >
-                                {property.furnished_type || "Un-Furnished"}
-                              </span>
-                            </div>
-                            <p
-                              className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate"
-                              title={subtitle}
-                            >
-                              {subtitle}
-                            </p>
-
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-1">
-                              <div className="flex items-center flex-wrap gap-2">
-                                <span className="text-xl sm:text-2xl font-bold">
-                                  ₹{" "}
-                                  {property.property_category_type === "Rent" ||
-                                    property.property_category_type ===
-                                    "PG/Co-living"
-                                    ? formatPrice(property.rent).replace(
-                                      "₹",
-                                      "",
-                                    )
-                                    : formatPrice(
-                                      property.property_price,
-                                    ).replace("₹", "")}
-                                </span>
-                                {(property.property_category_type === "Rent" ||
-                                  property.property_category_type ===
-                                  "PG/Co-living") && (
-                                    <span className="text-xs sm:text-sm text-gray-500">
-                                      /{property.rent_duration || "Per Month"}
-                                    </span>
-                                  )}
-                                {property.property_category_type?.includes(
-                                  "Buy",
-                                ) &&
-                                  property.possession_status ===
-                                  "Ready To Move" && (
-                                    <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:ml-6 bg-green-100 border border-green-200 rounded-full">
-                                      <MdApartment className="text-base text-green-700" />
-                                      <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
-                                        Ready to Move
-                                      </span>
-                                    </div>
-                                  )}
-                              </div>
-                              <div className="text-xs sm:text-sm font-medium whitespace-nowrap">
-                                {(property.property_category_type === "Rent" ||
-                                  property.property_category_type ===
-                                  "PG/Co-living") && (
-                                    <>
-                                      <span className="text-gray-500">
-                                        Deposit:
-                                      </span>
-                                      <span className="ml-1 font-semibold">
-                                        ₹{" "}
-                                        {property.custom_deposit_amount
-                                          ? property.custom_deposit_amount.toLocaleString(
-                                            "en-IN",
-                                          )
-                                          : "0"}
-                                      </span>
-                                    </>
-                                  )}
-                                {property.property_category_type?.includes(
-                                  "Buy",
-                                ) &&
-                                  property.possession_status !==
-                                  "Ready To Move" &&
-                                  property.possession_date && (
-                                    <>
-                                      <span className="text-gray-500">
-                                        Possession:
-                                      </span>
-                                      <span className="ml-1 font-semibold">
-                                        {new Date(
-                                          property.possession_date,
-                                        ).toLocaleDateString("en-IN")}
-                                      </span>
-                                    </>
-                                  )}
+                          <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
+                            <div className="flex items-center gap-2 px-3 min-w-0">
+                              <MdApartment className="text-[22px] text-gray-700 flex-shrink-0" />
+                              <div className="flex flex-col justify-center min-w-0">
+                                <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                  {property.building_type === "Commercial"
+                                    ? property.property_type === "Office"
+                                      ? "Office Space"
+                                      : property.property_type === "Retail"
+                                        ? "Retail Space"
+                                        : property.property_type
+                                    : property.property_category_type?.includes(
+                                          "PG",
+                                        )
+                                      ? `${property.bathroom || 0} Bathrooms`
+                                      : property.bhk_type}
+                                </p>
+                                <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                  {property.building_type === "Commercial"
+                                    ? "Property Type"
+                                    : property.property_category_type?.includes(
+                                          "PG",
+                                        )
+                                      ? "Bathrooms"
+                                      : property.property_type}
+                                </p>
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-3 py-2 sm:py-3 border-t border-b border-gray-100">
-                              <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 min-w-0">
-                                <MdApartment className="text-lg sm:text-[22px] text-gray-700 flex-shrink-0" />
-                                <div className="flex flex-col justify-center min-w-0">
-                                  <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
-                                    {property.building_type === "Commercial"
-                                      ? property.property_type === "Office"
-                                        ? "Office Space"
-                                        : property.property_type === "Retail"
-                                          ? "Retail Space"
-                                          : property.property_type
-                                      : property.property_category_type?.includes(
-                                        "PG",
-                                      )
-                                        ? `${property.bathroom || 0} Bathrooms`
-                                        : property.bhk_type}
-                                  </p>
-                                  <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
-                                    {property.building_type === "Commercial"
-                                      ? "Property Type"
-                                      : property.property_category_type?.includes(
-                                        "PG",
-                                      )
-                                        ? "Bathrooms"
-                                        : property.property_type}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 border-l border-gray-200 min-w-0">
-                                {property.property_category_type?.includes(
-                                  "PG",
-                                ) ? (
-                                  <FaUser className="text-base sm:text-[20px] text-gray-700 flex-shrink-0" />
-                                ) : (
-                                  <FaBath className="text-base sm:text-[20px] text-gray-700 flex-shrink-0" />
-                                )}
-                                <div className="flex flex-col justify-center min-w-0">
-                                  <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
-                                    {property.property_category_type?.includes(
-                                      "PG",
-                                    )
-                                      ? property.available_for
-                                      : `${property.bathroom || 0} Baths`}
-                                  </p>
-                                  <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
-                                    {property.property_category_type?.includes(
-                                      "PG",
-                                    )
-                                      ? "Available For"
-                                      : "Bathrooms"}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 border-l border-gray-200 min-w-0">
-                                <RiRuler2Line className="text-lg sm:text-[22px] text-gray-700 flex-shrink-0" />
-                                <div className="flex flex-col justify-center min-w-0">
-                                  <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
-                                    {property.area}
-                                    {property.area_in}
-                                  </p>
-                                  <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
-                                    Built Up Area
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-
-                            <hr className="my-1 border-gray-100" />
-
-                            <div className="flex items-center justify-between pt-1 pb-2 text-xs sm:text-[13px] text-gray-600 flex-wrap gap-1">
-                              <div className="flex items-center flex-wrap min-w-0">
-                                <div className="flex items-center">
-                                  <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
-                                  <span className="truncate">
-                                    Posted by {property.user_type || "Owner"}
-                                  </span>
-                                </div>
-                                <span className="mx-2 text-gray-400">•</span>
-                                <span className="whitespace-nowrap">
-                                  {property.days_since_created
-                                    ? `${property.days_since_created} days ago`
-                                    : "Recently"}
-                                </span>
-                                {distance && (
-                                  <>
-                                    <span className="mx-2 text-gray-400">•</span>
-                                    <div className="flex items-center whitespace-nowrap">
-                                      <FaMapMarkerAlt className="mr-1 text-red-500" />
-                                      {distance} km from you
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                              <PiShareNetworkLight
-                                className="ml-2 text-[20px] text-gray-500 cursor-pointer hover:text-blue-500"
-                                onClick={() =>
-                                  openShareModal(
-                                    `${window.location.origin}/propertydetails/${property._id}`,
-                                    property._id,
+                            <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                              {property.property_category_type?.includes(
+                                "PG",
+                              ) ? (
+                                <FaUser className="text-[20px] text-gray-700 flex-shrink-0" />
+                              ) : (
+                                <FaBath className="text-[20px] text-gray-700 flex-shrink-0" />
+                              )}
+                              <div className="flex flex-col justify-center min-w-0">
+                                <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                  {property.property_category_type?.includes(
+                                    "PG",
                                   )
-                                }
-                              />
+                                    ? property.available_for
+                                    : `${property.bathroom || 0} Baths`}
+                                </p>
+                                <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                  {property.property_category_type?.includes(
+                                    "PG",
+                                  )
+                                    ? "Available For"
+                                    : "Bathrooms"}
+                                </p>
+                              </div>
                             </div>
 
-                            <div className="flex flex-col xs:flex-row sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 pt-3">
-                              <div className="flex items-center min-w-0">
-                                <div className="flex items-center justify-center flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 overflow-hidden rounded-full bg-blue-100">
-                                  {property.property_owner_image ? (
-                                    <img
-                                      src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
-                                      alt="Owner"
-                                      className="object-cover w-full h-full rounded-full"
-                                    />
-                                  ) : (
-                                    <AiOutlineUser
-                                      className="text-blue-600"
-                                      size={24}
-                                    />
-                                  )}
-                                </div>
-                                <div className="flex flex-col justify-center min-w-0 ml-2 sm:ml-3 leading-tight">
-                                  <span
-                                    className="text-xs sm:text-sm font-semibold text-gray-900 truncate"
-                                    title={property.connect_to_name}
-                                  >
-                                    {property.connect_to_name || "Owner"}
-                                  </span>
-                                  <span className="text-[10px] sm:text-xs text-gray-500 truncate">
-                                    {property.user_type || "Owner"}
-                                  </span>
-                                </div>
+                            <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                              <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
+                              <div className="flex flex-col justify-center min-w-0">
+                                <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                  {property.area} {property.area_in}
+                                </p>
+                                <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                  Built Up Area
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <hr className="my-1 border-gray-100" />
+
+                          <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
+                            <div className="flex items-center flex-wrap min-w-0">
+                              <div className="flex items-center">
+                                <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
+                                <span className="truncate">
+                                  Posted by {property.user_type || "Owner"}
+                                </span>
+                              </div>
+                              <span className="mx-2 text-gray-400">•</span>
+                              <span className="whitespace-nowrap">
+                                {property.days_since_created
+                                  ? `${property.days_since_created} days ago`
+                                  : "Recently"}
+                              </span>
+                              {distance && (
+                                <>
+                                  <span className="mx-2 text-gray-400">•</span>
+                                  <div className="flex items-center whitespace-nowrap">
+                                    <FaMapMarkerAlt className="mr-1 text-red-500" />
+                                    {distance} km from you
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                            <PiShareNetworkLight
+                              className="ml-2 text-[20px] text-gray-500 cursor-pointer hover:text-blue-500"
+                              onClick={() =>
+                                openShareModal(
+                                  `${window.location.origin}/propertydetails/${property._id}`,
+                                  property._id,
+                                )
+                              }
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between pt-3 gap-2">
+                            <div className="flex items-center min-w-0">
+                              <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+                                {property.property_owner_image ? (
+                                  <img
+                                    src={`${process.env.REACT_APP_API_URL}/media/${property.property_owner_image}`}
+                                    alt="Owner"
+                                    className="object-cover w-full h-full rounded-full"
+                                  />
+                                ) : (
+                                  <AiOutlineUser
+                                    className="text-blue-600"
+                                    size={24}
+                                  />
+                                )}
+                              </div>
+                              <div className="flex flex-col ml-3 min-w-0">
+                                <span
+                                  className="text-sm font-semibold text-gray-900 truncate"
+                                  title={property.connect_to_name}
+                                >
+                                  {property.connect_to_name || "Owner"}
+                                </span>
+                                <span className="text-xs text-gray-500 truncate">
+                                  {property.user_type || "Owner"}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* RIGHT SIDE - Buttons */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {/* Contact */}
+                              <div
+                                className="flex items-center justify-center px-4 h-9 text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap"
+                                onClick={() => handleContactClick(property)}
+                              >
+                                Contact
                               </div>
 
-                              {/* RIGHT SIDE - Buttons */}
-                              <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
-                                <div
-                                  className="flex items-center justify-center flex-1 sm:flex-none sm:w-24 h-9 text-xs sm:text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap"
-                                  onClick={() => handleContactClick(property)}
-                                >
-                                  Contact
-                                </div>
-                                <a
-                                  href={`https://wa.me/91${property.connect_to_no}?text=Hello, I am interested in your property`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="flex items-center justify-center w-9 h-9 flex-shrink-0 text-white bg-green-500 rounded-md hover:bg-green-600"
-                                >
-                                  <FaWhatsapp />
-                                </a>
-                                <a
-                                  href={`tel:${property.connect_to_no}`}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="flex items-center justify-center w-9 h-9 flex-shrink-0 text-white bg-blue-500 rounded-md hover:bg-blue-600"
-                                >
-                                  <FaPhone />
-                                </a>
-                              </div>
+                              {/* WhatsApp */}
+                              <a
+                                href={`https://wa.me/91${property.connect_to_no}?text=Hello, I am interested in your property`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex items-center justify-center w-9 h-9 text-white bg-green-500 rounded-md hover:bg-green-600"
+                              >
+                                <FaWhatsapp />
+                              </a>
+
+                              {/* Call */}
+                              <a
+                                href={`tel:${property.connect_to_no}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex items-center justify-center w-9 h-9 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                              >
+                                <FaPhone />
+                              </a>
                             </div>
                           </div>
                         </div>
-                      );
-                    })
+                      </div>
+                    );
+                  })
                 ) : (
                   <div className="text-center text-black">
                     <p>No properties available at the moment.</p>
                   </div>
                 )}
               </div>
-
               {isContactModalOpen && selectedProperty && (
                 <ContactDetails
                   fullName={
                     freeViewCount <= 0 && paidViewCount <= 0
-                      ? `**** ${selectedProperty.connect_to_name?.slice(-1) || "N/A"}`
+                      ? `****${selectedProperty.connect_to_name?.slice(-1) || "N/A"}`
                       : selectedProperty.connect_to_name || "N/A"
                   }
                   mobile={
                     freeViewCount <= 0 && paidViewCount <= 0
-                      ? `******* ${selectedProperty.connect_to_no?.slice(-3) || "000"}`
+                      ? `*******${selectedProperty.connect_to_no?.slice(-3) || "000"}`
                       : selectedProperty.connect_to_no || "N/A"
                   }
                   showUpgradePrompt={showUpgradePrompt}
                   onClose={() => setIsContactModalOpen(false)}
                 />
               )}
-
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 mt-4">
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${
+                      currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
                     <MdOutlineNavigateBefore className="text-xl text-gray-700" />
                   </button>
+
+                  {/* Render dynamic pagination numbers */}
                   {getPaginationRange().map((page, index) => (
                     <button
                       key={index}
                       onClick={() =>
                         page !== "..." ? handlePageChange(page) : null
                       }
-                      className={`px-3 py-1 text-sm transition-colors ${currentPage === page
-                        ? "rounded-full my-border w-8 h-8 flex items-center justify-center font-normal"
-                        : "text-gray-700"
-                        }`}
+                      className={`px-3 py-1 text-sm transition-colors ${
+                        currentPage === page
+                          ? "rounded-full my-border w-8 h-8 flex items-center justify-center font-normal"
+                          : "text-gray-700"
+                      }`}
                     >
                       {page}
                     </button>
                   ))}
+
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${currentPage === totalPages
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                      }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-gray-300 ${
+                      currentPage === totalPages
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
                   >
                     <MdOutlineNavigateNext className="text-xl text-gray-700" />
                   </button>
@@ -3663,9 +3905,13 @@ const FeaturedDashboard = () => {
                 >
                   <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}" />
                   {properties
+                    // .filter(
+                    //   (property) => property.latitude && property.longitude,
+                    // )
                     .filter((property) => {
                       const lat = Number(property.latitude);
                       const lng = Number(property.longitude);
+
                       return Number.isFinite(lat) && Number.isFinite(lng);
                     })
                     .map((property) => (
@@ -3678,11 +3924,10 @@ const FeaturedDashboard = () => {
                         icon={createCustomIcon(
                           property,
                           property._id === activePropertyId ||
-                          property._id === hoveredPropertyId,
+                            property._id === hoveredPropertyId,
                         )}
                         eventHandlers={{
-                          mouseover: () =>
-                            setHoveredPropertyId(property._id),
+                          mouseover: () => setHoveredPropertyId(property._id),
                           mouseout: () => setHoveredPropertyId(null),
                         }}
                       >
@@ -3747,8 +3992,7 @@ const FeaturedDashboard = () => {
                                 <div className="flex items-center">
                                   <BiRupee className="mr-1 text-black bg-white" />
                                   <span>
-                                    {property.property_category_type ===
-                                      "Rent"
+                                    {property.property_category_type === "Rent"
                                       ? formatPrice(property.rent)
                                       : formatPrice(property.property_price)}
                                   </span>
@@ -3782,7 +4026,6 @@ const FeaturedDashboard = () => {
               )}
             </div>
           </div>
-
           {isShareModalOpen && (
             <div className="absolute right-0 z-50">
               <ShareModal
@@ -3790,6 +4033,7 @@ const FeaturedDashboard = () => {
                 closeShareModal={handleCloseShareModal}
                 copyLink={() => {
                   const url = currentShareUrl;
+
                   if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard
                       .writeText(url)
@@ -3803,6 +4047,7 @@ const FeaturedDashboard = () => {
                   } else {
                     fallbackCopyTextToClipboard(url);
                   }
+
                   function fallbackCopyTextToClipboard(text) {
                     const textArea = document.createElement("textarea");
                     textArea.value = text;
@@ -3811,6 +4056,7 @@ const FeaturedDashboard = () => {
                     document.body.appendChild(textArea);
                     textArea.focus();
                     textArea.select();
+
                     try {
                       const successful = document.execCommand("copy");
                       alert(successful ? "Link copied!" : "Copy failed");
@@ -3818,6 +4064,7 @@ const FeaturedDashboard = () => {
                       console.error("Fallback copy failed:", err);
                       alert("Copy failed");
                     }
+
                     document.body.removeChild(textArea);
                   }
                 }}
@@ -3825,24 +4072,24 @@ const FeaturedDashboard = () => {
             </div>
           )}
         </div>
-      </div>
 
-      <Login1
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onSwitchToSignUp={() => {
-          setIsLoginModalOpen(false);
-          setIsSignUpModalOpen(true);
-        }}
-      />
-      <SignUp1
-        isOpen={isSignUpModalOpen}
-        onClose={() => setIsSignUpModalOpen(false)}
-        onSwitchToLogin={() => {
-          setIsSignUpModalOpen(false);
-          setIsLoginModalOpen(true);
-        }}
-      />
+        <Login1
+          isOpen={isLoginModalOpen}
+          onClose={() => setIsLoginModalOpen(false)}
+          onSwitchToSignUp={() => {
+            setIsLoginModalOpen(false);
+            setIsSignUpModalOpen(true);
+          }}
+        />
+        <SignUp1
+          isOpen={isSignUpModalOpen}
+          onClose={() => setIsSignUpModalOpen(false)}
+          onSwitchToLogin={() => {
+            setIsSignUpModalOpen(false);
+            setIsLoginModalOpen(true);
+          }}
+        />
+      </div>
     </>
   );
 };

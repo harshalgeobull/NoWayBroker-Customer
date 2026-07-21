@@ -30,6 +30,7 @@ import { Hammer, CalendarDays, Car, ArrowUp, CheckCircle } from "lucide-react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { MdApartment } from "react-icons/md";
 import { RiRuler2Line } from "react-icons/ri";
+import { IoMdClose } from "react-icons/io";
 import { AiOutlineClockCircle, AiOutlineUser } from "react-icons/ai";
 // 👇 NEW: icons needed for the ProjectList.js-style card design used in
 // the "View other Projects" section below (ConfigCarousel + card chrome).
@@ -693,6 +694,14 @@ const ProjectDetail = () => {
   const handleCloseShareModal = () => {
     setIsShareModalOpen(false);
   };
+  const currentShareUrl = window.location.href;
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(currentShareUrl);
+    toast.success("Link copied!"); // agar toast already import hai
+  };
+
+
 
   //for the contact details
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -944,9 +953,9 @@ const ProjectDetail = () => {
   const heroLocation = project.address_area || "";
   // Hero Subtitle
   const heroTitle =
-    project.building_type === "Residential"
-      ? `${residentialConfigurations} Apartments in ${heroLocation}`
-      : `Commercial ${commercialConfigurations} in ${heroLocation}`;
+  project.building_type === "Residential"
+    ? `${residentialConfigurations} BHK Apartments in ${heroLocation}`
+    : `Commercial ${commercialConfigurations} in ${heroLocation}`;
 
   const prices = projectProperties
     .map((item) => Number(item.price))
@@ -1642,12 +1651,18 @@ const ProjectDetail = () => {
           {showAllImages && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
               <div className="relative w-11/12 p-6 overflow-auto bg-white rounded-lg h-5/6">
-                <button
+                {/* <button
                   className="absolute text-3xl text-black top-4 right-4"
                   onClick={() => setShowAllImages(false)}
-                ></button>
+                ></button> */}
+                <button
+                  className="absolute z-10 text-3xl text-black top-4 right-4 hover:text-red-600"
+                  onClick={() => setShowAllImages(false)}
+                >
+                  <IoMdClose size={28} />
+                </button>
 
-                <div className="sticky top-0 z-50 bg-white border rounded-lg shadow mt-4">
+                {/* <div className="sticky top-0 z-50 bg-white border rounded-lg shadow mt-4">
                   <div className="flex">
                     <button
                       onClick={() =>
@@ -1693,7 +1708,7 @@ const ProjectDetail = () => {
                       Location
                     </button>
                   </div>
-                </div>
+                </div> */}
                 <h2 className="mb-4 text-2xl font-semibold">Gallery</h2>
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
                   {/* All Images */}
@@ -1725,6 +1740,14 @@ const ProjectDetail = () => {
               </div>
             </div>
           )}
+          {isShareModalOpen && (
+            <ShareModal
+              currentShareUrl={currentShareUrl}
+              closeShareModal={handleCloseShareModal}
+              copyLink={copyLink}
+            />
+          )}
+
 
           {/* Property Location Section */}
           {/* {projects[0]?.project_details?.address && (
@@ -1950,6 +1973,31 @@ const ProjectDetail = () => {
                               if (key === "balcony") label = "Balconies";
                               if (key === "furnished_type") label = "Furnishing";
                               if (key === "age_of_property") label = "Property Age";
+                              if (key === "no_of_open_sides") label = "No. of Open Sides";
+                              if (key === "property_dimensions_length") label = "Length of Plot";
+                              if (key === "property_dimensions_breadth") label = "Breadth of Plot";
+                              if (key === "parking_types") label = "Parking Type";
+                              if (key === "number_of_seats_available") label = "Seats Available";
+                              if (key === "purchase_type") label = "Purchase Type";
+                              if (key === "sub_project_type") { label = property.project_type === "Plot/Land" ? "Land Type" : "Sub Project Type"; }
+                              if (key === "sub_project_type") {
+                                if (property.project_type === "Plot/Land") {
+                                  label = "Land Type";
+                                } else if (property.project_type === "Retail") {
+                                  label = "Retail Type";
+                                } else if (property.project_type === "Office") {
+                                  label = "Office Type";
+                                } else if (property.project_type === "Storage") {
+                                  label = "Storage Type";
+                                } else if (property.project_type === "Industry") {
+                                  label = "Industry Type";
+                                } else if (property.project_type === "Hospitality") {
+                                  label = "Hospitality Type";
+                                } else {
+                                  label = "Sub Project Type";
+                                }
+                              }
+
 
                               return (
                                 <div

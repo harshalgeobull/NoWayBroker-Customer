@@ -52,13 +52,13 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
 
   const handleSignUp = async () => {
     let hasError = false;
-    const newErrors = {
-      name: "",
-      mobile: "",
-      email: "",
-      city: "",
-      companyName: "",
-    };
+     const newErrors = {
+    name: "",
+    mobile: "",
+    email: "",
+    city: "",
+    companyName: "",
+  };
 
     if (!name.trim()) {
       newErrors.name = "Name is required";
@@ -89,8 +89,8 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
     }
 
     if (userType === "Builder" && !companyName.trim()) {
-      newErrors.companyName = "Company Name is required";
-      hasError = true;
+    newErrors.companyName = "Company Name is required";
+    hasError = true;
     }
 
     if (!agreed) {
@@ -235,8 +235,9 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                   setName(alphabetOnly);
                   setErrors({ ...errors, name: "" });
                 }}
-                className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${errors.name ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${
+                  errors.name ? "border-red-500" : "border-gray-300"
+                }`}
               />
             </div>
             {errors.name && (
@@ -246,36 +247,38 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
               </p>
             )}
             {userType === "Builder" && (
-              <>
-                <label className="block mb-1 text-sm font-medium text-gray-700">
-                  Company Name
-                </label>
+  <>
+    <label className="block mb-1 text-sm font-medium text-gray-700">
+      Company Name{" "}
+      <span className="text-xl font-bold text-red-500">*</span>
+    </label>
 
-                <div className="mb-1">
-                  <input
-                    type="text"
-                    placeholder="Company Name"
-                    value={companyName}
-                    onChange={(e) => {
-                      setCompanyName(e.target.value);
-                      setErrors({
-                        ...errors,
-                        companyName: "",
-                      });
-                    }}
-                    className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${errors.companyName ? "border-red-500" : "border-gray-300"
-                      }`}
-                  />
-                </div>
+    <div className="mb-1">
+      <input
+        type="text"
+        placeholder="Company Name"
+        value={companyName}
+        onChange={(e) => {
+          setCompanyName(e.target.value);
+          setErrors({
+            ...errors,
+            companyName: "",
+          });
+        }}
+        className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${
+          errors.companyName ? "border-red-500" : "border-gray-300"
+        }`}
+      />
+    </div>
 
-                {errors.companyName && (
-                  <p className="flex items-center gap-1 mb-3 text-sm text-red-500">
-                    <IoAlertCircleOutline size={16} />
-                    {errors.companyName}
-                  </p>
-                )}
-              </>
-            )}
+    {errors.companyName && (
+      <p className="flex items-center gap-1 mb-3 text-sm text-red-500">
+        <IoAlertCircleOutline size={16} />
+        {errors.companyName}
+      </p>
+    )}
+  </>
+)}
 
             {/* Email & City Row */}
             <div className="grid grid-cols-1 gap-3 mb-3 md:grid-cols-2">
@@ -294,8 +297,9 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                     setEmail(e.target.value);
                     setErrors({ ...errors, email: "" });
                   }}
-                  className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${errors.email ? "border-red-500" : "border-gray-300"
-                    }`}
+                  className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${
+                    errors.email ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
 
                 {errors.email && (
@@ -320,8 +324,9 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                     setCity(e.target.value);
                     setErrors({ ...errors, city: "" });
                   }}
-                  className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${errors.city ? "border-red-500" : "border-gray-300"
-                    }`}
+                  className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${
+                    errors.city ? "border-red-500" : "border-gray-300"
+                  }`}
                   readOnly={!!sessionStorage.getItem("cityName")}
                 />
 
@@ -368,8 +373,9 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                         setErrors({ ...errors, mobile: "" });
                       }
                     }}
-                    className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${errors.mobile ? "border-red-500" : "border-gray-300"
-                      }`}
+                    className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${
+                      errors.mobile ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
                 </div>
               </div>
@@ -411,10 +417,11 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
 
             <button
               onClick={handleSignUp}
-              className={`w-full py-3 rounded-lg text-lg font-medium transition ${!agreed
-                ? "bg-gray-400 text-white cursor-not-allowed"
-                : "my-bg text-white hover:my-bg"
-                }`}
+              className={`w-full py-3 rounded-lg text-lg font-medium transition ${
+                !agreed
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : "my-bg text-white hover:my-bg"
+              }`}
               disabled={!agreed}
             >
               {isSubmitting ? "Sending OTP..." : "Sign Up"}

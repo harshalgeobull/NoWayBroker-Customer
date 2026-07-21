@@ -111,35 +111,39 @@ const Editproject = () => {
 
   // ADDED FROM AddNewProject.js — required for multi-property support
   const emptyProjectProperty = {
-    project_type: "",
-    sub_project_type: "",
-    retail_location: "",
-    sub_sub_project_type: "",
-    price: "",
-    bhk_type: "",
-    carpet_area: "",
-    carpet_area_unit: "",
-    area: "",
-    area_in: "",
-    bathroom: "",
-    commercial_washroom: "",
-    total_floor: "",
-    project_floor: "",
-    no_of_cabines: "",
-    no_of_meeting_Rooms: "",
-    no_of_conference_room: "",
-    total_number_of_rooms: "",
-    facing: "",
-    property_dimensions_length: "",
-    property_dimensions_breadth: "",
-    age_of_property: "",
-    furnished_type: "",
-    balcony: "",
-    pantry_option: "",
-    central_AC: "",
-    reception_area: "",
-    personal_washroom: "",
-  };
+  project_type: "",
+  sub_project_type: "",
+  retail_location: "",
+  sub_sub_project_type: "",
+  price: "",
+  bhk_type: "",
+  carpet_area: "",
+  carpet_area_in: "",
+  area: "",
+  area_in: "",
+  bathroom: "",
+  commercial_washroom: "",
+  total_floor: "",
+  project_floor: "",
+  purchase_type: "",
+  no_of_open_sides: "",
+  parking_types: "",
+  number_of_seats_available: "",
+  no_of_cabines: "",
+  no_of_meeting_Rooms: "",
+  no_of_conference_room: "",
+  total_number_of_rooms: "",
+  facing: "",
+  property_dimensions_length: "",
+  property_dimensions_breadth: "",
+  age_of_property: "",
+  furnished_type: "",
+  balcony: "",
+  pantry_option: "",
+  central_AC: "",
+  reception_area: "",
+  personal_washroom: "",
+};
 
   const [projectProperties, setProjectProperties] = useState([
     { ...emptyProjectProperty },
@@ -908,12 +912,10 @@ Make it engaging, attractive, and human-like.
         area_in: projectProperties?.[0]?.area_in || formData.area_in || "",
 
         carpet_area:
-          projectProperties?.[0]?.carpet_area || formData.carpet_area || "",
+  projectProperties?.[0]?.carpet_area || "",
 
-        carpet_area_unit:
-          projectProperties?.[0]?.carpet_area_unit ||
-          formData.carpet_area_unit ||
-          "",
+carpet_area_in:
+  projectProperties?.[0]?.carpet_area_in || "",
 
         total_project_size: totalProjectSize || "",
 
@@ -1118,7 +1120,10 @@ Make it engaging, attractive, and human-like.
       if (addressArea) {
         apiFormData.append("address_area", addressArea);
       }
-
+      console.log(
+  "Project Properties:",
+  JSON.stringify(projectProperties, null, 2)
+);
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/cust_api/edit_project`,
         {
@@ -1132,6 +1137,30 @@ Make it engaging, attractive, and human-like.
       console.log("EDIT PROJECT RESPONSE:", result);
 
       if (result.status === 1) {
+        // UPDATE PROJECT PROPERTIES
+try {
+  for (const property of projectProperties) {
+    const propertyFormData = new FormData();
+
+    Object.entries(property).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        propertyFormData.append(key, value);
+      }
+    });
+
+    await axios.post(
+      `${process.env.REACT_APP_API_URL}/cust_api/edit_project_property`,
+      propertyFormData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+  }
+} catch (propertyError) {
+  console.log("PROJECT PROPERTY UPDATE ERROR:", propertyError);
+}
         // UPLOAD PROJECT GALLERY IMAGES
         if (fileData?.length > 0) {
           const imageFormData = new FormData();
@@ -1406,7 +1435,7 @@ Make it engaging, attractive, and human-like.
             price: data.average_project_price || "",
             bhk_type: data.bhk_type || "",
             carpet_area: data.carpet_area || "",
-            carpet_area_unit: data.carpet_area_unit || "",
+            carpet_area_in: data.carpet_area_in || "",
             area: data.area || "",
             area_in: data.area_in || "",
             bathroom: data.bathroom || "",
@@ -1625,7 +1654,7 @@ Make it engaging, attractive, and human-like.
 
       if (
         projectProperties.some(
-          (property) => !String(property.carpet_area_unit || "").trim(),
+          (property) => !String(property.carpet_area_in || "").trim(),
         )
       ) {
         newErrors.carpet_area_unit = "Carpet area unit is required.";
@@ -2582,9 +2611,9 @@ Make it engaging, attractive, and human-like.
                         <div>
                           <label className="font-medium text-gray-700">Unit</label>
                           <select
-                            value={projectProperty.carpet_area_unit || ""}
+                            value={projectProperty.carpet_area_in || ""}
                             onChange={(e) =>
-                              handleProjectPropertyChange(index, "carpet_area_unit", e.target.value)
+                              handleProjectPropertyChange(index, "carpet_area_in", e.target.value)
                             }
                             className="w-full mt-1 p-3 border rounded-lg"
                           >
@@ -3247,6 +3276,184 @@ Make it engaging, attractive, and human-like.
                               </select>
                             </div>
                           )}
+                          {buildingType === "Commercial" &&
+                            projectProperty.project_type === "Retail" && (
+                              <div>
+                                <label className="font-medium text-gray-700">
+                                  Parking Type
+                                </label>
+                          
+                                <Select
+                                  isMulti
+                                  name="parking_types"
+                                  options={[
+                                    { value: "Private Parking", label: "Private Parking" },
+                                    { value: "Public Parking", label: "Public Parking" },
+                                    { value: "Multilevel Parking", label: "Multilevel Parking" },
+                                    { value: "Not Available", label: "Not Available" },
+                                  ]}
+                                  value={[
+                                    { value: "Private Parking", label: "Private Parking" },
+                                    { value: "Public Parking", label: "Public Parking" },
+                                    { value: "Multilevel Parking", label: "Multilevel Parking" },
+                                    { value: "Not Available", label: "Not Available" },
+                                  ].filter((opt) =>
+                                    (projectProperty.parking_types || "")
+                                      .split(",")
+                                      .includes(opt.value)
+                                  )}
+                                  onChange={(selectedOptions) => {
+                                    const values = selectedOptions
+                                      ? selectedOptions.map((opt) => opt.value)
+                                      : [];
+                          
+                                    let finalValues = values;
+                          
+                                    if (values.includes("Not Available")) {
+                                      finalValues = ["Not Available"];
+                                    }
+                          
+                                    handleProjectPropertyChange(
+                                      index,
+                                      "parking_types",
+                                      finalValues.join(",")
+                                    );
+                                  }}
+                                  components={{ MultiValue: CustomMultiValue }}
+                                  placeholder="Select Parking Type"
+                                  classNamePrefix="react-select"
+                                  styles={{
+                                    control: (base, state) => ({
+                                      ...base,
+                                      minHeight: "60px",
+                                      padding: "6px",
+                                      borderColor: state.isFocused ? "#a855f7" : "#d1d5db",
+                                      boxShadow: state.isFocused
+                                        ? "0 0 0 2px #a855f7"
+                                        : "none",
+                                      borderRadius: "0.5rem",
+                                      fontSize: "16px",
+                                      display: "flex",
+                                      flexWrap: "nowrap",
+                                      overflowX: "auto",
+                                    }),
+                                    valueContainer: (base) => ({
+                                      ...base,
+                                      padding: "0 6px",
+                                      display: "flex",
+                                      flexWrap: "nowrap",
+                                      gap: "6px",
+                                      overflowX: "auto",
+                                      scrollbarWidth: "thin",
+                                      alignItems: "center",
+                                    }),
+                                    placeholder: (base) => ({
+                                      ...base,
+                                      color: "#1f2937",
+                                      fontSize: "16px",
+                                    }),
+                                    multiValue: (base) => ({
+                                      ...base,
+                                      backgroundColor: "#ede9fe",
+                                      borderRadius: "0.375rem",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      padding: "2px 6px",
+                                      whiteSpace: "nowrap",
+                                    }),
+                                    multiValueLabel: (base) => ({
+                                      ...base,
+                                      color: "#6b21a8",
+                                      fontWeight: "500",
+                                    }),
+                                    multiValueRemove: (base) => ({
+                                      ...base,
+                                      color: "#6b21a8",
+                                      ":hover": {
+                                        backgroundColor: "#ddd6fe",
+                                        color: "#4c1d95",
+                                      },
+                                    }),
+                                  }}
+                                />
+                              </div>
+                          )}
+                          {((buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                                            (buildingType === "Commercial" &&
+                                              projectProperty.project_type === "Plot/Land")) && (
+                                            <div>
+                                              <label className="font-medium text-gray-700">
+                                                No. of Open Sides
+                                              </label>
+                          
+                                              <select
+                                                value={projectProperty.no_of_open_sides || ""}
+                          onChange={(e) =>
+                            handleProjectPropertyChange(
+                              index,
+                              "no_of_open_sides",
+                              e.target.value
+                            )
+                          }
+                                                className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                                              >
+                                                <option value="">Select Open Sides</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                              </select>
+                                            </div>
+                                          )}
+                                          {(buildingType === "Commercial" ||
+                            (buildingType === "Residential" &&
+                              projectProperty.project_type === "Other")) && (
+                                            <div>
+                                              <label className="font-medium text-gray-700">
+                                                Purchase Type
+                                              </label>
+                          
+                                              <select
+                            value={projectProperty.purchase_type || ""}
+                            onChange={(e) =>
+                              handleProjectPropertyChange(
+                                index,
+                                "purchase_type",
+                                e.target.value
+                              )
+                            }
+                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          >
+                                                <option value="">Select Purchase Type</option>
+                                                <option value="Resale">Resale</option>
+                                                <option value="New bookings">New Bookings</option>
+                                              </select>
+                                            </div>
+                                          )}
+                                          {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                                            <div>
+                                              <label className="font-medium text-gray-700">
+                                                Number of Seats Available
+                                              </label>
+                          
+                                              <input
+                            type="text"
+                            value={projectProperty.number_of_seats_available || ""}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (/^\d*$/.test(value)) {
+                                handleProjectPropertyChange(
+                                  index,
+                                  "number_of_seats_available",
+                                  value
+                                );
+                              }
+                            }}
+                            placeholder="Enter number of seats"
+                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          />
+                                            </div>
+                                          )}
                       </div>
                       <div className="flex justify-end mt-4">
                         <button
@@ -3380,6 +3587,19 @@ Make it engaging, attractive, and human-like.
                         )}
                       </div>
                     )}
+                   <div>
+  <label className="font-medium text-gray-700">
+    RERA ID
+  </label>
+
+  <input
+    type="text"
+    value={reraId}
+    onChange={(e) => setReraId(e.target.value)}
+    placeholder="Enter RERA ID"
+    className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+  />
+</div>
                     {buildingType === "Commercial" && propertyType === "Retail" && (
                       <div>
                         <label className="font-medium text-gray-700">

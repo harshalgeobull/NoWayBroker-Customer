@@ -29,9 +29,9 @@ const Footer = () => {
     youtube: "#",
     linkedin: "#",
     instagram: "#",
-    appstore: "#",
-    playstore: "#",
-    twitter: "#",
+    appstore:"#",
+    playstore:"#",
+    twitter:"#",
   });
 
   useEffect(() => {
@@ -47,9 +47,9 @@ const Footer = () => {
             youtube: data.youtube || "#",
             linkedin: data.linkedin || "#",
             instagram: data.instagram || "#",
-            appstore: data.appstore || "#",
-            playstore: data.playstore || "#",
-            twitter: data.twitter || "#",
+            appstore:data.appstore || "#",
+            playstore:data.playstore || "#",
+            twitter:data.twitter || "#",
           });
         }
       } catch (error) {
@@ -167,26 +167,26 @@ const Footer = () => {
             </h4>
             <div className="flex space-x-4">
               <a
-                // href={socialLinks.playstore}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src="/image/abc.jpg"
-                  alt="Google Play"
-                  className="object-cover h-12 rounded-lg"
-                />
+              // href={socialLinks.playstore}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="/image/abc.jpg"
+                alt="Google Play"
+                className="object-cover h-12 rounded-lg"
+              />
               </a>
-              <a
-                // href={socialLinks.appstore}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src="/image/apl.png"
-                  alt="App Store"
-                  className="object-cover h-12 rounded-lg"
-                />
+                <a
+              // href={socialLinks.appstore}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="/image/apl.png"
+                alt="App Store"
+                className="object-cover h-12 rounded-lg"
+              />
               </a>
             </div>
             <div className="flex items-center mb-6 md:mb-0">
@@ -227,7 +227,7 @@ const Footer = () => {
           <div className="flex items-center space-x-2">
             <img src="/image/app.png" alt="NoWayBroker Logo" className="w-11" />
             <span className="text-sm text-gray-500">
-              © 2026 NOWAYBROKER ALL RIGHTS RESERVED
+               © 2026 NOWAYBROKER ALL RIGHTS RESERVED
             </span>
           </div>
           <div className="flex mt-4 space-x-8 md:mt-0">
