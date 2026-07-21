@@ -387,7 +387,7 @@ const RecommendedPropertiesDashboard = () => {
         setAmenitiesList(response.data.data);
       }
     } catch (error) {
-      console.log("Amenities fetch failed", error);
+      // Handle error silently
     }
   };
 

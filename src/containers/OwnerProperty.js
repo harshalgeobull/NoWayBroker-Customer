@@ -32,7 +32,7 @@ import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
-console.log(userLocation);
+// console.log(userLocation);
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
@@ -105,13 +105,11 @@ const OwnerProperty = ({
         setProperties(data.data);
       } else {
         setProperties([]);
-        console.log("No projects found");
       }
     } catch (error) {
       console.error("Error fetching recommended properties:", error);
     }
   };
-
   useEffect(() => {
     fetchRecommendedProperties();
   }, [data]);
@@ -126,37 +124,90 @@ const OwnerProperty = ({
       toast.error("Please log in to save properties to your favorites.");
       return;
     }
-    const data = { user_id: userId, property_id: propertyId };
+
+    // Optimistic update - UI instantly update, API background madhe
+    setProperties((prev) =>
+      prev.map((item) =>
+        item._id === propertyId ? { ...item, is_favorite: true } : item
+      )
+    );
+
     try {
-      await axios.post(
+      const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/add_to_favorite`,
-        data,
+        {
+          user_id: userId,
+          property_id: propertyId,
+        }
       );
-      fetchHomeData();
+
+      if (response.data.status === 1) {
+        setProperties((prev) =>
+          prev.map((item) =>
+            item._id === propertyId
+              ? {
+                ...item,
+                is_favorite: true,
+                favorite_id: response.data.favorite_id,
+              }
+              : item
+          )
+        );
+      } else {
+        // Revert if API failed
+        setProperties((prev) =>
+          prev.map((item) =>
+            item._id === propertyId ? { ...item, is_favorite: false } : item
+          )
+        );
+      }
     } catch (error) {
-      console.log("Failed to save the property. Please try again.");
-      fetchHomeData();
+      console.error("Add favorite failed:", error);
+
+      setProperties((prev) =>
+        prev.map((item) =>
+          item._id === propertyId
+            ? { ...item, is_favorite: false }
+            : item
+        )
+      );
     }
   };
 
   // Remove property from favorites
-  const removeFromFavorites = async (FavoriteId) => {
+  const removeFromFavorites = async (favoriteId) => {
     if (!userId) {
       toast.error("Please log in to remove properties from your favorites.");
       return;
     }
+
+    // Optimistic update - UI instantly update
+    setProperties((prev) =>
+      prev.map((item) =>
+        item.favorite_id === favoriteId
+          ? { ...item, is_favorite: false, favorite_id: null }
+          : item
+      )
+    );
+
     try {
-      await axios.delete(
+      const response = await axios.delete(
         `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
-        { data: { favorite_id: FavoriteId } },
+        {
+          data: {
+            favorite_id: favoriteId,
+          },
+        }
       );
-      fetchHomeData();
+
+      if (response.data.status !== 1) {
+        toast.error("Failed to remove favorite. Please try again.");
+      }
     } catch (error) {
-      console.log("Failed to remove the property. Please try again.");
-      fetchHomeData();
+      console.error("Remove favorite failed:", error);
+      toast.error("Failed to remove favorite. Please try again.");
     }
   };
-
   const convertToSqFt = (area, unit) => {
     if (!area || !unit) return null;
     const areaNum = parseFloat(area);
@@ -452,16 +503,17 @@ const OwnerProperty = ({
                           {/* Admin Approval Badge */}
                           {property.admin_approval === "Approved" && (
                             <div className="absolute top-2 left-2 z-20">
-                              <div className="flex items-center bg-[#35A853] text-white rounded-md shadow-md overflow-hidden">
-                                {/* Tick Icon */}
-                                <div className="flex items-center justify-center px-2 bg-[#2D9448]">
-                                  ✓
-                                </div>
+                              <div className="flex items-center bg-[#2DBE3F] text-white rounded-sm shadow-md px-2 py-1">
 
-                                {/* Text */}
-                                <div className="px-2 py-1 text-[10px] sm:text-xs font-semibold">
-                                  Admin Approval
-                                </div>
+                                {/* Tick Icon */}
+                                <span className="text-white text-xs font-bold mr-2">
+                                  ✓
+                                </span>
+
+                                {/* Verified Text */}
+                                <span className="text-[11px] font-semibold leading-none">
+                                  Verified
+                                </span>
                               </div>
                             </div>
                           )}

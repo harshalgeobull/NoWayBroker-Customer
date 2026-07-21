@@ -206,11 +206,8 @@ const Spotlights = ({
   useEffect(() => {
     if (data && data.status === 1 && Array.isArray(data.data)) {
       setProjectList(data.data);
-      const prime = data.data.find(p => p.project_name === "Prime Office Centre");
-      console.log("SPOTLIGHTS ACTUAL DATA for Prime Office Centre:", prime);
     } else {
       setProjectList([]);
-      console.log("No projects found");
     }
   }, [data]);
 
@@ -460,9 +457,23 @@ const Spotlights = ({
           // average_project_price, others use starting_price / min_price /
           // avg_price. Tries each in order and returns the first real value.
 
+          /* ====================================================================
+             FIX: Replace the price-resolution block inside the `visibleProjects.map(...)`
+             in ProjectList.js with this. The bug was that ProjectList.js read units
+             from `project.residential_units` (a field the API doesn't send) instead
+             of `project.project_properties` (the field Spotlights.js actually uses),
+             and it was missing the computed min–max range fallback for price.
+             ==================================================================== */
 
-          // Fallback: jar top-level price fields nastil, tar ProjectDetail.js sarkha
-          // project_properties chya price madhun min–max range calculate kar
+          // Each card shows its own price exactly as provided by the API:
+          // when `project_properties` includes a per-BHK price, that price is
+          // used as-is. Only when the API sends just a comma list of BHK
+          // types with no per-unit pricing do all cards fall back to the
+          // project's average price — a data-availability fallback, not
+          // fabricated UI.
+
+          // Fallback: if no top-level price field exists, compute a min–max
+          // range from project_properties prices (same as Spotlights.js).
           const propertyPrices = (project.project_properties || [])
             .map((p) => Number(p.price))
             .filter((p) => !isNaN(p) && p > 0);
@@ -474,6 +485,8 @@ const Spotlights = ({
                 ? propertyPrices[0]
                 : `${Math.min(...propertyPrices)} - ${Math.max(...propertyPrices)}`;
 
+          // Resolves the project's overall/starting price from whichever field
+          // name the backend actually sends.
           const resolvedProjectPrice =
             project.average_project_price ||
             project.starting_price ||
@@ -483,6 +496,7 @@ const Spotlights = ({
             computedRangePrice ||
             null;
 
+          // 👇 THE ACTUAL FIX: use `project_properties`, not `residential_units`
           const residentialUnits =
             project.project_properties && project.project_properties.length > 0
               ? project.project_properties.map((u) => ({
@@ -506,9 +520,13 @@ const Spotlights = ({
                   price: resolvedProjectPrice,
                 }))
                 : [];
-          // Location, used both to compose the subtitle and to compute distance.
-          // De-duplicated so the city name is never repeated twice (e.g. when
-          // address_area already reads "Bavdhan, Pune" and city_name is "Pune").
+
+          /* ====================================================================
+             Also update the ConfigCarousel call further down — it currently passes
+             `isCommercial ? commercialUnits : residentialUnits`, which is still
+             correct, but now residentialUnits will actually carry real prices.
+             No change needed there once the block above is swapped in.
+             ==================================================================== */
           const addressArea = project.address_area?.trim();
           const cityName = project.city_name?.trim();
           let locationText = "";

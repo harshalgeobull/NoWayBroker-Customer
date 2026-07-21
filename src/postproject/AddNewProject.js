@@ -9,6 +9,7 @@ import { FaFilePdf } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { IoMdClose } from "react-icons/io";
 import Select from "react-select";
 import {
   GoogleMap,
@@ -769,13 +770,13 @@ useEffect(() => {
       openSidesOfLand: formData.openSidesOfLand,
       length_of_land: formData.length_of_land,
       breadthOfLand: formData.breadthOfLand,
-      no_of_open_sides: formData.no_of_open_sides,
+      //no_of_open_sides: formData.no_of_open_sides,
       type_of_construction: formData.type_of_construction,
       furnished_type: formData.furnished_type,
       total_beds: formData.total_beds,
       office_type: formData.office_type,
-      parking_types: formData.parking_types,
-      purchase_type: formData.purchase_type,
+      //parking_types: formData.parking_types,
+      //purchase_type: formData.purchase_type,
       average_project_price: formData.average_project_price,
       bhk_type: formData.bhk_type,
       area: 1,
@@ -786,7 +787,7 @@ useEffect(() => {
       all_inclusive_price: formData.all_inclusive_price,
       price_negotiable: formData.price_negotiable,
       tax_and_goverment_charges: formData.tax_and_goverment_charges,
-      number_of_seats_available: formData.number_of_seats_available,
+      //number_of_seats_available: formData.number_of_seats_available,
 
       personal_washroom: formData.personal_washroom,
       lift_availability: formData.lift_availability,
@@ -854,8 +855,32 @@ useEffect(() => {
   if (result.status === "1") {
     const projectId = result.data._id;
 
-    console.log("Project ID:", projectId);
+      // ✅ NEW: Upload gallery images
+  if (fileData && fileData.length > 0) {
+    const imagesFormData = new FormData();
+    imagesFormData.append("project_id", projectId);
+    fileData.forEach((file) => {
+      imagesFormData.append("project_image", file); // matches request.FILES.getlist('project_image')
+    });
 
+    const imagesRes = await fetch(
+      `${process.env.REACT_APP_API_URL}/cust_api/add_project_images`, // apna actual URL path lagao
+      {
+        method: "POST",
+        body: imagesFormData,
+      },
+    );
+
+    const imagesResult = await imagesRes.json();
+    console.log("Project Images Upload:", imagesResult);
+
+    if (imagesResult?.error) {
+      toast.error(imagesResult.error);
+    }
+  }
+
+    console.log("Project ID:", projectId);
+console.log("Project Properties:", projectProperties);
 for (const property of projectProperties) {
   const projectPropertyFormData = new FormData();
 
@@ -2873,6 +2898,82 @@ onChange={(e) =>
       />
     </div>
 )}
+{((buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
+                  (buildingType === "Commercial" &&
+                    projectProperty.project_type === "Plot/Land")) && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      No. of Open Sides
+                    </label>
+
+                    <select
+                      value={projectProperty.no_of_open_sides || ""}
+onChange={(e) =>
+  handleProjectPropertyChange(
+    index,
+    "no_of_open_sides",
+    e.target.value
+  )
+}
+                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="">Select Open Sides</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                    </select>
+                  </div>
+                )}
+                {(buildingType === "Commercial" ||
+  (buildingType === "Residential" &&
+    projectProperty.project_type === "Other")) && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      Purchase Type
+                    </label>
+
+                    <select
+  value={projectProperty.purchase_type || ""}
+  onChange={(e) =>
+    handleProjectPropertyChange(
+      index,
+      "purchase_type",
+      e.target.value
+    )
+  }
+  className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+>
+                      <option value="">Select Purchase Type</option>
+                      <option value="Resale">Resale</option>
+                      <option value="New bookings">New Bookings</option>
+                    </select>
+                  </div>
+                )}
+                {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      Number of Seats Available
+                    </label>
+
+                    <input
+  type="text"
+  value={projectProperty.number_of_seats_available || ""}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      handleProjectPropertyChange(
+        index,
+        "number_of_seats_available",
+        value
+      );
+    }
+  }}
+  placeholder="Enter number of seats"
+  className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+/>
+                  </div>
+                )}
                   {/* <div className="md:col-span-3 mt-2"> */}
                     {/* <label className="font-medium text-gray-700">
                       Price Details
@@ -3210,7 +3311,7 @@ onChange={(e) =>
                     />
                   </div>
                 )} */}
-                {buildingType === "Commercial" && propertyType === "Retail" && (
+                {/* {buildingType === "Commercial" && propertyType === "Retail" && (
                   <div>
                     <label className="font-medium text-gray-700">
                       Parking Type
@@ -3250,10 +3351,10 @@ onChange={(e) =>
                           value: "Multilevel Parking",
                           label: "Multilevel Parking",
                         },
-                        // {
-                        //   value: "Not Available",
-                        //   label: "Not Available",
-                        // },
+                        {
+                          value: "Not Available",
+                          label: "Not Available",
+                        },
                       ].filter((opt) =>
                         (formData.parking_types || "")
                           .split(",")
@@ -3338,7 +3439,7 @@ onChange={(e) =>
                       }}
                     />
                   </div>
-                )}
+                )} */}
                 {/* {buildingType === "Commercial" && propertyType === "Office" && (
                   <div>
                     <label className="font-medium text-gray-700">
@@ -3430,6 +3531,19 @@ onChange={(e) =>
                       />
                     </div>
                   )} */}
+                  <div>
+  <label className="block mb-2 font-medium text-gray-700">
+    RERA ID
+  </label>
+
+  <input
+    type="text"
+    value={reraId}
+    onChange={(e) => setReraId(e.target.value)}
+    placeholder="Enter RERA ID"
+    className="w-full p-3 border rounded-lg outline-none"
+  />
+</div>
                 {buildingType === "Commercial" &&
                   propertyType === "Hospitality" && (
                     <div>
@@ -3582,28 +3696,7 @@ onChange={(e) =>
                     </div>
                   </>
                 )} */}
-                {((buildingType === "Residential" && propertyType === "Plot/Land") ||
-                  (buildingType === "Commercial" &&
-                    propertyType === "Plot/Land")) && (
-                  <div>
-                    <label className="font-medium text-gray-700">
-                      No. of Open Sides
-                    </label>
-
-                    <select
-                      name="no_of_open_sides"
-                      value={formData.no_of_open_sides || ""}
-                      onChange={handleInputChange}
-                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                    >
-                      <option value="">Select Open Sides</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                    </select>
-                  </div>
-                )}
+                
                 {((buildingType === "Residential" && propertyType === "Plot/Land") ||
                   (buildingType === "Commercial" &&
                     propertyType === "Plot/Land")) && (
@@ -3965,29 +4058,7 @@ onChange={(e) =>
                       </select>
                     </div>
                   )} */}
-                {buildingType === "Commercial" && propertyType === "Office" && (
-                  <div>
-                    <label className="font-medium text-gray-700">
-                      Number of Seats Available
-                    </label>
-
-                    <input
-                      type="text"
-                      value={formData.number_of_seats_available || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d*$/.test(value)) {
-                          setFormData((prev) => ({
-                            ...prev,
-                            number_of_seats_available: value,
-                          }));
-                        }
-                      }}
-                      placeholder="Enter number of seats"
-                      className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                    />
-                  </div>
-                )}
+                
                 {buildingType === "Residential" && propertyType === "PG" && (
                   <div>
                     <label className="font-medium text-gray-700">

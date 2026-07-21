@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+// File ke top mein, component function ke BAHAR
+
 import { IoIosInformationCircle } from "react-icons/io";
 import { ToWords } from "to-words";
 import { Trash } from "lucide-react"; // Using Lucide Icons for delete button
@@ -20,6 +22,7 @@ import "primeicons/primeicons.css";
 import { MdErrorOutline } from "react-icons/md";
 import Select, { components } from "react-select";
 import { Country, State } from "country-state-city";
+const GOOGLE_MAPS_LIBRARIES = ["places"];
 
 const AddNewProperty = () => {
   const [mapCenter, setMapCenter] = useState({ lat: 18.5204, lng: 73.8567 });
@@ -37,9 +40,13 @@ const AddNewProperty = () => {
   const [longitude, setLongitude] = useState(null);
   const autoCompleteRef = useRef(null);
   const GOOGLE_MAPS_API_KEY = "AIzaSyAUCNwxnNo52kFWJNGhRVj-AnkoffmzYe0";
+  // const { isLoaded } = useJsApiLoader({
+  //   googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+  //   libraries: ["places"],
+  // });
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: ["places"],
+    libraries: GOOGLE_MAPS_LIBRARIES,   
   });
 
   const userId = sessionStorage.getItem("accessToken");

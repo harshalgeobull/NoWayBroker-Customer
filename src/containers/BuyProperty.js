@@ -32,8 +32,6 @@ import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
-console.log(userLocation);
-
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371; // Earth radius in km
     const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -71,18 +69,15 @@ const BuyProperty = ({
 
     // Fetch Buy properties (data already filtered by parent with property_category_type: "Buy")
     const fetchBuyProperties = () => {
-        console.log("Full Data :", data);
         if (data?.status === 1 && Array.isArray(data.data)) {
-            console.log("API Data :", data.data);
             const buyProperties = data.data.filter(
                 (item) =>
                     item.property_category_type &&
-                    item.property_category_type.toLowerCase() === "buy",
+                    item.property_category_type.toLowerCase() === "buy"
             );
-            console.log("Buy Properties :", buyProperties);
+
             setProperties(buyProperties);
         } else {
-            console.log("No Buy Data");
             setProperties([]);
         }
     };
@@ -95,40 +90,93 @@ const BuyProperty = ({
         history.push("/advisordashboard?label=Buy");
     };
 
-    // Add property to favorites
     const addToFavorites = async (propertyId) => {
         if (!userId) {
             toast.error("Please log in to save properties to your favorites.");
             return;
         }
-        const data = { user_id: userId, property_id: propertyId };
+
+        // Optimistic update - UI instantly update, API background madhe
+        setProperties((prev) =>
+            prev.map((item) =>
+                item._id === propertyId ? { ...item, is_favorite: true } : item
+            )
+        );
+
         try {
-            await axios.post(
+            const response = await axios.post(
                 `${process.env.REACT_APP_API_URL}/cust_api/add_to_favorite`,
-                data,
+                {
+                    user_id: userId,
+                    property_id: propertyId,
+                }
             );
-            fetchHomeData();
+
+            if (response.data.status === 1) {
+                setProperties((prev) =>
+                    prev.map((item) =>
+                        item._id === propertyId
+                            ? {
+                                ...item,
+                                is_favorite: true,
+                                favorite_id: response.data.favorite_id,
+                            }
+                            : item
+                    )
+                );
+            } else {
+                // Revert if API failed
+                setProperties((prev) =>
+                    prev.map((item) =>
+                        item._id === propertyId ? { ...item, is_favorite: false } : item
+                    )
+                );
+            }
         } catch (error) {
-            console.log("Failed to save the property. Please try again.");
-            fetchHomeData();
+            console.error("Add favorite failed:", error);
+
+            setProperties((prev) =>
+                prev.map((item) =>
+                    item._id === propertyId
+                        ? { ...item, is_favorite: false }
+                        : item
+                )
+            );
         }
     };
 
     // Remove property from favorites
-    const removeFromFavorites = async (FavoriteId) => {
+    const removeFromFavorites = async (favoriteId) => {
         if (!userId) {
             toast.error("Please log in to remove properties from your favorites.");
             return;
         }
+
+        // Optimistic update - UI instantly update
+        setProperties((prev) =>
+            prev.map((item) =>
+                item.favorite_id === favoriteId
+                    ? { ...item, is_favorite: false, favorite_id: null }
+                    : item
+            )
+        );
+
         try {
-            await axios.delete(
+            const response = await axios.delete(
                 `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
-                { data: { favorite_id: FavoriteId } },
+                {
+                    data: {
+                        favorite_id: favoriteId,
+                    },
+                }
             );
-            fetchHomeData();
+
+            if (response.data.status !== 1) {
+                toast.error("Failed to remove favorite. Please try again.");
+            }
         } catch (error) {
-            console.log("Failed to remove the property. Please try again.");
-            fetchHomeData();
+            console.error("Remove favorite failed:", error);
+            toast.error("Failed to remove favorite. Please try again.");
         }
     };
 
@@ -437,11 +485,6 @@ const BuyProperty = ({
                                                                     Verified
                                                                 </span>
 
-                                                                {/* Info Icon */}
-                                                                <span className="ml-2 w-4 h-4 flex items-center justify-center rounded-full bg-white text-[#2DBE3F] text-[10px] font-bold">
-                                                                    i
-                                                                </span>
-
                                                             </div>
                                                         </div>
                                                     )}
@@ -456,6 +499,7 @@ const BuyProperty = ({
                                                         )}
 
                                                         <button
+                                                            type="button"
                                                             className="p-2 rounded-full shadow bg-gray-800/60 backdrop-blur-sm"
                                                             onClick={() => {
                                                                 if (!userId) {
@@ -748,10 +792,10 @@ const BuyProperty = ({
                                                     />
                                                 </div>
 
-                                                {console.log(
+                                                {/* {console.log(
                                                     property.connect_to_name,
                                                     property.property_owner_image,
-                                                )}
+                                                )} */}
 
                                                 {/* Row 6: Owner Details */}
                                                 <div className="flex items-center pt-3 mt-auto">

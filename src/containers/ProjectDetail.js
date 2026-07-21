@@ -30,7 +30,27 @@ import { Hammer, CalendarDays, Car, ArrowUp, CheckCircle } from "lucide-react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { MdApartment } from "react-icons/md";
 import { RiRuler2Line } from "react-icons/ri";
+import { IoMdClose } from "react-icons/io";
 import { AiOutlineClockCircle, AiOutlineUser } from "react-icons/ai";
+// 👇 NEW: icons needed for the ProjectList.js-style card design used in
+// the "View other Projects" section below (ConfigCarousel + card chrome).
+import {
+  FaBed,
+  FaHardHat,
+  FaHotel,
+  FaStore,
+  FaWarehouse,
+  FaVideo,
+  FaArrowRight,
+  FaChevronLeft,
+  FaChevronRight,
+  FaDownload,
+  FaHeart,
+} from "react-icons/fa";
+import { BsBuildings } from "react-icons/bs";
+import { HiOutlineOfficeBuilding } from "react-icons/hi";
+import { MdOutlineStoreMallDirectory, MdFiberNew } from "react-icons/md";
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
   const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -38,12 +58,137 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
+
+/* ====================================================================
+   ConfigCarousel — 👇 NEW: exact same component used on Spotlights.js /
+   ProjectList.js / ProjectBuilder.js cards. Dynamically renders one card
+   per available residential configuration (BHK for residential, unit type
+   for commercial) — never hardcoded, always driven by the `units` array's
+   actual length. Built on react-slick so users can swipe/drag horizontally
+   to reveal further configs beyond what's visible. No visible arrows, no
+   dots — pure swipe. Visible count is responsive: 3 on desktop, 2 on
+   tablet, 1-2 on mobile depending on available width.
+   Used only inside the "View other Projects" card grid at the bottom of
+   this page, to match the card design shown in ProjectList.js.
+   ==================================================================== */
+const ConfigCarousel = ({
+  units,
+  isCommercial,
+  formatAverageProjectPrice,
+  getCommercialIcon,
+}) => {
+  const innerSliderRef = useRef(null);
+
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1024,
+  );
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  if (!units || units.length === 0) return null;
+
+  const desktopVisible = Math.min(3, units.length);
+  const tabletVisible = Math.min(2, units.length);
+  const mobileVisible = Math.min(2, units.length);
+  const smallMobileVisible = Math.min(1, units.length);
+
+  let currentVisible = desktopVisible;
+  if (windowWidth <= 380) {
+    currentVisible = smallMobileVisible;
+  } else if (windowWidth <= 640) {
+    currentVisible = mobileVisible;
+  } else if (windowWidth <= 1024) {
+    currentVisible = tabletVisible;
+  }
+
+  const showNavButtons = units.length > currentVisible;
+
+  const sliderSettings = {
+    dots: false,
+    arrows: false,
+    infinite: units.length > smallMobileVisible,
+    speed: 400,
+    slidesToShow: desktopVisible,
+    slidesToScroll: 1,
+    swipe: true,
+    swipeToSlide: true,
+    touchThreshold: 8,
+    responsive: [
+      { breakpoint: 1024, settings: { slidesToShow: tabletVisible } },
+      { breakpoint: 640, settings: { slidesToShow: mobileVisible } },
+      { breakpoint: 380, settings: { slidesToShow: smallMobileVisible } },
+    ],
+  };
+
+  return (
+    <div className="w-full h-full flex items-center gap-1.5">
+      {showNavButtons && (
+        <button
+          type="button"
+          aria-label="Previous configuration"
+          onClick={(e) => {
+            e.stopPropagation();
+            innerSliderRef.current?.slickPrev();
+          }}
+          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] flex items-center justify-center transition-shadow duration-200"
+        >
+          <FaChevronLeft className="text-[#A70D2A] text-[10px] sm:text-xs" />
+        </button>
+      )}
+
+      <div className="flex-1 min-w-0 h-full flex items-center [&_.slick-list]:overflow-hidden [&_.slick-track]:flex [&_.slick-track]:items-stretch [&_.slick-slide]:h-auto [&_.slick-slide>div]:h-full">
+        <Slider ref={innerSliderRef} {...sliderSettings} className="w-full">
+          {units.map((unit, i) => {
+            const Icon = isCommercial ? getCommercialIcon(unit.type) : FaBed;
+            return (
+              <div key={i} className="h-full px-1">
+                <div className="h-full flex flex-col items-center justify-center border border-gray-200 rounded-lg px-2 py-2.5 text-center bg-white">
+                  <Icon className="text-sm mb-1 text-gray-700" />
+                  <h3 className="font-semibold text-[10.5px] sm:text-[11px] text-gray-900 truncate leading-tight">
+                    {unit.type}
+                  </h3>
+                  {unit.price ? (
+                    <h2 className="text-[#A70D2A] font-bold text-[15px] sm:text-base lg:text-[18px] mt-1.5 text-center truncate leading-tight">
+                      {formatAverageProjectPrice(unit.price)}
+                    </h2>
+                  ) : (
+                    <h2 className="text-gray-300 font-bold text-[15px] sm:text-base lg:text-[18px] mt-1.5 text-center">
+                      &nbsp;
+                    </h2>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </Slider>
+      </div>
+
+      {showNavButtons && (
+        <button
+          type="button"
+          aria-label="Next configuration"
+          onClick={(e) => {
+            e.stopPropagation();
+            innerSliderRef.current?.slickNext();
+          }}
+          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-[0_1px_4px_rgba(0,0,0,0.18)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.28)] flex items-center justify-center transition-shadow duration-200"
+        >
+          <FaChevronRight className="text-[#A70D2A] text-[10px] sm:text-xs" />
+        </button>
+      )}
+    </div>
+  );
+};
 
 const ProjectDetail = () => {
   // const [showAllImages, setShowAllImages] = useState(false);
@@ -160,22 +305,22 @@ const ProjectDetail = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [projectId]);
-const equalizeCardHeights = () => {
-  const cards = document.querySelectorAll(".configuration-card");
+  const equalizeCardHeights = () => {
+    const cards = document.querySelectorAll(".configuration-card");
 
-  if (!cards.length) return;
+    if (!cards.length) return;
 
-  let maxHeight = 0;
+    let maxHeight = 0;
 
-  cards.forEach((card) => {
-    card.style.height = "auto";
-    maxHeight = Math.max(maxHeight, card.offsetHeight);
-  });
+    cards.forEach((card) => {
+      card.style.height = "auto";
+      maxHeight = Math.max(maxHeight, card.offsetHeight);
+    });
 
-  cards.forEach((card) => {
-    card.style.height = `${maxHeight}px`;
-  });
-};
+    cards.forEach((card) => {
+      card.style.height = `${maxHeight}px`;
+    });
+  };
   // Fetch Project Data
   const fetchProjectDetails = async () => {
     try {
@@ -327,8 +472,8 @@ const equalizeCardHeights = () => {
 
         setProjects([result.data]);
         setTimeout(() => {
-  equalizeCardHeights();
-}, 500);
+          equalizeCardHeights();
+        }, 500);
       }
     } catch (error) {
       console.error("Failed to fetch project details:", error);
@@ -549,6 +694,14 @@ const equalizeCardHeights = () => {
   const handleCloseShareModal = () => {
     setIsShareModalOpen(false);
   };
+  const currentShareUrl = window.location.href;
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(currentShareUrl);
+    toast.success("Link copied!"); // agar toast already import hai
+  };
+
+
 
   //for the contact details
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -670,6 +823,18 @@ const equalizeCardHeights = () => {
     );
   };
 
+  // 👇 NEW: Maps a commercial unit "type" string to its React Icon, per spec
+  // — same helper used in Spotlights.js / ProjectList.js / ProjectBuilder.js,
+  // needed here for the ConfigCarousel in the "View other Projects" cards.
+  const getCommercialIcon = (type = "") => {
+    if (/office|co-?working/i.test(type)) return HiOutlineOfficeBuilding;
+    if (/retail/i.test(type)) return MdOutlineStoreMallDirectory;
+    if (/hotel/i.test(type)) return FaHotel;
+    if (/shop/i.test(type)) return FaStore;
+    if (/warehouse/i.test(type)) return FaWarehouse;
+    return BsBuildings;
+  };
+
   //  Add to favorites
   const addToFavoritesRecommendedProperty = async (PrjectId) => {
     if (!userId) {
@@ -725,16 +890,16 @@ const equalizeCardHeights = () => {
     };
   }, [isModalOpen]);
   useEffect(() => {
-  if (!projects.length) return;
+    if (!projects.length) return;
 
-  const timer1 = setTimeout(equalizeCardHeights, 300);
-  const timer2 = setTimeout(equalizeCardHeights, 700);
+    const timer1 = setTimeout(equalizeCardHeights, 300);
+    const timer2 = setTimeout(equalizeCardHeights, 700);
 
-  return () => {
-    clearTimeout(timer1);
-    clearTimeout(timer2);
-  };
-}, [projects]);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [projects]);
 
   // Tabs shown right below the image gallery (Overview / Amenities / About Property / Location)
   const detailTabs = [
@@ -771,12 +936,12 @@ const equalizeCardHeights = () => {
 
   // Residential BHKs
   const residentialConfigurations = [
-  ...new Set(
-    projectProperties
-      .map((item) => item.bhk_type?.replace(" BHK", ""))
-      .filter(Boolean),
-  ),
-].join(", ")
+    ...new Set(
+      projectProperties
+        .map((item) => item.bhk_type?.replace(" BHK", ""))
+        .filter(Boolean),
+    ),
+  ].join(", ")
 
   // Commercial Types
   const commercialConfigurations = [
@@ -788,9 +953,9 @@ const equalizeCardHeights = () => {
   const heroLocation = project.address_area || "";
   // Hero Subtitle
   const heroTitle =
-    project.building_type === "Residential"
-      ? `${residentialConfigurations} Apartments in ${heroLocation}`
-      : `Commercial ${commercialConfigurations} in ${heroLocation}`;
+  project.building_type === "Residential"
+    ? `${residentialConfigurations} BHK Apartments in ${heroLocation}`
+    : `Commercial ${commercialConfigurations} in ${heroLocation}`;
 
   const prices = projectProperties
     .map((item) => Number(item.price))
@@ -810,11 +975,11 @@ const equalizeCardHeights = () => {
   const sliderImages =
     projects?.length > 0
       ? [
-          projects[0]?.project_details?.cover_image,
-          ...(images || [])
-            .map((img) => img.image)
-            .filter((img) => img !== projects[0]?.project_details?.cover_image),
-        ]
+        projects[0]?.project_details?.cover_image,
+        ...(images || [])
+          .map((img) => img.image)
+          .filter((img) => img !== projects[0]?.project_details?.cover_image),
+      ]
       : [];
   console.log("sliderImages:", sliderImages);
   const handleDetailTabClick = (tab) => {
@@ -1120,42 +1285,41 @@ const equalizeCardHeights = () => {
           <div className="flex flex-wrap w-full gap-2 mt-4 sm:gap-4 md:mt-0 sm:w-auto">
             {projects[0]?.project_details?.virtual_tour_availability ===
               "Yes" && (
-              <button
-                className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
-                ${
-                  scheduledDateLabel === "Virtual Tour"
-                    ? "bg-white border my-text rounded-lg"
-                    : projects[0]?.tour_schedule?.[0]?.status === "Accepted"
-                      ? "bg-green-500 text-white rounded-full"
-                      : "bg-[#FFD700] text-black rounded-full"
-                }`}
-                onClick={() => {
-                  const token = sessionStorage.getItem("accessToken");
+                <button
+                  className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
+                ${scheduledDateLabel === "Virtual Tour"
+                      ? "bg-white border my-text rounded-lg"
+                      : projects[0]?.tour_schedule?.[0]?.status === "Accepted"
+                        ? "bg-green-500 text-white rounded-full"
+                        : "bg-[#FFD700] text-black rounded-full"
+                    }`}
+                  onClick={() => {
+                    const token = sessionStorage.getItem("accessToken");
 
-                  if (scheduledDateLabel !== "Virtual Tour") {
-                    history.push({
-                      pathname: "/dashboard",
-                      state: { page: "myVirtualtour" },
-                    });
-                  } else {
-                    if (token) {
-                      setIsModalOpen(true);
+                    if (scheduledDateLabel !== "Virtual Tour") {
+                      history.push({
+                        pathname: "/dashboard",
+                        state: { page: "myVirtualtour" },
+                      });
                     } else {
-                      setOpenVirtualTourAfterLogin(true);
-                      setIsLoginModalOpen(true);
+                      if (token) {
+                        setIsModalOpen(true);
+                      } else {
+                        setOpenVirtualTourAfterLogin(true);
+                        setIsLoginModalOpen(true);
+                      }
                     }
-                  }
-                }}
-              >
-                <PiCubeFocus size={20} />
+                  }}
+                >
+                  <PiCubeFocus size={20} />
 
-                {scheduledDateLabel}
+                  {scheduledDateLabel}
 
-                {scheduledDateLabel !== "Virtual Tour" && (
-                  <HiOutlineArrowRight size={16} />
-                )}
-              </button>
-            )}
+                  {scheduledDateLabel !== "Virtual Tour" && (
+                    <HiOutlineArrowRight size={16} />
+                  )}
+                </button>
+              )}
 
             {isModalOpen && (
               <GetScheduleModal
@@ -1473,11 +1637,10 @@ const equalizeCardHeights = () => {
                   key={tab.key}
                   type="button"
                   onClick={() => handleDetailTabClick(tab)}
-                  className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                    activeDetailTab === tab.key
-                      ? "border-rose-600 text-rose-600"
-                      : "border-transparent text-gray-600 hover:text-rose-600"
-                  }`}
+                  className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeDetailTab === tab.key
+                    ? "border-rose-600 text-rose-600"
+                    : "border-transparent text-gray-600 hover:text-rose-600"
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -1488,12 +1651,18 @@ const equalizeCardHeights = () => {
           {showAllImages && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
               <div className="relative w-11/12 p-6 overflow-auto bg-white rounded-lg h-5/6">
-                <button
+                {/* <button
                   className="absolute text-3xl text-black top-4 right-4"
                   onClick={() => setShowAllImages(false)}
-                ></button>
+                ></button> */}
+                <button
+                  className="absolute z-10 text-3xl text-black top-4 right-4 hover:text-red-600"
+                  onClick={() => setShowAllImages(false)}
+                >
+                  <IoMdClose size={28} />
+                </button>
 
-                <div className="sticky top-0 z-50 bg-white border rounded-lg shadow mt-4">
+                {/* <div className="sticky top-0 z-50 bg-white border rounded-lg shadow mt-4">
                   <div className="flex">
                     <button
                       onClick={() =>
@@ -1539,7 +1708,7 @@ const equalizeCardHeights = () => {
                       Location
                     </button>
                   </div>
-                </div>
+                </div> */}
                 <h2 className="mb-4 text-2xl font-semibold">Gallery</h2>
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
                   {/* All Images */}
@@ -1571,6 +1740,14 @@ const equalizeCardHeights = () => {
               </div>
             </div>
           )}
+          {isShareModalOpen && (
+            <ShareModal
+              currentShareUrl={currentShareUrl}
+              closeShareModal={handleCloseShareModal}
+              copyLink={copyLink}
+            />
+          )}
+
 
           {/* Property Location Section */}
           {/* {projects[0]?.project_details?.address && (
@@ -1594,55 +1771,55 @@ const equalizeCardHeights = () => {
 
           <div ref={configurationRef}>
             <h3 className="mb-6 text-3xl font-bold text-gray-900">
-  Configurations
-</h3>
+              Configurations
+            </h3>
             <div className="p-4 mt-2 bg-white rounded-lg shadow-sm">
               {(() => {
                 const project = projects[0]?.project_details || {};
                 const projectProperties = projects[0]?.project_properties || [];
                 const equalizeCardHeights = () => {
-  const cards = document.querySelectorAll(".configuration-card");
+                  const cards = document.querySelectorAll(".configuration-card");
 
-  let maxHeight = 0;
+                  let maxHeight = 0;
 
-  cards.forEach((card) => {
-    card.style.height = "auto";
-    maxHeight = Math.max(maxHeight, card.offsetHeight);
-  });
+                  cards.forEach((card) => {
+                    card.style.height = "auto";
+                    maxHeight = Math.max(maxHeight, card.offsetHeight);
+                  });
 
-  cards.forEach((card) => {
-    card.style.height = `${maxHeight}px`;
-  });
-};
+                  cards.forEach((card) => {
+                    card.style.height = `${maxHeight}px`;
+                  });
+                };
                 const configurationSliderSettings = {
-  dots: false,
-  infinite: projectProperties.length > 3,
-  speed: 500,
-  slidesToShow: Math.min(3, projectProperties.length),
-  slidesToScroll: 1,
-  arrows: true,
-  onInit: () => {
-    setTimeout(equalizeCardHeights, 300);
-  },
+                  dots: false,
+                  infinite: projectProperties.length > 3,
+                  speed: 500,
+                  slidesToShow: Math.min(3, projectProperties.length),
+                  slidesToScroll: 1,
+                  arrows: true,
+                  onInit: () => {
+                    setTimeout(equalizeCardHeights, 300);
+                  },
 
-  afterChange: () => {
-    setTimeout(equalizeCardHeights, 100);
-  },
-  responsive: [
-    {
-      breakpoint: 1024,
-      settings: {
-        slidesToShow: Math.min(2, projectProperties.length),
-      },
-    },
-    {
-      breakpoint: 768,
-      settings: {
-        slidesToShow: 1,
-      },
-    },
-  ],
-};
+                  afterChange: () => {
+                    setTimeout(equalizeCardHeights, 100);
+                  },
+                  responsive: [
+                    {
+                      breakpoint: 1024,
+                      settings: {
+                        slidesToShow: Math.min(2, projectProperties.length),
+                      },
+                    },
+                    {
+                      breakpoint: 768,
+                      settings: {
+                        slidesToShow: 1,
+                      },
+                    },
+                  ],
+                };
                 const hiddenPropertyFields = [
                   "_id",
                   "project",
@@ -1753,72 +1930,97 @@ const equalizeCardHeights = () => {
 
                 return (
                   <Slider {...configurationSliderSettings}>
-  {projectProperties.map((property, index) => (
-    <div key={index} className="px-2 h-full">
-  <div
-  className="configuration-card flex flex-col p-5 bg-white border border-gray-200 rounded-xl shadow-sm"
->
-        <h3 className="min-h-[56px] text-xl font-bold leading-7 text-gray-900">
-          {project.building_type === "Residential"
-            ? `${property.bhk_type || ""} ${property.project_type || ""}`.trim()
-            : property.project_type}
-        </h3>
+                    {projectProperties.map((property, index) => (
+                      <div key={index} className="px-2 h-full">
+                        <div
+                          className="configuration-card flex flex-col p-5 bg-white border border-gray-200 rounded-xl shadow-sm"
+                        >
+                          <h3 className="min-h-[56px] text-xl font-bold leading-7 text-gray-900">
+                            {project.building_type === "Residential"
+                              ? `${property.bhk_type || ""} ${property.project_type || ""}`.trim()
+                              : property.project_type}
+                          </h3>
 
-        <p className="mt-1 text-3xl font-bold my-text">
-          {formatPrice(property.price)}
-        </p>
+                          <p className="mt-1 text-3xl font-bold my-text">
+                            {formatPrice(property.price)}
+                          </p>
 
-        <hr className="mt-3 mb-4 border-gray-200" />
+                          <hr className="mt-3 mb-4 border-gray-200" />
 
-        <div className="space-y-2">
-          {Object.entries(property).map(([key, value]) => {
-            if (hiddenPropertyFields.includes(key)) return null;
+                          <div className="space-y-2">
+                            {Object.entries(property).map(([key, value]) => {
+                              if (hiddenPropertyFields.includes(key)) return null;
 
-            if (
-              value === null ||
-              value === undefined ||
-              value === "" ||
-              value === "NA" ||
-              value === "N/A" ||
-              value === false ||
-              value === "No"
-            ) {
-              return null;
-            }
+                              if (
+                                value === null ||
+                                value === undefined ||
+                                value === "" ||
+                                value === "NA" ||
+                                value === "N/A" ||
+                                value === false ||
+                                value === "No"
+                              ) {
+                                return null;
+                              }
 
-            let label = key
-              .replace(/_/g, " ")
-              .replace(/([A-Z])/g, " $1")
-              .replace(/\b\w/g, (c) => c.toUpperCase());
-              if (key === "bhk_type") label = "Configuration";
-if (key === "project_floor") label = "Floor";
-if (key === "bathroom") label = "Bathrooms";
-if (key === "balcony") label = "Balconies";
-if (key === "furnished_type") label = "Furnishing";
-if (key === "age_of_property") label = "Property Age";
+                              let label = key
+                                .replace(/_/g, " ")
+                                .replace(/([A-Z])/g, " $1")
+                                .replace(/\b\w/g, (c) => c.toUpperCase());
+                              if (key === "bhk_type") label = "Configuration";
+                              if (key === "project_floor") label = "Floor";
+                              if (key === "bathroom") label = "Bathrooms";
+                              if (key === "balcony") label = "Balconies";
+                              if (key === "furnished_type") label = "Furnishing";
+                              if (key === "age_of_property") label = "Property Age";
+                              if (key === "no_of_open_sides") label = "No. of Open Sides";
+                              if (key === "property_dimensions_length") label = "Length of Plot";
+                              if (key === "property_dimensions_breadth") label = "Breadth of Plot";
+                              if (key === "parking_types") label = "Parking Type";
+                              if (key === "number_of_seats_available") label = "Seats Available";
+                              if (key === "purchase_type") label = "Purchase Type";
+                              if (key === "sub_project_type") { label = property.project_type === "Plot/Land" ? "Land Type" : "Sub Project Type"; }
+                              if (key === "sub_project_type") {
+                                if (property.project_type === "Plot/Land") {
+                                  label = "Land Type";
+                                } else if (property.project_type === "Retail") {
+                                  label = "Retail Type";
+                                } else if (property.project_type === "Office") {
+                                  label = "Office Type";
+                                } else if (property.project_type === "Storage") {
+                                  label = "Storage Type";
+                                } else if (property.project_type === "Industry") {
+                                  label = "Industry Type";
+                                } else if (property.project_type === "Hospitality") {
+                                  label = "Hospitality Type";
+                                } else {
+                                  label = "Sub Project Type";
+                                }
+                              }
 
-            return (
-              <div
-                key={key}
-                className="flex justify-between py-2 border-b border-gray-100"
-              >
-                <span className="text-gray-500">{label}</span>
 
-                <span className="font-semibold text-right break-words">
-  {key === "carpet_area"
-    ? `${value} ${property.carpet_area_in || ""}`
-    : key === "area"
-    ? `${value} ${property.area_in || ""}`
-    : String(value)}
-</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  ))}
-</Slider>
+                              return (
+                                <div
+                                  key={key}
+                                  className="flex justify-between py-2 border-b border-gray-100"
+                                >
+                                  <span className="text-gray-500">{label}</span>
+
+                                  <span className="font-semibold text-right break-words">
+                                    {key === "carpet_area"
+                                      ? `${value} ${property.carpet_area_in || ""}`
+                                      : key === "area"
+                                        ? `${value} ${property.area_in || ""}`
+                                        : String(value)}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </Slider>
                 );
               })()}
             </div>
@@ -1856,44 +2058,44 @@ if (key === "age_of_property") label = "Property Age";
                 },
 
                 ...(project.possession_status === "Under Construction" &&
-                project.possession_date
+                  project.possession_date
                   ? [
-                      {
-                        label: "Possession",
-                        value: new Date(
-                          project.possession_date,
-                        ).toLocaleDateString("en-GB", {
-                          month: "short",
-                          year: "numeric",
-                        }),
-                        icon: (
-                          <CalendarDays className="w-5 h-5 text-purple-600" />
-                        ),
-                        bg: "bg-purple-100",
-                      },
-                    ]
+                    {
+                      label: "Possession",
+                      value: new Date(
+                        project.possession_date,
+                      ).toLocaleDateString("en-GB", {
+                        month: "short",
+                        year: "numeric",
+                      }),
+                      icon: (
+                        <CalendarDays className="w-5 h-5 text-purple-600" />
+                      ),
+                      bg: "bg-purple-100",
+                    },
+                  ]
                   : []),
 
                 ...(project.lift_availability === "Yes"
                   ? [
-                      {
-                        label: "Lift",
-                        value: "Available",
-                        icon: <ArrowUp className="w-5 h-5 text-indigo-600" />,
-                        bg: "bg-indigo-100",
-                      },
-                    ]
+                    {
+                      label: "Lift",
+                      value: "Available",
+                      icon: <ArrowUp className="w-5 h-5 text-indigo-600" />,
+                      bg: "bg-indigo-100",
+                    },
+                  ]
                   : []),
 
                 ...(project.parking_availability === "Yes"
                   ? [
-                      {
-                        label: "Parking",
-                        value: "Available",
-                        icon: <Car className="w-5 h-5 text-emerald-600" />,
-                        bg: "bg-emerald-100",
-                      },
-                    ]
+                    {
+                      label: "Parking",
+                      value: "Available",
+                      icon: <Car className="w-5 h-5 text-emerald-600" />,
+                      bg: "bg-emerald-100",
+                    },
+                  ]
                   : []),
               ];
 
@@ -2103,11 +2305,10 @@ if (key === "age_of_property") label = "Property Age";
 
             {enquiryStatus && (
               <div
-                className={`text-center mt-4 text-lg ${
-                  enquiryStatus.type === "success"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
+                className={`text-center mt-4 text-lg ${enquiryStatus.type === "success"
+                  ? "text-green-600"
+                  : "text-red-600"
+                  }`}
               >
                 {enquiryStatus.message}
               </div>
@@ -2142,6 +2343,13 @@ if (key === "age_of_property") label = "Property Age";
       </div>
 
       {/* Other Projects Section Start */}
+      {/* ====================================================================
+          👇 CHANGED: card design below now matches Spotlights.js / ProjectList.js
+          exactly — same size (min-h-[440px]/[460px]/[480px]), same ConfigCarousel
+          showing BHK + price boxes, same badges, same builder row, same
+          Brochure / View Details buttons. Everything else on this page is
+          untouched.
+          ==================================================================== */}
       <div className="py-4 mt-8 bg-white rounded-2xl">
         <div className="flex flex-col items-center justify-between px-4 md:flex-row">
           <div className="flex flex-col">
@@ -2177,281 +2385,320 @@ if (key === "age_of_property") label = "Property Age";
           </div>
         </div>
 
-        <Slider ref={sliderRef} {...settings} className="mx-auto mt-4">
+        <Slider
+          ref={sliderRef}
+          {...settings}
+          className="mx-auto -mx-2 mt-4 [&_.slick-track]:flex [&_.slick-track]:items-stretch [&_.slick-slide]:h-auto [&_.slick-slide>div]:h-full"
+        >
           {projectList
-            .filter(
-              (project) =>
-                project?.cover_image &&
-                project?.project_name &&
-                project?.average_project_price,
-            )
-            .map((project, index) => (
-              <div key={index} className="px-2 md:px-3">
-                <div className="w-full overflow-hidden bg-white shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300">
-                  <div className="relative">
-                    <img
-                      src={project.cover_image}
-                      alt={project.project_name}
-                      className="w-full h-[220px] sm:h-[260px] md:h-[300px] lg:h-[320px] object-cover rounded-t-2xl cursor-pointer"
-                      onClick={() =>
-                        history.push(`/projectdetail/${project._id}`)
-                      }
-                    />
+            .filter((project) => project?.cover_image && project?.project_name)
+            .map((otherProject, index) => {
+              const isCommercial =
+                otherProject.property_category === "Commercial" ||
+                (otherProject.commercial_units &&
+                  otherProject.commercial_units.length > 0);
 
-                    {/* Heart + Share */}
-                    <div className="absolute top-2 right-2 flex items-center space-x-2">
+              const commercialUnits =
+                otherProject.commercial_units &&
+                  otherProject.commercial_units.length > 0
+                  ? otherProject.commercial_units
+                  : [];
+
+              // Same price-resolution logic as Spotlights.js / ProjectList.js /
+              // ProjectBuilder.js: prefer project_properties, fall back to a
+              // computed min–max range, then to congfigurations.
+              const propertyPrices = (otherProject.project_properties || [])
+                .map((p) => Number(p.price))
+                .filter((p) => !isNaN(p) && p > 0);
+
+              const computedRangePrice =
+                propertyPrices.length === 0
+                  ? null
+                  : propertyPrices.length === 1
+                    ? propertyPrices[0]
+                    : `${Math.min(...propertyPrices)} - ${Math.max(...propertyPrices)}`;
+
+              const resolvedProjectPrice =
+                otherProject.average_project_price ||
+                otherProject.starting_price ||
+                otherProject.min_price ||
+                otherProject.avg_price ||
+                otherProject.price ||
+                computedRangePrice ||
+                null;
+
+              const residentialUnits =
+                otherProject.project_properties &&
+                  otherProject.project_properties.length > 0
+                  ? otherProject.project_properties.map((u) => ({
+                    ...u,
+                    type: u.bhk_type || u.project_type,
+                    price: Number(
+                      u.price ||
+                      u.property_price ||
+                      u.unit_price ||
+                      u.configuration_price ||
+                      u.amount ||
+                      resolvedProjectPrice,
+                    ),
+                  }))
+                  : otherProject.congfigurations
+                    ? otherProject.congfigurations.split(",").map((c) => ({
+                      type: c.trim().includes("BHK")
+                        ? c.trim()
+                        : `${c.trim()} BHK`,
+                      price: resolvedProjectPrice,
+                    }))
+                    : [];
+
+              const addressArea = otherProject.address_area?.trim();
+              const cityName = otherProject.city_name?.trim();
+              let locationText = "";
+              if (addressArea && cityName) {
+                locationText = addressArea
+                  .toLowerCase()
+                  .includes(cityName.toLowerCase())
+                  ? addressArea
+                  : `${addressArea}, ${cityName}`;
+              } else {
+                locationText = addressArea || cityName || "";
+              }
+
+              const distanceKm = getProjectDistance(otherProject);
+
+              const subtitle = isCommercial
+                ? (() => {
+                  const unitSummary =
+                    [
+                      ...new Set(
+                        commercialUnits.map((u) => u.type).filter(Boolean),
+                      ),
+                    ].join(", ") ||
+                    otherProject.project_type ||
+                    "Commercial Space";
+                  return locationText
+                    ? `${unitSummary} in ${locationText}`
+                    : unitSummary;
+                })()
+                : otherProject.congfigurations
+                  ? (() => {
+                    const bhkSummary = otherProject.congfigurations
+                      .split(",")
+                      .map((c) => c.trim().replace(/\s*BHK/i, ""))
+                      .join(",");
+                    return locationText
+                      ? `${bhkSummary} BHK Apartments in ${locationText}`
+                      : `${bhkSummary} BHK Apartments`;
+                  })()
+                  : locationText
+                    ? `Apartments in ${locationText}`
+                    : "Apartments";
+
+              return (
+                <div key={otherProject._id || index} className="h-full px-2">
+                  {/* ==================== CARD — same design as Spotlights.js / ProjectList.js ==================== */}
+                  <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-[0_6px_24px_rgba(17,24,39,0.08)] hover:shadow-[0_18px_48px_rgba(17,24,39,0.16)] transition-all duration-300 flex flex-col h-full min-h-[440px] sm:min-h-[460px] lg:min-h-[480px] w-full">
+                    {/* ==================== IMAGE SECTION (fixed height) ==================== */}
+                    <div className="relative overflow-hidden flex-shrink-0 h-[150px] sm:h-[165px] lg:h-[180px]">
+                      <img
+                        src={otherProject.cover_image}
+                        alt={otherProject.project_name || ""}
+                        className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform duration-500 ease-out"
+                        onClick={() =>
+                          history.push(`/projectdetail/${otherProject._id}`)
+                        }
+                      />
+
+                      {/* Top Left badge — always "New Booking" */}
+                      <div className="absolute top-2 left-2 z-10">
+                        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(22,163,74,0.4)]">
+                          <MdFiberNew size={11} />
+                          <span>New Booking</span>
+                        </div>
+                      </div>
+
+                      {/* Wishlist Heart - Top Right */}
                       <button
-                        className="bg-gray-800/60 backdrop-blur-sm p-2 rounded-full shadow"
+                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 backdrop-blur flex items-center justify-center hover:scale-110 transition-transform duration-200"
                         onClick={(e) => {
                           e.stopPropagation();
                           if (!userId) {
                             setIsLoginModalOpen(true);
                             return;
                           }
-                          if (project.is_favorite) {
+                          if (otherProject.is_favorite) {
                             removeFromFavoritesRecommendedProperty(
-                              project.favorite_id,
+                              otherProject.favorite_id,
                             );
                           } else {
-                            addToFavoritesRecommendedProperty(project._id);
+                            addToFavoritesRecommendedProperty(
+                              otherProject._id,
+                            );
                           }
                         }}
                       >
-                        <Heart
-                          size={20}
-                          stroke={project.is_favorite ? "none" : "white"}
-                          color={
-                            project.is_favorite
-                              ? "red"
-                              : "rgba(75, 85, 99, 0.4)"
+                        <FaHeart
+                          size={11}
+                          className={
+                            otherProject.is_favorite
+                              ? "text-red-500"
+                              : "text-white"
                           }
-                          fill={
-                            project.is_favorite
-                              ? "red"
-                              : "rgba(75, 85, 99, 0.4)"
-                          }
-                          strokeWidth={2}
                         />
                       </button>
-                      <FontAwesomeIcon
-                        icon={faShareNodes}
-                        className="text-gray-500 bg-white p-2 rounded shadow cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsShareModalOpen(true);
-                        }}
-                      />
-                    </div>
 
-                    {/* Logo + Project Name overlay */}
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[90%] sm:w-[85%] md:w-[80%] h-[110px] md:h-[120px] bg-gray-800/60 backdrop-blur-md flex flex-col justify-end p-4 rounded-t-3xl">
-                      <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-full flex justify-center items-center shadow-lg overflow-hidden">
-                        <img
-                          src={project.logo}
-                          alt="Project Logo"
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                      <h3 className="text-center text-white text-lg md:text-2xl font-bold line-clamp-2 min-h-[48px] mt-4">
-                        {project.project_name || "No Project Name Available"}
-                      </h3>
-                    </div>
-                  </div>
-
-                  {/* Card Body */}
-                  <div
-                    className="p-4 bg-white rounded-b-2xl cursor-pointer"
-                    onClick={() =>
-                      history.push(`/projectdetail/${project._id}`)
-                    }
-                  >
-                    {/* Row 1: Project Name + Furnished Type */}
-                    <div className="flex items-start justify-between gap-3 mb-0">
-                      <h3 className="flex-1 m-0 text-base font-bold leading-6 text-gray-900 truncate">
-                        {project.project_name || ""}
-                      </h3>
-                      {project.furnished_type && (
-                        <span className="flex-shrink-0 text-sm font-medium leading-6 text-black whitespace-nowrap">
-                          {project.furnished_type}
-                        </span>
+                      {/* Virtual Tour - Black Glassmorphism, right of heart */}
+                      {otherProject.virtual_tour && (
+                        <a
+                          href={
+                            typeof otherProject.virtual_tour === "string"
+                              ? otherProject.virtual_tour
+                              : undefined
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="absolute top-2 right-10 bg-black/40 backdrop-blur-md border border-white/20 text-white px-1.5 py-1 rounded-lg flex items-center gap-1 text-[9px] font-medium"
+                        >
+                          <FaVideo size={10} />
+                          <span className="hidden sm:inline">Virtual Tour</span>
+                        </a>
                       )}
-                    </div>
 
-                    {/* Row 2: Subtitle */}
-                    <p className="mt-0 mb-2 text-sm leading-5 text-gray-500 truncate">
-                      {project.congfigurations
-                        ? project.congfigurations.includes("BHK")
-                          ? project.congfigurations
-                          : project.congfigurations
-                              .split(",")
-                              .map((c) => `${c.trim()} BHK`)
-                              .join(", ")
-                        : ""}{" "}
-                      {project.project_type} for Sale in{" "}
-                      {project.address_area || ""}
-                      {project.city_name ? `, ${project.city_name}` : ""}
-                    </p>
-
-                    {/* Row 3: Price + Status */}
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-xl font-bold">
-                        {formatAverageProjectPrice(
-                          project.average_project_price,
-                        )}
-                      </span>
-                      {project.possession_status === "Ready To Move" && (
-                        <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
-                          <MdApartment className="text-base text-green-700" />
-                          <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
-                            Ready to Move
-                          </span>
+                      {/* Property Type Ribbon - Bottom Left */}
+                      {otherProject.property_for && (
+                        <div className="absolute bottom-0 left-0 bg-blue-700 text-white px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wide">
+                          {otherProject.property_for}
                         </div>
                       )}
                     </div>
 
-                    {/* Row 4: Features Grid */}
-                    <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
-                      {/* Configuration / Type */}
-                      <div className="flex items-center gap-2 px-1 min-w-0">
-                        <Building2
-                          size={20}
-                          className="text-gray-700 flex-shrink-0"
-                        />
-                        <div className="flex flex-col min-w-0 leading-tight">
-                          <p className="m-0 text-sm font-semibold leading-4 truncate">
-                            {project.congfigurations
-                              ? project.congfigurations.includes("BHK")
-                                ? project.congfigurations.split(",")[0].trim()
-                                : `${project.congfigurations.split(",")[0].trim()} BHK`
-                              : ""}
-                          </p>
-                          <p className="m-0 text-xs leading-4 text-gray-500">
-                            {project.project_type || "Apartment"}
-                          </p>
-                        </div>
+                    {/* ==================== CARD BODY (fills remaining height) ==================== */}
+                    <div
+                      className="cursor-pointer flex flex-col flex-1 min-h-0"
+                      onClick={() =>
+                        history.push(`/projectdetail/${otherProject._id}`)
+                      }
+                    >
+                      {/* Project Name + Subtitle (BHK + location combined) */}
+                      <div className="px-3.5 pt-3 flex-shrink-0">
+                        <h2 className="text-xl sm:text-[22px] lg:text-2xl leading-tight font-bold text-[#111827] line-clamp-2">
+                          {otherProject.project_name ||
+                            "No Project Name Available"}
+                        </h2>
+                        <p className="mt-1 text-gray-500 text-[11px] sm:text-xs lg:text-sm line-clamp-2">
+                          {subtitle}
+                        </p>
                       </div>
 
-                      {/* Bathrooms */}
-                      <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
-                        <Bath
-                          size={20}
-                          className="text-gray-700 flex-shrink-0"
-                        />
-                        <div className="flex flex-col min-w-0 leading-tight">
-                          <p className="m-0 text-sm font-semibold leading-4 truncate">
-                            {project.bathroom || 0} Baths
-                          </p>
-                          <p className="m-0 text-xs leading-4 text-gray-500">
-                            Bathrooms
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Built Up Area */}
-                      <div className="flex items-center gap-2 px-1 border-l border-gray-200 min-w-0">
-                        <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
-                        <div className="flex flex-col min-w-0 leading-tight">
-                          <p className="m-0 text-sm font-semibold leading-4 truncate">
-                            {project.area ? `${project.area} sq.ft` : "N/A"}
-                          </p>
-                          <p className="m-0 text-xs leading-4 text-gray-500">
-                            Built Up Area
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <hr className="my-1 border-gray-100" />
-
-                    {/* Row 5 : Posted By | Days | Distance | Share */}
-                    <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
-                      {/* Left */}
-                      <div className="flex items-center flex-wrap min-w-0">
-                        {/* Posted By */}
-                        <div className="flex items-center">
-                          <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
-                          <span className="truncate">
-                            Posted by {project.user_type || "Builder"}
-                          </span>
-                        </div>
-
-                        {/* Dot */}
-                        <span className="mx-2 text-gray-400">•</span>
-
-                        {/* Days */}
-                        <span className="whitespace-nowrap">
-                          {project.days_since_created !== undefined &&
-                          project.days_since_created !== null
-                            ? project.days_since_created === 0
-                              ? "Today"
-                              : `${project.days_since_created} days ago`
-                            : project.created_at
-                              ? `${Math.max(
-                                  0,
-                                  Math.floor(
-                                    (Date.now() -
-                                      new Date(project.created_at).getTime()) /
-                                      (1000 * 60 * 60 * 24),
-                                  ),
-                                )} days ago`
-                              : "Recently"}
-                        </span>
-
-                        {/* Distance */}
-                        {getProjectDistance(project) && (
-                          <>
-                            <span className="mx-2 text-gray-400">•</span>
-                            <div className="flex items-center whitespace-nowrap">
-                              <FaMapMarkerAlt className="mr-1 text-red-500" />
-                              {getProjectDistance(project)} km from you
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      {/* Share */}
-                      <FontAwesomeIcon
-                        icon={faShareNodes}
-                        className="ml-2 text-[17px] text-gray-500 transition-colors cursor-pointer hover:text-blue-500"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setIsShareModalOpen(true);
-                        }}
-                      />
-                    </div>
-
-                    {/* Row 6: Owner Details */}
-                    <div className="flex items-center pt-2">
-                      <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
-                        {project.property_owner_image &&
-                        !project.property_owner_image.includes(
-                          "default_profile",
-                        ) ? (
-                          <img
-                            src={`${process.env.REACT_APP_API_URL}/media/${project.property_owner_image}`}
-                            alt={project.connect_to_name || "Builder"}
-                            className="object-cover w-full h-full rounded-full"
+                      {/* Commercial Property label — only for commercial cards */}
+                      {isCommercial && (
+                        <div className="px-3.5 mt-2 flex-shrink-0 flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-gray-700">
+                          <HiOutlineOfficeBuilding
+                            className="text-[#A70D2A]"
+                            size={13}
                           />
-                        ) : (
-                          <AiOutlineUser className="text-xl text-blue-600" />
-                        )}
+                          <span>Commercial Property</span>
+                        </div>
+                      )}
+
+                      {/* ==================== CONFIGURATION SECTION (fixed height) ====================
+                          Three config cards visible at a time (BHK for residential,
+                          unit type for commercial). No visible arrows/dots — swipe
+                          to reveal more. */}
+                      <div
+                        className={`px-3.5 flex-shrink-0 h-[74px] flex items-center ${isCommercial ? "mt-2" : "mt-2.5"
+                          }`}
+                      >
+                        <ConfigCarousel
+                          units={isCommercial ? commercialUnits : residentialUnits}
+                          isCommercial={isCommercial}
+                          formatAverageProjectPrice={formatAverageProjectPrice}
+                          getCommercialIcon={getCommercialIcon}
+                        />
                       </div>
 
-                      <div className="flex items-center ml-4">
-                        <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                          {project.connect_to_name || "Builder"}
-                        </span>
-                        <div className="w-px h-4 mx-4 bg-gray-300"></div>
-                        <span className="text-sm text-gray-500 whitespace-nowrap">
-                          {project.user_type || "Builder"}
-                        </span>
+                      {/* Spacer pushes builder + buttons to the bottom of the card */}
+                      <div className="mt-auto flex-shrink-0">
+                        {/* ==================== BUILDER SECTION ==================== */}
+                        <div className="mx-3.5 pt-3.5 sm:pt-4 pb-3.5 sm:pb-4 border-t border-gray-100 flex items-center gap-3">
+                          <div className="w-7 h-7 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0 overflow-hidden self-center">
+                            {otherProject.property_owner_image &&
+                              !otherProject.property_owner_image.includes(
+                                "default_profile",
+                              ) ? (
+                              <img
+                                src={`${process.env.REACT_APP_API_URL}/media/${otherProject.property_owner_image}`}
+                                alt={otherProject.connect_to_name || "Builder"}
+                                className="object-cover w-full h-full"
+                              />
+                            ) : (
+                              <FaHardHat className="text-xs text-yellow-700" />
+                            )}
+                          </div>
+
+                          <div className="min-w-0 flex-1 flex items-center justify-between gap-2">
+                            <div className="min-w-0 flex flex-col justify-center">
+                              <p className="text-xs text-gray-500 leading-none mb-0">
+                                Builder
+                              </p>
+                              <h3 className="text-base font-semibold leading-tight text-[#111827] mt-0.5 truncate">
+                                {otherProject.connect_to_name || "Builder"}
+                              </h3>
+                            </div>
+
+                            {distanceKm && (
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <FaMapMarkerAlt
+                                  className="text-red-600 flex-shrink-0"
+                                  size={12}
+                                />
+                                <span className="text-gray-500 text-sm whitespace-nowrap">
+                                  {distanceKm} km from you
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* ==================== BOTTOM BUTTONS ==================== */}
+                        <div className="grid grid-cols-2 gap-2 px-3.5 py-3">
+                          <button
+                            className="border-2 border-[#A70D2A] text-[#A70D2A] rounded-lg h-9 text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 hover:bg-[#A70D2A]/5 transition-colors duration-200"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (otherProject.brochure) {
+                                window.open(
+                                  otherProject.brochure,
+                                  "_blank",
+                                  "noopener,noreferrer",
+                                );
+                              }
+                            }}
+                          >
+                            <FaDownload size={11} />
+                            Brochure
+                          </button>
+
+                          <button
+                            className="bg-[#A70D2A] rounded-lg text-white text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 h-9 hover:bg-[#8a0a22] hover:shadow-lg transition-all duration-200"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              history.push(
+                                `/projectdetail/${otherProject._id}`,
+                              );
+                            }}
+                          >
+                            View Details
+                            <FaArrowRight size={11} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </Slider>
       </div>
       {/* Other Projects Section End */}

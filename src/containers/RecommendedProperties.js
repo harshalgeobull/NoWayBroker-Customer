@@ -102,17 +102,16 @@ const RecommendedProperties = ({
   // Fetch recommended properties
   const fetchRecommendedProperties = async () => {
     try {
-      // {console.log(data)}
       if (data && data.status === 1 && Array.isArray(data.data)) {
         setProperties(data.data);
       } else {
         setProperties([]);
-        console.log("No projects found");
       }
     } catch (error) {
       console.error("Error fetching recommended properties:", error);
     }
   };
+
 
   // {console.log(properties)}
 
@@ -473,16 +472,17 @@ const RecommendedProperties = ({
                           {/* Admin Approval Badge */}
                           {property.admin_approval === "Approved" && (
                             <div className="absolute top-2 left-2 z-20">
-                              <div className="flex items-center bg-[#35A853] text-white rounded-md shadow-md overflow-hidden">
-                                {/* Tick Icon */}
-                                <div className="flex items-center justify-center px-2 bg-[#2D9448]">
-                                  ✓
-                                </div>
+                              <div className="flex items-center bg-[#2DBE3F] text-white rounded-sm shadow-md px-2 py-1">
 
-                                {/* Text */}
-                                <div className="px-2 py-1 text-[10px] sm:text-xs font-semibold">
-                                  Admin Approval
-                                </div>
+                                {/* Tick Icon */}
+                                <span className="text-white text-xs font-bold mr-2">
+                                  ✓
+                                </span>
+
+                                {/* Verified Text */}
+                                <span className="text-[11px] font-semibold leading-none">
+                                  Verified
+                                </span>
                               </div>
                             </div>
                           )}
@@ -797,10 +797,10 @@ const RecommendedProperties = ({
                               }}
                             />
                           </div>
-                          {console.log(
+                          {/* {console.log(
                             property.connect_to_name,
                             property.property_owner_image,
-                          )}
+                          )} */}
                           {/* Row 6 : Owner Details */}
                           <div className="flex items-center pt-3">
                             {/* Avatar */}

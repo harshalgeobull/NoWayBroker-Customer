@@ -52,7 +52,7 @@ const Home = () => {
         }
       );
 
-      console.log("BUY API DATA:", response.data);
+      // console.log("BUY API DATA:", response.data);
 
       if (response.data.status === 1) {
         setBuyProperty({
@@ -88,7 +88,7 @@ const Home = () => {
         }
       );
 
-      console.log("COMMERCIAL API DATA:", response.data);
+      // console.log("COMMERCIAL API DATA:", response.data);
 
       if (response.data.status === 1) {
         setCommercialData({
@@ -113,7 +113,6 @@ const Home = () => {
       const formData = new FormData();
       formData.append("user_id", userId);
       formData.append("city_name", cityName);
-
 
 
       const response = await axios.post(
@@ -161,7 +160,7 @@ const Home = () => {
       );
 
       if (response.data.status === 1) {
-        console.log("OWNER API DATA:", response.data.data);
+        // console.log("OWNER API DATA:", response.data.data);
         setOwnerProperties(response.data.data || []);
       }
     } catch (error) {
@@ -177,16 +176,16 @@ const Home = () => {
     }
 
     if ("geolocation" in navigator) {
-      console.log("Geolocation supported");
+      // console.log("Geolocation supported");
 
       navigator.geolocation.getCurrentPosition(
         async (position) => {
-          console.log("Location permission granted");
+          // console.log("Location permission granted");
 
           const { latitude, longitude } = position.coords;
 
-          console.log("Latitude:", latitude);
-          console.log("Longitude:", longitude);
+          // console.log("Latitude:", latitude);
+          // console.log("Longitude:", longitude);
 
           sessionStorage.setItem(
             "userLocation",
@@ -201,26 +200,26 @@ const Home = () => {
               `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=AIzaSyAUCNwxnNo52kFWJNGhRVj-AnkoffmzYe0`,
             );
 
-            console.log("Google API Response:", response.data);
+            // console.log("Google API Response:", response.data);
 
             if (response.data.status === "OK") {
               const addressComponents =
                 response.data.results[0].address_components;
 
-              console.log("Address Components:", addressComponents);
+              // console.log("Address Components:", addressComponents);
 
               const cityComponent = addressComponents.find((component) =>
                 component.types.includes("locality"),
               );
 
-              console.log("Detected City:", cityComponent);
+              // console.log("Detected City:", cityComponent);
 
               if (cityComponent) {
                 setCityName(cityComponent.long_name);
 
                 sessionStorage.setItem("cityName", cityComponent.long_name);
 
-                console.log("Saved city:", sessionStorage.getItem("cityName"));
+                // console.log("Saved city:", sessionStorage.getItem("cityName"));
               }
             }
           } catch (error) {
@@ -233,7 +232,7 @@ const Home = () => {
         },
       );
     } else {
-      console.log("Geolocation is not supported by this browser.");
+      // console.log("Geolocation is not supported by this browser.");
     }
   }, []);
 
