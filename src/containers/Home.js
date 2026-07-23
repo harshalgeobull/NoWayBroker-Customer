@@ -65,7 +65,34 @@ const Home = () => {
     }
   };
 
+const [offersData, setOffersData] = useState({
+  status: 0,
+  data: [],
+});
+const fetchOffers = async () => {
+  try {
+    const formData = new FormData();
+    formData.append("page", 1);
+    formData.append("page_size", 10);
 
+    if (userId) {
+      formData.append("user_id", userId);
+    }
+
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/cust_api/get_offer`,
+      formData
+    );
+
+    setOffersData(response.data);
+  } catch (error) {
+    console.error("Error fetching offers:", error);
+    setOffersData({
+      status: 0,
+      data: [],
+    });
+  }
+};
   const [commercialData, setCommercialData] = useState({
     status: 0,
     data: [],
@@ -125,7 +152,6 @@ const Home = () => {
           },
         },
       );
-
       if (response.data) {
         setHomeData({
           recommendedProperties: response.data.featured_properties || [],
@@ -193,7 +219,7 @@ const Home = () => {
           );
 
           // Reload page after saving location
-          window.location.reload();
+          //window.location.reload();
 
           try {
             const response = await axios.get(
@@ -242,6 +268,7 @@ const Home = () => {
 
     const debounceFetch = setTimeout(() => {
       fetchHomeData();
+       fetchOffers();
       fetchOwnerProperties();
     }, 300);
 
@@ -332,7 +359,7 @@ const Home = () => {
             currentShareUrl={currentShareUrl}
             fetchHomeData={fetchHomeData}
           />
-          <OffersForYou data={homeData.offersForYou} />
+          <OffersForYou data={offersData} />
           <RecommendedProperties
             data={homeData.recommendedProperties}
             openRecommendedShareModal={openRecommendedShareModal}

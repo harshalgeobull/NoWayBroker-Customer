@@ -91,6 +91,7 @@ const Editproject = () => {
   const [brochureDoc, setBrochureDoc] = useState(null);
   const brochureInputRef = useRef(null);
   const [errors, setErrors] = useState({});
+  const [deletedPropertyIds, setDeletedPropertyIds] = useState([]);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [companyLogo, setCompanyLogo] = useState(null);
   const companyLogoInputRef = useRef(null);
@@ -163,6 +164,12 @@ const Editproject = () => {
       toast.error("At least one project property is required.");
       return;
     }
+
+    const property = projectProperties[index];
+    // Save the ID of existing properties for deletion
+  if (property._id) {
+    setDeletedPropertyIds((prev) => [...prev, property._id]);
+  }
 
     setProjectProperties((prev) =>
       prev.filter((_, i) => i !== index)
@@ -1038,7 +1045,7 @@ carpet_area_in:
         additional_rooms: formData.additional_rooms?.join(",") || "",
 
         // PROJECT EXTRA
-        configurations: configurations || "",
+        congfigurations: configurations || "",
 
         launch_date: launchDate || "",
 
@@ -1137,6 +1144,22 @@ carpet_area_in:
       console.log("EDIT PROJECT RESPONSE:", result);
 
       if (result.status === 1) {
+        // DELETE REMOVED PROJECT PROPERTIES
+try {
+  for (const propertyId of deletedPropertyIds) {
+    const deleteFormData = new FormData();
+    deleteFormData.append("project_property_id", propertyId);
+
+    await axios.delete(
+      `${process.env.REACT_APP_API_URL}/cust_api/remove_project_property`,
+      {
+        data: deleteFormData,
+      }
+    );
+  }
+} catch (deleteError) {
+  console.log("PROJECT PROPERTY DELETE ERROR:", deleteError);
+}
         // UPDATE PROJECT PROPERTIES
 try {
   for (const property of projectProperties) {
