@@ -46,7 +46,7 @@ const AddNewProperty = () => {
   // });
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: GOOGLE_MAPS_LIBRARIES,   
+    libraries: GOOGLE_MAPS_LIBRARIES,
   });
 
   const userId = sessionStorage.getItem("accessToken");
@@ -8948,14 +8948,20 @@ fice Space") ||
                           : "Generate with AI"}
                       </button>
                     </div>
-
-                    <textarea
-                      name="property_description"
-                      className="w-full h-40 p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      value={formData.property_description}
-                      onChange={handleInputChange}
-                      placeholder="Enter Property Description"
-                    />
+                    {/* Relative wrapper for Textarea and Live Counter */}
+                    <div className="relative w-full mt-1">
+                      <textarea
+                        name="property_description"
+                        maxLength={800}
+                        className="w-full h-40 p-3 pb-7 pr-16 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-rose-500 resize-none block"
+                        value={formData?.property_description || ""}
+                        onChange={handleInputChange}
+                        placeholder="Enter Property Description"
+                      />
+                      <span className="absolute bottom-2 right-3 text-xs text-gray-400 pointer-events-none select-none z-10">
+                        {(formData?.property_description || "").length}/800
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

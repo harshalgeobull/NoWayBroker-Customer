@@ -473,7 +473,7 @@ const BuyProperty = ({
                                                     {/* Admin Approval Badge */}
                                                     {property.admin_approval === "Approved" && (
                                                         <div className="absolute top-2 left-2 z-20">
-                                                            <div className="flex items-center bg-[#2DBE3F] text-white rounded-sm shadow-md px-2 py-1">
+                                                            <div className="flex items-center bg-[#8B1E3F] text-white rounded-sm shadow-md px-2 py-1">
 
                                                                 {/* Tick Icon */}
                                                                 <span className="text-white text-xs font-bold mr-2">
@@ -545,33 +545,23 @@ const BuyProperty = ({
                                                                 .toLowerCase();
 
                                                             let matchedType = "UNKNOWN";
-                                                            let badgeColor = "bg-gray-500";
+                                                            const badgeColor = "bg-[#8B1E3F]";
 
                                                             if (normalizedCategory === "buy") {
                                                                 matchedType = "FOR BUY";
-                                                                badgeColor = "bg-green-500";
                                                             } else if (normalizedCategory === "rent") {
                                                                 matchedType = "FOR RENT";
-                                                                badgeColor = "bg-blue-500";
-                                                            } else if (
-                                                                normalizedCategory.includes("commercial buy")
-                                                            ) {
+                                                            } else if (normalizedCategory.includes("commercial buy")) {
                                                                 matchedType = "COMMERCIAL BUY";
-                                                                badgeColor = "bg-purple-500";
-                                                            } else if (
-                                                                normalizedCategory.includes("commercial lease")
-                                                            ) {
+                                                            } else if (normalizedCategory.includes("commercial lease")) {
                                                                 matchedType = "COMMERCIAL LEASE";
-                                                                badgeColor = "bg-indigo-500";
                                                             } else if (
                                                                 normalizedCategory.includes("pg") ||
                                                                 normalizedCategory.includes("co living") ||
                                                                 normalizedCategory.includes("coliving")
                                                             ) {
                                                                 matchedType = "PG/CO-LIVING";
-                                                                badgeColor = "bg-yellow-500";
                                                             }
-
                                                             return (
                                                                 <span
                                                                     className={`text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-se-lg truncate block ${badgeColor}`}
@@ -637,11 +627,10 @@ const BuyProperty = ({
 
                                                         {/* Ready to Move - Keep close to price */}
                                                         {property.property_category_type?.includes("Buy") &&
-                                                            property.possession_status ===
-                                                            "Ready To Move" && (
-                                                                <div className="flex items-center gap-2 px-2 py-1 bg-green-100 border border-green-200 rounded-full sm:px-3">
-                                                                    <MdApartment className="text-base text-green-700" />
-                                                                    <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                                                            property.possession_status === "Ready To Move" && (
+                                                                <div className="flex items-center gap-2 px-2 py-1 text-white border rounded-full bg-[#8B1E3F] border-[#8B1E3F] sm:px-3">
+                                                                    <MdApartment className="text-base text-white" />
+                                                                    <span className="text-xs font-semibold text-white whitespace-nowrap">
                                                                         Ready to Move
                                                                     </span>
                                                                 </div>

@@ -19,6 +19,7 @@ import { MdOutlineBedroomParent } from "react-icons/md";
 import { AiOutlineUser, AiOutlineClockCircle } from "react-icons/ai";
 import { BiShapeSquare } from "react-icons/bi";
 import { PiShareNetworkLight } from "react-icons/pi";
+import { FaPhoneAlt } from "react-icons/fa";
 import axios from "axios";
 import {
   HiOutlineBadgeCheck,
@@ -54,6 +55,27 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 
 const defaultImage = "/image/appstore.png";
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
+const formatDateToDDMMYYYY = (dateVal, fallbackDate = null) => {
+  if (!dateVal || dateVal.toString().trim() === "" || dateVal.toString().toLowerCase() === "null") {
+    return dateVal;
+  }
+
+  let dateObj;
+  if (dateVal.toString().trim().toLowerCase() === "immediately") {
+    dateObj = fallbackDate ? new Date(fallbackDate) : new Date();
+  } else {
+    dateObj = new Date(dateVal);
+  }
+
+  if (isNaN(dateObj.getTime())) {
+    return dateVal;
+  }
+
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const year = dateObj.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -827,9 +849,9 @@ const Detail = ({ propertyData }) => {
     ["Property Category Type", propertyDetails?.property_category_type || null],
     ["Rent", propertyDetails?.rent || null],
     ["Rent Duration", propertyDetails?.rent_duration || null],
-    ["Property Added Date", propertyDetails?.property_added_date || null],
+    ["Property Added Date", propertyDetails?.property_added_date ? formatDateToDDMMYYYY(propertyDetails.property_added_date) : null],
     ["Possession Status", propertyDetails?.possession_status || null],
-    ["Possession Date", propertyDetails?.possession_date || null],
+    ["Possession Date", propertyDetails?.possession_date ? formatDateToDDMMYYYY(propertyDetails.possession_date) : null],
 
     ["Area Type", propertyDetails?.area_type || null],
     ["Built up Area", propertyDetails?.area || null],
@@ -896,8 +918,16 @@ const Detail = ({ propertyData }) => {
     ],
     ["Maintenance Cost", propertyDetails?.maintenance_cost || null],
     ["Available Beds", propertyDetails?.available_beds || null],
-    ["Available From", propertyDetails?.available_from || null],
-    ["Available On", propertyDetails?.available_on || null],
+    [
+      "Available From",
+      propertyDetails?.possession_date || propertyDetails?.available_from
+        ? formatDateToDDMMYYYY(
+          propertyDetails?.possession_date || propertyDetails?.available_from,
+          propertyDetails?.property_added_date
+        )
+        : null,
+    ],
+    ["Available On", propertyDetails?.available_on ? formatDateToDDMMYYYY(propertyDetails.available_on) : null],
 
     ["No Of Cabines", propertyDetails?.no_of_cabines || null],
     ["No Of Meeting Rooms", propertyDetails?.no_of_meeting_Rooms || null],
@@ -955,11 +985,13 @@ const Detail = ({ propertyData }) => {
     bgColor: "bg-green-50",
     iconColor: "text-green-600",
   });
-
   addStatusItem({
     icon: <HiOutlineCalendar />,
     title: "Available From",
-    value: propertyDetails?.available_from,
+    value: formatDateToDDMMYYYY(
+      propertyDetails?.possession_date || propertyDetails?.available_from,
+      propertyDetails?.property_added_date
+    ),
     bgColor: "bg-blue-50",
     iconColor: "text-blue-600",
   });
@@ -976,8 +1008,8 @@ const Detail = ({ propertyData }) => {
     icon: <HiOutlineClock />,
     title: "Last Updated",
     value: propertyDetails?.updated_at
-      ? new Date(propertyDetails.updated_at).toLocaleDateString("en-GB")
-      : propertyDetails?.property_added_date,
+      ? formatDateToDDMMYYYY(propertyDetails.updated_at)
+      : formatDateToDDMMYYYY(propertyDetails?.property_added_date),
     bgColor: "bg-purple-50",
     iconColor: "text-purple-600",
   });
@@ -1282,8 +1314,8 @@ const Detail = ({ propertyData }) => {
                   />
                   {/* Watermark */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span className="text-5xl md:text-4xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
-                      NoWayBroker
+                    <span className="text-4xl md:text-3xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
+                      NowayBroker
                     </span>
                   </div>
                 </div>
@@ -1298,8 +1330,8 @@ const Detail = ({ propertyData }) => {
                         className="rounded-2xl w-full h-64 md:h-[400px] object-cover detail-cover-image"
                       />
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span className="text-2xl font-bold text-white rotate-[-30deg] opacity-60">
-                          NoWayBroker
+                        <span className="text-4xl md:text-3xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
+                          NowayBroker
                         </span>
                       </div>
                     </div>
@@ -1320,8 +1352,8 @@ const Detail = ({ propertyData }) => {
                             className="rounded-2xl w-full h-48 md:h-[195px] object-cover detail-gallery-image"
                           />
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <span className="text-2xl font-bold text-white rotate-[-30deg] opacity-60">
-                              NoWayBroker
+                            <span className="text-4xl md:text-3xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
+                              NowayBroker
                             </span>
                           </div>
                         </div>
@@ -1359,8 +1391,8 @@ const Detail = ({ propertyData }) => {
                                   className="rounded-2xl w-full h-48 md:h-[190px] object-cover detail-gallery-image"
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                  <span className="text-2xl font-bold text-white rotate-[-30deg] opacity-60">
-                                    NoWayBroker
+                                  <span className="text-4xl md:text-3xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
+                                    NowayBroker
                                   </span>
                                 </div>
                               </div>
@@ -1689,19 +1721,29 @@ const Detail = ({ propertyData }) => {
                     readOnly
                     className="w-full p-3 mb-4 text-lg border rounded-md outline-none focus:ring-2 focus:ring-rose-500"
                   />
-                  <textarea
-                    placeholder="Message"
-                    value={message}
-                    onChange={(e) => {
-                      setMessage(e.target.value);
-                      handleFieldChange();
-                    }}
-                    className="w-full p-4 mb-6 text-lg border rounded-md outline-none focus:ring-2 focus:ring-rose-500"
-                    required
-                  ></textarea>
+
+                  {/* IMPORTANT: TextArea wrapper Div with 'relative' */}
+                  <div className="relative w-full mb-4">
+                    <textarea
+                      placeholder="Message"
+                      value={message}
+                      maxLength={255}
+                      onChange={(e) => {
+                        setMessage(e.target.value);
+                        handleFieldChange();
+                      }}
+                      className="w-full h-28 p-3 pb-7 pr-16 text-base border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-rose-500 resize-none block"
+                      required
+                    ></textarea>
+                    {/* Counter inside the textarea box */}
+                    <span className="absolute bottom-2 right-3 text-xs text-gray-400 pointer-events-none select-none z-10">
+                      {message.length}/255
+                    </span>
+                  </div>
+
                   <button
                     type="submit"
-                    className="w-full py-4 text-lg text-white my-bg rounded-lg"
+                    className="w-full mt-2 py-4 text-lg text-white my-bg rounded-lg"
                   >
                     Send an Enquiry
                   </button>
@@ -1743,8 +1785,8 @@ const Detail = ({ propertyData }) => {
                       className="object-cover w-full h-48 rounded-lg"
                     />
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <span className="text-2xl font-bold text-white rotate-[-30deg] opacity-60">
-                        NoWayBroker
+                      <span className="text-4xl md:text-3xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
+                        NowayBroker
                       </span>
                     </div>
                   </div>
@@ -2005,36 +2047,36 @@ const Detail = ({ propertyData }) => {
                             .toLowerCase();
 
                           let badgeText = "UNKNOWN";
-                          let badgeColor = "bg-gray-500";
+                          let badgeColor = "bg-[#8B1E3F]";
 
                           if (normalizedCategory === "buy") {
                             badgeText = "FOR BUY";
-                            badgeColor = "bg-green-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           } else if (normalizedCategory === "rent") {
                             badgeText = "FOR RENT";
-                            badgeColor = "bg-blue-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           } else if (
                             normalizedCategory.includes("commercial buy")
                           ) {
                             badgeText = "COMMERCIAL BUY";
-                            badgeColor = "bg-purple-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           } else if (
                             normalizedCategory.includes("commercial lease")
                           ) {
                             badgeText = "COMMERCIAL LEASE";
-                            badgeColor = "bg-indigo-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           } else if (
                             normalizedCategory.includes("pg") ||
                             normalizedCategory.includes("co living") ||
                             normalizedCategory.includes("coliving")
                           ) {
                             badgeText = "PG / CO-LIVING";
-                            badgeColor = "bg-yellow-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           } else if (
                             normalizedCategory.includes("residential")
                           ) {
                             badgeText = "RESIDENTIAL";
-                            badgeColor = "bg-pink-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           }
 
                           return (
@@ -2096,9 +2138,9 @@ const Detail = ({ propertyData }) => {
                           )}
                           {property.property_category_type?.includes("Buy") &&
                             property.possession_status === "Ready To Move" && (
-                              <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 bg-green-100 border border-green-200 rounded-full">
-                                <MdApartment className="text-sm sm:text-base text-green-700" />
-                                <span className="text-[10px] sm:text-xs font-semibold text-green-700 whitespace-nowrap">
+                              <div className="flex items-center gap-2 px-2 py-1 text-white border rounded-full bg-[#8B1E3F] border-[#8B1E3F] sm:px-3">
+                                <MdApartment className="text-base text-white" />
+                                <span className="text-xs font-semibold text-white whitespace-nowrap">
                                   Ready to Move
                                 </span>
                               </div>
@@ -2287,9 +2329,9 @@ const Detail = ({ propertyData }) => {
                           <a
                             href={`tel:${property.connect_to_no}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                            className="flex items-center justify-center w-9 h-9 flex-shrink-0 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
                           >
-                            <FaPhone />
+                            <FaPhoneAlt className="text-base" />
                           </a>
                         </div>
                       </div>

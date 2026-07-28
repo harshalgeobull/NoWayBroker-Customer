@@ -139,19 +139,19 @@ const OfferDetail = () => {
     };
 
     const formatPrice = (price) => {
-  if (!price) return "";
+      if (!price) return "";
 
-  price = Number(price);
+      price = Number(price);
 
-  const formatNumber = (num) =>
-     num.toFixed(2).replace(/\.?0+$/, "");
+      const formatNumber = (num) =>
+        num.toFixed(2).replace(/\.?0+$/, "");
 
-  if (price >= 10000000) return `₹ ${formatNumber(price / 10000000)} Cr`;
-  if (price >= 100000) return `₹ ${formatNumber(price / 100000)} L`;
-  if (price >= 1000) return `₹ ${formatNumber(price / 1000)} K`;
+      if (price >= 10000000) return `₹ ${formatNumber(price / 10000000)} Cr`;
+      if (price >= 100000) return `₹ ${formatNumber(price / 100000)} L`;
+      if (price >= 1000) return `₹ ${formatNumber(price / 1000)} K`;
 
-  return `₹ ${price}`;
-};
+      return `₹ ${price}`;
+    };
 
     const handleCall = (e) => {
       if (!phoneNumber) {
@@ -234,16 +234,16 @@ const OfferDetail = () => {
 
       if (normalizedCategory === "buy") {
         badgeText = "FOR BUY";
-        badgeColor = "bg-green-500";
+        badgeColor = "bg-[#8B1E3F]";
       } else if (normalizedCategory === "rent") {
         badgeText = "FOR RENT";
-        badgeColor = "bg-blue-500";
+        badgeColor = "bg-[#8B1E3F]";
       } else if (normalizedCategory.includes("commercial buy")) {
         badgeText = "COMMERCIAL BUY";
-        badgeColor = "bg-purple-500";
+        badgeColor = "bg-[#8B1E3F]";
       } else if (normalizedCategory.includes("commercial lease")) {
         badgeText = "COMMERCIAL LEASE";
-        badgeColor = "bg-indigo-500";
+        badgeColor = "bg-[#8B1E3F]";
       } else if (
         normalizedCategory.includes("pg") ||
         normalizedCategory.includes("co living") ||
@@ -389,9 +389,9 @@ const OfferDetail = () => {
                   )}
                   {propertyData.property_category_type?.includes("Buy") &&
                     propertyData.possession_status === "Ready To Move" && (
-                      <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
-                        <MdApartment className="text-base text-green-700" />
-                        <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                      <div className="flex items-center gap-2 px-3 py-1 ml-6 text-white border rounded-full bg-[#8B1E3F] border-[#8B1E3F]">
+                        <MdApartment className="text-base text-white" />
+                        <span className="text-xs font-semibold text-white whitespace-nowrap">
                           Ready to Move
                         </span>
                       </div>

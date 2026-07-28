@@ -158,7 +158,7 @@ const ConfigCarousel = ({
                     {unit.type}
                   </h3>
                   {unit.price ? (
-                    <h2 className="text-[#A70D2A] font-bold text-[15px] sm:text-base lg:text-[18px] mt-1.5 text-center truncate leading-tight">
+                    <h2 className="text-[#8B1E3F] font-bold text-[15px] sm:text-base lg:text-[18px] mt-1.5 text-center truncate leading-tight">
                       {formatAverageProjectPrice(unit.price)}
                     </h2>
                   ) : (
@@ -953,9 +953,9 @@ const ProjectDetail = () => {
   const heroLocation = project.address_area || "";
   // Hero Subtitle
   const heroTitle =
-  project.building_type === "Residential"
-    ? `${residentialConfigurations} BHK Apartments in ${heroLocation}`
-    : `Commercial ${commercialConfigurations} in ${heroLocation}`;
+    project.building_type === "Residential"
+      ? `${residentialConfigurations} BHK Apartments in ${heroLocation}`
+      : `Commercial ${commercialConfigurations} in ${heroLocation}`;
 
   const prices = projectProperties
     .map((item) => Number(item.price))
@@ -2047,14 +2047,18 @@ const ProjectDetail = () => {
                   value: project.possession_status,
                   icon:
                     project.possession_status === "Ready To Move" ? (
-                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <CheckCircle className="w-5 h-5 text-white" />
                     ) : (
                       <Hammer className="w-5 h-5 text-orange-600" />
                     ),
                   bg:
                     project.possession_status === "Ready To Move"
-                      ? "bg-green-100"
+                      ? "bg-[#8B1E3F]"
                       : "bg-orange-100",
+                  textColor:
+                    project.possession_status === "Ready To Move"
+                      ? "text-white"
+                      : "text-orange-600",
                 },
 
                 ...(project.possession_status === "Under Construction" &&
@@ -2284,16 +2288,24 @@ const ProjectDetail = () => {
                   readOnly
                   className="w-full p-3 mb-4 text-lg border rounded-md outline-none focus:ring-2 focus:ring-rose-500"
                 />
-                <textarea
-                  placeholder="Message"
-                  value={message}
-                  onChange={(e) => {
-                    setMessage(e.target.value);
-                    handleFieldChange();
-                  }}
-                  className="w-full p-4 mb-6 text-lg border rounded-md outline-none focus:ring-2 focus:ring-rose-500"
-                  required
-                ></textarea>
+                {/* IMPORTANT: TextArea wrapper Div with 'relative' */}
+                <div className="relative w-full mb-4">
+                  <textarea
+                    placeholder="Message"
+                    value={message}
+                    maxLength={255}
+                    onChange={(e) => {
+                      setMessage(e.target.value);
+                      handleFieldChange();
+                    }}
+                    className="w-full h-28 p-3 pb-7 pr-16 text-base border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-rose-500 resize-none block"
+                    required
+                  ></textarea>
+                  {/* Counter inside the textarea box */}
+                  <span className="absolute bottom-2 right-3 text-xs text-gray-400 pointer-events-none select-none z-10">
+                    {message.length}/255
+                  </span>
+                </div>
                 <button
                   type="submit"
                   className="w-full py-4 text-lg text-white my-bg rounded-lg"
@@ -2511,7 +2523,7 @@ const ProjectDetail = () => {
 
                       {/* Top Left badge — always "New Booking" */}
                       <div className="absolute top-2 left-2 z-10">
-                        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(22,163,74,0.4)]">
+                        <div className="bg-gradient-to-r from-[#8B1E3F] to-[#6D1732] text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(139,30,63,0.4)]">
                           <MdFiberNew size={11} />
                           <span>New Booking</span>
                         </div>
@@ -2664,7 +2676,7 @@ const ProjectDetail = () => {
                         {/* ==================== BOTTOM BUTTONS ==================== */}
                         <div className="grid grid-cols-2 gap-2 px-3.5 py-3">
                           <button
-                            className="border-2 border-[#A70D2A] text-[#A70D2A] rounded-lg h-9 text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 hover:bg-[#A70D2A]/5 transition-colors duration-200"
+                            className="border-2 border-[#8B1E3F] text-[#8B1E3F] rounded-lg h-9 text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 hover:bg-[#8B1E3F]/5 transition-colors duration-200"
                             onClick={(e) => {
                               e.stopPropagation();
                               if (otherProject.brochure) {
@@ -2681,7 +2693,7 @@ const ProjectDetail = () => {
                           </button>
 
                           <button
-                            className="bg-[#A70D2A] rounded-lg text-white text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 h-9 hover:bg-[#8a0a22] hover:shadow-lg transition-all duration-200"
+                            className="bg-[#8B1E3F] rounded-lg text-white text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 h-9 hover:bg-[#6D1732] hover:shadow-lg transition-all duration-200"
                             onClick={(e) => {
                               e.stopPropagation();
                               history.push(

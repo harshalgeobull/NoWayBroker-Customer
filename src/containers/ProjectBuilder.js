@@ -137,7 +137,7 @@ const ConfigCarousel = ({
                     {unit.type}
                   </h3>
                   {unit.price ? (
-                    <h2 className="text-[#A70D2A] font-bold text-[15px] sm:text-base lg:text-[18px] mt-1.5 text-center truncate leading-tight">
+                    <h2 className="text-[#8B1E3F] font-bold text-[15px] sm:text-base lg:text-[18px] mt-1.5 text-center truncate leading-tight">
                       {formatAverageProjectPrice(unit.price)}
                     </h2>
                   ) : (
@@ -622,12 +622,11 @@ const ProjectBuilder = () => {
 
                         {/* Top Left badge */}
                         <div className="absolute top-2 left-2 z-10">
-                          <div className="bg-gradient-to-r from-green-500 to-green-600 text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(22,163,74,0.4)]">
+                          <div className="bg-gradient-to-r from-[#8B1E3F] to-[#6D1732] text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(139,30,63,0.4)]">
                             <MdFiberNew size={11} />
                             <span>New Booking</span>
                           </div>
                         </div>
-
                         {/* Wishlist Heart */}
                         <button
                           className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 backdrop-blur flex items-center justify-center hover:scale-110 transition-transform duration-200"
@@ -768,7 +767,7 @@ const ProjectBuilder = () => {
                           {/* BOTTOM BUTTONS */}
                           <div className="grid grid-cols-2 gap-2 px-3.5 py-3">
                             <button
-                              className="border-2 border-[#A70D2A] text-[#A70D2A] rounded-lg h-9 text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 hover:bg-[#A70D2A]/5 transition-colors duration-200"
+                              className="border-2 border-[#8B1E3F] text-[#8B1E3F] rounded-lg h-9 text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 hover:bg-[#8B1E3F]/5 transition-colors duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (project.brochure) {
@@ -785,7 +784,7 @@ const ProjectBuilder = () => {
                             </button>
 
                             <button
-                              className="bg-[#A70D2A] rounded-lg text-white text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 h-9 hover:bg-[#8a0a22] hover:shadow-lg transition-all duration-200"
+                              className="bg-[#8B1E3F] rounded-lg text-white text-[11px] sm:text-xs font-semibold flex justify-center items-center gap-1.5 h-9 hover:bg-[#6D1732] hover:shadow-lg transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleProjectClick(project._id);

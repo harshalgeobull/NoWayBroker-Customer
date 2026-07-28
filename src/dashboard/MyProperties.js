@@ -43,7 +43,6 @@ const MyProperties = () => {
     { label: "₹ 60 Lakhs", value: 6000000 },
     { label: "₹ 75 Lakhs", value: 7500000 },
     { label: "₹ 90 Lakhs", value: 9000000 },
-
     { label: "₹ 1 Crore", value: 10000000 },
     { label: "₹ 1.25 Crore", value: 12500000 },
     { label: "₹ 1.5 Crore", value: 15000000 },
@@ -52,33 +51,50 @@ const MyProperties = () => {
     { label: "₹ 3 Crore", value: 30000000 },
     { label: "₹ 4 Crore", value: 40000000 },
     { label: "₹ 5 Crore", value: 50000000 },
-    { label: "₹ 7.5 Crore", value: 75000000 },
-
     { label: "₹ 10 Crore", value: 100000000 },
-    { label: "₹ 15 Crore", value: 150000000 },
     { label: "₹ 20 Crore", value: 200000000 },
-    { label: "₹ 25 Crore", value: 250000000 },
     { label: "₹ 30 Crore", value: 300000000 },
-    { label: "₹ 40 Crore", value: 400000000 },
     { label: "₹ 50 Crore", value: 500000000 },
-    { label: "₹ 60 Crore", value: 600000000 },
     { label: "₹ 75 Crore", value: 750000000 },
-    { label: "₹ 90 Crore", value: 900000000 },
-
-    { label: "₹ 100 Crore", value: 1000000000 },
-    { label: "₹ 150 Crore", value: 1500000000 },
-    { label: "₹ 200 Crore", value: 2000000000 },
-    { label: "₹ 250 Crore", value: 2500000000 },
-    { label: "₹ 300 Crore", value: 3000000000 },
-    { label: "₹ 400 Crore", value: 4000000000 },
-    { label: "₹ 500 Crore", value: 5000000000 },
-    { label: "₹ 600 Crore", value: 6000000000 },
-    { label: "₹ 750 Crore", value: 7500000000 },
-    { label: "₹ 900 Crore", value: 9000000000 },
-
-    { label: "₹ 1000 Crore", value: 10000000000 },
   ];
 
+
+  const rentAndPgPriceOptions = [
+    { label: "₹ 1 Thousand", value: 1000 },
+    { label: "₹ 2 Thousand", value: 2000 },
+    { label: "₹ 3 Thousand", value: 3000 },
+    { label: "₹ 4 Thousand", value: 4000 },
+    { label: "₹ 5 Thousand", value: 5000 },
+    { label: "₹ 6 Thousand", value: 6000 },
+    { label: "₹ 7 Thousand", value: 7000 },
+    { label: "₹ 8 Thousand", value: 8000 },
+    { label: "₹ 9 Thousand", value: 9000 },
+    { label: "₹ 10 Thousand", value: 10000 },
+    { label: "₹ 15 Thousand", value: 15000 },
+    { label: "₹ 20 Thousand", value: 20000 },
+    { label: "₹ 25 Thousand", value: 25000 },
+    { label: "₹ 30 Thousand", value: 30000 },
+    { label: "₹ 40 Thousand", value: 40000 },
+    { label: "₹ 50 Thousand", value: 50000 },
+    { label: "₹ 60 Thousand", value: 60000 },
+    { label: "₹ 70 Thousand", value: 70000 },
+    { label: "₹ 80 Thousand", value: 80000 },
+    { label: "₹ 90 Thousand", value: 90000 },
+    { label: "₹ 1 Lakh", value: 100000 },
+    { label: "₹ 2 Lakhs", value: 200000 },
+    { label: "₹ 3 Lakhs", value: 300000 },
+    { label: "₹ 4 Lakhs", value: 400000 },
+    { label: "₹ 5 Lakhs", value: 500000 },
+    { label: "₹ 6 Lakhs", value: 600000 },
+    { label: "₹ 7 Lakhs", value: 700000 },
+    { label: "₹ 8 Lakhs", value: 800000 },
+    { label: "₹ 9 Lakhs", value: 900000 },
+    { label: "₹ 10 Lakhs", value: 1000000 },
+  ];
+  const budgetOptions =
+    category === "Rent" || category === "PG/Co-living"
+      ? rentAndPgPriceOptions
+      : priceOptions;
   // State Setup
   const [showNextModal, setShowNextModal] = useState(false);
   const [offerName, setOfferName] = useState("");
@@ -141,7 +157,7 @@ const MyProperties = () => {
           // Set badge color, type, and status based on property category type
           switch (item.property_category_type) {
             case "Buy":
-              badgeColor = "bg-green-600";
+              badgeColor = "bg-[#8B1E3F]";
               type = "FOR BUY";
               status =
                 item.available_status === "Sold" ? "Sold Out" : "Available";
@@ -239,9 +255,15 @@ const MyProperties = () => {
     }
   };
 
+
   const handleMaxChange = (e) => {
-    const value = Number(e.target.value);
-    setMaxPrice(value);
+    let value = e.target.value;
+
+    if (value === "1000001") {
+      value = "";
+
+      setMaxPrice(value);
+    };
 
     if (minPrice && value < minPrice) {
       setPriceError("Max price should not be less than Min price");
@@ -305,41 +327,41 @@ const MyProperties = () => {
           switch (item.property_category_type) {
             case "Buy":
               badgeColor = "bg-green-600";
-              type = "FOR BUY";
+              badgeColor = "bg-[#8B1E3F]";
               status =
                 item.available_status === "Sold" ? "Sold Out" : "Available";
               break;
 
             case "Rent":
-              badgeColor = "bg-blue-600";
+              badgeColor = "bg-[#8B1E3F]";
               type = "FOR RENT";
               status =
                 item.available_status === "Sold" ? "Rented Out" : "Available";
               break;
 
             case "Commercial Buy":
-              badgeColor = "bg-purple-600";
+              badgeColor = "bg-[#8B1E3F]";
               type = "COMMERCIAL BUY";
               status =
                 item.available_status === "Sold" ? "Sold Out" : "Available";
               break;
 
             case "Commercial Lease":
-              badgeColor = "bg-indigo-600";
+              badgeColor = "bg-[#8B1E3F]";
               type = "COMMERCIAL LEASE";
               status =
                 item.available_status === "Sold" ? "Leased Out" : "Available";
               break;
 
             case "PG/Co-living":
-              badgeColor = "bg-yellow-500";
+              badgeColor = "bg-[#8B1E3F]";
               type = "PG / CO-LIVING";
               status =
                 item.available_status === "Sold" ? "Occupied" : "Available";
               break;
 
             default:
-              badgeColor = "bg-gray-400";
+              badgeColor = "bg-[#8B1E3F]";
               type = item.property_category_type?.toUpperCase() || "UNKNOWN";
               status = "Available";
           }
@@ -780,10 +802,10 @@ const MyProperties = () => {
             <select
               value={minPrice}
               onChange={handleMinChange}
-              className="px-2 py-2 border rounded-lg outline-none w-28"
+              className="border px-2 py-2 rounded-lg w-28 outline-none"
             >
               <option value="">₹ Min</option>
-              {priceOptions.map((option, index) => (
+              {budgetOptions.map((option, index) => (
                 <option key={index} value={option.value}>
                   {option.label}
                 </option>
@@ -793,10 +815,10 @@ const MyProperties = () => {
             <select
               value={maxPrice}
               onChange={handleMaxChange}
-              className="px-2 py-2 border rounded-lg outline-none w-28"
+              className="border px-2 py-2 rounded-lg w-28 outline-none"
             >
               <option value="">₹ Max</option>
-              {priceOptions.map((option, index) => (
+              {budgetOptions.map((option, index) => (
                 <option key={index} value={option.value}>
                   {option.label}
                 </option>

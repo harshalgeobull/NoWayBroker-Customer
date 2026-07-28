@@ -255,23 +255,23 @@ const AllProperty = () => {
   };
 
   const formatPrice = (price) => {
-  if (price === null || price === undefined || price === "") return "";
+    if (price === null || price === undefined || price === "") return "";
 
-  price = Number(price);
+    price = Number(price);
 
-  const formatNumber = (value) =>
-    value.toFixed(2).replace(/\.?0+$/, "");
+    const formatNumber = (value) =>
+      value.toFixed(2).replace(/\.?0+$/, "");
 
-  if (price >= 10000000) {
-    return `₹ ${formatNumber(price / 10000000)} Cr`;
-  } else if (price >= 100000) {
-    return `₹ ${formatNumber(price / 100000)} L`;
-  } else if (price >= 1000) {
-    return `₹ ${formatNumber(price / 1000)} K`;
-  } else {
-    return `₹ ${price}`;
-  }
-};
+    if (price >= 10000000) {
+      return `₹ ${formatNumber(price / 10000000)} Cr`;
+    } else if (price >= 100000) {
+      return `₹ ${formatNumber(price / 100000)} L`;
+    } else if (price >= 1000) {
+      return `₹ ${formatNumber(price / 1000)} K`;
+    } else {
+      return `₹ ${price}`;
+    }
+  };
 
   const createCustomIcon = (price, isActive = false) =>
     L.divIcon({
@@ -566,7 +566,7 @@ const AllProperty = () => {
 
                     {/* FOR BUY & FEATURED Tags (Bottom of the Image) */}
                     <div className="absolute bottom-0 left-0">
-                      <span className="bg-green-500 text-white text-xs px-3 py-1 rounded-se-lg">
+                      <span className="bg-[#8B1E3F] text-white text-xs px-3 py-1 rounded-se-lg">
                         FOR BUY
                       </span>
                     </div>
@@ -684,9 +684,8 @@ const AllProperty = () => {
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className={`w-8 h-8 flex items-center justify-center rounded-full  border-2 border-gray-300  ${
-                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`w-8 h-8 flex items-center justify-center rounded-full  border-2 border-gray-300  ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 <MdOutlineNavigateBefore className="text-xl text-gray-700" />
               </button>
@@ -696,11 +695,10 @@ const AllProperty = () => {
                 <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`mx-1 px-3 py-1 rounded-full text-sm ${
-                    currentPage === i + 1
+                  className={`mx-1 px-3 py-1 rounded-full text-sm ${currentPage === i + 1
                       ? "my-border text-black"
                       : " text-gray-700"
-                  }`}
+                    }`}
                 >
                   {i + 1}
                 </button>
@@ -712,11 +710,10 @@ const AllProperty = () => {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className={`w-8 h-8 flex items-center justify-center rounded-full  border-2 border-gray-300  ${
-                  currentPage === totalPages
+                className={`w-8 h-8 flex items-center justify-center rounded-full  border-2 border-gray-300  ${currentPage === totalPages
                     ? "opacity-50 cursor-not-allowed"
                     : ""
-                }`}
+                  }`}
               >
                 <MdOutlineNavigateNext className="text-xl text-gray-700" />
               </button>

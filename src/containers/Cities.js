@@ -18,6 +18,12 @@ const Cities = React.memo(({ data }) => {
     { name: "Mumbai", imageUrl: "/image/mumbai.jpg", properties: "0" },
     { name: "Delhi", imageUrl: "/image/delhi.jpg", properties: "0" },
     { name: "Bangalore", imageUrl: "/image/banglore.jpg", properties: "0" },
+    // {
+    //   name: "Bengaluru",
+    //   apiName: "Bangalore",
+    //   imageUrl: "/image/banglore.jpg",
+    //   properties: "0",
+    // },
     { name: "Chennai", imageUrl: "/image/chennai.jpg", properties: "0" },
     { name: "Hyderabad", imageUrl: "/image/hyderabad.jpg", properties: "0" },
     { name: "Kolkata", imageUrl: "/image/kolkatta.jpg", properties: "0" },

@@ -503,7 +503,7 @@ const OwnerProperty = ({
                           {/* Admin Approval Badge */}
                           {property.admin_approval === "Approved" && (
                             <div className="absolute top-2 left-2 z-20">
-                              <div className="flex items-center bg-[#2DBE3F] text-white rounded-sm shadow-md px-2 py-1">
+                              <div className="flex items-center bg-[#8B1E3F] text-white rounded-sm shadow-md px-2 py-1">
 
                                 {/* Tick Icon */}
                                 <span className="text-white text-xs font-bold mr-2">
@@ -514,6 +514,7 @@ const OwnerProperty = ({
                                 <span className="text-[11px] font-semibold leading-none">
                                   Verified
                                 </span>
+
                               </div>
                             </div>
                           )}
@@ -569,39 +570,39 @@ const OwnerProperty = ({
                                 .trim()
                                 .toLowerCase();
 
-                              let matchedType = "UNKNOWN";
-                              let badgeColor = "bg-gray-500";
+                              let badgeText = "UNKNOWN";
+                              let badgeColor = "bg-[#8B1E3F]";
 
                               if (normalizedCategory === "buy") {
-                                matchedType = "FOR BUY";
-                                badgeColor = "bg-green-500";
+                                badgeText = "FOR BUY";
+                                badgeColor = "bg-[#8B1E3F]";
                               } else if (normalizedCategory === "rent") {
-                                matchedType = "FOR RENT";
-                                badgeColor = "bg-blue-500";
+                                badgeText = "FOR RENT";
+                                badgeColor = "bg-[#8B1E3F]";
                               } else if (
                                 normalizedCategory.includes("commercial buy")
                               ) {
-                                matchedType = "COMMERCIAL BUY";
-                                badgeColor = "bg-purple-500";
+                                badgeText = "COMMERCIAL BUY";
+                                badgeColor = "bg-[#8B1E3F]";
                               } else if (
                                 normalizedCategory.includes("commercial lease")
                               ) {
-                                matchedType = "COMMERCIAL LEASE";
-                                badgeColor = "bg-indigo-500";
+                                badgeText = "COMMERCIAL LEASE";
+                                badgeColor = "bg-[#8B1E3F]";
                               } else if (
                                 normalizedCategory.includes("pg") ||
                                 normalizedCategory.includes("co living") ||
                                 normalizedCategory.includes("coliving")
                               ) {
-                                matchedType = "PG/CO-LIVING";
-                                badgeColor = "bg-yellow-500";
+                                badgeText = "PG/CO-LIVING";
+                                badgeColor = "bg-[#8B1E3F]";
                               }
 
                               return (
                                 <span
-                                  className={`text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-se-lg truncate block ${badgeColor}`}
+                                  className={`text-white text-xs px-3 py-1 rounded-se-lg ${badgeColor}`}
                                 >
-                                  {matchedType}
+                                  {badgeText}
                                 </span>
                               );
                             })()}
@@ -667,11 +668,10 @@ const OwnerProperty = ({
 
                             {/* Ready to Move - Keep close to price */}
                             {property.property_category_type?.includes("Buy") &&
-                              property.possession_status ===
-                              "Ready To Move" && (
-                                <div className="flex items-center gap-2 px-2 py-1 bg-green-100 border border-green-200 rounded-full sm:px-3">
-                                  <MdApartment className="text-base text-green-700" />
-                                  <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                              property.possession_status === "Ready To Move" && (
+                                <div className="flex items-center gap-2 px-2 py-1 text-white border rounded-full bg-[#8B1E3F] border-[#8B1E3F] sm:px-3">
+                                  <MdApartment className="text-base text-white" />
+                                  <span className="text-xs font-semibold text-white whitespace-nowrap">
                                     Ready to Move
                                   </span>
                                 </div>

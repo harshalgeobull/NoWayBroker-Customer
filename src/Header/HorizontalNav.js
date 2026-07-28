@@ -29,7 +29,7 @@ const HorizontalNav = () => {
   const [profileImage, setProfileImage] = useState("");
   const [showLogoPreview, setShowLogoPreview] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
-  
+
 
   const searchBarRoutes = [
     "/property",
@@ -40,7 +40,7 @@ const HorizontalNav = () => {
 
   const showSearchBar =
     [
-      
+
       "/searchdashboard",
       "/property",
       "/advisordashboard",
@@ -90,13 +90,22 @@ const HorizontalNav = () => {
   };
 
   useEffect(() => {
-    if (isDropdownOpen) {
-      const timer = setTimeout(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
         setIsDropdownOpen(false);
-      }, 3000);
+      }
+    };
 
-      return () => clearTimeout(timer);
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
     }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, [isDropdownOpen]);
 
   const [freePostCount, setFreePostCount] = useState(0);
@@ -154,16 +163,25 @@ const HorizontalNav = () => {
 
   return (
     <nav className="flex flex-wrap items-center justify-between px-4 py-3 text-sm font-light bg-white rounded-lg md:flex-nowrap lg:px-8 gap-y-4 md:gap-y-0 shadow-sm">
-      
+
       {/* 1. Left side: Logo */}
       <div className="flex items-center justify-between w-full md:w-auto flex-shrink-0">
         <Link to="/" className="cursor-pointer">
           <img
             src="/image/app.png"
             alt="NoWayBroker Logo"
-            className="w-[95px] h-[90px]"
+            className="w-[120px] h-[115px]"
           />
         </Link>
+        {/* 1. Left side: Logo */}
+        {/* <div className="flex items-center justify-between w-full md:w-auto flex-shrink-0">
+        <Link to="/" className="flex items-center">
+          <img
+            src="/image/app.png"
+            alt="NoWayBroker Logo"
+            className="w-full h-auto object-contain min-w-[64px] max-w-[160px]"
+          />
+        </Link> */}
         {/* Hamburger Menu for Mobile */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -175,11 +193,10 @@ const HorizontalNav = () => {
 
       {/* --- DESKTOP WRAPPER (Forces Links & Buttons on ONE line) --- */}
       <div
-        className={`${
-          isMobileMenuOpen ? "flex" : "hidden"
-        } flex-col items-center w-full mt-2 space-y-4 md:space-y-0 md:mt-0 md:flex md:flex-row md:flex-1 md:justify-between md:ml-8`}
+        className={`${isMobileMenuOpen ? "flex" : "hidden"
+          } flex-col items-center w-full mt-2 space-y-4 md:space-y-0 md:mt-0 md:flex md:flex-row md:flex-1 md:justify-between md:ml-8`}
       >
-        
+
         {/* 2. Middle: Navigation Tabs and Search Bar */}
         <div className="flex justify-center w-full md:w-auto md:flex-1">
           {showSearchBar && (
@@ -267,7 +284,7 @@ const HorizontalNav = () => {
 
         {/* 3. Right side: Buttons and Icons */}
         <div className="flex flex-col items-center w-full space-y-4 md:w-auto md:flex-row md:space-y-0 md:space-x-3 lg:space-x-4 flex-shrink-0">
-          
+
           <Link
             to="/download"
             className="px-3 py-2 text-sm font-medium no-underline transition border rounded lg:text-base my-text border-rose-500 hover:text-rose-700 hover:no-underline whitespace-nowrap"
@@ -312,7 +329,7 @@ const HorizontalNav = () => {
 
           {/* Icons Block (Headphones & Profile) */}
           <div className="flex items-center space-x-3 lg:space-x-4">
-            
+
             {/* Contact Us Popover */}
             <div className="relative flex items-center">
               <button
@@ -323,76 +340,76 @@ const HorizontalNav = () => {
               </button>
 
               {isContactOpen && (
-              <div className="absolute right-0 z-50 p-6 mt-2 bg-white border border-gray-200 shadow-2xl top-12 rounded-xl w-[340px]">
-                <h4 className="mb-5 text-[13px] font-bold tracking-wider text-[#0f172a] uppercase">
-                  Contact Us
-                </h4>
+                <div className="absolute right-0 z-50 p-6 mt-2 bg-white border border-gray-200 shadow-2xl top-12 rounded-xl w-[340px]">
+                  <h4 className="mb-5 text-[13px] font-bold tracking-wider text-[#0f172a] uppercase">
+                    Contact Us
+                  </h4>
 
-                {/* Toll Free */}
-                <div className="flex items-start mb-6">
-                  {/* Solid Phone Icon */}
-                  <svg className="w-[18px] h-[18px] mt-1 mr-4 text-[#334155] fill-current" viewBox="0 0 24 24">
-                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-                  </svg>
-                  <div>
-                    <p className="mb-1 text-[13px] font-medium text-gray-500 leading-tight">
-                      Toll Free | 9:30 AM to 6:30 PM <br /> (Mon-Sun)
-                    </p>
-                    <p className="text-[19px] font-bold text-[#1e293b]">
-                      1800-41-99099
-                    </p>
-                  </div>
-                </div>
-
-                {/* International Users */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-start">
+                  {/* Toll Free */}
+                  <div className="flex items-start mb-6">
                     {/* Solid Phone Icon */}
                     <svg className="w-[18px] h-[18px] mt-1 mr-4 text-[#334155] fill-current" viewBox="0 0 24 24">
-                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
                     </svg>
                     <div>
                       <p className="mb-1 text-[13px] font-medium text-gray-500 leading-tight">
-                        For International Users
+                        Toll Free | 9:30 AM to 6:30 PM <br /> (Mon-Sun)
                       </p>
                       <p className="text-[19px] font-bold text-[#1e293b]">
-                        +91-120-6637501
+                        1800-41-99099
                       </p>
                     </div>
                   </div>
-                  {/* Small dark triangle arrow */}
-                  <div className="mb-2 text-xl text-[#1e293b]">
-                    ▸
+
+                  {/* International Users */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-start">
+                      {/* Solid Phone Icon */}
+                      <svg className="w-[18px] h-[18px] mt-1 mr-4 text-[#334155] fill-current" viewBox="0 0 24 24">
+                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                      </svg>
+                      <div>
+                        <p className="mb-1 text-[13px] font-medium text-gray-500 leading-tight">
+                          For International Users
+                        </p>
+                        <p className="text-[19px] font-bold text-[#1e293b]">
+                          +91-120-6637501
+                        </p>
+                      </div>
+                    </div>
+                    {/* Small dark triangle arrow */}
+                    <div className="mb-2 text-xl text-[#1e293b]">
+                      ▸
+                    </div>
                   </div>
+
+                  {/* Call Back Button */}
+                  <button className="flex items-center justify-center w-full py-2.5 mb-4 text-[15px] font-bold text-[#4064d7] transition bg-white border-[1.5px] border-[#4064d7] rounded-[4px] hover:bg-blue-50">
+                    <FiPhoneCall className="mr-2 text-lg" /> Request a Call Back
+                  </button>
+
+                  {/* FAQ Link */}
+                  <p className="m-0 text-[13px] text-gray-800">
+                    To check all the FAQ{" "}
+                    <Link to="/faq" className="text-[#4064d7] no-underline hover:underline">
+                      click here
+                    </Link>
+                  </p>
                 </div>
-
-                {/* Call Back Button */}
-                <button className="flex items-center justify-center w-full py-2.5 mb-4 text-[15px] font-bold text-[#4064d7] transition bg-white border-[1.5px] border-[#4064d7] rounded-[4px] hover:bg-blue-50">
-                  <FiPhoneCall className="mr-2 text-lg" /> Request a Call Back
-                </button>
-
-                {/* FAQ Link */}
-                <p className="m-0 text-[13px] text-gray-800">
-                  To check all the FAQ{" "}
-                  <Link to="/faq" className="text-[#4064d7] no-underline hover:underline">
-                    click here
-                  </Link>
-                </p>
-              </div>
-            )}
+              )}
             </div>
 
             {/* Profile Dropdown */}
-            <div className="relative flex items-center">
+            <div className="relative flex items-center" ref={dropdownRef}>
               {isLoggedIn ? (
                 <>
                   <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    onClick={() => setIsDropdownOpen((prev) => !prev)}
                     className="focus:outline-none"
                   >
                     {profileImage &&
-                    profileImage !== "null" &&
-                    profileImage.trim() !== "" ? (
+                      profileImage !== "null" &&
+                      profileImage.trim() !== "" ? (
                       <img
                         src={profileImage}
                         alt="Profile"
@@ -412,6 +429,7 @@ const HorizontalNav = () => {
                         <li>
                           <Link
                             to={{ pathname: "/dashboard", state: { page: "profile" } }}
+                            onClick={() => setIsDropdownOpen(false)}
                             className="block px-4 py-2 text-gray-800 no-underline hover:bg-gray-100 hover:no-underline"
                           >
                             Profile
@@ -420,6 +438,7 @@ const HorizontalNav = () => {
                         <li>
                           <Link
                             to={{ pathname: "/dashboard", state: { page: "myProperties" } }}
+                            onClick={() => setIsDropdownOpen(false)}
                             className="block px-4 py-2 text-gray-800 no-underline hover:bg-gray-100 hover:no-underline"
                           >
                             My Properties
@@ -428,6 +447,7 @@ const HorizontalNav = () => {
                         <li>
                           <Link
                             to={{ pathname: "/dashboard", state: { page: "myVirtualtour" } }}
+                            onClick={() => setIsDropdownOpen(false)}
                             className="block px-4 py-2 text-gray-800 no-underline hover:bg-gray-100 hover:no-underline"
                           >
                             My Virtual Tour
@@ -436,6 +456,7 @@ const HorizontalNav = () => {
                         <li>
                           <Link
                             to={{ pathname: "/dashboard", state: { page: "myFavourite" } }}
+                            onClick={() => setIsDropdownOpen(false)}
                             className="block px-4 py-2 text-gray-800 no-underline hover:bg-gray-100 hover:no-underline"
                           >
                             My Favourites
@@ -444,6 +465,7 @@ const HorizontalNav = () => {
                         <li>
                           <Link
                             to={{ pathname: "/dashboard", state: { page: "saveSerches" } }}
+                            onClick={() => setIsDropdownOpen(false)}
                             className="block px-4 py-2 text-gray-800 no-underline hover:bg-gray-100 hover:no-underline"
                           >
                             Saved Searches
@@ -451,7 +473,10 @@ const HorizontalNav = () => {
                         </li>
                         <li>
                           <button
-                            onClick={handleLogout}
+                            onClick={() => {
+                              setIsDropdownOpen(false);
+                              handleLogout();
+                            }}
                             className="w-full px-4 py-2 text-left text-gray-800 no-underline hover:bg-gray-100 hover:no-underline"
                           >
                             Logout
@@ -479,34 +504,36 @@ const HorizontalNav = () => {
       </div>
 
       {/* Logout Warning Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-50">
-          <div className="relative p-6 text-center bg-white shadow-lg rounded-2xl w-96">
-            <button
-              className="absolute text-2xl text-black top-2 right-2"
-              onClick={() => setShowModal(false)}
-            >
-              <IoCloseCircleOutline />
-            </button>
-            <h2 className="text-2xl font-semibold">Are you sure?</h2>
-            <p className="mt-2 text-gray-500">You will be logged out!</p>
-            <div className="flex justify-center gap-6 mt-4">
+      {
+        showModal && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-50">
+            <div className="relative p-6 text-center bg-white shadow-lg rounded-2xl w-96">
               <button
-                className="px-8 py-2 text-white my-bg rounded-md hover:my-bg"
-                onClick={confirmLogout}
-              >
-                Yes, logout!
-              </button>
-              <button
-                className="px-8 py-2 text-black bg-white border border-black rounded-md hover:bg-gray-100"
+                className="absolute text-2xl text-black top-2 right-2"
                 onClick={() => setShowModal(false)}
               >
-                Cancel
+                <IoCloseCircleOutline />
               </button>
+              <h2 className="text-2xl font-semibold">Are you sure?</h2>
+              <p className="mt-2 text-gray-500">You will be logged out!</p>
+              <div className="flex justify-center gap-6 mt-4">
+                <button
+                  className="px-8 py-2 text-white my-bg rounded-md hover:my-bg"
+                  onClick={confirmLogout}
+                >
+                  Yes, logout!
+                </button>
+                <button
+                  className="px-8 py-2 text-black bg-white border border-black rounded-md hover:bg-gray-100"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Auth & Image Modals */}
       <Login1
@@ -525,22 +552,24 @@ const HorizontalNav = () => {
           setIsLoginModalOpen(true);
         }}
       />
-      {showLogoPreview && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-80">
-          <button
-            onClick={() => setShowLogoPreview(false)}
-            className="absolute text-4xl text-white top-5 right-5"
-          >
-            <IoCloseCircleOutline />
-          </button>
-          <img
-            src="/image/app.png"
-            alt="Logo Preview"
-            className="max-w-[90%] max-h-[90vh] object-contain rounded-xl"
-          />
-        </div>
-      )}
-    </nav>
+      {
+        showLogoPreview && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-80">
+            <button
+              onClick={() => setShowLogoPreview(false)}
+              className="absolute text-4xl text-white top-5 right-5"
+            >
+              <IoCloseCircleOutline />
+            </button>
+            <img
+              src="/image/app.png"
+              alt="Logo Preview"
+              className="max-w-[90%] max-h-[90vh] object-contain rounded-xl"
+            />
+          </div>
+        )
+      }
+    </nav >
   );
 };
 

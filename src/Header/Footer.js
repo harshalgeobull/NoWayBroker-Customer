@@ -29,9 +29,9 @@ const Footer = () => {
     youtube: "#",
     linkedin: "#",
     instagram: "#",
-    appstore:"#",
-    playstore:"#",
-    twitter:"#",
+    appstore: "#",
+    playstore: "#",
+    twitter: "#",
   });
 
   useEffect(() => {
@@ -47,9 +47,9 @@ const Footer = () => {
             youtube: data.youtube || "#",
             linkedin: data.linkedin || "#",
             instagram: data.instagram || "#",
-            appstore:data.appstore || "#",
-            playstore:data.playstore || "#",
-            twitter:data.twitter || "#",
+            appstore: data.appstore || "#",
+            playstore: data.playstore || "#",
+            twitter: data.twitter || "#",
           });
         }
       } catch (error) {
@@ -69,96 +69,93 @@ const Footer = () => {
 
   return (
     <footer
-      className="py-6 bg-white shadow-sm"
+      className="w-full py-6 overflow-x-hidden bg-white shadow-sm"
       style={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
     >
-      <div className="max-w-[1450px] mx-auto px-4">
+      <div className="w-full max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
         {/* Top Section */}
-        <div className="grid grid-cols-1 gap-8 pb-8 border-b border-gray-300 md:grid-cols-12">
-          <div className="grid grid-cols-1 gap-8 md:col-span-12 md:grid-cols-12">
-            {/* Company Info */}
-            <div className="flex flex-col items-start md:col-span-5">
-              <img
-                src="/image/app.png"
-                alt="NoWayBroker Logo"
-                className="object-cover w-24 h-20 mb-4"
-              />
-              <p className="text-gray-500 text-[17px] leading-relaxed">
-                We offer full-stack services for all real estate needs,
-                including home loans, pay rent, packers and movers, legal
-                assistance, property valuation, and expert advice.
-              </p>
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 pb-8 border-b border-gray-300">
+          {/* Company Info */}
+          <div className="flex flex-col items-center text-center sm:items-start sm:text-left sm:col-span-2 lg:col-span-5">
+            <img
+              src="/image/app.png"
+              alt="NoWayBroker Logo"
+              className="object-cover w-20 h-16 mb-4 sm:w-24 sm:h-20"
+            />
+            <p className="text-gray-500 text-[15px] sm:text-[17px] leading-relaxed max-w-md">
+              We offer full-stack services for all real estate needs,
+              including home loans, pay rent, packers and movers, legal
+              assistance, property valuation, and expert advice.
+            </p>
+          </div>
 
-            {/* Company Links */}
-            <div className="md:col-span-2 ">
-              <h3 className="text-gray-700 text-[18px] font-semibold mb-4 ml-4">
-                COMPANY
-              </h3>
-              <ul className="space-y-3">
-                <li>
-                  <span
-                    onClick={() => handleNavigation("/about-us")}
-                    className="text-gray-500 hover:text-gray-700 text-[17px] font-medium no-underline hover:no-underline cursor-pointer"
-                  >
-                    About
-                  </span>
-                </li>
-                <li>
-                  <span
-                    onClick={() => handleNavigation("/faq")}
-                    className="text-gray-500 hover:text-gray-700 text-[17px] font-medium no-underline hover:no-underline cursor-pointer"
-                  >
-                    FAQ
-                  </span>
-                </li>
-                <li>
-                  <span
-                    onClick={() => handleNavigation("/contact")}
-                    className="text-gray-500 hover:text-gray-700 text-[17px] font-medium no-underline hover:no-underline cursor-pointer"
-                  >
-                    Contact Us
-                  </span>
-                </li>
+          {/* Company Links */}
+          <div className="flex flex-col items-center text-center sm:items-start sm:text-left lg:col-span-2">
+            <h3 className="text-gray-700 text-[17px] sm:text-[18px] font-semibold mb-4 sm:ml-4">
+              COMPANY
+            </h3>
+            <ul className="space-y-3">
+              <li>
+                <span
+                  onClick={() => handleNavigation("/about-us")}
+                  className="text-gray-500 hover:text-gray-700 text-[15px] sm:text-[17px] font-medium no-underline hover:no-underline cursor-pointer"
+                >
+                  About
+                </span>
+              </li>
+              <li>
+                <span
+                  onClick={() => handleNavigation("/faq")}
+                  className="text-gray-500 hover:text-gray-700 text-[15px] sm:text-[17px] font-medium no-underline hover:no-underline cursor-pointer"
+                >
+                  FAQ
+                </span>
+              </li>
+              <li>
+                <span
+                  onClick={() => handleNavigation("/contact")}
+                  className="text-gray-500 hover:text-gray-700 text-[15px] sm:text-[17px] font-medium no-underline hover:no-underline cursor-pointer"
+                >
+                  Contact Us
+                </span>
+              </li>
 
-                <li>
-                  <span
-                    onClick={() => handleNavigation("/nri")}
-                    className="text-gray-500 hover:text-gray-700 text-[17px] font-medium no-underline hover:no-underline cursor-pointer"
-                  >
-                    NRIPage
-                  </span>
-                </li>
-              </ul>
-            </div>
+              <li>
+                <span
+                  onClick={() => handleNavigation("/nri")}
+                  className="text-gray-500 hover:text-gray-700 text-[15px] sm:text-[17px] font-medium no-underline hover:no-underline cursor-pointer"
+                >
+                  NRIPage
+                </span>
+              </li>
+            </ul>
+          </div>
 
-            {/* Properties in India */}
-            <div className="md:col-span-5">
-              <h3 className="text-gray-700 text-[18px] font-semibold mb-4">
-                PROPERTIES IN INDIA
-              </h3>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {[
-                  "Delhi",
-                  "Mumbai",
-                  "Chennai",
-                  "Pune",
-                  "Noida",
-                  "Gurgaon",
-                ].map((city) => (
-                  <button
-                    key={city}
-                    onClick={() => handleCityClick(city)}
-                    className="text-left text-gray-500 hover:text-gray-700 text-[17px] font-medium hover:no-underline no-underline"
-                  >
-                    Property in {city}
-                  </button>
-                ))}
-              </div>
+          {/* Properties in India */}
+          <div className="sm:col-span-2 lg:col-span-5">
+            <h3 className="text-gray-700 text-[17px] sm:text-[18px] font-semibold mb-4 text-center sm:text-left">
+              PROPERTIES IN INDIA
+            </h3>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {[
+                "Delhi",
+                "Mumbai",
+                "Chennai",
+                "Pune",
+                "Noida",
+                "Gurgaon",
+              ].map((city) => (
+                <button
+                  key={city}
+                  onClick={() => handleCityClick(city)}
+                  className="text-left text-gray-500 hover:text-gray-700 text-[15px] sm:text-[17px] font-medium hover:no-underline no-underline break-words"
+                >
+                  Property in {city}
+                </button>
+              ))}
             </div>
           </div>
         </div>
-
         {/* Middle Section */}
         <div className="flex flex-col items-center justify-between py-8 border-b border-gray-300 md:flex-row">
           <div className="flex flex-col items-center mb-6 md:items-start md:mb-0">
@@ -167,26 +164,26 @@ const Footer = () => {
             </h4>
             <div className="flex space-x-4">
               <a
-              // href={socialLinks.playstore}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src="/image/abc.jpg"
-                alt="Google Play"
-                className="object-cover h-12 rounded-lg"
-              />
+                // href={socialLinks.playstore}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  src="/image/abc.jpg"
+                  alt="Google Play"
+                  className="object-cover h-12 rounded-lg"
+                />
               </a>
-                <a
-              // href={socialLinks.appstore}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                src="/image/apl.png"
-                alt="App Store"
-                className="object-cover h-12 rounded-lg"
-              />
+              <a
+                //href={socialLinks.appstore}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  src="/image/apl.png"
+                  alt="App Store"
+                  className="object-cover h-12 rounded-lg"
+                />
               </a>
             </div>
             <div className="flex items-center mb-6 md:mb-0">
@@ -210,7 +207,7 @@ const Footer = () => {
               {icons.map(({ icon: Icon, link }, index) => (
                 <a
                   key={index}
-                  // href={link}
+                  href={link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700"
@@ -223,23 +220,23 @@ const Footer = () => {
         </div>
 
         {/* Bottom Section */}
-        <div className="flex flex-col items-center justify-between py-4 md:flex-row">
-          <div className="flex items-center space-x-2">
-            <img src="/image/app.png" alt="NoWayBroker Logo" className="w-11" />
-            <span className="text-sm text-gray-500">
-               © 2026 NOWAYBROKER ALL RIGHTS RESERVED
+        <div className="flex flex-col items-center justify-between gap-4 py-4 text-center sm:flex-row sm:text-left sm:gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+            <img src="/image/app.png" alt="NoWayBroker Logo" className="w-9 sm:w-11" />
+            <span className="text-xs sm:text-sm text-gray-500">
+              © 2026 NOWAYBROKER ALL RIGHTS RESERVED
             </span>
           </div>
-          <div className="flex mt-4 space-x-8 md:mt-0">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
             <Link
               to="/privacy-policy"
-              className="text-xs text-gray-500 no-underline hover:text-gray-700 hover:no-underline"
+              className="text-xs text-gray-500 no-underline hover:text-gray-700 hover:no-underline whitespace-nowrap"
             >
               PRIVACY POLICY
             </Link>
             <Link
               to="/terms-conditions"
-              className="text-xs text-gray-500 no-underline hover:text-gray-700 hover:no-underline"
+              className="text-xs text-gray-500 no-underline hover:text-gray-700 hover:no-underline whitespace-nowrap"
             >
               TERMS OF SERVICE
             </Link>
