@@ -32,6 +32,7 @@ import "slick-carousel/slick/slick-theme.css";
 import ShareModal from "../containers/ShareModal";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
+import { FaPhoneAlt } from "react-icons/fa";
 
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
 
@@ -515,10 +516,10 @@ const AgentDetail = () => {
                         <div className="absolute bottom-0 left-0">
                           <span
                             className={`text-white text-xs px-3 py-1 rounded-se-lg ${property.property_category_type === "Buy"
-                              ? "bg-green-500"
+                              ? "bg-[#8B1E3F]"
                               : property.property_category_type === "Rent"
-                                ? "bg-blue-500"
-                                : "bg-gray-500"
+                                ? "bg-[#8B1E3F]"
+                                : "bg-[#8B1E3F]"
                               }`}
                           >
                             {property.property_category_type === "Buy"
@@ -634,24 +635,17 @@ const AgentDetail = () => {
                               )}
                           </span>
 
+
+
                           {property.property_category_type?.includes("Buy") &&
                             property.possession_status === "Ready To Move" && (
-                              <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
-                                <MdApartment className="text-base text-green-700" />
-                                <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                              <div className="flex items-center gap-2 px-2 py-1 text-white border rounded-full bg-[#8B1E3F] border-[#8B1E3F] sm:px-3">
+                                <MdApartment className="text-base text-white" />
+                                <span className="text-xs font-semibold text-white whitespace-nowrap">
                                   Ready to Move
                                 </span>
                               </div>
                             )}
-
-                          {property.construction_status === "Ready To Move" && (
-                            <div className="flex items-center gap-2 px-3 py-1 bg-green-100 border border-green-200 rounded-full">
-                              <MdApartment className="text-base text-green-700" />
-                              <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
-                                Ready to Move
-                              </span>
-                            </div>
-                          )}
                         </div>
 
                         {/* Row 4: Features Grid */}
@@ -784,12 +778,13 @@ const AgentDetail = () => {
                               <FaWhatsapp />
                             </a>
 
+                            {/* Call */}
                             <a
                               href={`tel:${property.connect_to_no}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="flex items-center justify-center w-9 h-9 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                              className="flex items-center justify-center w-9 h-9 flex-shrink-0 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
                             >
-                              <FaPhone />
+                              <FaPhoneAlt className="text-base" />
                             </a>
                           </div>
                         </div>

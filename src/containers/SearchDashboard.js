@@ -3580,12 +3580,12 @@ export default function SearchDashboard() {
                           </Link>
 
                           {/* Days Ago Tag (Top Left) */}
-                          {property.days_since_created !== undefined &&
+                          {/* {property.days_since_created !== undefined &&
                             property.days_since_created !== null && (
                               <span className="absolute z-20 px-2 py-1 text-[10px] sm:text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm whitespace-nowrap max-w-[55%] truncate">
                                 {property.days_since_created} days ago
                               </span>
-                            )}
+                            )} */}
 
                           {/* Admin Approval Badge (Top Left) */}
                           {property.admin_approval === "Approved" && (

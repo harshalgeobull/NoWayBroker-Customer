@@ -92,94 +92,94 @@ const Commercial = ({
 
   // Add property to favorites
   const addToFavorites = async (propertyId) => {
-        if (!userId) {
-            toast.error("Please log in to save properties to your favorites.");
-            return;
-        }
+    if (!userId) {
+      toast.error("Please log in to save properties to your favorites.");
+      return;
+    }
 
-        // Optimistic update - UI instantly update, API background madhe
+    // Optimistic update - UI instantly update, API background madhe
+    setProperties((prev) =>
+      prev.map((item) =>
+        item._id === propertyId ? { ...item, is_favorite: true } : item
+      )
+    );
+
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/cust_api/add_to_favorite`,
+        {
+          user_id: userId,
+          property_id: propertyId,
+        }
+      );
+
+      if (response.data.status === 1) {
         setProperties((prev) =>
-            prev.map((item) =>
-                item._id === propertyId ? { ...item, is_favorite: true } : item
-            )
+          prev.map((item) =>
+            item._id === propertyId
+              ? {
+                ...item,
+                is_favorite: true,
+                favorite_id: response.data.favorite_id,
+              }
+              : item
+          )
         );
-
-        try {
-            const response = await axios.post(
-                `${process.env.REACT_APP_API_URL}/cust_api/add_to_favorite`,
-                {
-                    user_id: userId,
-                    property_id: propertyId,
-                }
-            );
-
-            if (response.data.status === 1) {
-                setProperties((prev) =>
-                    prev.map((item) =>
-                        item._id === propertyId
-                            ? {
-                                ...item,
-                                is_favorite: true,
-                                favorite_id: response.data.favorite_id,
-                            }
-                            : item
-                    )
-                );
-            } else {
-                // Revert if API failed
-                setProperties((prev) =>
-                    prev.map((item) =>
-                        item._id === propertyId ? { ...item, is_favorite: false } : item
-                    )
-                );
-            }
-        } catch (error) {
-            console.error("Add favorite failed:", error);
-
-            setProperties((prev) =>
-                prev.map((item) =>
-                    item._id === propertyId
-                        ? { ...item, is_favorite: false }
-                        : item
-                )
-            );
-        }
-    };
-
-    // Remove property from favorites
-    const removeFromFavorites = async (favoriteId) => {
-        if (!userId) {
-            toast.error("Please log in to remove properties from your favorites.");
-            return;
-        }
-
-        // Optimistic update - UI instantly update
+      } else {
+        // Revert if API failed
         setProperties((prev) =>
-            prev.map((item) =>
-                item.favorite_id === favoriteId
-                    ? { ...item, is_favorite: false, favorite_id: null }
-                    : item
-            )
+          prev.map((item) =>
+            item._id === propertyId ? { ...item, is_favorite: false } : item
+          )
         );
+      }
+    } catch (error) {
+      console.error("Add favorite failed:", error);
 
-        try {
-            const response = await axios.delete(
-                `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
-                {
-                    data: {
-                        favorite_id: favoriteId,
-                    },
-                }
-            );
+      setProperties((prev) =>
+        prev.map((item) =>
+          item._id === propertyId
+            ? { ...item, is_favorite: false }
+            : item
+        )
+      );
+    }
+  };
 
-            if (response.data.status !== 1) {
-                toast.error("Failed to remove favorite. Please try again.");
-            }
-        } catch (error) {
-            console.error("Remove favorite failed:", error);
-            toast.error("Failed to remove favorite. Please try again.");
+  // Remove property from favorites
+  const removeFromFavorites = async (favoriteId) => {
+    if (!userId) {
+      toast.error("Please log in to remove properties from your favorites.");
+      return;
+    }
+
+    // Optimistic update - UI instantly update
+    setProperties((prev) =>
+      prev.map((item) =>
+        item.favorite_id === favoriteId
+          ? { ...item, is_favorite: false, favorite_id: null }
+          : item
+      )
+    );
+
+    try {
+      const response = await axios.delete(
+        `${process.env.REACT_APP_API_URL}/cust_api/remove_from_favorite`,
+        {
+          data: {
+            favorite_id: favoriteId,
+          },
         }
-    };
+      );
+
+      if (response.data.status !== 1) {
+        toast.error("Failed to remove favorite. Please try again.");
+      }
+    } catch (error) {
+      console.error("Remove favorite failed:", error);
+      toast.error("Failed to remove favorite. Please try again.");
+    }
+  };
 
   const convertToSqFt = (area, unit) => {
     if (!area || !unit) return null;
@@ -476,7 +476,7 @@ const Commercial = ({
                           {/* Admin Approval Badge */}
                           {property.admin_approval === "Approved" && (
                             <div className="absolute top-2 left-2 z-20">
-                              <div className="flex items-center bg-[#2DBE3F] text-white rounded-sm shadow-md px-2 py-1">
+                              <div className="flex items-center bg-[#8B1E3F] text-white rounded-sm shadow-md px-2 py-1">
 
                                 {/* Tick Icon */}
                                 <span className="text-white text-xs font-bold mr-2">
@@ -491,6 +491,7 @@ const Commercial = ({
                               </div>
                             </div>
                           )}
+
                           {/* Virtual Tour & Favorite Button */}
                           <div className="absolute flex items-center space-x-2 top-2 right-2">
                             {property.virtual_tour_availability === "Yes" && (
@@ -544,33 +545,32 @@ const Commercial = ({
                                 .toLowerCase();
 
                               let matchedType = "UNKNOWN";
-                              let badgeColor = "bg-gray-500";
+                              let badgeColor = "bg-[#8B1E3F]";
 
                               if (normalizedCategory === "buy") {
                                 matchedType = "FOR BUY";
-                                badgeColor = "bg-green-500";
+                                badgeColor = "bg-[#8B1E3F]";
                               } else if (normalizedCategory === "rent") {
                                 matchedType = "FOR RENT";
-                                badgeColor = "bg-blue-500";
+                                badgeColor = "bg-[#8B1E3F]";
                               } else if (
                                 normalizedCategory.includes("commercial buy")
                               ) {
                                 matchedType = "COMMERCIAL BUY";
-                                badgeColor = "bg-purple-500";
+                                badgeColor = "bg-[#8B1E3F]";
                               } else if (
                                 normalizedCategory.includes("commercial lease")
                               ) {
                                 matchedType = "COMMERCIAL LEASE";
-                                badgeColor = "bg-indigo-500";
+                                badgeColor = "bg-[#8B1E3F]";
                               } else if (
                                 normalizedCategory.includes("pg") ||
                                 normalizedCategory.includes("co living") ||
                                 normalizedCategory.includes("coliving")
                               ) {
                                 matchedType = "PG/CO-LIVING";
-                                badgeColor = "bg-yellow-500";
+                                badgeColor = "bg-[#8B1E3F]";
                               }
-
                               return (
                                 <span
                                   className={`text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-se-lg truncate block ${badgeColor}`}
@@ -637,11 +637,10 @@ const Commercial = ({
 
                             {/* Ready to Move - Keep close to price */}
                             {property.property_category_type?.includes("Buy") &&
-                              property.possession_status ===
-                              "Ready To Move" && (
-                                <div className="flex items-center gap-2 px-2 py-1 bg-green-100 border border-green-200 rounded-full sm:px-3">
-                                  <MdApartment className="text-base text-green-700" />
-                                  <span className="text-xs font-semibold text-green-700 whitespace-nowrap">
+                              property.possession_status === "Ready To Move" && (
+                                <div className="flex items-center gap-2 px-2 py-1 text-white border rounded-full bg-[#8B1E3F] border-[#8B1E3F] sm:px-3">
+                                  <MdApartment className="text-base text-white" />
+                                  <span className="text-xs font-semibold text-white whitespace-nowrap">
                                     Ready to Move
                                   </span>
                                 </div>

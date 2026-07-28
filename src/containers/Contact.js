@@ -796,14 +796,20 @@ const Contact = ({ setAlert }) => {
                 >
                   Feedback <span className="text-red-500"> *</span>
                 </label>
-                <textarea
-                  className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
-                  name="feedback_msg"
-                  placeholder="Your feedback here..."
-                  onChange={(e) => onChange(e)}
-                  value={feedback_msg}
-                  required
-                ></textarea>
+                <div className="relative w-full mt-1">
+                  <textarea
+                    name="feedback_msg"
+                    placeholder="Your feedback here..."
+                    value={feedback_msg}
+                    maxLength={555}
+                    onChange={(e) => onChange(e)}
+                    className="w-full h-32 p-3 pb-7 pr-16 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-rose-500 resize-none block"
+                    required
+                  />
+                  <span className="absolute bottom-2 right-3 text-xs text-gray-400 pointer-events-none select-none z-10">
+                    {(feedback_msg || "").length}/555
+                  </span>
+                </div>
               </div>
 
               <div className="mb-4 form-group">

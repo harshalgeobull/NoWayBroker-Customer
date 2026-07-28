@@ -58,6 +58,45 @@ const MyProperties = () => {
     { label: "₹ 75 Crore", value: 750000000 },
   ];
 
+
+  const rentAndPgPriceOptions = [
+    { label: "₹ 1 Thousand", value: 1000 },
+    { label: "₹ 2 Thousand", value: 2000 },
+    { label: "₹ 3 Thousand", value: 3000 },
+    { label: "₹ 4 Thousand", value: 4000 },
+    { label: "₹ 5 Thousand", value: 5000 },
+    { label: "₹ 6 Thousand", value: 6000 },
+    { label: "₹ 7 Thousand", value: 7000 },
+    { label: "₹ 8 Thousand", value: 8000 },
+    { label: "₹ 9 Thousand", value: 9000 },
+    { label: "₹ 10 Thousand", value: 10000 },
+    { label: "₹ 15 Thousand", value: 15000 },
+    { label: "₹ 20 Thousand", value: 20000 },
+    { label: "₹ 25 Thousand", value: 25000 },
+    { label: "₹ 30 Thousand", value: 30000 },
+    { label: "₹ 40 Thousand", value: 40000 },
+    { label: "₹ 50 Thousand", value: 50000 },
+    { label: "₹ 60 Thousand", value: 60000 },
+    { label: "₹ 70 Thousand", value: 70000 },
+    { label: "₹ 80 Thousand", value: 80000 },
+    { label: "₹ 90 Thousand", value: 90000 },
+    { label: "₹ 1 Lakh", value: 100000 },
+    { label: "₹ 2 Lakhs", value: 200000 },
+    { label: "₹ 3 Lakhs", value: 300000 },
+    { label: "₹ 4 Lakhs", value: 400000 },
+    { label: "₹ 5 Lakhs", value: 500000 },
+    { label: "₹ 6 Lakhs", value: 600000 },
+    { label: "₹ 7 Lakhs", value: 700000 },
+    { label: "₹ 8 Lakhs", value: 800000 },
+    { label: "₹ 9 Lakhs", value: 900000 },
+    { label: "₹ 10 Lakhs", value: 1000000 },
+  ];
+  const budgetOptions =
+    propertyType === "Rent"
+      ? rentPriceOptions
+      : propertyType === "PG/Co-living"
+        ? pgPriceOptions
+        : priceOptions;
   // State Setup
   const [showNextModal, setShowNextModal] = useState(false);
   const [offerName, setOfferName] = useState("");
@@ -143,10 +182,10 @@ const MyProperties = () => {
             price: item.property_price,
             date: item.created_at
               ? new Date(item.created_at).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })
               : "N/A",
             badgeColor,
             status,
@@ -192,16 +231,14 @@ const MyProperties = () => {
       setPriceError("");
     }
   };
-
   const handleMaxChange = (e) => {
-    const value = Number(e.target.value);
-    setMaxPrice(value);
+    let value = e.target.value;
 
-    if (minPrice && value < minPrice) {
-      setPriceError("Max price should not be less than Min price");
-    } else {
-      setPriceError("");
+    if (value === "1000001") {
+      value = "";
     }
+
+    setMaxPrice(value);
   };
 
   const handleConfirmDelete = async (property_id) => {
@@ -281,10 +318,10 @@ const MyProperties = () => {
             price: item.property_price,
             date: item.created_at
               ? new Date(item.created_at).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })
               : "N/A",
             badgeColor,
             status,
@@ -378,10 +415,10 @@ const MyProperties = () => {
               price: item.property_price,
               date: item.created_at
                 ? new Date(item.created_at).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })
                 : "N/A",
               badgeColor,
               status,
@@ -443,18 +480,18 @@ const MyProperties = () => {
         const updatedProperties = properties.map((property) =>
           property.id === selectedPropertyId
             ? {
-                ...property,
-                soldOut:
-                  selectedProperty.status === "Available"
-                    ? "Sold"
-                    : "Available",
-                status:
-                  selectedProperty.status === "Available"
-                    ? property.type === "FOR BUY"
-                      ? "Sold Out"
-                      : "Rented Out"
-                    : "Available",
-              }
+              ...property,
+              soldOut:
+                selectedProperty.status === "Available"
+                  ? "Sold"
+                  : "Available",
+              status:
+                selectedProperty.status === "Available"
+                  ? property.type === "FOR BUY"
+                    ? "Sold Out"
+                    : "Rented Out"
+                  : "Available",
+            }
             : property,
         );
         setProperties(updatedProperties);
@@ -647,7 +684,7 @@ const MyProperties = () => {
               className="border px-2 py-2 rounded-lg w-28 outline-none"
             >
               <option value="">₹ Min</option>
-              {priceOptions.map((option, index) => (
+              {budgetOptions.map((option, index) => (
                 <option key={index} value={option.value}>
                   {option.label}
                 </option>
@@ -660,7 +697,7 @@ const MyProperties = () => {
               className="border px-2 py-2 rounded-lg w-28 outline-none"
             >
               <option value="">₹ Max</option>
-              {priceOptions.map((option, index) => (
+              {budgetOptions.map((option, index) => (
                 <option key={index} value={option.value}>
                   {option.label}
                 </option>
@@ -683,27 +720,25 @@ const MyProperties = () => {
               <div
                 key={property.id}
                 className={`bg-white shadow-sm rounded-lg p-4 flex flex-col md:flex-row items-start md:items-center justify-between relative
-                  ${
-                    property.published === "Approved"
-                      ? "border-2 border-green-500"
-                      : property.published === "Rejected"
-                        ? "border-2 border-red-500"
-                        : property.published === "Pending"
-                          ? "border-2 border-yellow-500"
-                          : "border border-gray-300"
+                  ${property.published === "Approved"
+                    ? "border-2 border-green-500"
+                    : property.published === "Rejected"
+                      ? "border-2 border-red-500"
+                      : property.published === "Pending"
+                        ? "border-2 border-yellow-500"
+                        : "border border-gray-300"
                   }`}
               >
                 {/* Published Badge (Top Left Corner) */}
                 <div
                   className={`absolute top-2 left-6 text-xs font-medium px-3 py-1 rounded-md 
-                    ${
-                      property.published === "Approved"
-                        ? "bg-green-200 text-green-700 border border-green-700"
-                        : property.published === "Rejected"
-                          ? "bg-red-200 text-red-700 border border-red-700"
-                          : property.published === "Pending"
-                            ? "bg-yellow-200 text-yellow-700 border border-yellow-700"
-                            : "bg-gray-300 text-gray-600 border border-gray-600"
+                    ${property.published === "Approved"
+                      ? "bg-green-200 text-green-700 border border-green-700"
+                      : property.published === "Rejected"
+                        ? "bg-red-200 text-red-700 border border-red-700"
+                        : property.published === "Pending"
+                          ? "bg-yellow-200 text-yellow-700 border border-yellow-700"
+                          : "bg-gray-300 text-gray-600 border border-gray-600"
                     }`}
                 >
                   {property.published === "Approved"
@@ -754,7 +789,7 @@ const MyProperties = () => {
                             ? `${(property.rent / 1000).toFixed(1).replace(/\.0$/, "")} K`
                             : property.rent}
                       {property.rent_duration &&
-                      property.rent_duration !== "N/A"
+                        property.rent_duration !== "N/A"
                         ? ` / ${property.rent_duration}`
                         : ""}
                     </p>
@@ -825,12 +860,11 @@ const MyProperties = () => {
 
                 {/* Status Badge */}
                 <div
-                  className={`absolute top-2 right-2 px-3 py-2 text-sm rounded-lg cursor-pointer ${
-                    property.status === "Rented Out" ||
+                  className={`absolute top-2 right-2 px-3 py-2 text-sm rounded-lg cursor-pointer ${property.status === "Rented Out" ||
                     property.status === "Sold Out"
-                      ? "bg-gray-300 text-gray-600"
-                      : "border border-black"
-                  }`}
+                    ? "bg-gray-300 text-gray-600"
+                    : "border border-black"
+                    }`}
                   onClick={() => handleStatusClick(property)}
                 >
                   {property.status}
@@ -844,11 +878,10 @@ const MyProperties = () => {
         {totalPages > 1 && (
           <div className="flex justify-center items-center space-x-3 mt-6">
             <button
-              className={`px-3 py-2 border rounded-full ${
-                currentPage === 1
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "hover:bg-gray-100"
-              }`}
+              className={`px-3 py-2 border rounded-full ${currentPage === 1
+                ? "text-gray-400 cursor-not-allowed"
+                : "hover:bg-gray-100"
+                }`}
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
@@ -857,22 +890,20 @@ const MyProperties = () => {
             {[...Array(totalPages)].map((_, index) => (
               <button
                 key={index}
-                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-medium ${
-                  currentPage === index + 1
-                    ? "my-border my-text"
-                    : "text-gray-500 hover:bg-gray-100"
-                }`}
+                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-medium ${currentPage === index + 1
+                  ? "my-border my-text"
+                  : "text-gray-500 hover:bg-gray-100"
+                  }`}
                 onClick={() => setCurrentPage(index + 1)}
               >
                 {index + 1}
               </button>
             ))}
             <button
-              className={`px-3 py-2 border rounded-full ${
-                currentPage === totalPages
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "hover:bg-gray-100"
-              }`}
+              className={`px-3 py-2 border rounded-full ${currentPage === totalPages
+                ? "text-gray-400 cursor-not-allowed"
+                : "hover:bg-gray-100"
+                }`}
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
@@ -900,17 +931,16 @@ const MyProperties = () => {
                   ? "Mark as Sold Out"
                   : "Mark as Rented Out"
                 : selectedProperty?.status === "Sold Out" ||
-                    selectedProperty?.status === "Rented Out"
+                  selectedProperty?.status === "Rented Out"
                   ? "Mark as Available"
                   : null}
             </h2>
             <p className="text-gray-500 mt-2">
               {selectedProperty?.status === "Available"
-                ? `Are you sure you want to mark this property as ${
-                    selectedProperty?.type === "FOR BUY"
-                      ? "Sold Out"
-                      : "Rented Out"
-                  }?`
+                ? `Are you sure you want to mark this property as ${selectedProperty?.type === "FOR BUY"
+                  ? "Sold Out"
+                  : "Rented Out"
+                }?`
                 : `Are you sure you want to mark this property as Available?`}
             </p>
             <div className="flex justify-center gap-8 mt-4">

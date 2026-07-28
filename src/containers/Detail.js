@@ -19,6 +19,7 @@ import { MdOutlineBedroomParent } from "react-icons/md";
 import { AiOutlineUser, AiOutlineClockCircle } from "react-icons/ai";
 import { BiShapeSquare } from "react-icons/bi";
 import { PiShareNetworkLight } from "react-icons/pi";
+import { FaPhoneAlt } from "react-icons/fa";
 import axios from "axios";
 import {
   HiOutlineBadgeCheck,
@@ -32,6 +33,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "../styles/RecommendedProperties.css";
+import "../styles/DetailResponsive.css";
 import { BsHouseDoorFill, BsArrowsFullscreen } from "react-icons/bs";
 import { faShareNodes } from "@fortawesome/free-solid-svg-icons";
 import { useHistory } from "react-router-dom"; // import for routing
@@ -53,6 +55,27 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 
 const defaultImage = "/image/appstore.png";
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
+const formatDateToDDMMYYYY = (dateVal, fallbackDate = null) => {
+  if (!dateVal || dateVal.toString().trim() === "" || dateVal.toString().toLowerCase() === "null") {
+    return dateVal;
+  }
+
+  let dateObj;
+  if (dateVal.toString().trim().toLowerCase() === "immediately") {
+    dateObj = fallbackDate ? new Date(fallbackDate) : new Date();
+  } else {
+    dateObj = new Date(dateVal);
+  }
+
+  if (isNaN(dateObj.getTime())) {
+    return dateVal;
+  }
+
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const year = dateObj.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -826,9 +849,9 @@ const Detail = ({ propertyData }) => {
     ["Property Category Type", propertyDetails?.property_category_type || null],
     ["Rent", propertyDetails?.rent || null],
     ["Rent Duration", propertyDetails?.rent_duration || null],
-    ["Property Added Date", propertyDetails?.property_added_date || null],
+    ["Property Added Date", propertyDetails?.property_added_date ? formatDateToDDMMYYYY(propertyDetails.property_added_date) : null],
     ["Possession Status", propertyDetails?.possession_status || null],
-    ["Possession Date", propertyDetails?.possession_date || null],
+    ["Possession Date", propertyDetails?.possession_date ? formatDateToDDMMYYYY(propertyDetails.possession_date) : null],
 
     ["Area Type", propertyDetails?.area_type || null],
     ["Built up Area", propertyDetails?.area || null],
@@ -895,8 +918,16 @@ const Detail = ({ propertyData }) => {
     ],
     ["Maintenance Cost", propertyDetails?.maintenance_cost || null],
     ["Available Beds", propertyDetails?.available_beds || null],
-    ["Available From", propertyDetails?.available_from || null],
-    ["Available On", propertyDetails?.available_on || null],
+    [
+      "Available From",
+      propertyDetails?.possession_date || propertyDetails?.available_from
+        ? formatDateToDDMMYYYY(
+          propertyDetails?.possession_date || propertyDetails?.available_from,
+          propertyDetails?.property_added_date
+        )
+        : null,
+    ],
+    ["Available On", propertyDetails?.available_on ? formatDateToDDMMYYYY(propertyDetails.available_on) : null],
 
     ["No Of Cabines", propertyDetails?.no_of_cabines || null],
     ["No Of Meeting Rooms", propertyDetails?.no_of_meeting_Rooms || null],
@@ -954,11 +985,13 @@ const Detail = ({ propertyData }) => {
     bgColor: "bg-green-50",
     iconColor: "text-green-600",
   });
-
   addStatusItem({
     icon: <HiOutlineCalendar />,
     title: "Available From",
-    value: propertyDetails?.available_from,
+    value: formatDateToDDMMYYYY(
+      propertyDetails?.possession_date || propertyDetails?.available_from,
+      propertyDetails?.property_added_date
+    ),
     bgColor: "bg-blue-50",
     iconColor: "text-blue-600",
   });
@@ -975,8 +1008,8 @@ const Detail = ({ propertyData }) => {
     icon: <HiOutlineClock />,
     title: "Last Updated",
     value: propertyDetails?.updated_at
-      ? new Date(propertyDetails.updated_at).toLocaleDateString("en-GB")
-      : propertyDetails?.property_added_date,
+      ? formatDateToDDMMYYYY(propertyDetails.updated_at)
+      : formatDateToDDMMYYYY(propertyDetails?.property_added_date),
     bgColor: "bg-purple-50",
     iconColor: "text-purple-600",
   });
@@ -1053,11 +1086,11 @@ const Detail = ({ propertyData }) => {
 
   return (
     <>
-      <div className="max-w-full px-4 mx-auto sm:px-16">
+      <div className="max-w-full px-4 mx-auto sm:px-16 detail-page-container">
         {/* Property Details Section */}
-        <div className="relative w-full h-auto p-2 mb-4 rounded-lg shadow-sm bg-rose-50">
+        <div className="relative w-full h-auto p-2 mb-4 rounded-lg shadow-sm bg-rose-50 detail-header-card">
           {(propertyDetails?.property_price || propertyDetails?.rent) && (
-            <div className="absolute top-4 right-4 flex flex-col items-end">
+            <div className="absolute top-4 right-4 flex flex-col items-end detail-price-block">
               <p className="flex items-center mt-5 text-3xl font-bold my-text">
                 <FaRupeeSign className="mr-2" />
                 {propertyDetails?.property_category_type === "Rent" ||
@@ -1092,13 +1125,13 @@ const Detail = ({ propertyData }) => {
               : ""}
           </h2> */}
 
-          <h2 className="mt-2 ml-6 text-3xl font-normal">
+          <h2 className="mt-2 ml-6 text-3xl font-normal detail-title">
             {propertyDetails?.property_name
               ? `${propertyDetails.property_name} `
               : ""}
           </h2>
 
-          <p className="ml-6 text-xl font-bold text-gray-700 break-words whitespace-normal max-w-[80ch]">
+          <p className="ml-6 text-xl font-bold text-gray-700 break-words whitespace-normal max-w-[80ch] detail-address">
             <img
               src="/image/address_icon.png"
               alt="Address Icon"
@@ -1106,7 +1139,7 @@ const Detail = ({ propertyData }) => {
             />
             {propertyDetails?.address || "Address N/A"}
           </p>
-          <div className="flex items-center mt-6 ml-5 space-x-8">
+          <div className="flex items-center mt-6 ml-5 space-x-8 detail-info-row">
             {propertyDetails?.bhk_type && (
               <div className="flex items-center space-x-2">
                 <FaBed className="text-2xl my-text" />
@@ -1135,10 +1168,10 @@ const Detail = ({ propertyData }) => {
             )}
           </div>
 
-          <div className="flex justify-end mt-6 space-x-4">
+          <div className="flex justify-end mt-6 space-x-4 detail-actions-row">
             {propertyDetails.virtual_tour_availability === "Yes" && (
               <button
-                className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center 
+                className={`px-6 py-2 text-lg flex items-center gap-2 w-full sm:w-auto justify-center detail-action-btn
       ${tourSchedule?.[0]?.status === "Accepted"
                     ? "bg-green-500 text-white rounded-full"
                     : scheduledDateLabel === "Virtual Tour"
@@ -1180,7 +1213,7 @@ const Detail = ({ propertyData }) => {
               />
             )}
             <div
-              className="w-full px-3 py-1 text-sm text-white my-bg rounded-lg cursor-pointer sm:px-4 sm:py-2 sm:text-lg sm:w-auto"
+              className="w-full px-3 py-1 text-sm text-white my-bg rounded-lg cursor-pointer sm:px-4 sm:py-2 sm:text-lg sm:w-auto detail-action-btn detail-contact-btn"
               onClick={() => {
                 const token = sessionStorage.getItem("accessToken");
                 if (token) {
@@ -1236,7 +1269,7 @@ const Detail = ({ propertyData }) => {
                 />
               )}
             <div
-              className="flex items-center justify-center w-10 h-10 bg-white rounded-md cursor-pointer"
+              className="flex items-center justify-center w-10 h-10 bg-white rounded-md cursor-pointer detail-icon-btn"
               onClick={() => {
                 if (propertyDetails.is_favorite) {
                   removeFromFavoritesRecommendedProperty(
@@ -1256,7 +1289,7 @@ const Detail = ({ propertyData }) => {
             </div>
 
             <div
-              className="flex items-center justify-center w-8 h-8 bg-white rounded-md cursor-pointer sm:w-10 sm:h-10"
+              className="flex items-center justify-center w-8 h-8 bg-white rounded-md cursor-pointer sm:w-10 sm:h-10 detail-icon-btn"
               onClick={() => {
                 setIsShareModalOpen(true);
               }}
@@ -1267,22 +1300,22 @@ const Detail = ({ propertyData }) => {
         </div>
 
         {/* Image Section & Contact Form */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 h-auto md:h-[550px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 h-auto md:h-[550px] detail-main-grid">
           {/* Left Side Image Section */}
-          <div className="grid grid-cols-1 col-span-2 gap-1 md:grid-cols-1">
+          <div className="grid grid-cols-1 col-span-2 gap-1 md:grid-cols-1 detail-left-col">
             {/* Image Section */}
-            <div className="flex flex-col gap-2 mt-6 md:flex-row">
+            <div className="flex flex-col gap-2 mt-6 md:flex-row detail-image-row">
               {propertyImages.length === 0 ? (
                 <div className="w-full relative">
                   <img
                     src={propertyDetails?.cover_image}
                     alt="Main"
-                    className="rounded-2xl w-full h-64 md:h-[400px] object-cover"
+                    className="rounded-2xl w-full h-64 md:h-[400px] object-cover detail-cover-image"
                   />
                   {/* Watermark */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <span className="text-5xl md:text-4xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
-                      NoWayBroker
+                    <span className="text-4xl md:text-3xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
+                      NowayBroker
                     </span>
                   </div>
                 </div>
@@ -1294,11 +1327,11 @@ const Detail = ({ propertyData }) => {
                       <img
                         src={propertyDetails.cover_image}
                         alt="Main"
-                        className="rounded-2xl w-full h-64 md:h-[400px] object-cover"
+                        className="rounded-2xl w-full h-64 md:h-[400px] object-cover detail-cover-image"
                       />
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span className="text-2xl font-bold text-white rotate-[-30deg] opacity-60">
-                          NoWayBroker
+                        <span className="text-4xl md:text-3xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
+                          NowayBroker
                         </span>
                       </div>
                     </div>
@@ -1316,11 +1349,11 @@ const Detail = ({ propertyData }) => {
                           <img
                             src={propertyImages[0].image}
                             alt="Preview"
-                            className="rounded-2xl w-full h-48 md:h-[195px] object-cover"
+                            className="rounded-2xl w-full h-48 md:h-[195px] object-cover detail-gallery-image"
                           />
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <span className="text-2xl font-bold text-white rotate-[-30deg] opacity-60">
-                              NoWayBroker
+                            <span className="text-4xl md:text-3xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
+                              NowayBroker
                             </span>
                           </div>
                         </div>
@@ -1355,11 +1388,11 @@ const Detail = ({ propertyData }) => {
                                 <img
                                   src={filteredImages[1]?.image}
                                   alt="Preview"
-                                  className="rounded-2xl w-full h-48 md:h-[190px] object-cover"
+                                  className="rounded-2xl w-full h-48 md:h-[190px] object-cover detail-gallery-image"
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                  <span className="text-2xl font-bold text-white rotate-[-30deg] opacity-60">
-                                    NoWayBroker
+                                  <span className="text-4xl md:text-3xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
+                                    NowayBroker
                                   </span>
                                 </div>
                               </div>
@@ -1389,10 +1422,10 @@ const Detail = ({ propertyData }) => {
               )}
             </div>
             {/* Navigation Tabs */}
-            <div className="sticky top-0 z-20 flex items-center gap-8 px-6 py-4 mb-4 bg-white rounded-lg shadow-sm">
+            <div className="sticky top-0 z-20 flex items-center gap-8 px-6 py-4 mb-4 bg-white rounded-lg shadow-sm detail-tabs">
               <button
                 onClick={() => scrollToSection(overviewRef, "overview")}
-                className={`relative font-medium pb-1 ${activeSection === "overview"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "overview"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1407,7 +1440,7 @@ const Detail = ({ propertyData }) => {
                 onClick={() =>
                   scrollToSection(statusTimelineRef, "statusTimeline")
                 }
-                className={`relative font-medium pb-1 ${activeSection === "statusTimeline"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "statusTimeline"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1419,7 +1452,7 @@ const Detail = ({ propertyData }) => {
               </button>
               <button
                 onClick={() => scrollToSection(moreDetailsRef, "moreDetails")}
-                className={`relative font-medium pb-1 ${activeSection === "moreDetails"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "moreDetails"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1432,7 +1465,7 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(amenitiesRef, "amenities")}
-                className={`relative font-medium pb-1 ${activeSection === "amenities"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "amenities"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1445,7 +1478,7 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(aboutRef, "about")}
-                className={`relative font-medium pb-1 ${activeSection === "about"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "about"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1458,7 +1491,7 @@ const Detail = ({ propertyData }) => {
 
               <button
                 onClick={() => scrollToSection(locationRef, "location")}
-                className={`relative font-medium pb-1 ${activeSection === "location"
+                className={`relative font-medium pb-1 detail-tab-btn ${activeSection === "location"
                   ? "text-red-600"
                   : "hover:text-[#8A2432]"
                   }`}
@@ -1637,11 +1670,11 @@ const Detail = ({ propertyData }) => {
             </div>
           </div>
           {/* Right Side Contact Form with Increased Height */}
-          <div className="sticky top-0 flex flex-col max-h-screen pt-4 overflow-auto">
-            <div className="bg-white shadow-lg rounded-2xl p-4 min-h-[650px] flex flex-col justify-between">
+          <div className="sticky top-0 flex flex-col max-h-screen pt-4 overflow-auto detail-enquiry-col">
+            <div className="bg-white shadow-lg rounded-2xl p-4 min-h-[650px] flex flex-col justify-between detail-enquiry-card">
               <div>
                 <h3 className="mb-5 text-xl font-semibold">Make an Enquiry</h3>
-                <div className="flex items-center pb-3 mb-6 space-x-6 border-b-2 border-black">
+                <div className="flex items-center pb-3 mb-6 space-x-6 border-b-2 border-black detail-agent-row">
                   <Link
                     to={`/agentdetail/${userDetails?._id}`}
                     onClick={() =>
@@ -1688,19 +1721,29 @@ const Detail = ({ propertyData }) => {
                     readOnly
                     className="w-full p-3 mb-4 text-lg border rounded-md outline-none focus:ring-2 focus:ring-rose-500"
                   />
-                  <textarea
-                    placeholder="Message"
-                    value={message}
-                    onChange={(e) => {
-                      setMessage(e.target.value);
-                      handleFieldChange();
-                    }}
-                    className="w-full p-4 mb-6 text-lg border rounded-md outline-none focus:ring-2 focus:ring-rose-500"
-                    required
-                  ></textarea>
+
+                  {/* IMPORTANT: TextArea wrapper Div with 'relative' */}
+                  <div className="relative w-full mb-4">
+                    <textarea
+                      placeholder="Message"
+                      value={message}
+                      maxLength={255}
+                      onChange={(e) => {
+                        setMessage(e.target.value);
+                        handleFieldChange();
+                      }}
+                      className="w-full h-28 p-3 pb-7 pr-16 text-base border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-rose-500 resize-none block"
+                      required
+                    ></textarea>
+                    {/* Counter inside the textarea box */}
+                    <span className="absolute bottom-2 right-3 text-xs text-gray-400 pointer-events-none select-none z-10">
+                      {message.length}/255
+                    </span>
+                  </div>
+
                   <button
                     type="submit"
-                    className="w-full py-4 text-lg text-white my-bg rounded-lg"
+                    className="w-full mt-2 py-4 text-lg text-white my-bg rounded-lg"
                   >
                     Send an Enquiry
                   </button>
@@ -1742,8 +1785,8 @@ const Detail = ({ propertyData }) => {
                       className="object-cover w-full h-48 rounded-lg"
                     />
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <span className="text-2xl font-bold text-white rotate-[-30deg] opacity-60">
-                        NoWayBroker
+                      <span className="text-4xl md:text-3xl font-extrabold text-white rotate-[-30deg] opacity-40 select-none">
+                        NowayBroker
                       </span>
                     </div>
                   </div>
@@ -2004,36 +2047,36 @@ const Detail = ({ propertyData }) => {
                             .toLowerCase();
 
                           let badgeText = "UNKNOWN";
-                          let badgeColor = "bg-gray-500";
+                          let badgeColor = "bg-[#8B1E3F]";
 
                           if (normalizedCategory === "buy") {
                             badgeText = "FOR BUY";
-                            badgeColor = "bg-green-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           } else if (normalizedCategory === "rent") {
                             badgeText = "FOR RENT";
-                            badgeColor = "bg-blue-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           } else if (
                             normalizedCategory.includes("commercial buy")
                           ) {
                             badgeText = "COMMERCIAL BUY";
-                            badgeColor = "bg-purple-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           } else if (
                             normalizedCategory.includes("commercial lease")
                           ) {
                             badgeText = "COMMERCIAL LEASE";
-                            badgeColor = "bg-indigo-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           } else if (
                             normalizedCategory.includes("pg") ||
                             normalizedCategory.includes("co living") ||
                             normalizedCategory.includes("coliving")
                           ) {
                             badgeText = "PG / CO-LIVING";
-                            badgeColor = "bg-yellow-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           } else if (
                             normalizedCategory.includes("residential")
                           ) {
                             badgeText = "RESIDENTIAL";
-                            badgeColor = "bg-pink-500";
+                            badgeColor = "bg-[#8B1E3F]";
                           }
 
                           return (
@@ -2095,9 +2138,9 @@ const Detail = ({ propertyData }) => {
                           )}
                           {property.property_category_type?.includes("Buy") &&
                             property.possession_status === "Ready To Move" && (
-                              <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 bg-green-100 border border-green-200 rounded-full">
-                                <MdApartment className="text-sm sm:text-base text-green-700" />
-                                <span className="text-[10px] sm:text-xs font-semibold text-green-700 whitespace-nowrap">
+                              <div className="flex items-center gap-2 px-2 py-1 text-white border rounded-full bg-[#8B1E3F] border-[#8B1E3F] sm:px-3">
+                                <MdApartment className="text-base text-white" />
+                                <span className="text-xs font-semibold text-white whitespace-nowrap">
                                   Ready to Move
                                 </span>
                               </div>
@@ -2286,9 +2329,9 @@ const Detail = ({ propertyData }) => {
                           <a
                             href={`tel:${property.connect_to_no}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                            className="flex items-center justify-center w-9 h-9 flex-shrink-0 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
                           >
-                            <FaPhone />
+                            <FaPhoneAlt className="text-base" />
                           </a>
                         </div>
                       </div>
