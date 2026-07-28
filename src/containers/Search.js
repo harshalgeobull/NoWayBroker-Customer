@@ -1,6 +1,7 @@
 // import React, { useState } from "react";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link, useHistory } from "react-router-dom";
+import axios from "axios";
 import {
   FaSearch,
   FaCity,
@@ -19,6 +20,8 @@ const Search = () => {
   const history = useHistory();
   const { searchCity, setSearchCity } = useContext(SearchContext);
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+const [showSuggestions, setShowSuggestions] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyAt8bj4UACvakZfiSy-0c1o_ivfplm7jEU";
   const [type, setType] = useState("");
   const [error, setError] = useState("");
@@ -116,6 +119,37 @@ const Search = () => {
       }
     );
   };
+  const handleSearchChange = async (e) => {
+  const value = e.target.value;
+
+  setSearchQuery(value);
+
+  if (!value.trim()) {
+    setSuggestions([]);
+    setShowSuggestions(false);
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/cust_api/search_suggestions`,
+      {
+        query: value,
+      }
+    );
+
+    if (response.data.status === 1) {
+  setSuggestions(response.data.data);
+  setShowSuggestions(true);
+} else {
+  setSuggestions([]);
+  setShowSuggestions(false);
+}
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const handleSearch = () => {
     if (!searchQuery && !searchCity && !type) {
@@ -134,66 +168,67 @@ const Search = () => {
     });
   };
 
-  useEffect(() => {
-    const loadGoogleMapsScript = () => {
-      if (window.google && window.google.maps) {
-        initAutocomplete();
-        return;
-      }
+  // useEffect(() => {
+  //   const loadGoogleMapsScript = () => {
+  //     if (window.google && window.google.maps) {
+  //       initAutocomplete();
+  //       return;
+  //     }
 
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
-      script.async = true;
-      script.defer = true;
+  //     const script = document.createElement("script");
+  //     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+  //     script.async = true;
+  //     script.defer = true;
 
-      script.onload = () => {
-        initAutocomplete();
-      };
+  //     script.onload = () => {
+  //       initAutocomplete();
+  //     };
 
-      document.body.appendChild(script);
-    };
+  //     document.body.appendChild(script);
+  //   };
 
-    const initAutocomplete = () => {
-      const autocomplete = new window.google.maps.places.Autocomplete(
-        inputRef.current,
-        {
-          types: ["(cities)"],
-          componentRestrictions: { country: "in" },
-        },
-      );
+  //   const initAutocomplete = () => {
+  //     const autocomplete = new window.google.maps.places.Autocomplete(
+  //       inputRef.current,
+  //       {
+  //         types: ["(cities)"],
+  //         componentRestrictions: { country: "in" },
+  //       },
+  //     );
 
-      autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
+  //     autocomplete.addListener("place_changed", () => {
+  //       const place = autocomplete.getPlace();
 
-        if (place && place.name) {
-          setSearchQuery(place.name);
-          setSearchCity(place.name);
-        }
-      });
-    };
+  //       if (place && place.name) {
+  //         setSearchQuery(place.name);
+  //         setSearchCity(place.name);
+  //       }
+  //     });
+  //   };
 
-    loadGoogleMapsScript();
-  }, []);
-  useEffect(() => {
-    if (!window.google) return;
+  //   loadGoogleMapsScript();
+  // }, []);
+  // useEffect(() => {
+  //   if (!window.google) return;
 
-    const autocomplete = new window.google.maps.places.Autocomplete(
-      inputRef.current,
-      {
-        types: ["(cities)"],
-        componentRestrictions: { country: "in" },
-      },
-    );
+  //   const autocomplete = new window.google.maps.places.Autocomplete(
+  //     inputRef.current,
+  //     {
+  //       types: ["(cities)"],
+  //       componentRestrictions: { country: "in" },
+  //     },
+  //   );
 
-    autocomplete.addListener("place_changed", () => {
-      const place = autocomplete.getPlace();
+  //   autocomplete.addListener("place_changed", () => {
+  //     const place = autocomplete.getPlace();
 
-      if (place && place.name) {
-        setSearchQuery(place.name);
-        setSearchCity(place.name);
-      }
-    });
-  }, []);
+  //     if (place && place.name) {
+  //       setSearchQuery(place.name);
+  //       setSearchCity(place.name);
+  //     }
+  //   });
+  // }, []);
+  console.log(suggestions);
   return (
     <div className="relative flex items-center justify-center m-3 bg-white min-h-[200px] py-9 sm:py-18">
       <div
@@ -272,8 +307,24 @@ const Search = () => {
                   placeholder={placeholderTexts[placeholderIndex]}
                   className="w-full min-w-0 px-2 ml-2 text-sm text-gray-600 bg-transparent outline-none border-none sm:text-base"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={handleSearchChange}
                 />
+                {showSuggestions && suggestions.length > 0 && (
+  <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+    {suggestions.map((item, index) => (
+      <div
+        key={index}
+        className="px-4 py-3 cursor-pointer hover:bg-gray-100 border-b last:border-b-0"
+        onClick={() => {
+          setSearchQuery(item.text);
+          setShowSuggestions(false);
+        }}
+      >
+        {item.text}
+      </div>
+    ))}
+  </div>
+)}
               </div>
 
               {/* City Dropdown */}
@@ -286,15 +337,15 @@ const Search = () => {
                   onChange={handleCityChange}
                 >
                   <option value="">Select a City</option>
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Bangalore">Bangalore</option>
-                  <option value="Pune">Pune</option>
-                  <option value="Hyderabad">Hyderabad</option>
-                  <option value="Chennai">Chennai</option>
-                  <option value="Kolkata">Kolkata</option>
                   <option value="Ahmedabad">Ahmedabad</option>
-                  <option value="Jaipur">Jaipur</option>
+                  <option value="Bengaluru">Bengaluru</option>
+                  <option value="Chennai">Chennai</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Hyderabad">Hyderabad</option>
+                  <option value="Kolkata">Kolkata</option>
+                  <option value="Mumbai">Mumbai</option>
+                  <option value="Pune">Pune</option>
+                  {/* <option value="Jaipur">Jaipur</option>
                   <option value="Lucknow">Lucknow</option>
                   <option value="Chandigarh">Chandigarh</option>
                   <option value="Surat">Surat</option>
@@ -321,7 +372,7 @@ const Search = () => {
                   <option value="Rajkot">Rajkot</option>
                   <option value="Jodhpur">Jodhpur</option>
                   <option value="Madurai">Madurai</option>
-                  <option value="Jabalpur">Jabalpur</option>
+                  <option value="Jabalpur">Jabalpur</option> */}
                 </select>
               </div>
 
@@ -400,7 +451,7 @@ const Search = () => {
             >
               Suggestion:
             </h3>
-            {["Mumbai", "Pune", "Hyderabad", "Bangalore", "Chennai"].map(
+            {["Ahmedabad", "Bengaluru", "Chennai", "Delhi", "Hyderabad", "Kolkata", "Mumbai", "Pune",].map(
               (location) => (
                 <Link
                   key={location}

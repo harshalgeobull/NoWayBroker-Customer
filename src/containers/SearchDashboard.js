@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { IoClose } from "react-icons/io5";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
@@ -31,6 +31,7 @@ import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 import { useCity } from "./SearchContext";
 import { FaWhatsapp, FaPhone } from "react-icons/fa";
+import { FaPhoneAlt } from "react-icons/fa";
 import ContactDetails from "../containers/ContactDetails";
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -50,9 +51,46 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
+/**
+ * Enables Leaflet's scroll-wheel zoom ONLY while the cursor is over the
+ * map container, and disables it as soon as the cursor leaves — so the
+ * page scrolls normally everywhere else. No UI/markers/popups/controls
+ * are affected; this only toggles the wheel-zoom interaction handler.
+ */
+function ScrollWheelZoomOnHover() {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+
+    // Start disabled so page scroll works by default
+    map.scrollWheelZoom.disable();
+
+    const container = map.getContainer();
+
+    const enableZoom = () => map.scrollWheelZoom.enable();
+    const disableZoom = () => map.scrollWheelZoom.disable();
+
+    container.addEventListener("mouseenter", enableZoom);
+    container.addEventListener("mouseleave", disableZoom);
+
+    return () => {
+      container.removeEventListener("mouseenter", enableZoom);
+      container.removeEventListener("mouseleave", disableZoom);
+      map.scrollWheelZoom.disable();
+    };
+  }, [map]);
+
+  return null;
+}
+
 export default function SearchDashboard() {
   const [hoveredPropertyId, setHoveredPropertyId] = useState(null);
   const [squareFtDropdownOpen, setSquareFtDropdownOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [appliedSortBy, setAppliedSortBy] = useState("");
+  const [appliedVerifiedOnly, setAppliedVerifiedOnly] = useState(false);
   const location = useLocation();
   const propertytype = location.state?.propertyType;
   const [properties, setProperties] = useState([]);
@@ -293,17 +331,135 @@ export default function SearchDashboard() {
   ];
 
   const purchaseTypeOptions = ["Resale", "New bookings"];
-
   const priceOptions = [
-    500000, 1000000, 1500000, 2000000, 2500000, 3000000, 3500000, 4000000,
-    4500000, 5000000, 5500000, 6000000, 6500000, 7000000, 7500000, 8000000,
-    8500000, 9000000, 9500000, 10000000, 12500000, 15000000, 17500000,
-    20000000, 25000000, 30000000, 40000000, 50000000, 75000000, 100000000,
-    150000000, 200000000, 250000000, 300000000, 400000000, 500000000,
-    600000000, 700000000, 750000000, 900000000, 1000000000, 1500000000,
-    2000000000, 2500000000, 3000000000, 4000000000, 5000000000, 6000000000,
-    7000000000, 7500000000, 9000000000, 10000000000,
+    500000,
+    1000000,
+    1500000,
+    2000000,
+    2500000,
+    3000000,
+    3500000,
+    4000000,
+    4500000,
+    5000000,
+    5500000,
+    6000000,
+    6500000,
+    7000000,
+    7500000,
+    8000000,
+    8500000,
+    9000000,
+    9500000,
+    10000000,
+    12500000,
+    15000000,
+    17500000,
+    20000000,
+    25000000,
+    30000000,
+    40000000,
+    50000000,
+    75000000,
+    100000000,
+    150000000,
+    200000000,
+    250000000,
+    300000000,
+    400000000,
+    500000000,
+    600000000,
+    700000000,
+    750000000,
+    900000000,
+    1000000000,
+    1500000000,
+    2000000000,
+    2500000000,
+    3000000000,
+    4000000000,
+    5000000000,
+    6000000000,
+    7000000000,
+    7500000000,
+    9000000000,
+    10000000000,
   ];
+
+  const rentPriceOptions = [
+    1000,
+    2000,
+    3000,
+    4000,
+    5000,
+    6000,
+    7000,
+    8000,
+    9000,
+    10000,
+    15000,
+    20000,
+    25000,
+    30000,
+    40000,
+    50000,
+    60000,
+    70000,
+    80000,
+    90000,
+    100000,
+    200000,
+    300000,
+    400000,
+    500000,
+    600000,
+    700000,
+    800000,
+    900000,
+    1000000,
+
+  ];
+
+  const pgPriceOptions = [
+    1000,
+    2000,
+    3000,
+    4000,
+    5000,
+    6000,
+    7000,
+    8000,
+    9000,
+    10000,
+    15000,
+    20000,
+    25000,
+    30000,
+    40000,
+    50000,
+    60000,
+    70000,
+    80000,
+    90000,
+    100000,
+    200000,
+    300000,
+    400000,
+    500000,
+    600000,
+    700000,
+    800000,
+    900000,
+    1000000,
+  ];
+
+  const budgetOptions =
+    propertyType === "Rent"
+      ? rentPriceOptions
+      : propertyType === "PG/Co-living"
+        ? pgPriceOptions
+        : priceOptions;
+
 
   const areaUnits = [
     "sq.ft",
@@ -399,26 +555,36 @@ export default function SearchDashboard() {
     );
   };
 
-  const fetchProperties = async (searchCity, type, searchQuery) => {
+  const fetchProperties = async (
+    searchCity,
+    type,
+    searchQuery,
+    sortValue = appliedSortBy,
+    verifiedValue = appliedVerifiedOnly,
+  ) => {
     try {
       const fetchPropertiesFormData = new FormData();
       fetchPropertiesFormData.append("user_id", accessToken);
       fetchPropertiesFormData.append("page", currentPage);
       fetchPropertiesFormData.append("page_size", itemsPerPage);
 
-      // Agar Near Me true hai, toh lat, lng aur radius bhejein
       if (isNearMe && userLat && userLng) {
         fetchPropertiesFormData.append("is_near_me", "true");
         fetchPropertiesFormData.append("latitude", userLat);
         fetchPropertiesFormData.append("longitude", userLng);
-        fetchPropertiesFormData.append("radius", 5); // 5 KM range
+        fetchPropertiesFormData.append("radius", 5);
       } else {
-        // Normal search (City ya Locality se)
         fetchPropertiesFormData.append("city_name", searchCity);
         fetchPropertiesFormData.append("search_query", searchQuery);
         fetchPropertiesFormData.append("building_type", type);
       }
 
+      if (sortValue) {
+        fetchPropertiesFormData.append("sort_by", sortValue);
+      }
+      if (verifiedValue) {
+        fetchPropertiesFormData.append("verified", true);
+      }
       const response = await axios.post(
         `${API_URL}/cust_api/search_properties`,
         fetchPropertiesFormData,
@@ -443,7 +609,11 @@ export default function SearchDashboard() {
     }
   };
 
-  const fetchFilteredProperties = async (page) => {
+  const fetchFilteredProperties = async (
+    page,
+    sortValue = appliedSortBy,
+    verifiedValue = appliedVerifiedOnly,
+  ) => {
     try {
       setError(null);
       const formData = new FormData();
@@ -460,6 +630,13 @@ export default function SearchDashboard() {
       formData.append("page", page);
       formData.append("page_size", itemsPerPage);
       formData.append("search_keyword", searchQuery);
+
+      if (sortValue) {
+        formData.append("sort_by", sortValue); // newest | oldest | price_low | price_high
+      }
+      if (verifiedValue) {
+        formData.append("verified", true);
+      }
 
       if (buildingType) {
         formData.append("building_type", buildingType);
@@ -750,16 +927,16 @@ export default function SearchDashboard() {
     return () => {
       document.head.removeChild(style);
     };
-  }, [searchCity, type, searchQuery, currentPage, accessToken]);
+  }, [searchCity, type, searchQuery, currentPage, accessToken, appliedSortBy, appliedVerifiedOnly]);
 
   const formatPrice = (price) => {
     if (!price) return "";
 
     price = Number(price);
 
-const formatNumber = (num) => {
-  return num.toFixed(2).replace(/\.?0+$/, "");
-};
+    const formatNumber = (num) => {
+      return num.toFixed(2).replace(/\.?0+$/, "");
+    };
 
     if (price >= 10000000) {
       return `₹ ${formatNumber(price / 10000000)} Cr`; // Crores
@@ -773,22 +950,22 @@ const formatNumber = (num) => {
   };
 
   const formatPriceMinMax = (value) => {
-  const num = Number(value);
+    const num = Number(value);
 
-  const formatNumber = (n) =>
-    n.toFixed(2).replace(/\.?0+$/, "");
+    const formatNumber = (n) =>
+      n.toFixed(2).replace(/\.?0+$/, "");
 
-  if (num >= 10000000)
-    return `${formatNumber(num / 10000000)} Cr`;
+    if (num >= 10000000)
+      return `${formatNumber(num / 10000000)} Cr`;
 
-  if (num >= 100000)
-    return `${formatNumber(num / 100000)} L`;
+    if (num >= 100000)
+      return `${formatNumber(num / 100000)} L`;
 
-  if (num >= 1000)
-    return `${formatNumber(num / 1000)} K`;
+    if (num >= 1000)
+      return `${formatNumber(num / 1000)} K`;
 
-  return num.toString();
-};
+    return num.toString();
+  };
   // 5L = 500000, goes up to 75Cr (750000000)
 
   const createCustomIcon = (property, isActive = false) => {
@@ -830,36 +1007,33 @@ const formatNumber = (num) => {
     const normalizedBuilding = buildingTypeRaw.trim().toLowerCase();
 
     let badgeText = "";
-    let badgeColor = "bg-gray-500";
+    let badgeColor = "bg-[#8B1E3F]";
 
     if (normalizedBuilding === "commercial" && normalizedCategory === "buy") {
       badgeText = "COMMERCIAL BUY";
-      badgeColor = "bg-purple-500";
+      badgeColor = "bg-[#8B1E3F]";
     } else if (
       normalizedBuilding === "commercial" &&
       normalizedCategory === "rent"
     ) {
       badgeText = "COMMERCIAL LEASE";
-      badgeColor = "bg-indigo-500";
+      badgeColor = "bg-[#8B1E3F]";
     } else if (normalizedCategory === "buy") {
       badgeText = "FOR BUY";
-      badgeColor = "bg-green-500";
+      badgeColor = "bg-[#8B1E3F]";
     } else if (normalizedCategory === "rent") {
       badgeText = "FOR RENT";
-      badgeColor = "bg-blue-500";
+      badgeColor = "bg-[#8B1E3F]";
     } else if (
       normalizedCategory.includes("pg") ||
       normalizedCategory.includes("co living") ||
       normalizedCategory.includes("coliving")
     ) {
       badgeText = "PG / CO-LIVING";
-      badgeColor = "bg-yellow-500";
+      badgeColor = "bg-[#8B1E3F]";
     } else if (normalizedBuilding === "residential") {
       badgeText = "RESIDENTIAL";
-      badgeColor = "bg-pink-500";
-    } else {
-      badgeText = "UNKNOWN";
-      badgeColor = "bg-gray-500";
+      badgeColor = "bg-[#8B1E3F]";
     }
 
     return { badgeText, badgeColor };
@@ -894,6 +1068,12 @@ const formatNumber = (num) => {
 
       setPlotLandTypes([]);
 
+      // Reset Sort By & Verified (both selected and applied state)
+      setSortBy("");
+      setVerifiedOnly(false);
+      setAppliedSortBy("");
+      setAppliedVerifiedOnly(false);
+
       // Close dropdowns
       setPriceDropdownOpen(false);
       setSquareFtDropdownOpen(false);
@@ -904,13 +1084,17 @@ const formatNumber = (num) => {
       setActiveApi("search");
       setCurrentPage(1);
 
-      fetchProperties(searchCity, type, searchQuery);
+      fetchProperties(searchCity, type, searchQuery, "", false);
     } else {
+      // Lock in the currently selected Sort By & Verified values
+      setAppliedSortBy(sortBy);
+      setAppliedVerifiedOnly(verifiedOnly);
+
       setFiltersApplied(true);
       setActiveApi("filter");
       setCurrentPage(1);
 
-      fetchFilteredProperties(1);
+      fetchFilteredProperties(1, sortBy, verifiedOnly);
       setAreaIn("sq.ft");
     }
   };
@@ -1479,7 +1663,32 @@ const formatNumber = (num) => {
       plotLandTypes,
     };
   };
+  const getDisplayProperties = () => {
+    let list = [...properties];
 
+    if (appliedVerifiedOnly) {
+      list = list.filter(
+        (property) =>
+          property.admin_approval === "Approved" || property.isVerified === true,
+      );
+    }
+
+    if (appliedSortBy) {
+      list.sort((a, b) => {
+        if (appliedSortBy === "newest") {
+          return new Date(b.created_at) - new Date(a.created_at);
+        }
+        if (appliedSortBy === "oldest") {
+          return new Date(a.created_at) - new Date(b.created_at);
+        }
+        const priceA = Number(a.property_price ?? a.rent ?? 0);
+        const priceB = Number(b.property_price ?? b.rent ?? 0);
+        return appliedSortBy === "price_low" ? priceA - priceB : priceB - priceA;
+      });
+    }
+
+    return list;
+  };
   const checkPostLimits = async () => {
     try {
       const profileForm = new FormData();
@@ -1613,6 +1822,41 @@ const formatNumber = (num) => {
             className="flex gap-2 overflow-x-auto pb-2 whitespace-nowrap"
             onScroll={closeAllDropdowns}
           >
+            {/* Sort By Dropdown */}
+            <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full h-16 p-2 border-2 border-gray-300 rounded-md appearance-none focus:outline-none hover:bg-gray-300"
+              >
+                <option value="">Sort By</option>
+                <option value="newest">Newest</option>
+                <option value="price_low">Price Low to High</option>
+                <option value="price_high">Price High to Low</option>
+                <option value="oldest">Oldest</option>
+              </select>
+              <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
+            </div>
+
+            {/* Verified Filter Dropdown */}
+            <div className={`relative z-50 ${FILTER_WIDTH} flex-shrink-0`}>
+              <select
+                value="verified"
+                onChange={() => { }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setVerifiedOnly((prev) => !prev);
+                }}
+                className={`relative z-50 w-full h-16 p-2 border-2 rounded-md appearance-none focus:outline-none cursor-pointer ${verifiedOnly
+                  ? "border-[#8B1E3F] bg-[#8B1E3F] text-white"
+                  : "border-gray-300 bg-white hover:bg-gray-300"
+                  }`}
+              >
+                <option value="verified">Verified Properties</option>
+              </select>
+              <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
+            </div>
+
             {/* Property Category Dropdown */}
             <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
               <select
@@ -1819,8 +2063,8 @@ const formatNumber = (num) => {
                         className="p-2 border-2 border-gray-300 rounded-md focus:outline-none"
                       >
                         <option value="">Min</option>
-                        {priceOptions
-                          .filter((price) => !maxPrice || price < maxPrice) // enforce < Max
+                        {budgetOptions
+                          .filter((price) => !maxPrice || price < Number(maxPrice))
                           .map((price) => (
                             <option key={price} value={price}>
                               {formatPriceMinMax(price)}
@@ -1835,8 +2079,8 @@ const formatNumber = (num) => {
                         className="p-2 border-2 border-gray-300 rounded-md focus:outline-none"
                       >
                         <option value="">Max</option>
-                        {priceOptions
-                          .filter((price) => !minPrice || price > minPrice) // enforce > Min
+                        {budgetOptions
+                          .filter((price) => !minPrice || price > Number(minPrice))
                           .map((price) => (
                             <option key={price} value={price}>
                               {formatPriceMinMax(price)}
@@ -1848,7 +2092,6 @@ const formatNumber = (num) => {
                   document.body,
                 )}
             </div>
-
             {/* Furnished Status Dropdown */}
             <div className={`relative ${FILTER_WIDTH} flex-shrink-0`}>
               <select
@@ -3178,8 +3421,8 @@ const formatNumber = (num) => {
             >
               {/* Right: Properties - matched to FeaturedDashboard card design */}
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-                {properties.length > 0 ? (
-                  properties.map((property) => {
+                {getDisplayProperties().length > 0 ? (
+                  getDisplayProperties().map((property) => {
                     let distance = null;
                     if (userLocation && property.latitude && property.longitude) {
                       distance = calculateDistance(
@@ -3232,17 +3475,17 @@ const formatNumber = (num) => {
                     return (
                       <div
                         key={property._id}
-                        className={`shadow-md rounded-2xl overflow-hidden block no-underline hover:no-underline ${hoveredPropertyId === property._id
+                        className={`shadow-md rounded-2xl overflow-hidden flex flex-col h-full w-full max-w-full min-w-0 box-border block no-underline hover:no-underline ${hoveredPropertyId === property._id
                           ? "bg-green-200"
                           : ""
                           }`}
                         onMouseEnter={() => setHoveredPropertyId(property._id)}
                         onMouseLeave={() => setHoveredPropertyId(null)}
                       >
-                        <div className="relative" key={property._id}>
+                        <div className="relative w-full overflow-hidden rounded-t-2xl flex-shrink-0">
                           <Link
                             to={`/propertydetails/${property._id}`}
-                            className="block overflow-hidden no-underline bg-white border-2 rounded-lg hover:no-underline"
+                            className="block overflow-hidden no-underline bg-white hover:no-underline"
                           >
                             {1 + (property?.property_images?.length || 0) > 1 ? (
                               <Slider
@@ -3308,7 +3551,7 @@ const formatNumber = (num) => {
                                   <img
                                     src={property.cover_image}
                                     alt="Cover"
-                                    className="object-cover w-full h-48 rounded-t-2xl"
+                                    className="w-full aspect-video object-cover rounded-t-2xl"
                                   />
                                 </div>
 
@@ -3319,7 +3562,7 @@ const formatNumber = (num) => {
                                       <img
                                         src={imgObj.image}
                                         alt="Property"
-                                        className="object-cover w-full h-48 rounded-t-2xl"
+                                        className="w-full aspect-video object-cover rounded-t-2xl"
                                       />
                                     </div>
                                   ),
@@ -3330,7 +3573,7 @@ const formatNumber = (num) => {
                                 <img
                                   src={property.cover_image}
                                   alt="Cover"
-                                  className="object-cover w-full h-48 rounded-t-2xl"
+                                  className="w-full aspect-video object-cover rounded-t-2xl"
                                 />
                               </div>
                             )}
@@ -3339,21 +3582,37 @@ const formatNumber = (num) => {
                           {/* Days Ago Tag (Top Left) */}
                           {property.days_since_created !== undefined &&
                             property.days_since_created !== null && (
-                              <span className="absolute px-2 py-1 text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm">
+                              <span className="absolute z-20 px-2 py-1 text-[10px] sm:text-xs font-normal text-white rounded-full top-2 left-2 bg-gray-800/60 backdrop-blur-sm whitespace-nowrap max-w-[55%] truncate">
                                 {property.days_since_created} days ago
                               </span>
                             )}
 
+                          {/* Admin Approval Badge (Top Left) */}
+                          {property.admin_approval === "Approved" && (
+                            <div className="absolute z-20 top-1.5 left-1.5 sm:top-2 sm:left-2 max-w-[55%]">
+                              <div className="flex items-center bg-[#8B1E3F] text-white rounded-sm shadow-md px-1.5 py-0.5 sm:px-2 sm:py-1">
+                                {/* Tick Icon */}
+                                <span className="mr-1 text-[10px] sm:text-xs font-bold text-white flex-shrink-0">
+                                  ✓
+                                </span>
+                                {/* Verified Text */}
+                                <span className="text-[9px] sm:text-[11px] font-semibold leading-none truncate">
+                                  Verified
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Virtual Tour & Heart Icon (Top Right) */}
-                          <div className="absolute flex items-center space-x-2 top-2 right-2">
+                          <div className="absolute z-20 flex items-center gap-1.5 sm:gap-2 top-2 right-2 max-w-[70%]">
                             {property.virtual_tour_availability === "Yes" && (
-                              <span className="flex items-center gap-1 px-2 py-1 text-xs font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm">
-                                <PiCubeFocus className="text-sm text-white" />
-                                Virtual Tour
+                              <span className="flex items-center gap-1 px-2 py-1 text-[10px] sm:text-xs font-normal text-white rounded-full bg-gray-800/60 backdrop-blur-sm whitespace-nowrap">
+                                <PiCubeFocus className="text-sm text-white flex-shrink-0" />
+                                <span className="hidden xs:inline sm:inline">Virtual Tour</span>
                               </span>
                             )}
                             <button
-                              className="p-1.5 text-xs font-normal text-white bg-opacity-50 rounded-full bg-gray-800/60 backdrop-blur-sm"
+                              className="p-1.5 text-xs font-normal text-white bg-opacity-50 rounded-full bg-gray-800/60 backdrop-blur-sm flex-shrink-0"
                               onClick={(e) => {
                                 e.preventDefault();
                                 if (!accessToken) {
@@ -3391,9 +3650,9 @@ const formatNumber = (num) => {
                               getCategoryBadge(property);
                             if (!badgeText) return null;
                             return (
-                              <div className="absolute bottom-0 left-0">
+                              <div className="absolute bottom-0 left-0 z-20 max-w-[65%]">
                                 <span
-                                  className={`text-white text-xs px-3 py-1 rounded-se-lg ${badgeColor}`}
+                                  className={`block text-white text-[10px] sm:text-xs font-semibold px-2 sm:px-3 py-1 rounded-se-lg truncate ${badgeColor}`}
                                 >
                                   {badgeText}
                                 </span>
@@ -3403,8 +3662,8 @@ const formatNumber = (num) => {
 
                           {/* FEATURED tag - only if marked */}
                           {property.mark_as_featured === "Yes" && (
-                            <div className="absolute bottom-0 right-0">
-                              <span className="px-3 py-1 text-xs text-white bg-yellow-500 rounded-ss-lg">
+                            <div className="absolute bottom-0 right-0 z-20">
+                              <span className="px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-semibold text-white bg-yellow-500 rounded-ss-lg whitespace-nowrap">
                                 FEATURED
                               </span>
                             </div>
@@ -3412,64 +3671,65 @@ const formatNumber = (num) => {
                         </div>
 
                         {/* Property Details — AdvisorDashboard card design */}
-                        <div className="flex flex-col flex-1 p-3 text-black bg-white">
-                          <div className="flex items-start justify-between gap-3 mb-0">
+                        <div className="flex flex-col flex-1 min-w-0 w-full p-2.5 xs:p-3 sm:p-4 text-black bg-white overflow-hidden">
+                          <div className="flex items-start justify-between gap-1.5 sm:gap-3 mb-0 min-w-0 flex-wrap xs:flex-nowrap">
                             <h3
-                              className="flex-1 m-0 text-lg font-semibold leading-6 text-gray-900 truncate"
+                              className="flex-1 min-w-0 m-0 text-sm xs:text-base sm:text-lg font-semibold leading-5 sm:leading-6 text-gray-900 truncate whitespace-nowrap overflow-hidden text-ellipsis"
                               title={property.property_name}
                             >
                               {property.property_name || "N/A"}
                             </h3>
                             <span
-                              className="flex-shrink-0 m-0 text-sm font-medium leading-6 text-black sm:text-base whitespace-nowrap"
+                              className="flex-shrink-0 m-0 text-[10px] xs:text-xs sm:text-sm font-medium leading-5 sm:leading-6 text-black whitespace-nowrap"
                               title={property.furnished_type}
                             >
                               {property.furnished_type || "Un-Furnished"}
                             </span>
                           </div>
 
-                          <p className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate" title={subtitle}>
+                          <p className="mt-0 mb-1 text-sm leading-5 text-gray-600 truncate min-w-0" title={subtitle}>
                             {subtitle}
                           </p>
 
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center">
-                              <span className="text-2xl font-bold">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-1 min-w-0">
+                            <div className="flex items-center flex-wrap gap-1.5 sm:gap-2 min-w-0">
+                              <span className="text-lg xs:text-xl sm:text-2xl font-bold whitespace-nowrap">
                                 ₹{" "}
                                 {property.property_category_type === "Rent"
                                   ? formatPrice(property.rent).replace("₹ ", "")
                                   : formatPrice(property.property_price).replace("₹ ", "")}
                               </span>
-                              {property.property_category_type === "Rent" && (
-                                <span className="ml-1 text-sm text-gray-500">/ {property.rent_duration}</span>
-                              )}
+                              <span className="text-xs sm:text-sm text-[#8B1E3F] whitespace-nowrap">
+                                / {property.rent_duration}
+                              </span>
                               {property.property_category_type?.includes("Buy") &&
                                 property.possession_status === "Ready To Move" && (
-                                  <div className="flex items-center gap-2 px-3 py-1 ml-6 bg-green-100 border border-green-200 rounded-full">
-                                    <MdApartment className="text-base text-green-700" />
-                                    <span className="text-xs font-semibold text-green-700 whitespace-nowrap">Ready to Move</span>
+                                  <div className="flex items-center gap-2 px-2 sm:px-3 py-1 text-white border rounded-full bg-[#8B1E3F] border-[#8B1E3F] flex-shrink-0">
+                                    <MdApartment className="text-base text-white flex-shrink-0" />
+                                    <span className="text-xs font-semibold text-white whitespace-nowrap">
+                                      Ready to Move
+                                    </span>
                                   </div>
                                 )}
                             </div>
-                            <div className="text-sm font-medium whitespace-nowrap">
+                            <div className="text-xs sm:text-sm font-medium whitespace-nowrap flex-shrink-0">
                               {property.property_category_type?.includes("Buy") &&
                                 property.possession_status !== "Ready To Move" &&
                                 property.possession_date && (
                                   <>
-                                    <span className="text-gray-500">Possession:</span>
-                                    <span className="ml-1 font-semibold">
+                                    <span className="text-[#8B1E3F]">Possession:</span>
+                                    <span className="ml-1 font-semibold text-[#8B1E3F]">
                                       {new Date(property.possession_date).toLocaleDateString("en-IN")}
                                     </span>
                                   </>
                                 )}
                             </div>
                           </div>
-
-                          <div className="grid grid-cols-3 py-3 border-t border-b border-gray-100">
-                            <div className="flex items-center gap-2 px-3 min-w-0">
-                              <MdApartment className="text-[22px] text-gray-700 flex-shrink-0" />
+                          <div className="grid grid-cols-3 gap-0.5 xs:gap-1 py-2 sm:py-3 border-t border-b border-gray-100 min-w-0">
+                            <div className="flex items-center gap-1 sm:gap-2 px-0.5 xs:px-1 sm:px-3 min-w-0">
+                              <MdApartment className="text-base xs:text-lg sm:text-[22px] text-gray-700 flex-shrink-0" />
                               <div className="flex flex-col justify-center min-w-0">
-                                <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
                                   {property.building_type === "Commercial"
                                     ? property.property_type === "Office"
                                       ? "Office Space"
@@ -3480,7 +3740,7 @@ const formatNumber = (num) => {
                                       ? `${property.bathroom || 0} Bathrooms`
                                       : property.bhk_type}
                                 </p>
-                                <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
                                   {property.building_type === "Commercial"
                                     ? "Property Type"
                                     : property.property_category_type?.includes("PG")
@@ -3490,68 +3750,67 @@ const formatNumber = (num) => {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
+                            <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 border-l border-gray-200 min-w-0">
                               {property.property_category_type?.includes("PG") ? (
-                                <FaUser className="text-[20px] text-gray-700 flex-shrink-0" />
+                                <FaUser className="text-base sm:text-[20px] text-gray-700 flex-shrink-0" />
                               ) : (
-                                <FaBath className="text-[20px] text-gray-700 flex-shrink-0" />
+                                <FaBath className="text-base sm:text-[20px] text-gray-700 flex-shrink-0" />
                               )}
                               <div className="flex flex-col justify-center min-w-0">
-                                <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
                                   {property.property_category_type?.includes("PG")
                                     ? property.available_for
                                     : `${property.bathroom || 0} Baths`}
                                 </p>
-                                <p className="m-0 text-xs leading-4 text-gray-500 truncate">
+                                <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">
                                   {property.property_category_type?.includes("PG") ? "Available For" : "Bathrooms"}
                                 </p>
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 px-3 border-l border-gray-200 min-w-0">
-                              <RiRuler2Line className="text-[22px] text-gray-700 flex-shrink-0" />
+                            <div className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 border-l border-gray-200 min-w-0">
+                              <RiRuler2Line className="text-lg sm:text-[22px] text-gray-700 flex-shrink-0" />
                               <div className="flex flex-col justify-center min-w-0">
-                                <p className="m-0 text-sm font-semibold leading-4 truncate">
+                                <p className="m-0 text-xs sm:text-sm font-semibold leading-4 truncate">
                                   {property.area} {property.area_in}
                                 </p>
-                                <p className="m-0 text-xs leading-4 text-gray-500 truncate">Built Up Area</p>
+                                <p className="m-0 text-[10px] sm:text-xs leading-4 text-gray-500 truncate">Built Up Area</p>
                               </div>
                             </div>
                           </div>
 
                           <hr className="my-1 border-gray-100" />
 
-                          <div className="flex items-center justify-between pt-1 pb-2 text-[13px] text-gray-600">
-                            <div className="flex items-center flex-wrap min-w-0">
-                              <div className="flex items-center">
-                                <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700" />
-                                <span className="truncate">Posted by {property.user_type || "Owner"}</span>
+                          <div className="flex items-center justify-between gap-2 pt-1 pb-2 text-xs sm:text-[13px] text-gray-600 flex-nowrap min-w-0 overflow-hidden">
+                            <div className="flex items-center flex-nowrap min-w-0 gap-x-2 overflow-hidden">
+                              <div className="flex items-center min-w-0 flex-shrink">
+                                <AiOutlineClockCircle className="mr-1 text-[15px] text-gray-700 flex-shrink-0" />
+                                <span className="truncate min-w-0 whitespace-nowrap overflow-hidden text-ellipsis">Posted by {property.user_type || "Owner"}</span>
                               </div>
-                              <span className="mx-2 text-gray-400">•</span>
-                              <span className="whitespace-nowrap">
+                              <span className="text-gray-400 hidden xs:inline flex-shrink-0">•</span>
+                              <span className="whitespace-nowrap flex-shrink-0">
                                 {property.days_since_created ? `${property.days_since_created} days ago` : "Recently"}
                               </span>
                               {distance && (
                                 <>
-                                  <span className="mx-2 text-gray-400">•</span>
-                                  <div className="flex items-center whitespace-nowrap">
-                                    <FaMapMarkerAlt className="mr-1 text-red-500" />
+                                  <span className="text-gray-400 hidden xs:inline flex-shrink-0">•</span>
+                                  <div className="flex items-center whitespace-nowrap flex-shrink-0">
+                                    <FaMapMarkerAlt className="mr-1 text-red-500 flex-shrink-0" />
                                     {distance} km from you
                                   </div>
                                 </>
                               )}
                             </div>
                             <PiShareNetworkLight
-                              className="ml-2 text-[20px] text-gray-500 cursor-pointer hover:text-blue-500"
+                              className="ml-2 text-[20px] text-gray-500 cursor-pointer hover:text-blue-500 flex-shrink-0"
                               onClick={() =>
                                 openShareModal1(`${window.location.origin}/propertydetails/${property._id}`, property._id)
                               }
                             />
                           </div>
-
-                          <div className="flex items-center justify-between pt-3 gap-2">
-                            <div className="flex items-center min-w-0">
-                              <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-full bg-blue-100">
+                          <div className="flex flex-nowrap items-center justify-between gap-1.5 xs:gap-2 pt-3 mt-auto min-w-0 w-full overflow-hidden">
+                            <div className="flex items-center min-w-0 flex-1 overflow-hidden">
+                              <div className="flex items-center justify-center flex-shrink-0 w-7 h-7 xs:w-8 xs:h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 overflow-hidden rounded-full bg-blue-100">
                                 {property.property_owner_image ? (
                                   <img
                                     src={`${API_URL}/media/${property.property_owner_image}`}
@@ -3559,22 +3818,22 @@ const formatNumber = (num) => {
                                     className="object-cover w-full h-full rounded-full"
                                   />
                                 ) : (
-                                  <AiOutlineUser className="text-blue-600" size={24} />
+                                  <AiOutlineUser className="text-blue-600 text-xl sm:text-2xl" />
                                 )}
                               </div>
-                              <div className="flex flex-col ml-3 min-w-0">
-                                <span className="text-sm font-semibold text-gray-900 truncate" title={property.connect_to_name}>
+                              <div className="flex flex-col justify-center min-w-0 flex-1 ml-2 sm:ml-3 leading-tight overflow-hidden">
+                                <span className="block min-w-0 max-w-full truncate whitespace-nowrap overflow-hidden text-ellipsis text-xs sm:text-sm font-semibold text-gray-900" title={property.connect_to_name}>
                                   {property.connect_to_name || "Owner"}
                                 </span>
-                                <span className="text-xs text-gray-500 truncate">{property.user_type || "Owner"}</span>
+                                <span className="block min-w-0 max-w-full truncate whitespace-nowrap overflow-hidden text-ellipsis text-[10px] sm:text-xs text-gray-500">{property.user_type || "Owner"}</span>
                               </div>
                             </div>
 
                             {/* RIGHT SIDE - Buttons */}
-                            <div className="flex items-center gap-2 flex-shrink-0">
+                            <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 flex-nowrap flex-shrink-0">
                               {/* Contact */}
                               <div
-                                className="flex items-center justify-center px-4 h-9 text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap"
+                                className="flex items-center justify-center min-w-[3.25rem] xs:min-w-[3.75rem] sm:w-20 h-7 xs:h-8 sm:h-9 text-[10px] xs:text-[11px] sm:text-sm font-semibold text-white bg-red-800 rounded-md cursor-pointer hover:bg-red-900 whitespace-nowrap px-1.5 sm:px-2 flex-shrink-0"
                                 onClick={() => handleContactClick(property)}
                               >
                                 Contact
@@ -3582,22 +3841,22 @@ const formatNumber = (num) => {
 
                               {/* WhatsApp */}
                               <a
-                                href={`https://wa.me/91${property.connect_to_no}?text=Hello, I am interested in your property`}
+                                href={`https://wa.me/91${property.connect_to_no}?text=${encodeURIComponent("Hello, I am interested in your property")}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="flex items-center justify-center w-9 h-9 text-white bg-green-500 rounded-md hover:bg-green-600"
+                                className="flex items-center justify-center w-7 h-7 xs:w-8 xs:h-8 sm:w-9 sm:h-9 flex-shrink-0 text-white bg-green-500 rounded-md hover:bg-green-600 text-xs xs:text-sm"
                               >
                                 <FaWhatsapp />
                               </a>
 
                               {/* Call */}
                               <a
-                                href={`tel:${property.connect_to_no}`}
+                                href={`tel:+91${property.connect_to_no}`}
                                 onClick={(e) => e.stopPropagation()}
-                                className="flex items-center justify-center w-9 h-9 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                                className="flex items-center justify-center w-7 h-7 xs:w-8 xs:h-8 sm:w-9 sm:h-9 flex-shrink-0 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
                               >
-                                <FaPhone />
+                                <FaPhoneAlt className="text-xs xs:text-sm sm:text-base" />
                               </a>
                             </div>
                           </div>
@@ -3687,6 +3946,7 @@ const formatNumber = (num) => {
                   scrollWheelZoom={false}
                   style={{ width: "100%", height: "100%" }}
                 >
+                  <ScrollWheelZoomOnHover />
                   <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}" />
 
                   {properties
