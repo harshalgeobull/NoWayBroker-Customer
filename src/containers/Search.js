@@ -16,16 +16,51 @@ import { RiHomeLine } from "react-icons/ri";
 // import { useContext } from "react";
 import { SearchContext } from "./SearchContext";
 
+// Shared tab config — every tab is rendered from this single list so all
+// tabs share the exact same markup, classes, and animation behavior.
+const NAV_TABS = [
+  { label: "BUY", key: "Buy", type: "Buy" },
+  { label: "RENT", key: "Rent", type: "Rent" },
+  { label: "PG", key: "PG", type: "PG/Co-living" },
+  { label: "Plots/Land", key: "Plot", type: "Plot/Land" },
+  { label: "COMMERCIAL", key: "Commercial", type: "Commercial" },
+];
+
 const Search = () => {
   const history = useHistory();
   const { searchCity, setSearchCity } = useContext(SearchContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyAt8bj4UACvakZfiSy-0c1o_ivfplm7jEU";
   const [type, setType] = useState("");
   const [error, setError] = useState("");
   const inputRef = useRef(null);
+
+  // ==========================================================
+  // Shared nav-tab hover indicator.
+  // No tab is "active" by default — the underline only appears
+  // while the cursor is actually over a tab, and it fades out
+  // (not snaps to another tab) once the cursor leaves the row.
+  // ==========================================================
+  const tabRefs = useRef({});
+  const [indicatorStyle, setIndicatorStyle] = useState({
+    left: 0,
+    width: 0,
+    opacity: 0,
+  });
+
+  const moveIndicator = (key) => {
+    const el = tabRefs.current[key];
+    if (el) {
+      setIndicatorStyle({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 });
+    }
+  };
+
+  const handleTabMouseEnter = (key) => moveIndicator(key);
+  const handleTabRowMouseLeave = () => {
+    setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
+  };
 
   const handleCityChange = (e) => {
     const selectedCity = e.target.value;
@@ -120,36 +155,36 @@ const [showSuggestions, setShowSuggestions] = useState(false);
     );
   };
   const handleSearchChange = async (e) => {
-  const value = e.target.value;
+    const value = e.target.value;
 
-  setSearchQuery(value);
+    setSearchQuery(value);
 
-  if (!value.trim()) {
-    setSuggestions([]);
-    setShowSuggestions(false);
-    return;
-  }
+    if (!value.trim()) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
 
-  try {
-    const response = await axios.post(
-      `${process.env.REACT_APP_API_URL}/cust_api/search_suggestions`,
-      {
-        query: value,
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/cust_api/search_suggestions`,
+        {
+          query: value,
+        }
+      );
+
+      if (response.data.status === 1) {
+        setSuggestions(response.data.data);
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
       }
-    );
 
-    if (response.data.status === 1) {
-  setSuggestions(response.data.data);
-  setShowSuggestions(true);
-} else {
-  setSuggestions([]);
-  setShowSuggestions(false);
-}
-
-  } catch (error) {
-    console.error(error);
-  }
-};
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleSearch = () => {
     if (!searchQuery && !searchCity && !type) {
@@ -253,38 +288,56 @@ const [showSuggestions, setShowSuggestions] = useState(false);
         <div className="flex flex-col w-full bg-white rounded-2xl shadow-lg">
 
           {/* Top Tabs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-16 text-gray-700 font-semibold tracking-wider border-b border-gray-100 p-3">
-            <Link
-              to={{ pathname: "/property", state: { propertyType: "Buy" } }}
-              className="text-lg font-medium tracking-wider text-gray-600 no-underline transition hover:my-text hover:no-underline"
-            >
-              BUY
-            </Link>
-            <Link
-              to={{ pathname: "/property", state: { propertyType: "Rent" } }}
-              className="text-lg font-medium tracking-wider text-gray-600 no-underline transition hover:my-text hover:no-underline"
-            >
-              RENT
-            </Link>
-            <Link
-              to={{ pathname: "/property", state: { propertyType: "PG/Co-living" } }}
-              className="text-lg font-medium tracking-wider text-gray-600 no-underline transition hover:my-text hover:no-underline"
-            >
-              PG
-            </Link>
-            <Link
-              to={{ pathname: "/property", state: { propertyType: "Plot/Land" } }}
-              className="text-lg font-medium tracking-wider text-gray-600 no-underline transition hover:my-text hover:no-underline"
-            >
-              Plots/Land
-            </Link>
-            <Link
-              to={{ pathname: "/property", state: { propertyType: "Commercial" } }}
-              className="text-lg font-medium tracking-wider text-gray-600 no-underline transition hover:my-text hover:no-underline"
-            >
-              COMMERCIAL
-            </Link>
+          <div
+            className="relative flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-16 text-gray-700 font-semibold tracking-wider border-b border-gray-100 p-3"
+            onMouseLeave={handleTabRowMouseLeave}
+          >
+            {NAV_TABS.map((tab) => (
+              <Link
+                key={tab.key}
+                ref={(el) => {
+                  tabRefs.current[tab.key] = el;
+                }}
+                to={{ pathname: "/property", state: { propertyType: tab.type } }}
+                onMouseEnter={() => handleTabMouseEnter(tab.key)}
+                className="nav-tab text-lg font-medium tracking-wider text-gray-600 no-underline hover:no-underline"
+              >
+                {tab.label}
+              </Link>
+            ))}
+
+            {/* Single shared sliding indicator — this is the ONLY underline.
+                Hidden by default, fades in and slides to whichever tab is hovered,
+                fades out when the cursor leaves the whole tab row. */}
+            <span
+              className="nav-tab-indicator hidden sm:block"
+              style={{
+                left: indicatorStyle.left,
+                width: indicatorStyle.width,
+                opacity: indicatorStyle.opacity,
+              }}
+            />
           </div>
+
+          {/* Shared hover styles — identical for every tab, no per-tab overrides,
+              no "active" state; color + underline only appear on hover. */}
+          <style>{`
+            .nav-tab {
+              position: relative;
+              transition: color 0.3s ease;
+            }
+            .nav-tab:hover {
+              color: #8B1E3F;
+            }
+            .nav-tab-indicator {
+              position: absolute;
+              bottom: 6px;
+              height: 3px;
+              background-color: #8B1E3F;
+              opacity: 0;
+              transition: left 0.3s ease, width 0.3s ease, opacity 0.2s ease;
+            }
+          `}</style>
 
           {/* Bottom Search Inputs (Fixed: Removed duplicate background/shadows) */}
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center p-3 gap-3 lg:gap-2">
@@ -310,21 +363,21 @@ const [showSuggestions, setShowSuggestions] = useState(false);
                   onChange={handleSearchChange}
                 />
                 {showSuggestions && suggestions.length > 0 && (
-  <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
-    {suggestions.map((item, index) => (
-      <div
-        key={index}
-        className="px-4 py-3 cursor-pointer hover:bg-gray-100 border-b last:border-b-0"
-        onClick={() => {
-          setSearchQuery(item.text);
-          setShowSuggestions(false);
-        }}
-      >
-        {item.text}
-      </div>
-    ))}
-  </div>
-)}
+                  <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+                    {suggestions.map((item, index) => (
+                      <div
+                        key={index}
+                        className="px-4 py-3 cursor-pointer hover:bg-gray-100 border-b last:border-b-0"
+                        onClick={() => {
+                          setSearchQuery(item.text);
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        {item.text}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* City Dropdown */}
