@@ -797,14 +797,14 @@ const City_Wise = () => {
       setLoading(true);
 
       const formData = new FormData();
-      formData.append("user_id", accessToken);
+      //formData.append("user_id", accessToken);
       formData.append("city_name", city_name);
       formData.append("page", currentPage || 1);
       formData.append("page_size", itemsPerPage);
       if (sortValue) formData.append("sort_by", sortValue); // newest | oldest | price_low | price_high
       if (verifiedValue) formData.append("verified", true);
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/cust_api/search_properties`,
+        `${process.env.REACT_APP_API_URL}/cust_api/filter_property`,
         formData,
       );
 
@@ -946,7 +946,9 @@ const City_Wise = () => {
       const cityToSend =
         searchCity && searchCity.trim() !== "" ? searchCity.trim() : city_name;
 
-      formData.append("customer_id", accessToken);
+      if (accessToken) {
+  formData.append("customer_id", accessToken);
+}
 
       if (cityToSend) {
         formData.append("city_name", cityToSend);
@@ -3379,8 +3381,12 @@ const City_Wise = () => {
             >
               {/* Right: Properties */}
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-                {sortedProperties.length > 0 ? (
-                  sortedProperties.map((property) => {
+                {sortedProperties.filter(
+  (property) => property.available_status !== "Sold"
+).length > 0 ? (
+  sortedProperties
+    .filter((property) => property.available_status !== "Sold")
+    .map((property) => {
                     let distance = null;
                     if (userLocation && property.latitude && property.longitude) {
                       distance = calculateDistance(
@@ -3684,11 +3690,13 @@ const City_Wise = () => {
                             <div className="flex items-center flex-wrap gap-1.5 sm:gap-2 min-w-0">
                               <span className="text-lg xs:text-xl sm:text-2xl font-bold whitespace-nowrap">
                                 ₹{" "}
-                                {property.property_category_type === "Rent"
+                                {property.property_category_type === "Rent" ||
+                                  property.property_category_type === "PG/Co-living"
                                   ? formatPrice(property.rent).replace("₹ ", "")
                                   : formatPrice(property.property_price).replace("₹ ", "")}
                               </span>
-                              {property.property_category_type === "Rent" && (
+                              {(property.property_category_type === "Rent" ||
+                                property.property_category_type === "PG/Co-living") && (
                                 <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">/ {property.rent_duration}</span>
                               )}
                               {property.property_category_type?.includes("Buy") &&

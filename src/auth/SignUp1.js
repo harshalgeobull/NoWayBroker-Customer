@@ -222,7 +222,7 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
 
             {/* Name */}
             <label className="block mb-1 text-sm font-medium text-gray-700">
-              Name <span className="text-xl font-bold text-red-500">*</span>
+              Full Name <span className="text-xl font-bold text-red-500">*</span>
             </label>
             <div className="mb-1">
               <input
@@ -283,7 +283,7 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
               {/* Email */}
               <div>
                 <label className="block mb-1 text-sm font-medium text-gray-700">
-                  Email{" "}
+                  Email Address{" "}
                   <span className="text-xl font-bold text-red-500">*</span>
                 </label>
 

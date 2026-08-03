@@ -101,7 +101,12 @@ export default function SearchDashboard() {
   const userLng = locationState?.lng || null;
   const [error, setError] = useState(null);
   const { searchQuery = "", type = "" } = location.state || {};
-  const [search, setSearch] = useState("");
+  useEffect(() => {
+    if (location.state) {
+      setSearch(location.state.searchQuery || "");
+    }
+  }, [location.state]);
+  const [search, setSearch] = useState(searchQuery);
   const { searchCity, setSearchCity } = useCity();
   const [propertyType, setPropertyType] = useState("");
   const [bhkType, setBhkType] = useState("");
@@ -125,6 +130,7 @@ export default function SearchDashboard() {
   // Paginatio -
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState();
+  const [totalResults, setTotalResults] = useState(0);
   const itemsPerPage = 10;
   const [activeIndexes, setActiveIndexes] = useState({});
   const [priceDropdownOpen, setPriceDropdownOpen] = useState(false);
@@ -172,6 +178,12 @@ export default function SearchDashboard() {
   const [propertyType2, setPropertyType2] = useState([]);
   const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
   const propertyTypeButtonRef = useRef(null);
+  const [parsedFilters, setParsedFilters] = useState({
+  property_category_type: "",
+  building_type: "",
+  property_type: "",
+  bhk_type: "",
+  });
   //Property Portal
   const [propertyTypeDropdownPos, setPropertyTypeDropdownPos] = useState({
     top: 0,
@@ -554,7 +566,30 @@ export default function SearchDashboard() {
       prev === propertyImages.length - 1 ? 0 : prev + 1,
     );
   };
+  const getResultsTitle = () => {
+    let title = "";
 
+  if (bhkType) {
+    
+    title += bhkType;
+  }
+  if (propertyType2.length > 0) {
+    title += ` ${propertyType2[0]}`;
+  }
+  if (propertyType) {
+    if (propertyType === "Buy") {
+      title += " For Sale";
+    } else if (propertyType === "Rent") {
+      title += " For Rent";
+    } else if (propertyType === "Commercial Buy") {
+      title += " For Sale";
+    } else if (propertyType === "Commercial Lease") {
+      title += " For Lease";
+    }
+  }
+    console.log("Title:", title);
+    return title;
+  };
   const fetchProperties = async (
     searchCity,
     type,
@@ -593,43 +628,139 @@ export default function SearchDashboard() {
         },
       );
       if (response.status === 200 && response.data.status === 1) {
-        setProperties(response.data.data);
-        setTotalPages(response.data.total_pages || 1);
-      } else {
-        setError("No properties available");
-        setProperties([]);
-        setTotalPages(0);
-      }
+  setProperties(response.data.data);
+  setTotalPages(response.data.total_pages || 1);
+  setTotalResults(response.data.total_count || 0);
+
+  if (response.data.parsed_filters) {
+    setParsedFilters(response.data.parsed_filters);
+  }
+} else {
+  setError("No properties available");
+  setProperties([]);
+  setTotalPages(0);
+  setTotalResults(0);
+}
     } catch (error) {
       setError("Failed to load properties.");
       setProperties([]);
       setTotalPages(0);
+      setTotalResults(0);
     } finally {
       setLoading(false);
     }
   };
+  useEffect(() => {
+  console.log("Parsed Filters:", parsedFilters);
+}, [parsedFilters]);
+const BUY_PROPERTY_TYPE_MAPPING = {
+    "Apartment": "Flat/Apartment",
+    "Independent House/Villa": "Home/Villa",
+    "Plot/Land": "Plot/Land",
+};
 
+const RENT_PROPERTY_TYPE_MAPPING = {
+    "Apartment": "Flat/Apartment",
+    "Independent House/Villa": "Independent House/Villa",
+};
+const COMMERCIAL_BUY_PROPERTY_TYPE_MAPPING = {
+    "Office": "Ready to move office space",
+    "Retail": "Retail",
+    "Plot/Land": "Plot/Land",
+    "Storage": "Ware House",
+    "Industry": "Manufacturing",
+    "Hospitality": "Hotel/Resorts",
+    "Other": "Others",
+};
+
+const COMMERCIAL_LEASE_PROPERTY_TYPE_MAPPING = {
+    "Office": "Office Space",
+    "Retail": "Retail Shops/Showrooms",
+    "Plot/Land": "Plot/Land",
+    "Storage": "Other Commercial Spaces",
+    "Industry": "Other Commercial Spaces",
+    "Hospitality": "Other Commercial Spaces",
+    "Other": "Other Commercial Spaces",
+};
+  useEffect(() => {
+  if (!parsedFilters) return;
+
+  if (parsedFilters.property_category_type) {
+    setPropertyType(parsedFilters.property_category_type);
+  }
+
+  if (parsedFilters.building_type) {
+    setBuildingType(parsedFilters.building_type);
+  }
+
+  if (parsedFilters.bhk_type) {
+    setBhkType(parsedFilters.bhk_type);
+  }
+
+  if (parsedFilters.property_type) {
+    console.log("Backend Property Type:", parsedFilters.property_type);
+
+    let propertyType = parsedFilters.property_type;
+
+if (parsedFilters.building_type === "Residential") {
+    if (parsedFilters.property_category_type === "Buy") {
+        propertyType =
+            BUY_PROPERTY_TYPE_MAPPING[propertyType] || propertyType;
+    } else if (parsedFilters.property_category_type === "Rent") {
+        propertyType =
+            RENT_PROPERTY_TYPE_MAPPING[propertyType] || propertyType;
+    }
+} else if (parsedFilters.building_type === "Commercial") {
+    if (parsedFilters.property_category_type === "Buy" ||
+        parsedFilters.property_category_type === "Commercial Buy"
+    ) {
+        propertyType =
+            COMMERCIAL_BUY_PROPERTY_TYPE_MAPPING[propertyType] || propertyType;
+    } else if (
+        parsedFilters.property_category_type === "Commercial Lease" ||
+        parsedFilters.property_category_type === "Lease" ||
+        parsedFilters.property_category_type === "Rent"
+    ) {
+        propertyType =
+            COMMERCIAL_LEASE_PROPERTY_TYPE_MAPPING[propertyType] || propertyType;
+    }
+}
+console.log("Mapped Property Type:", propertyType);
+
+setPropertyType2([propertyType]);
+}
+}, [parsedFilters]);
+useEffect(() => {
+  console.log({
+    propertyType,
+    buildingType,
+    bhkType,
+    propertyType2,
+  });
+}, [propertyType, buildingType, bhkType, propertyType2]);
   const fetchFilteredProperties = async (
     page,
     sortValue = appliedSortBy,
     verifiedValue = appliedVerifiedOnly,
   ) => {
     try {
-      setError(null);
-      const formData = new FormData();
+  setError(null);
 
-      const cityToSend =
-        searchCity && searchCity.trim() !== "" ? searchCity.trim() : "";
+  const formData = new FormData();
 
-      formData.append("customer_id", accessToken);
+  formData.append("customer_id", accessToken);
 
-      if (cityToSend) {
-        formData.append("city_name", cityToSend);
-      }
+  if (parsedFilters?.city_name) {
+    formData.append("city_name", parsedFilters.city_name);
+  }
 
-      formData.append("page", page);
-      formData.append("page_size", itemsPerPage);
-      formData.append("search_keyword", searchQuery);
+  if (parsedFilters?.address_area) {
+    formData.append("address_area", parsedFilters.address_area);
+  }
+
+  formData.append("page", page);
+  formData.append("page_size", itemsPerPage);
+  formData.append("search_keyword", searchQuery);
 
       if (sortValue) {
         formData.append("sort_by", sortValue); // newest | oldest | price_low | price_high
@@ -775,14 +906,17 @@ export default function SearchDashboard() {
       if (response.status === 200 && response.data.status === 1) {
         setProperties(response.data.data);
         setTotalPages(response.data.total_pages || 1);
+        setTotalResults(response.data.total_count || 0);
       } else {
         setProperties([]);
         setTotalPages(0);
+        setTotalResults(0);
         setError("No properties available");
       }
     } catch (error) {
       setProperties([]);
       setTotalPages(0);
+      setTotalResults(0);
       setError("Failed to load properties.");
     } finally {
       setLoading(false);
@@ -1839,7 +1973,7 @@ export default function SearchDashboard() {
             </div>
 
             {/* Verified Filter Dropdown */}
-            <div className={`relative z-50 ${FILTER_WIDTH} flex-shrink-0`}>
+            <div className={`relativ ${FILTER_WIDTH} flex-shrink-0`}>
               <select
                 value="verified"
                 onChange={() => { }}
@@ -1847,7 +1981,7 @@ export default function SearchDashboard() {
                   e.preventDefault();
                   setVerifiedOnly((prev) => !prev);
                 }}
-                className={`relative z-50 w-full h-16 p-2 border-2 rounded-md appearance-none focus:outline-none cursor-pointer ${verifiedOnly
+                className={`relative w-full h-16 p-2 border-2 rounded-md appearance-none focus:outline-none cursor-pointer ${verifiedOnly
                   ? "border-[#8B1E3F] bg-[#8B1E3F] text-white"
                   : "border-gray-300 bg-white hover:bg-gray-300"
                   }`}
@@ -3395,20 +3529,34 @@ export default function SearchDashboard() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-4 mt-4 sm:flex-row sm:justify-end ">
-          <button
-            onClick={handleButtonClick}
-            className="w-40 p-3 text-rose-700 my-border rounded-md hover:bg-gray-300 focus:outline-none"
-          >
-            {filtersApplied ? "Reset Filters" : "Apply Filter"}
-          </button>
-          <button
-            className="w-40 p-3 my-border rounded-md hover:bg-gray-300 focus:outline-none"
-            onClick={handleSaveSearch}
-          >
-            Save Search
-          </button>
-        </div>
+        <div className="flex items-center justify-between px-6 mt-4 mb-3">
+  <h2 className="text-2xl font-bold text-gray-900">
+    <span className="text-[#8B1E3F]">{totalResults}</span> Results
+
+    {(searchQuery || filtersApplied) && (
+  <>
+    <span className="mx-3 text-gray-400">|</span>
+    <span>{filtersApplied ? getResultsTitle() : searchQuery}</span>
+  </>
+)}
+  </h2>
+
+  <div className="flex gap-4">
+    <button
+      onClick={handleButtonClick}
+      className="w-40 p-3 text-rose-700 my-border rounded-md hover:bg-gray-300"
+    >
+      {filtersApplied ? "Reset Filters" : "Apply Filter"}
+    </button>
+
+    <button
+      onClick={handleSaveSearch}
+      className="w-40 p-3 my-border rounded-md hover:bg-gray-300"
+    >
+      Save Search
+    </button>
+  </div>
+</div>
       </div>
 
       {/* Main Content */}

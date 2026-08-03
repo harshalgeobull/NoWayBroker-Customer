@@ -621,12 +621,19 @@ const ProjectBuilder = () => {
                         />
 
                         {/* Top Left badge */}
-                        <div className="absolute top-2 left-2 z-10">
-                          <div className="bg-gradient-to-r from-[#8B1E3F] to-[#6D1732] text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(139,30,63,0.4)]">
-                            <MdFiberNew size={11} />
-                            <span>New Booking</span>
-                          </div>
-                        </div>
+                        {/* Top Left Badges */}
+<div className="absolute top-2 left-2 z-10 flex items-center gap-2">
+  {/* New Booking */}
+  <div className="bg-gradient-to-r from-[#8B1E3F] to-[#6D1732] text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(139,30,63,0.4)]">
+    <MdFiberNew size={11} />
+    <span>New Booking</span>
+  </div>
+
+  {/* RERA */}
+  <div className="bg-gradient-to-r from-[#8B1E3F] to-[#6D1732] text-white px-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(139,30,63,0.4)]">
+    <span>RERA</span>
+  </div>
+</div>
                         {/* Wishlist Heart */}
                         <button
                           className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 backdrop-blur flex items-center justify-center hover:scale-110 transition-transform duration-200"

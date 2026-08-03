@@ -75,9 +75,9 @@ const fetchOffers = async () => {
     formData.append("page", 1);
     formData.append("page_size", 10);
 
-    if (userId) {
-      formData.append("user_id", userId);
-    }
+    // if (userId) {
+    //   formData.append("user_id", userId);
+    // }
 
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/cust_api/get_offer`,

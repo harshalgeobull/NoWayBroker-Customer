@@ -163,6 +163,8 @@ const EditProperty = () => {
   const [carpetArea, setCarpetArea] = useState("");
   const [carpetAreaUnit, setCarpetAreaUnit] = useState("");
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  const [isLaterSelected, setIsLaterSelected] = useState(false);
+  
 
   const buildPrompt = () => {
     return `
@@ -965,7 +967,7 @@ Make it engaging, attractive, and human-like.
     openSidesOfLand: openSidesOfLand,
     type_of_construction: typeOfConstruction,
   });
-
+  
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -994,6 +996,9 @@ Make it engaging, attractive, and human-like.
       }));
     }
   }, [roomType]);
+  useEffect(() => {
+  setIsLaterSelected(formData.available_from === "Later");
+}, [formData.available_from]);
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -1151,7 +1156,13 @@ Make it engaging, attractive, and human-like.
         if (key === "pantry_option") {
           value = pantry;
         }
-
+        if (key === "available_from") {
+  if (formData.isImmediateAvailable === "No") {
+    value = "";
+  } else {
+    value = "Immediately";
+  }
+}
         form.append(key, value ?? "");
       }
 
@@ -1266,9 +1277,9 @@ Make it engaging, attractive, and human-like.
             : prev.possession_date;
 
         // remove available_from when Later selected
-        if (value === "Later") {
-          delete updatedData.available_from;
-        }
+        // if (value === "Later") {
+        //   delete updatedData.available_from;
+        // }
       }
 
       return updatedData;
@@ -2998,6 +3009,39 @@ Make it engaging, attractive, and human-like.
                           propertyCategory === "Paying Guest") && (
                             <div className="md:col-span-3 mt-2">
                               <div className="flex flex-wrap gap-4 mt-2">
+                                {/* All Inclusive Price */}
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.all_inclusive_price === "Yes"}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      all_inclusive_price: e.target.checked
+                                        ? "Yes"
+                                        : "No",
+                                    })
+                                  }
+                                />
+                                All Inclusive Price
+                              </label>
+
+                              {/* Price Onwards */}
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.price_onwards === "Yes"}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      price_onwards: e.target.checked
+                                        ? "Yes"
+                                        : "No",
+                                    })
+                                  }
+                                />
+                                Price Onwards
+                              </label>
                                 {/* Price Negotiable */}
                                 <label className="flex items-center gap-2">
                                   <input
@@ -9064,6 +9108,40 @@ Make it engaging, attractive, and human-like.
                         </div>
                       )
                     }
+                    {(formData.possession_status === "Under Construction" ||
+  isLaterSelected) && (
+  <div>
+    <label className="font-medium text-gray-700">
+      {isLaterSelected ? "Available Date" : "Possession Date"}
+      <span className="text-xl font-bold text-red-500">*</span>
+    </label>
+
+    <input
+      type="date"
+      name="possession_date"
+      className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+        formErrors.possession_date
+          ? "border-red-600"
+          : "border-rose-300"
+      }`}
+      value={formData.possession_date || ""}
+      min={new Date().toISOString().split("T")[0]}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          possession_date: e.target.value,
+        })
+      }
+    />
+
+    {formErrors.possession_date && (
+      <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+        <MdErrorOutline className="text-lg" />
+        {formErrors.possession_date}
+      </p>
+    )}
+  </div>
+)}
 
                     {propertyCategory === "Rent" &&
                       buildingType === "Residential" &&
