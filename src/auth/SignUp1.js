@@ -438,4 +438,3 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
 };
 
 export default SignUp1;
-

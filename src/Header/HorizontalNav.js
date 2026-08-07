@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { SearchContext } from "../containers/SearchContext";
+import NavbarSearch from "../containers/NavbarSearch";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 import { useHistory } from "react-router-dom";
@@ -51,12 +52,12 @@ const HorizontalNav = () => {
 
   const hideTabLinks = showSearchBar;
 
-  useEffect(() => {
-    if (!showSearchBar) {
-      setSearchCity("");
-      setInputValue("");
-    }
-  }, [location.pathname]);
+  // useEffect(() => {
+  //   if (!showSearchBar) {
+  //     setSearchCity("");
+  //     setInputValue("");
+  //   }
+  // }, [location.pathname]);
 
   const checkLoginStatus = () => {
     const userId = sessionStorage.getItem("accessToken");
@@ -200,45 +201,46 @@ const HorizontalNav = () => {
         {/* 2. Middle: Navigation Tabs and Search Bar */}
         <div className="flex justify-center w-full md:w-auto md:flex-1">
           {showSearchBar && (
-            <div className="flex items-center flex-wrap gap-2 my-border rounded-md px-3 py-2 w-full md:w-[300px] bg-white min-h-12">
-              {searchCity && (
-                <span className="flex items-center px-3 py-1 text-sm text-black bg-gray-200 rounded-full">
-                  {searchCity}
-                  <button
-                    className="ml-2 text-black hover:text-gray-600 focus:outline-none"
-                    onClick={() => setSearchCity("")}
-                  >
-                    ✕
-                  </button>
-                </span>
-              )}
+            // <div className="flex items-center flex-wrap gap-2 my-border rounded-md px-3 py-2 w-full md:w-[300px] bg-white min-h-12">
+            //   {searchCity && (
+            //     <span className="flex items-center px-3 py-1 text-sm text-black bg-gray-200 rounded-full">
+            //       {searchCity}
+            //       <button
+            //         className="ml-2 text-black hover:text-gray-600 focus:outline-none"
+            //         onClick={() => setSearchCity("")}
+            //       >
+            //         ✕
+            //       </button>
+            //     </span>
+            //   )}
 
-              {searchQuery && (
-                <span className="flex items-center px-3 py-1 text-sm text-black bg-gray-200 rounded-full">
-                  {searchQuery}
-                  <button
-                    className="ml-2 text-black hover:text-gray-600 focus:outline-none"
-                    onClick={() => setSearchQuery("")}
-                  >
-                    ✕
-                  </button>
-                </span>
-              )}
+            //   {searchQuery && (
+            //     <span className="flex items-center px-3 py-1 text-sm text-black bg-gray-200 rounded-full">
+            //       {searchQuery}
+            //       <button
+            //         className="ml-2 text-black hover:text-gray-600 focus:outline-none"
+            //         onClick={() => setSearchQuery("")}
+            //       >
+            //         ✕
+            //       </button>
+            //     </span>
+            //   )}
 
-              <input
-                type="text"
-                className="bg-transparent border-none outline-none"
-                placeholder="Search Location..."
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && inputValue.trim() !== "") {
-                    setSearchCity(inputValue.trim());
-                    setInputValue("");
-                  }
-                }}
-              />
-            </div>
+            //   <input
+            //     type="text"
+            //     className="bg-transparent border-none outline-none"
+            //     placeholder="Search Location..."
+            //     value={inputValue}
+            //     onChange={(e) => setInputValue(e.target.value)}
+            //     onKeyDown={(e) => {
+            //       if (e.key === "Enter" && inputValue.trim() !== "") {
+            //         setSearchCity(inputValue.trim());
+            //         setInputValue("");
+            //       }
+            //     }}
+            //   />
+            // </div>
+            <NavbarSearch />
           )}
 
           {!hideTabLinks && (
@@ -356,7 +358,7 @@ const HorizontalNav = () => {
                         Toll Free | 9:30 AM to 6:30 PM <br /> (Mon-Sun)
                       </p>
                       <p className="text-[19px] font-bold text-[#1e293b]">
-                        1800-41-99099
+                        +91 8600199570
                       </p>
                     </div>
                   </div>

@@ -990,6 +990,16 @@ const ProjectDetail = () => {
     <div className="max-w-full px-4 mx-auto md:px-16">
       {/* Property Details Section */}
       <div className="relative p-4 mb-4 rounded-lg shadow-sm bg-rose-50">
+        {project?.rera_id && (
+          <div className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-white border border-green-200 rounded-md shadow-sm">
+            <span className="text-[10px] font-semibold uppercase text-green-700">
+              RERA ID
+            </span>
+            <span className="text-sm font-bold text-gray-800">
+              {project.rera_id}
+            </span>
+          </div>
+        )}
         {/* Price Section - Moved to top on mobile */}
         {/* <div className="flex flex-col items-start mb-4 space-y-1 sm:absolute sm:top-4 sm:right-4 sm:items-end sm:mb-0">
           {loading ? (
@@ -2522,13 +2532,18 @@ const ProjectDetail = () => {
                       />
 
                       {/* Top Left badge — always "New Booking" */}
-                      <div className="absolute top-2 left-2 z-10">
+                      <div className="absolute top-2 left-2 z-10 flex items-center gap-1.5">
+                        {/* New Booking */}
                         <div className="bg-gradient-to-r from-[#8B1E3F] to-[#6D1732] text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(139,30,63,0.4)]">
                           <MdFiberNew size={11} />
                           <span>New Booking</span>
                         </div>
-                      </div>
 
+                        {/* RERA */}
+                        <div className="bg-gradient-to-r from-[#8B1E3F] to-[#6D1732] text-white px-2.5 py-1 rounded-full flex items-center text-[9px] font-semibold shadow-[0_2px_10px_rgba(139,30,63,0.4)]">
+                          RERA
+                        </div>
+                      </div>
                       {/* Wishlist Heart - Top Right */}
                       <button
                         className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 backdrop-blur flex items-center justify-center hover:scale-110 transition-transform duration-200"

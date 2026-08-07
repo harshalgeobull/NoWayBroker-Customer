@@ -17,7 +17,7 @@ const Cities = React.memo(({ data }) => {
   const cities = useMemo(() => [
     { name: "Mumbai", imageUrl: "/image/mumbai.jpg", properties: "0" },
     { name: "Delhi", imageUrl: "/image/delhi.jpg", properties: "0" },
-    { name: "Bangalore", imageUrl: "/image/banglore.jpg", properties: "0" },
+    { name: "Bengaluru", imageUrl: "/image/banglore.jpg", properties: "0" },
     // {
     //   name: "Bengaluru",
     //   apiName: "Bangalore",

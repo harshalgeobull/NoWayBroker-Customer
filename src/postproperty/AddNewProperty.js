@@ -2944,6 +2944,38 @@ Make it engaging, attractive, and human-like.
                               </label>
 
                               {/* Electricity & Water Charges Included */}
+                              {/* All Inclusive Price */}
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.all_inclusive_price === "Yes"}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      all_inclusive_price: e.target.checked
+                                        ? "Yes"
+                                        : "No",
+                                    })
+                                  }
+                                />
+                                All Inclusive Price
+                              </label>
+                              {/* Price Onwards */}
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.price_onwards === "Yes"}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      price_onwards: e.target.checked
+                                        ? "Yes"
+                                        : "No",
+                                    })
+                                  }
+                                />
+                                Price Onwards
+                              </label>
                               <label className="flex items-center gap-2">
                                 <input
                                   type="checkbox"
@@ -3267,18 +3299,15 @@ Make it engaging, attractive, and human-like.
 
                         <select
                           name="available_from"
-                          //value={formData.available_from}
-                          value="Immediately"
-                          // onChange={(e) => {
-                          //   setIsLaterSelected(e.target.value === "Later");
-                          //   handleInputChange(e);
-                          // }}
-                          onChange={() => { }}
+                          value={formData.available_from}
+                          onChange={(e) => {
+                            setIsLaterSelected(e.target.value === "Later");
+                            handleInputChange(e);
+                          }}
                           className="w-full p-3 mt-1 text-gray-800 bg-white border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                         >
-                          {/* <option value="">Select availability</option> */}
                           <option value="Immediately">Immediate</option>
-                          {/* <option value="Later">Later</option> */}
+                          <option value="Later">Later</option>
                         </select>
                       </div>
                     )

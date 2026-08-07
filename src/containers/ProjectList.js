@@ -577,18 +577,23 @@ const ProjectList = () => {
                         {/* Top Left badges — "New Booking" always shows; "Admin
                             Approval" stacks directly beneath it when the
                             project has actually been approved. */}
-                        <div className="absolute top-2 left-2 z-10 flex flex-col items-start gap-1.5">
+                        <div className="absolute top-2 left-2 z-10 flex items-center gap-1.5">
+                          {/* New Booking */}
                           <div className="bg-gradient-to-r from-[#8B1E3F] to-[#6D1732] text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(139,30,63,0.4)]">
                             <MdFiberNew size={11} />
                             <span>New Booking</span>
                           </div>
 
+                          {/* RERA */}
+                          <div className="bg-gradient-to-r from-[#8B1E3F] to-[#6D1732] text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(139,30,63,0.4)]">
+                            <span>RERA</span>
+                          </div>
+
+                          {/* Admin Approval */}
                           {isApproved && (
                             <div className="bg-blue-600 text-white pl-2 pr-2.5 py-1 rounded-full flex items-center gap-1 text-[9px] font-semibold shadow-[0_2px_10px_rgba(37,99,235,0.4)]">
                               <FaCheckCircle size={10} />
-                              <span className="hidden sm:inline">
-                                Admin Approval
-                              </span>
+                              <span className="hidden sm:inline">Admin Approval</span>
                               <span className="sm:hidden">Approved</span>
                             </div>
                           )}

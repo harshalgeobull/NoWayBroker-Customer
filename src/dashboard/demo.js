@@ -648,7 +648,7 @@ const MyProperties = () => {
             <option value="Mumbai">Mumbai</option>
             <option value="Pune">Pune</option>
             <option value="Delhi">Delhi</option>
-            <option value="Bangalore">Bangalore</option>
+            <option value="Bangalore">Bengaluru</option>
             <option value="Chennai">Chennai</option>
             <option value="Hyderabad">Hyderabad</option>
             <option value="Kolkata">Kolkata</option>
