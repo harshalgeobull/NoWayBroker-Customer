@@ -1,6 +1,7 @@
 // import React, { useState } from "react";
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link, useHistory } from "react-router-dom";
+import axios from "axios";
 import {
   FaSearch,
   FaCity,
@@ -15,20 +16,74 @@ import { RiHomeLine } from "react-icons/ri";
 // import { useContext } from "react";
 import { SearchContext } from "./SearchContext";
 
+// Shared tab config — every tab is rendered from this single list so all
+// tabs share the exact same markup, classes, and animation behavior.
+const NAV_TABS = [
+  { label: "BUY", key: "Buy", type: "Buy" },
+  { label: "RENT", key: "Rent", type: "Rent" },
+  { label: "PG", key: "PG", type: "PG/Co-living" },
+  { label: "Plots/Land", key: "Plot", type: "Plot/Land" },
+  { label: "COMMERCIAL", key: "Commercial", type: "Commercial" },
+];
+
 const Search = () => {
   const history = useHistory();
-
   const { searchCity, setSearchCity } = useContext(SearchContext);
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyAt8bj4UACvakZfiSy-0c1o_ivfplm7jEU";
   const [type, setType] = useState("");
   const [error, setError] = useState("");
   const inputRef = useRef(null);
+
+  // ==========================================================
+  // Shared nav-tab hover indicator.
+  // No tab is "active" by default — the underline only appears
+  // while the cursor is actually over a tab, and it fades out
+  // (not snaps to another tab) once the cursor leaves the row.
+  // ==========================================================
+  const tabRefs = useRef({});
+  const [indicatorStyle, setIndicatorStyle] = useState({
+    left: 0,
+    width: 0,
+    opacity: 0,
+  });
+
+  const moveIndicator = (key) => {
+    const el = tabRefs.current[key];
+    if (el) {
+      setIndicatorStyle({ left: el.offsetLeft, width: el.offsetWidth, opacity: 1 });
+    }
+  };
+
+  const handleTabMouseEnter = (key) => moveIndicator(key);
+  const handleTabRowMouseLeave = () => {
+    setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
+  };
+
   const handleCityChange = (e) => {
     const selectedCity = e.target.value;
     setSearchCity(selectedCity);
   };
 
+  // Rotating placeholder text (cycles every 3s, then repeats)
+  const placeholderTexts = [
+    "Search by City or Locality...",
+    "Search Properties by Location",
+    "Enter City, Area",
+    'Search "Pune"',
+    'Search "Mumbai"',
+  ];
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % placeholderTexts.length);
+    }, 3000);
+
+    return () => clearInterval(intervalId); // cleanup on unmount
+  }, []);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   const handleNearMeSearch = async (e) => {
@@ -99,6 +154,37 @@ const Search = () => {
       }
     );
   };
+  const handleSearchChange = async (e) => {
+    const value = e.target.value;
+
+    setSearchQuery(value);
+
+    if (!value.trim()) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/cust_api/search_suggestions`,
+        {
+          query: value,
+        }
+      );
+
+      if (response.data.status === 1) {
+        setSuggestions(response.data.data);
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleSearch = () => {
     if (!searchQuery && !searchCity && !type) {
@@ -117,66 +203,67 @@ const Search = () => {
     });
   };
 
-  useEffect(() => {
-    const loadGoogleMapsScript = () => {
-      if (window.google && window.google.maps) {
-        initAutocomplete();
-        return;
-      }
+  // useEffect(() => {
+  //   const loadGoogleMapsScript = () => {
+  //     if (window.google && window.google.maps) {
+  //       initAutocomplete();
+  //       return;
+  //     }
 
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
-      script.async = true;
-      script.defer = true;
+  //     const script = document.createElement("script");
+  //     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+  //     script.async = true;
+  //     script.defer = true;
 
-      script.onload = () => {
-        initAutocomplete();
-      };
+  //     script.onload = () => {
+  //       initAutocomplete();
+  //     };
 
-      document.body.appendChild(script);
-    };
+  //     document.body.appendChild(script);
+  //   };
 
-    const initAutocomplete = () => {
-      const autocomplete = new window.google.maps.places.Autocomplete(
-        inputRef.current,
-        {
-          types: ["(cities)"],
-          componentRestrictions: { country: "in" },
-        },
-      );
+  //   const initAutocomplete = () => {
+  //     const autocomplete = new window.google.maps.places.Autocomplete(
+  //       inputRef.current,
+  //       {
+  //         types: ["(cities)"],
+  //         componentRestrictions: { country: "in" },
+  //       },
+  //     );
 
-      autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
+  //     autocomplete.addListener("place_changed", () => {
+  //       const place = autocomplete.getPlace();
 
-        if (place && place.name) {
-          setSearchQuery(place.name);
-          setSearchCity(place.name);
-        }
-      });
-    };
+  //       if (place && place.name) {
+  //         setSearchQuery(place.name);
+  //         setSearchCity(place.name);
+  //       }
+  //     });
+  //   };
 
-    loadGoogleMapsScript();
-  }, []);
-  useEffect(() => {
-    if (!window.google) return;
+  //   loadGoogleMapsScript();
+  // }, []);
+  // useEffect(() => {
+  //   if (!window.google) return;
 
-    const autocomplete = new window.google.maps.places.Autocomplete(
-      inputRef.current,
-      {
-        types: ["(cities)"],
-        componentRestrictions: { country: "in" },
-      },
-    );
+  //   const autocomplete = new window.google.maps.places.Autocomplete(
+  //     inputRef.current,
+  //     {
+  //       types: ["(cities)"],
+  //       componentRestrictions: { country: "in" },
+  //     },
+  //   );
 
-    autocomplete.addListener("place_changed", () => {
-      const place = autocomplete.getPlace();
+  //   autocomplete.addListener("place_changed", () => {
+  //     const place = autocomplete.getPlace();
 
-      if (place && place.name) {
-        setSearchQuery(place.name);
-        setSearchCity(place.name);
-      }
-    });
-  }, []);
+  //     if (place && place.name) {
+  //       setSearchQuery(place.name);
+  //       setSearchCity(place.name);
+  //     }
+  //   });
+  // }, []);
+  console.log(suggestions);
   return (
     <div className="relative flex items-center justify-center m-3 bg-white min-h-[200px] py-9 sm:py-18">
       <div
@@ -186,7 +273,7 @@ const Search = () => {
         }}
       ></div>
 
-      <div className="relative w-11/12 max-w-lg p-2 bg-transparent rounded-3xl sm:p-6 sm:max-w-5xl">
+      <div className="relative w-full max-w-6xl p-2 bg-transparent rounded-3xl mx-auto sm:p-6">
         {/* Heading Section */}
         <div className="mb-6 text-center sm:mb-11">
           <h1 className="text-2xl font-semibold tracking-widest text-white sm:text-2xl lg:text-3xl">
@@ -198,80 +285,120 @@ const Search = () => {
 
         {/* Search Form */}
         {/* Row 1 — Property Tabs & Search Form */}
-        <div className="flex flex-col bg-white rounded-2xl shadow-lg w-[120%] -ml-[10%]">
+        <div className="flex flex-col w-full bg-white rounded-2xl shadow-lg">
 
           {/* Top Tabs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-16 text-gray-700 font-semibold tracking-wider border-b border-gray-100 p-3">
-            <Link
-              to={{ pathname: "/property", state: { propertyType: "Buy" } }}
-              className="text-lg font-medium tracking-wider text-gray-600 no-underline transition hover:my-text hover:no-underline"
-            >
-              BUY
-            </Link>
-            <Link
-              to={{ pathname: "/property", state: { propertyType: "Rent" } }}
-              className="text-lg font-medium tracking-wider text-gray-600 no-underline transition hover:my-text hover:no-underline"
-            >
-              RENT
-            </Link>
-            <Link
-              to={{ pathname: "/property", state: { propertyType: "PG/Co-living" } }}
-              className="text-lg font-medium tracking-wider text-gray-600 no-underline transition hover:my-text hover:no-underline"
-            >
-              PG
-            </Link>
-            <Link
-              to={{ pathname: "/property", state: { propertyType: "Plot/Land" } }}
-              className="text-lg font-medium tracking-wider text-gray-600 no-underline transition hover:my-text hover:no-underline"
-            >
-              Plots/Land
-            </Link>
-            <Link
-              to={{ pathname: "/property", state: { propertyType: "Commercial" } }}
-              className="text-lg font-medium tracking-wider text-gray-600 no-underline transition hover:my-text hover:no-underline"
-            >
-              COMMERCIAL
-            </Link>
+          <div
+            className="relative flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-16 text-gray-700 font-semibold tracking-wider border-b border-gray-100 p-3"
+            onMouseLeave={handleTabRowMouseLeave}
+          >
+            {NAV_TABS.map((tab) => (
+              <Link
+                key={tab.key}
+                ref={(el) => {
+                  tabRefs.current[tab.key] = el;
+                }}
+                to={{ pathname: "/property", state: { propertyType: tab.type } }}
+                onMouseEnter={() => handleTabMouseEnter(tab.key)}
+                className="nav-tab text-lg font-medium tracking-wider text-gray-600 no-underline hover:no-underline"
+              >
+                {tab.label}
+              </Link>
+            ))}
+
+            {/* Single shared sliding indicator — this is the ONLY underline.
+                Hidden by default, fades in and slides to whichever tab is hovered,
+                fades out when the cursor leaves the whole tab row. */}
+            <span
+              className="nav-tab-indicator hidden sm:block"
+              style={{
+                left: indicatorStyle.left,
+                width: indicatorStyle.width,
+                opacity: indicatorStyle.opacity,
+              }}
+            />
           </div>
 
+          {/* Shared hover styles — identical for every tab, no per-tab overrides,
+              no "active" state; color + underline only appear on hover. */}
+          <style>{`
+            .nav-tab {
+              position: relative;
+              transition: color 0.3s ease;
+            }
+            .nav-tab:hover {
+              color: #8B1E3F;
+            }
+            .nav-tab-indicator {
+              position: absolute;
+              bottom: 6px;
+              height: 3px;
+              background-color: #8B1E3F;
+              opacity: 0;
+              transition: left 0.3s ease, width 0.3s ease, opacity 0.2s ease;
+            }
+          `}</style>
+
           {/* Bottom Search Inputs (Fixed: Removed duplicate background/shadows) */}
-          <div className="flex flex-col sm:flex-row items-center p-3 gap-2 sm:gap-4">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center p-3 gap-3 lg:gap-2">
 
-            {/* Search Field */}
-            <div className="relative flex items-center w-full flex-1 p-2">
-              <button className="p-1 my-text rounded-full focus:outline-none">
-                <FiSearch size={22} />
-              </button>
-              <input
-                ref={inputRef}
-                type="text"
-                id="search"
-                placeholder="Search by City or Locality..."
-                className="w-full px-2 ml-2 text-sm text-gray-600 bg-transparent outline-none border-none sm:text-base"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            {/* Search Field + Dropdowns wrapper: stacks on mobile/tablet, row on desktop */}
+            <div className="flex flex-col md:flex-row items-stretch md:items-center w-full flex-1 gap-2 md:gap-0 md:divide-x md:divide-gray-100">
 
-
+              {/* Search Field */}
+              <div className="relative flex items-center w-full px-2 py-2 md:py-1 md:pr-3">
+                <button
+                  type="button"
+                  className="p-1 my-text rounded-full focus:outline-none shrink-0"
+                >
+                  <FiSearch size={22} />
+                </button>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  id="search"
+                  placeholder={placeholderTexts[placeholderIndex]}
+                  className="w-full min-w-0 px-2 ml-2 text-sm text-gray-600 bg-transparent outline-none border-none sm:text-base"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+                    {suggestions.map((item, index) => (
+                      <div
+                        key={index}
+                        className="px-4 py-3 cursor-pointer hover:bg-gray-100 border-b last:border-b-0"
+                        onClick={() => {
+                          setSearchQuery(item.text);
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        {item.text}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* City Dropdown */}
-              <div className="flex items-center sm:w-[330px] px-3 py-2">              <MdOutlineAddLocation className="my-text shrink-0" size={22} />
+              <div className="flex items-center w-full md:w-[220px] lg:w-[230px] px-2 py-2 md:px-3">
+                <MdOutlineAddLocation className="my-text shrink-0" size={22} />
                 <select
                   id="city"
-                  className="w-full ml-2 text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer"
+                  className="w-full min-w-0 ml-2 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer"
                   value={searchCity}
                   onChange={handleCityChange}
                 >
                   <option value="">Select a City</option>
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Bangalore">Bangalore</option>
-                  <option value="Pune">Pune</option>
-                  <option value="Hyderabad">Hyderabad</option>
-                  <option value="Chennai">Chennai</option>
-                  <option value="Kolkata">Kolkata</option>
                   <option value="Ahmedabad">Ahmedabad</option>
-                  <option value="Jaipur">Jaipur</option>
+                  <option value="Bengaluru">Bengaluru</option>
+                  <option value="Chennai">Chennai</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Hyderabad">Hyderabad</option>
+                  <option value="Kolkata">Kolkata</option>
+                  <option value="Mumbai">Mumbai</option>
+                  <option value="Pune">Pune</option>
+                  {/* <option value="Jaipur">Jaipur</option>
                   <option value="Lucknow">Lucknow</option>
                   <option value="Chandigarh">Chandigarh</option>
                   <option value="Surat">Surat</option>
@@ -298,7 +425,7 @@ const Search = () => {
                   <option value="Rajkot">Rajkot</option>
                   <option value="Jodhpur">Jodhpur</option>
                   <option value="Madurai">Madurai</option>
-                  <option value="Jabalpur">Jabalpur</option>
+                  <option value="Jabalpur">Jabalpur</option> */}
                 </select>
               </div>
 
@@ -306,12 +433,12 @@ const Search = () => {
 
 
               {/* Type Dropdown */}
-              <div className="flex items-center min-w-[180px] px-2 py-2">
+              <div className="flex items-center w-full md:w-[190px] lg:w-[200px] px-2 py-2 md:px-3">
                 <RiHomeLine className="my-text shrink-0" size={22} />
 
                 <select
                   id="type"
-                  className="flex-1 ml-2 text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer"
+                  className="w-full min-w-0 ml-2 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer truncate"
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                 >
@@ -321,13 +448,14 @@ const Search = () => {
                 </select>
               </div>
               {/* Near Me Button */}
-              <div className="p-2 relative flex items-center justify-center group shrink-0 ml-1">
+              <div className="flex items-center justify-center md:justify-start p-2 relative group shrink-0">
                 <button
                   onClick={handleNearMeSearch}
                   disabled={isLoadingLocation}
+                  type="button"
                   className={`flex items-center justify-center p-2 transition rounded-full focus:outline-none ${isLoadingLocation
-                      ? "bg-gray-100 text-gray-400 animate-pulse"
-                      : "bg-rose-50 my-text hover:bg-rose-100"
+                    ? "bg-gray-100 text-gray-400 animate-pulse"
+                    : "bg-rose-50 my-text hover:bg-rose-100"
                     }`}
                 >
                   <MdMyLocation size={20} />
@@ -346,11 +474,11 @@ const Search = () => {
 
             {/* Search Button */}
             <button
-              className="flex items-center justify-center w-full gap-2 px-6 py-2.5 text-white transition-all duration-300 my-bg rounded-lg sm:w-auto hover:opacity-90 font-medium shrink-0"
+              className="flex items-center justify-center w-full lg:w-auto gap-2 px-6 py-2.5 text-white transition-all duration-300 my-bg rounded-lg hover:opacity-90 font-medium shrink-0"
               onClick={handleSearch}
             >
               <FiSearch size={20} />
-              <span className="hidden sm:inline">Search</span>
+              <span className="inline">Search</span>
             </button>
           </div>
         </div>
@@ -376,7 +504,7 @@ const Search = () => {
             >
               Suggestion:
             </h3>
-            {["Mumbai", "Pune", "Hyderabad", "Bangalore", "Chennai"].map(
+            {["Ahmedabad", "Bengaluru", "Chennai", "Delhi", "Hyderabad", "Kolkata", "Mumbai", "Pune",].map(
               (location) => (
                 <Link
                   key={location}

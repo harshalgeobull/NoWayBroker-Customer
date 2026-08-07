@@ -43,7 +43,6 @@ const MyProperties = () => {
     { label: "₹ 60 Lakhs", value: 6000000 },
     { label: "₹ 75 Lakhs", value: 7500000 },
     { label: "₹ 90 Lakhs", value: 9000000 },
-
     { label: "₹ 1 Crore", value: 10000000 },
     { label: "₹ 1.25 Crore", value: 12500000 },
     { label: "₹ 1.5 Crore", value: 15000000 },
@@ -52,33 +51,50 @@ const MyProperties = () => {
     { label: "₹ 3 Crore", value: 30000000 },
     { label: "₹ 4 Crore", value: 40000000 },
     { label: "₹ 5 Crore", value: 50000000 },
-    { label: "₹ 7.5 Crore", value: 75000000 },
-
     { label: "₹ 10 Crore", value: 100000000 },
-    { label: "₹ 15 Crore", value: 150000000 },
     { label: "₹ 20 Crore", value: 200000000 },
-    { label: "₹ 25 Crore", value: 250000000 },
     { label: "₹ 30 Crore", value: 300000000 },
-    { label: "₹ 40 Crore", value: 400000000 },
     { label: "₹ 50 Crore", value: 500000000 },
-    { label: "₹ 60 Crore", value: 600000000 },
     { label: "₹ 75 Crore", value: 750000000 },
-    { label: "₹ 90 Crore", value: 900000000 },
-
-    { label: "₹ 100 Crore", value: 1000000000 },
-    { label: "₹ 150 Crore", value: 1500000000 },
-    { label: "₹ 200 Crore", value: 2000000000 },
-    { label: "₹ 250 Crore", value: 2500000000 },
-    { label: "₹ 300 Crore", value: 3000000000 },
-    { label: "₹ 400 Crore", value: 4000000000 },
-    { label: "₹ 500 Crore", value: 5000000000 },
-    { label: "₹ 600 Crore", value: 6000000000 },
-    { label: "₹ 750 Crore", value: 7500000000 },
-    { label: "₹ 900 Crore", value: 9000000000 },
-
-    { label: "₹ 1000 Crore", value: 10000000000 },
   ];
 
+
+  const rentAndPgPriceOptions = [
+    { label: "₹ 1 Thousand", value: 1000 },
+    { label: "₹ 2 Thousand", value: 2000 },
+    { label: "₹ 3 Thousand", value: 3000 },
+    { label: "₹ 4 Thousand", value: 4000 },
+    { label: "₹ 5 Thousand", value: 5000 },
+    { label: "₹ 6 Thousand", value: 6000 },
+    { label: "₹ 7 Thousand", value: 7000 },
+    { label: "₹ 8 Thousand", value: 8000 },
+    { label: "₹ 9 Thousand", value: 9000 },
+    { label: "₹ 10 Thousand", value: 10000 },
+    { label: "₹ 15 Thousand", value: 15000 },
+    { label: "₹ 20 Thousand", value: 20000 },
+    { label: "₹ 25 Thousand", value: 25000 },
+    { label: "₹ 30 Thousand", value: 30000 },
+    { label: "₹ 40 Thousand", value: 40000 },
+    { label: "₹ 50 Thousand", value: 50000 },
+    { label: "₹ 60 Thousand", value: 60000 },
+    { label: "₹ 70 Thousand", value: 70000 },
+    { label: "₹ 80 Thousand", value: 80000 },
+    { label: "₹ 90 Thousand", value: 90000 },
+    { label: "₹ 1 Lakh", value: 100000 },
+    { label: "₹ 2 Lakhs", value: 200000 },
+    { label: "₹ 3 Lakhs", value: 300000 },
+    { label: "₹ 4 Lakhs", value: 400000 },
+    { label: "₹ 5 Lakhs", value: 500000 },
+    { label: "₹ 6 Lakhs", value: 600000 },
+    { label: "₹ 7 Lakhs", value: 700000 },
+    { label: "₹ 8 Lakhs", value: 800000 },
+    { label: "₹ 9 Lakhs", value: 900000 },
+    { label: "₹ 10 Lakhs", value: 1000000 },
+  ];
+  const budgetOptions =
+    category === "Rent" || category === "PG/Co-living"
+      ? rentAndPgPriceOptions
+      : priceOptions;
   // State Setup
   const [showNextModal, setShowNextModal] = useState(false);
   const [offerName, setOfferName] = useState("");
@@ -134,77 +150,77 @@ const MyProperties = () => {
 
       if (response.data.status === 1) {
         const transformed = response.data.data.map((item) => {
-        let badgeColor = "bg-gray-400";
-        let type = "UNKNOWN";
-        let status = "Available";
+          let badgeColor = "bg-gray-400";
+          let type = "UNKNOWN";
+          let status = "Available";
 
-        // Set badge color, type, and status based on property category type
-        switch (item.property_category_type) {
-          case "Buy":
-            badgeColor = "bg-green-600";
-            type = "FOR BUY";
-            status =
-              item.available_status === "Sold" ? "Sold Out" : "Available";
-            break;
+          // Set badge color, type, and status based on property category type
+          switch (item.property_category_type) {
+            case "Buy":
+              badgeColor = "bg-[#8B1E3F]";
+              type = "FOR BUY";
+              status =
+                item.available_status === "Sold" ? "Sold Out" : "Available";
+              break;
 
-          case "Rent":
-            badgeColor = "bg-blue-600";
-            type = "FOR RENT";
-            status =
-              item.available_status === "Sold" ? "Rented Out" : "Available";
-            break;
+            case "Rent":
+              badgeColor = "bg-blue-600";
+              type = "FOR RENT";
+              status =
+                item.available_status === "Sold" ? "Rented Out" : "Available";
+              break;
 
-          case "Commercial Buy":
-            badgeColor = "bg-purple-600";
-            type = "COMMERCIAL BUY";
-            status =
-              item.available_status === "Sold" ? "Sold Out" : "Available";
-            break;
+            case "Commercial Buy":
+              badgeColor = "bg-purple-600";
+              type = "COMMERCIAL BUY";
+              status =
+                item.available_status === "Sold" ? "Sold Out" : "Available";
+              break;
 
-          case "Commercial Lease":
-            badgeColor = "bg-indigo-600";
-            type = "COMMERCIAL LEASE";
-            status =
-              item.available_status === "Sold" ? "Leased Out" : "Available";
-            break;
+            case "Commercial Lease":
+              badgeColor = "bg-indigo-600";
+              type = "COMMERCIAL LEASE";
+              status =
+                item.available_status === "Sold" ? "Leased Out" : "Available";
+              break;
 
-          case "PG/Co-living":
-            badgeColor = "bg-yellow-500";
-            type = "PG / CO-LIVING";
-            status =
-              item.available_status === "Sold" ? "Occupied" : "Available";
-            break;
+            case "PG/Co-living":
+              badgeColor = "bg-yellow-500";
+              type = "PG / CO-LIVING";
+              status =
+                item.available_status === "Sold" ? "Occupied" : "Available";
+              break;
 
-          default:
-            badgeColor = "bg-gray-400";
-            type = item.property_category_type?.toUpperCase() || "UNKNOWN";
-            status = "Available";
-        }
+            default:
+              badgeColor = "bg-gray-400";
+              type = item.property_category_type?.toUpperCase() || "UNKNOWN";
+              status = "Available";
+          }
 
-        return {
-          id: item._id,
-          type,
-          title: item.property_name,
-          location: item.address_area,
-          price: item.property_price,
-          date: item.created_at
-            ? new Date(item.created_at).toLocaleDateString("en-GB", {
+          return {
+            id: item._id,
+            type,
+            title: item.property_name,
+            location: item.address_area,
+            price: item.property_price,
+            date: item.created_at
+              ? new Date(item.created_at).toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "long",
                 year: "numeric",
               })
-            : "N/A",
-          badgeColor,
-          status,
-          soldOut: item.available_status,
-          image: item.cover_image,
-          published: item.admin_approval,
-          rent: item.rent,
-          rent_duration: item.rent_duration,
-          view_count: item.view_count,
-          leads_count: item.leads_count,
-        };
-      });
+              : "N/A",
+            badgeColor,
+            status,
+            soldOut: item.available_status,
+            image: item.cover_image,
+            published: item.admin_approval,
+            rent: item.rent,
+            rent_duration: item.rent_duration,
+            view_count: item.view_count,
+            leads_count: item.leads_count,
+          };
+        });
 
         setProperties(transformed);
         setTotalPages(response.data.total_pages);
@@ -239,9 +255,15 @@ const MyProperties = () => {
     }
   };
 
+
   const handleMaxChange = (e) => {
-    const value = Number(e.target.value);
-    setMaxPrice(value);
+    let value = e.target.value;
+
+    if (value === "1000001") {
+      value = "";
+
+      setMaxPrice(value);
+    };
 
     if (minPrice && value < minPrice) {
       setPriceError("Max price should not be less than Min price");
@@ -305,41 +327,41 @@ const MyProperties = () => {
           switch (item.property_category_type) {
             case "Buy":
               badgeColor = "bg-green-600";
-              type = "FOR BUY";
+              badgeColor = "bg-[#8B1E3F]";
               status =
                 item.available_status === "Sold" ? "Sold Out" : "Available";
               break;
 
             case "Rent":
-              badgeColor = "bg-blue-600";
+              badgeColor = "bg-[#8B1E3F]";
               type = "FOR RENT";
               status =
                 item.available_status === "Sold" ? "Rented Out" : "Available";
               break;
 
             case "Commercial Buy":
-              badgeColor = "bg-purple-600";
+              badgeColor = "bg-[#8B1E3F]";
               type = "COMMERCIAL BUY";
               status =
                 item.available_status === "Sold" ? "Sold Out" : "Available";
               break;
 
             case "Commercial Lease":
-              badgeColor = "bg-indigo-600";
+              badgeColor = "bg-[#8B1E3F]";
               type = "COMMERCIAL LEASE";
               status =
                 item.available_status === "Sold" ? "Leased Out" : "Available";
               break;
 
             case "PG/Co-living":
-              badgeColor = "bg-yellow-500";
+              badgeColor = "bg-[#8B1E3F]";
               type = "PG / CO-LIVING";
               status =
                 item.available_status === "Sold" ? "Occupied" : "Available";
               break;
 
             default:
-              badgeColor = "bg-gray-400";
+              badgeColor = "bg-[#8B1E3F]";
               type = item.property_category_type?.toUpperCase() || "UNKNOWN";
               status = "Available";
           }
@@ -352,10 +374,10 @@ const MyProperties = () => {
             price: item.property_price,
             date: item.created_at
               ? new Date(item.created_at).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })
               : "N/A",
             badgeColor,
             status,
@@ -395,7 +417,6 @@ const MyProperties = () => {
   };
 
   const firstLoad = useRef(true);
-
 
   const fetchFilteredProperties = async () => {
     if (!userId) {
@@ -475,10 +496,10 @@ const MyProperties = () => {
             price: item.property_price,
             date: item.created_at
               ? new Date(item.created_at).toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })
               : "N/A",
             badgeColor,
             status,
@@ -541,18 +562,18 @@ const MyProperties = () => {
         const updatedProperties = properties.map((property) =>
           property.id === selectedPropertyId
             ? {
-                ...property,
-                soldOut:
-                  selectedProperty.status === "Available"
-                    ? "Sold"
-                    : "Available",
-                status:
-                  selectedProperty.status === "Available"
-                    ? property.type === "FOR BUY"
-                      ? "Sold Out"
-                      : "Rented Out"
-                    : "Available",
-              }
+              ...property,
+              soldOut:
+                selectedProperty.status === "Available"
+                  ? "Sold"
+                  : "Available",
+              status:
+                selectedProperty.status === "Available"
+                  ? property.type === "FOR BUY"
+                    ? "Sold Out"
+                    : "Rented Out"
+                  : "Available",
+            }
             : property,
         );
         setProperties(updatedProperties);
@@ -725,7 +746,7 @@ const MyProperties = () => {
             <option value="Mumbai">Mumbai</option>
             <option value="Pune">Pune</option>
             <option value="Delhi">Delhi</option>
-            <option value="Bangalore">Bangalore</option>
+            <option value="Bangalore">Bengaluru</option>
             <option value="Chennai">Chennai</option>
             <option value="Hyderabad">Hyderabad</option>
             <option value="Kolkata">Kolkata</option>
@@ -760,8 +781,12 @@ const MyProperties = () => {
             <option value="">Property Type</option>
             <option value="Flat/Apartment">Flat/Apartment</option>
             <option value="Builder Floor">Builder Floor</option>
-            <option value="Independent House/Villa">Independent House/Villa</option>
-            <option value="Independent/Builder Floor">Independent/Builder Floor</option>
+            <option value="Independent House/Villa">
+              Independent House/Villa
+            </option>
+            <option value="Independent/Builder Floor">
+              Independent/Builder Floor
+            </option>
             <option value="1RK/Studio Apartment">1RK/Studio Apartment</option>
             <option value="Service Apartment">Service Apartment</option>
             <option value="Farmhouse">Farmhouse</option>
@@ -777,10 +802,10 @@ const MyProperties = () => {
             <select
               value={minPrice}
               onChange={handleMinChange}
-              className="px-2 py-2 border rounded-lg outline-none w-28"
+              className="border px-2 py-2 rounded-lg w-28 outline-none"
             >
               <option value="">₹ Min</option>
-              {priceOptions.map((option, index) => (
+              {budgetOptions.map((option, index) => (
                 <option key={index} value={option.value}>
                   {option.label}
                 </option>
@@ -790,10 +815,10 @@ const MyProperties = () => {
             <select
               value={maxPrice}
               onChange={handleMaxChange}
-              className="px-2 py-2 border rounded-lg outline-none w-28"
+              className="border px-2 py-2 rounded-lg w-28 outline-none"
             >
               <option value="">₹ Max</option>
-              {priceOptions.map((option, index) => (
+              {budgetOptions.map((option, index) => (
                 <option key={index} value={option.value}>
                   {option.label}
                 </option>
@@ -816,36 +841,29 @@ const MyProperties = () => {
               <div
                 key={property.id}
                 className={`bg-white shadow-sm rounded-lg p-4 flex flex-col md:flex-row items-start md:items-center justify-between relative
-                  ${
-                    property.published === "Approved"
-                      ? "border-2 border-green-500"
-                      : property.published === "Rejected"
-                        ? "border-2 border-red-500"
-                        : property.published === "Pending"
-                          ? "border-2 border-yellow-500"
-                          : "border border-gray-300"
+    ${property.published === "Approved"
+                    ? "border-2 border-green-500"
+                    : property.published === "Pending"
+                      ? "border-2 border-yellow-500"
+                      : "border border-gray-300"
                   }`}
               >
                 {/* Published Badge (Top Left Corner) */}
+                {/* Published Badge (Top Left Corner) */}
                 <div
                   className={`absolute top-2 left-6 text-xs font-medium px-3 py-1 rounded-md 
-                    ${
-                      property.published === "Approved"
-                        ? "bg-green-200 text-green-700 border border-green-700"
-                        : property.published === "Rejected"
-                          ? "bg-red-200 text-red-700 border border-red-700"
-                          : property.published === "Pending"
-                            ? "bg-yellow-200 text-yellow-700 border border-yellow-700"
-                            : "bg-gray-300 text-gray-600 border border-gray-600"
+    ${property.published === "Approved"
+                      ? "bg-green-200 text-green-700 border border-green-700"
+                      : property.published === "Pending"
+                        ? "bg-yellow-200 text-yellow-700 border border-yellow-700"
+                        : "bg-gray-300 text-gray-600 border border-gray-600"
                     }`}
                 >
                   {property.published === "Approved"
                     ? "Approved"
-                    : property.published === "Rejected"
-                      ? "Rejected"
-                      : property.published === "Pending"
-                        ? "Pending"
-                        : "Not Published"}
+                    : property.published === "Pending"
+                      ? "Pending"
+                      : "Not Published"}
                 </div>
 
                 {/* Left Section (Image + Badge) */}
@@ -876,18 +894,19 @@ const MyProperties = () => {
                   <p className="mb-0 text-sm text-gray-500">
                     {property.location}
                   </p>
-                  {property.type === "FOR RENT" ? (
+                  {property.type === "FOR RENT" ||
+                    property.type === "PG / CO-LIVING" ? (
                     <p className="mt-1 font-bold text-black">
                       ₹{" "}
                       {property.rent >= 10000000
-                        ? `${(property.rent / 10000000).toFixed(1).replace(/\.0$/, "")} Cr`
+                        ? `${(property.rent / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`
                         : property.rent >= 100000
-                          ? `${(property.rent / 100000).toFixed(1).replace(/\.0$/, "")} L`
+                          ? `${(property.rent / 100000).toFixed(2).replace(/\.?0+$/, "")} L`
                           : property.rent >= 1000
-                            ? `${(property.rent / 1000).toFixed(1).replace(/\.0$/, "")} K`
+                            ? `${(property.rent / 1000).toFixed(2).replace(/\.?0+$/, "")} K`
                             : property.rent}
                       {property.rent_duration &&
-                      property.rent_duration !== "N/A"
+                        property.rent_duration !== "N/A"
                         ? ` / ${property.rent_duration}`
                         : ""}
                     </p>
@@ -897,11 +916,11 @@ const MyProperties = () => {
                       <p className="mt-1 font-bold text-black">
                         ₹{" "}
                         {Number(property.price) >= 10000000
-                          ? `${(Number(property.price) / 10000000).toFixed(1).replace(/\.0$/, "")} Cr`
+                          ? `${(Number(property.price) / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`
                           : Number(property.price) >= 100000
-                            ? `${(Number(property.price) / 100000).toFixed(1).replace(/\.0$/, "")} L`
+                            ? `${(Number(property.price) / 100000).toFixed(2).replace(/\.?0+$/, "")} L`
                             : Number(property.price) >= 1000
-                              ? `${(Number(property.price) / 1000).toFixed(1).replace(/\.0$/, "")} K`
+                              ? `${(Number(property.price) / 1000).toFixed(2).replace(/\.?0+$/, "")} K`
                               : property.price}
                       </p>
                     )
@@ -960,12 +979,11 @@ const MyProperties = () => {
 
                 {/* Status Badge */}
                 <div
-                  className={`absolute top-2 right-2 px-3 py-2 text-sm rounded-lg cursor-pointer ${
-                    property.status === "Rented Out" ||
+                  className={`absolute top-2 right-2 px-3 py-2 text-sm rounded-lg cursor-pointer ${property.status === "Rented Out" ||
                     property.status === "Sold Out"
-                      ? "bg-gray-300 text-gray-600"
-                      : "border border-black"
-                  }`}
+                    ? "bg-gray-300 text-gray-600"
+                    : "border border-black"
+                    }`}
                   //             onClick={() => {
                   //  handleStatusClick(property);
                   //  setSelectedPropertyId(property.id);
@@ -984,11 +1002,10 @@ const MyProperties = () => {
         {totalPages > 1 && (
           <div className="flex items-center justify-center mt-6 space-x-3">
             <button
-              className={`px-3 py-2 border rounded-full ${
-                currentPage === 1
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "hover:bg-gray-100"
-              }`}
+              className={`px-3 py-2 border rounded-full ${currentPage === 1
+                ? "text-gray-400 cursor-not-allowed"
+                : "hover:bg-gray-100"
+                }`}
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
@@ -997,22 +1014,20 @@ const MyProperties = () => {
             {[...Array(totalPages)].map((_, index) => (
               <button
                 key={index}
-                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-medium ${
-                  currentPage === index + 1
-                    ? "my-border my-text"
-                    : "text-gray-500 hover:bg-gray-100"
-                }`}
+                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-medium ${currentPage === index + 1
+                  ? "my-border my-text"
+                  : "text-gray-500 hover:bg-gray-100"
+                  }`}
                 onClick={() => setCurrentPage(index + 1)}
               >
                 {index + 1}
               </button>
             ))}
             <button
-              className={`px-3 py-2 border rounded-full ${
-                currentPage === totalPages
-                  ? "text-gray-400 cursor-not-allowed"
-                  : "hover:bg-gray-100"
-              }`}
+              className={`px-3 py-2 border rounded-full ${currentPage === totalPages
+                ? "text-gray-400 cursor-not-allowed"
+                : "hover:bg-gray-100"
+                }`}
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
@@ -1040,17 +1055,16 @@ const MyProperties = () => {
                   ? "Mark as Sold Out"
                   : "Mark as Rented Out"
                 : selectedProperty?.status === "Sold Out" ||
-                    selectedProperty?.status === "Rented Out"
+                  selectedProperty?.status === "Rented Out"
                   ? "Mark as Available"
                   : null}
             </h2>
             <p className="mt-2 text-gray-500">
               {selectedProperty?.status === "Available"
-                ? `Are you sure you want to mark this property as ${
-                    selectedProperty?.type === "FOR BUY"
-                      ? "Sold Out"
-                      : "Rented Out"
-                  }?`
+                ? `Are you sure you want to mark this property as ${selectedProperty?.type === "FOR BUY"
+                  ? "Sold Out"
+                  : "Rented Out"
+                }?`
                 : `Are you sure you want to mark this property as Available?`}
             </p>
             <div className="flex justify-center gap-8 mt-4">

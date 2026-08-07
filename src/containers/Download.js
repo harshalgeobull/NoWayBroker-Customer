@@ -71,7 +71,7 @@ const Download = () => {
           </div>
           <div className="flex gap-4 mt-8">
             <a
-              // href={socialLinks.appstore}
+              href={socialLinks.appstore}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -83,7 +83,7 @@ const Download = () => {
             </a>
 
             <a
-              // href={socialLinks.playstore}
+              href={socialLinks.playstore}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -96,13 +96,18 @@ const Download = () => {
           </div>
         </div>
 
-        {/* Right Section - Image */}
+        {/* Right Section - Video */}
         <div className="flex justify-center lg:w-3/4">
-          <img
-            src="/image/app3.png"
-            alt="Mobile App Preview"
-            className="shadow-lg w-96 lg:w-full lg:h-[425px] rounded-2xl"
-          />
+          <video
+            src="/app-video.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="shadow-lg w-96 lg:w-full lg:h-[425px] rounded-2xl object-cover"
+          >
+            Your browser does not support the video tag.
+          </video>
         </div>
       </div>
     </div>

@@ -36,7 +36,6 @@ const Profile = () => {
       if (data.status === 1 && data.data) {
         setProfileData(data.data);
         setUpdatedData(data.data);
-
         // Set profile image if available
         if (data.data.profile_image) {
           setProfileImage(data.data.profile_image);
@@ -63,6 +62,12 @@ const Profile = () => {
   const displayValue = (value) =>
     value !== null && value !== "" ? value : "N/A";
 
+  // Check if the logged-in user is a Builder (used to conditionally show Company Name)
+  const isBuilder =
+    (updatedData.user_type || profileData?.user_type || "")
+      .toString()
+      .toLowerCase() === "builder";
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUpdatedData({ ...updatedData, [name]: value });
@@ -82,6 +87,8 @@ const Profile = () => {
             mobile_number: updatedData.mobile_number,
             proprietorship: updatedData.proprietorship,
             experience: updatedData.experience,
+            city: updatedData.city,
+            company_name: updatedData.company_name,
           }),
         },
       );
@@ -223,6 +230,9 @@ const Profile = () => {
               <p className="text-gray-800">
                 {displayValue(profileData.mobile_number)}
               </p>
+
+              <p className="text-gray-600 mt-4">City</p>
+              <p className="text-gray-800">{displayValue(profileData.city)}</p>
             </div>
             <div>
               <p className="text-gray-600">Experience</p>
@@ -234,6 +244,14 @@ const Profile = () => {
               <p className="text-gray-800 font-semibold">
                 {displayValue(profileData.proprietorship)}
               </p>
+              {isBuilder && (
+                <>
+                  <p className="text-gray-600 mt-4">Company Name</p>
+                  <p className="text-gray-800 font-semibold">
+                    {displayValue(profileData.company_name)}
+                  </p>
+                </>
+              )}
             </div>
           </div>
           <button
@@ -284,6 +302,18 @@ const Profile = () => {
                 />
               </label>
               <label className="block">
+                <span className="text-gray-600">Mobile Number</span>
+                <input
+                  type="text"
+                  name="mobile_number"
+                  className="w-full border rounded-md p-2"
+                  value={updatedData.mobile_number || ""}
+                  onChange={handleInputChange}
+                  maxLength={10}
+                  readOnly
+                />
+              </label>
+              <label className="block">
                 <span className="text-gray-600">Email</span>
                 <input
                   type="email"
@@ -293,6 +323,28 @@ const Profile = () => {
                   onChange={handleInputChange}
                   pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                   title="Please enter a valid email address"
+                />
+              </label>
+              {isBuilder && (
+                <label className="block">
+                  <span className="text-gray-600">Company Name</span>
+                  <input
+                    type="text"
+                    name="company_name"
+                    className="w-full border rounded-md p-2"
+                    value={updatedData.company_name || ""}
+                    onChange={handleInputChange}
+                  />
+                </label>
+              )}
+              <label className="block">
+                <span className="text-gray-600">City</span>
+                <input
+                  type="text"
+                  name="city"
+                  className="w-full border rounded-md p-2"
+                  value={updatedData.city || ""}
+                  onChange={handleInputChange}
                 />
               </label>
               <label className="block">

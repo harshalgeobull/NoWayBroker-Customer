@@ -202,7 +202,7 @@ const Adviser = ({ data }) => {
 
     <div className="w-full h-16 mb-2">
       <img
-        src="/image/upcoming.png"
+        src="/image/BuilderProject.jpg"
         alt="Upcoming Projects"
         className="w-full h-full object-cover rounded-2xl"
       />
@@ -212,7 +212,7 @@ const Adviser = ({ data }) => {
 
       <div className="w-1/2 h-16">
         <img
-          src="/image/upcoming1.png"
+          src="/image/BuilderProject.jpg"
           alt=""
           className="w-full h-full object-cover rounded-2xl"
         />
@@ -220,7 +220,7 @@ const Adviser = ({ data }) => {
 
       <div className="w-1/2 h-16">
         <img
-          src="/image/upcoming2.png"
+          src="/image/BuilderProject.jpg"
           alt=""
           className="w-full h-full object-cover rounded-2xl"
         />
