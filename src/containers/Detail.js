@@ -374,6 +374,7 @@ const Detail = ({ propertyData }) => {
   const settings = {
     infinite: true,
     slidesToShow: 4,
+    lazyLoad: "ondemand",
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,

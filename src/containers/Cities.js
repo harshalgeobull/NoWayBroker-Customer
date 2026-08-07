@@ -4,15 +4,27 @@ import Slider from "react-slick";
 
 const Cities = React.memo(({ data }) => {
   const [citiesData, setCitiesData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const history = useHistory();
 
-  useEffect(() => {
-    if (Array.isArray(data.data) && data.data.length > 0) {
-      setCitiesData(data.data);
-    } else {
-      setCitiesData([{ city_name: "Default City", property_count: 0 }]);
-    }
-  }, [data]);
+  // useEffect(() => {
+  //   if (Array.isArray(data.data) && data.data.length > 0) {
+  //     setCitiesData(data.data);
+  //   } else {
+  //     setCitiesData([{ city_name: "Default City", property_count: 0 }]);
+  //   }
+  // }, [data]);
+
+
+useEffect(() => {
+  if (Array.isArray(data.data) && data.data.length > 0) {
+    setCitiesData(data.data);
+    setLoading(false);
+  } else {
+    setCitiesData([]);
+    setLoading(true);
+  }
+}, [data]);
 
   const cities = useMemo(() => [
     { name: "Mumbai", imageUrl: "/image/mumbai.jpg", properties: "0" },
@@ -99,7 +111,7 @@ const Cities = React.memo(({ data }) => {
                   {city.name}
                 </h3>
                 <p className="text-xs xl:text-sm text-gray-600 truncate">
-                  {city.properties} properties
+                  {loading ? "Loading..." : `${city.properties} properties`}
                 </p>
               </div>
             </div>
@@ -128,7 +140,7 @@ const Cities = React.memo(({ data }) => {
                       {city.name}
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-600 truncate">
-                      {city.properties} properties
+                      {loading ? "Loading..." : `${city.properties} properties`}
                     </p>
                   </div>
                 </div>

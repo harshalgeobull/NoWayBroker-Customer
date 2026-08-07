@@ -30,6 +30,7 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
+import PropertyCardSkeleton from "./PropertyCardSkeleton";
 
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -212,6 +213,7 @@ const BuyProperty = ({
 
     const settings = {
         infinite: true,
+        lazyLoad: "ondemand",
         slidesToShow: 4,
         slidesToScroll: 1,
         autoplay: true,
@@ -311,7 +313,14 @@ const BuyProperty = ({
                         </div>
                     </div>
 
-                    <Slider {...settings} className="slider-container" ref={sliderRef}>
+                    {data.status === 0 ? (
+  <Slider {...settings} className="slider-container" ref={sliderRef}>
+    {[1, 2, 3, 4].map((item) => (
+      <PropertyCardSkeleton key={item} />
+    ))}
+  </Slider>
+) : (
+  <Slider {...settings} className="slider-container" ref={sliderRef}>
                         {properties
                             .filter((property) => property.available_status !== "Sold")
                             .map((property) => {
@@ -456,6 +465,7 @@ const BuyProperty = ({
                                                                     </div>
                                                                 ))}
                                                             </Slider>
+                                                            
                                                         ) : (
                                                             <img
                                                                 src={allImages[0] || "/image/app.png"}
@@ -836,7 +846,7 @@ const BuyProperty = ({
                                 );
                             })}
                     </Slider>
-
+                    )}
                     {/* Mobile slider nav (arrows moved below the cards on small screens) */}
                     <div className="flex items-center justify-center gap-4 mt-3 sm:hidden">
                         <button

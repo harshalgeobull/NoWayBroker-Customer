@@ -28,6 +28,7 @@ import { PiCubeFocus } from "react-icons/pi";
 import { useHistory } from "react-router-dom";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
+import PropertyCardSkeleton from "./PropertyCardSkeleton";
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -184,6 +185,7 @@ const RecommendedProperties = ({
   const BASE_URL = process.env.REACT_APP_API_URL;
   const settings = {
     infinite: true,
+    lazyLoad: "ondemand",
     slidesToShow: 4,
     slidesToScroll: 1,
     autoplay: true,
@@ -326,7 +328,15 @@ const RecommendedProperties = ({
               </div>
             </div>
           </div>
-
+       {data?.status === 0 ? (
+  <Slider {...settings} className="slider-container" ref={sliderRef}>
+    {[1, 2, 3, 4].map((item) => (
+      <div key={item}>
+        <PropertyCardSkeleton />
+      </div>
+    ))}
+  </Slider>
+  ) : (
           <Slider {...settings} className="slider-container" ref={sliderRef}>
             {properties
               .filter((property) => property.available_status !== "Sold")
@@ -921,6 +931,7 @@ const RecommendedProperties = ({
                 );
               })}
           </Slider>
+        )}
         </div>
       </div>
       <div

@@ -21,15 +21,28 @@ const Home = () => {
   const userId = sessionStorage.getItem("accessToken");
 
   const [homeData, setHomeData] = useState({
-    recommendedProperties: [],
+    recommendedProperties: {
+  status: 0,
+  data: [],
+},
     offersForYou: [],
-    spotlight: [],
-    manyMore: [],
+    spotlight: {
+  status: 0,
+  data: [],
+},
+    manyMore: {
+    status: 0,
+    data: [],
+  },
     cities: [],
     adviser: {},
   });
 
   const [ownerProperties, setOwnerProperties] = useState([]);
+  const [ownerData, setOwnerData] = useState({
+  status: 0,
+  data: [],
+});
 
   const [buyData, setBuyProperty] = useState({
     status: 0,
@@ -154,10 +167,20 @@ const fetchOffers = async () => {
       );
       if (response.data) {
         setHomeData({
-          recommendedProperties: response.data.featured_properties || [],
+         recommendedProperties: response.data.featured_properties || {
+  status: 0,
+  data: [],
+},
           offersForYou: response.data.offers || [],
-          spotlight: response.data.projects || [],
-          manyMore: response.data.recommended_properties || [],
+          spotlight: response.data.projects || {
+  status: 0,
+  data: [],
+},
+         manyMore:
+  response.data.recommended_properties || {
+    status: 0,
+    data: [],
+  },
           cities: response.data.city_property_count || [],
           adviser: response.data.user_type_property_count || {},
         });
@@ -186,9 +209,13 @@ const fetchOffers = async () => {
       );
 
       if (response.data.status === 1) {
-        // console.log("OWNER API DATA:", response.data.data);
-        setOwnerProperties(response.data.data || []);
-      }
+  setOwnerProperties(response.data.data || []);
+
+  setOwnerData({
+    status: 1,
+    data: response.data.data || [],
+  });
+}
     } catch (error) {
       console.error("Owner API Error:", error);
     }
@@ -298,7 +325,8 @@ const fetchOffers = async () => {
     alert("Link copied: " + currentShareUrl);
   }, [currentShareUrl]);
   //console.log("ownerProperties", ownerProperties);
-
+  console.log("Recommended:", homeData.recommendedProperties);
+console.log("Spotlight:", homeData.spotlight);
   return (
     <>
       <Helmet>
@@ -333,10 +361,7 @@ const fetchOffers = async () => {
             currentShareUrl={currentShareUrl}
           />
           <OwnerProperty
-            data={{
-              status: 1,
-              data: ownerProperties,
-            }}
+            data={ownerData}
             openRecommendedShareModal={openRecommendedShareModal}
             closeShareModal={closeShareModal}
             copyLink={copyLink}

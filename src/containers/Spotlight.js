@@ -26,7 +26,7 @@ import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { MdOutlineStoreMallDirectory, MdFiberNew } from "react-icons/md";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
-
+import PropertyCardSkeleton from "./PropertyCardSkeleton";
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
   const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -225,6 +225,7 @@ const Spotlights = ({
   // Featured Properties section.
   const settings = {
     infinite: true,
+    lazyLoad: "ondemand",
     speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
@@ -431,6 +432,19 @@ const Spotlights = ({
           card wrapper) stretches to the row's tallest item automatically.
           -mx-2 / px-2 on the slide gives a tight, consistent 16px gap between
           cards (8px on each side) instead of the old, uneven wide gap. */}
+      {data?.status === 0 ? (
+  <Slider
+    ref={sliderRef}
+    {...settings}
+    className="mx-auto -mx-2 [&_.slick-track]:flex [&_.slick-track]:items-stretch [&_.slick-slide]:h-auto [&_.slick-slide>div]:h-full"
+  >
+    {[1, 2, 3, 4].map((item) => (
+      <div key={item}>
+        <PropertyCardSkeleton />
+      </div>
+    ))}
+  </Slider>
+) : (
       <Slider
         ref={sliderRef}
         {...settings}
@@ -787,7 +801,7 @@ const Spotlights = ({
           );
         })}
       </Slider>
-
+    )}
       <div
         id="shareModal"
         className="fixed bottom-0 right-0 items-center justify-center bg-black bg-opacity-50 z-50 hidden"
