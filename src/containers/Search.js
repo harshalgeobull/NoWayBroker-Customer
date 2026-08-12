@@ -123,6 +123,7 @@ const Search = () => {
             }
 
             if (detectedCity) {
+              sessionStorage.setItem("cityName", detectedCity);
               // Redirect to dashboard with the detected city
               setSearchCity(detectedCity);
               history.push({
@@ -298,7 +299,13 @@ const Search = () => {
                 ref={(el) => {
                   tabRefs.current[tab.key] = el;
                 }}
-                to={{ pathname: "/property", state: { propertyType: tab.type } }}
+                to={{
+  pathname: "/property",
+  state: {
+    propertyType: tab.type,
+    cityName: sessionStorage.getItem("cityName") || "",
+  },
+}}
                 onMouseEnter={() => handleTabMouseEnter(tab.key)}
                 className="nav-tab text-lg font-medium tracking-wider text-gray-600 no-underline hover:no-underline"
               >
@@ -346,7 +353,7 @@ const Search = () => {
             <div className="flex flex-col md:flex-row items-stretch md:items-center w-full flex-1 gap-2 md:gap-0 md:divide-x md:divide-gray-100">
 
               {/* Search Field */}
-              <div className="relative flex items-center w-full px-2 py-2 md:py-1 md:pr-3">
+              <div className="relative flex items-center w-full px-2 py-2 md:py-1 md:pr-1">
                 <button
                   type="button"
                   className="p-1 my-text rounded-full focus:outline-none shrink-0"
@@ -381,11 +388,11 @@ const Search = () => {
               </div>
 
               {/* City Dropdown */}
-              <div className="flex items-center w-full md:w-[220px] lg:w-[230px] px-2 py-2 md:px-3">
-                <MdOutlineAddLocation className="my-text shrink-0" size={22} />
+              <div className="flex items-center w-full md:w-[230px] lg:w-[240px] px-2 py-2 md:px-3">
+                <MdOutlineAddLocation className="my-text shrink-0" size={20} />
                 <select
                   id="city"
-                  className="w-full min-w-0 ml-2 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer"
+                  className="w-full min-w-0 ml-1 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer"
                   value={searchCity}
                   onChange={handleCityChange}
                 >
@@ -433,12 +440,12 @@ const Search = () => {
 
 
               {/* Type Dropdown */}
-              <div className="flex items-center w-full md:w-[190px] lg:w-[200px] px-2 py-2 md:px-3">
-                <RiHomeLine className="my-text shrink-0" size={22} />
+              <div className="flex items-center w-full md:w-[243px] lg:w-[253px] px-2 py-2 md:px-3">
+                <RiHomeLine className="my-text shrink-0" size={18} />
 
                 <select
                   id="type"
-                  className="w-full min-w-0 ml-2 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer truncate"
+                  className="w-full min-w-0 ml-1 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer"
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                 >

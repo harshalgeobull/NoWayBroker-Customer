@@ -462,15 +462,14 @@ const MyProjects = () => {
               onChange={(e) => setCity(e.target.value)}
             >
               <option value="">City</option>
-              <option value="Nashik">Nashik</option>
-              <option value="Mumbai">Mumbai</option>
-              <option value="Pune">Pune</option>
-              <option value="Delhi">Delhi</option>
-              <option value="Bangalore">Bengaluru</option>
-              <option value="Chennai">Chennai</option>
-              <option value="Hyderabad">Hyderabad</option>
-              <option value="Kolkata">Kolkata</option>
               <option value="Ahmedabad">Ahmedabad</option>
+            <option value="Bangalore">Bengaluru</option>
+            <option value="Chennai">Chennai</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Kolkata">Kolkata</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Pune">Pune</option>
             </select>
             {/* <div className="relative md:mt-0">
               <input

@@ -7,7 +7,7 @@ const Download = () => {
     appstore: "#",
     playstore: "#",
   });
-
+  const [mobileNumber, setMobileNumber] = useState("");
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -55,11 +55,17 @@ const Download = () => {
                 Enter Mobile Number
               </label>
               <input
-                id="mobileNumber"
-                type="text"
-                placeholder="Enter your mobile number"
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-rose-600 focus:outline-none"
-              />
+  id="mobileNumber"
+  type="tel"
+  placeholder="Enter your mobile number"
+  maxLength={10}
+  value={mobileNumber}
+  onChange={(e) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+    setMobileNumber(value);
+  }}
+  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-rose-600 focus:outline-none"
+/>
             </div>
 
             {/* Button aligned to the bottom of the label */}

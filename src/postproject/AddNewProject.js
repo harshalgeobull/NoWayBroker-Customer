@@ -4374,7 +4374,7 @@ Make it engaging, attractive, and human-like.
                   {/* Header Section */}
                   <div className="mb-6">
                     <h2 className="text-2xl font-semibold text-gray-900">
-                      Project Info
+                      Generate Project Information with AI
                     </h2>
                     <p className="text-gray-500">
                       Details about the project, including an overview and

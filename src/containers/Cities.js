@@ -58,12 +58,19 @@ useEffect(() => {
       .sort((a, b) => b.propertyCount - a.propertyCount); // sort descending
   }, [cities, citiesData]);
 
-  const handleCityClick = useCallback((cityName) => {
-    history.push({
-      pathname: `/citywiseproperties/${encodeURIComponent(cityName)}`
-    });
-  }, [history]);
+  // const handleCityClick = useCallback((cityName) => {
+  //   history.push({
+  //     pathname: `/citywiseproperties/${encodeURIComponent(cityName)}`
+  //   });
+  // }, [history]);
 
+ const handleCityClick = useCallback((cityName) => {
+  sessionStorage.setItem("selectedCity", cityName);
+
+  history.push({
+    pathname: `/citywiseproperties/${encodeURIComponent(cityName)}`
+  });
+}, [history]);
   const sliderSettings = {
     dots: true,
     infinite: true,

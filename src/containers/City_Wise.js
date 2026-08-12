@@ -42,6 +42,7 @@ import SignUp1 from "../auth/SignUp1";
 import { useCity } from "./SearchContext";
 import ContactDetails from "../containers/ContactDetails";
 import { FaPhoneAlt } from "react-icons/fa";
+import { getResultsTitle } from "./getResultsTitle";
 
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
 
@@ -231,6 +232,7 @@ const City_Wise = () => {
   const { searchCity } = useCity();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState();
+  const [totalResults, setTotalResults] = useState(0);
   const itemsPerPage = 10;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [propertyImages, setPropertyImages] = useState([]);
@@ -393,10 +395,6 @@ const City_Wise = () => {
   ];
 
   const rentPriceOptions = [
-    1000,
-    2000,
-    3000,
-    4000,
     5000,
     6000,
     7000,
@@ -426,10 +424,6 @@ const City_Wise = () => {
   ];
 
   const pgPriceOptions = [
-    1000,
-    2000,
-    3000,
-    4000,
     5000,
     6000,
     7000,
@@ -760,9 +754,9 @@ const City_Wise = () => {
     `;
     document.head.appendChild(style);
 
-    const cityToFetch =
-      searchCity && searchCity.trim() !== "" ? searchCity.trim() : city_name;
-
+    // const cityToFetch =
+    //   searchCity && searchCity.trim() !== "" ? searchCity.trim() : city_name;
+    const cityToFetch = city_name;
     if (!cityToFetch) return;
 
     //  Correct API call
@@ -819,9 +813,11 @@ const City_Wise = () => {
 
         setProperties(valid);
         setTotalPages(response.data.total_pages || 1);
+        setTotalResults(response.data.total_count || 0);
       } else {
         setProperties([]);
         setTotalPages(0);
+        setTotalResults(0);
       }
     } catch (err) {
       setError("Failed to load properties");
@@ -943,9 +939,9 @@ const City_Wise = () => {
     try {
       const formData = new FormData();
 
-      const cityToSend =
-        searchCity && searchCity.trim() !== "" ? searchCity.trim() : city_name;
-
+      // const cityToSend =
+      //   searchCity && searchCity.trim() !== "" ? searchCity.trim() : city_name;
+      const cityToSend = city_name;
       if (accessToken) {
   formData.append("customer_id", accessToken);
 }
@@ -1102,9 +1098,11 @@ const City_Wise = () => {
       if (response.status === 200 && response.data.status === 1) {
         setProperties(response.data.data);
         setTotalPages(response.data.total_pages || 1);
+        setTotalResults(response.data.total_count || 0);
       } else {
         setProperties([]);
         setTotalPages(0);
+        setTotalResults(0);
         setError("No properties available");
       }
     } catch (error) {
@@ -1840,10 +1838,12 @@ const City_Wise = () => {
 
                   // Auto-set building type
                   if (val === "Commercial Buy" || val === "Commercial Lease") {
-                    setBuildingType("Commercial");
-                  } else {
-                    setBuildingType("");
-                  }
+  setBuildingType("Commercial");
+} else if (val === "Buy" || val === "Rent") {
+  setBuildingType("Residential");
+} else {
+  setBuildingType("");
+}
                 }}
                 className="w-full h-16 p-2 border-2 border-gray-300 rounded-md appearance-none"
               >
@@ -1863,6 +1863,8 @@ const City_Wise = () => {
                 value={buildingType}
                 onChange={(e) => setBuildingType(e.target.value)}
                 disabled={
+                  propertyType === "Buy" ||
+                  propertyType === "Rent" ||
                   propertyType === "Commercial Buy" ||
                   propertyType === "Commercial Lease"
                 }
@@ -3355,20 +3357,40 @@ const City_Wise = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-4 mt-4 sm:flex-row sm:justify-end ">
-          <button
-            onClick={handleButtonClick}
-            className="w-40 p-3 text-rose-700 my-border rounded-md hover:bg-gray-300 focus:outline-none"
-          >
-            {filtersApplied ? "Reset Filters" : "Apply Filter"}
-          </button>
-          <button
-            className="w-40 p-3 my-border rounded-md hover:bg-gray-300 focus:outline-none"
-            onClick={handleSaveSearch}
-          >
-            Save Search
-          </button>
-        </div>
+        <div className="flex items-center justify-between px-6 mt-4 mb-3">
+  {/* Left Side */}
+  <h2 className="text-2xl font-bold text-gray-900">
+    <span className="text-[#8B1E3F]">{totalResults}</span> Results
+    <span className="mx-3 text-gray-400">|</span>
+    <span>
+      {getResultsTitle({
+        bhkType,
+        propertyType,
+        propertyType2,
+        buildingType,
+        searchLocation: city_name,
+        filtersApplied,
+      })}
+    </span>
+  </h2>
+
+  {/* Right Side */}
+  <div className="flex gap-4">
+    <button
+      onClick={handleButtonClick}
+      className="w-40 p-3 text-rose-700 my-border rounded-md hover:bg-gray-300"
+    >
+      {filtersApplied ? "Reset Filters" : "Apply Filter"}
+    </button>
+
+    <button
+      onClick={handleSaveSearch}
+      className="w-40 p-3 my-border rounded-md hover:bg-gray-300"
+    >
+      Save Search
+    </button>
+  </div>
+</div>
       </div>
 
       {/* Main Content */}

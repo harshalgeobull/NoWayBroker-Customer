@@ -54,6 +54,7 @@ const Home = () => {
       formData.append("page", 1);
       formData.append("page_size", 10);
       formData.append("property_category_type", "Buy");
+      formData.append("building_type", "Residential");
 
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/filter_property`,
@@ -116,7 +117,8 @@ const fetchOffers = async () => {
       const formData = new FormData();
       formData.append("page", 1);
       formData.append("page_size", 10);
-      formData.append("property_category_type", "Commercial Buy");
+      formData.append("property_category_type", "Buy");
+      formData.append("building_type", "Commercial");
 
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/filter_property`,

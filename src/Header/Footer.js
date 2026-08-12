@@ -138,17 +138,19 @@ const Footer = () => {
             </h3>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {[
+                "Ahmedabad",
+                "Bengaluru",
+                "Chennai", 
                 "Delhi",
+                "Hyderabad",
+                "Kolkata",
                 "Mumbai",
-                "Chennai",
-                "Pune",
-                "Noida",
-                "Gurgaon",
+                "Pune",   
               ].map((city) => (
                 <button
                   key={city}
                   onClick={() => handleCityClick(city)}
-                  className="text-left text-gray-500 hover:text-gray-700 text-[15px] sm:text-[17px] font-medium hover:no-underline no-underline break-words"
+                  className="text-left text-gray-500 hover:text-gray-700 text-[15px] sm:text-[17px] font-medium hover:no-underline no-underline whitespace-nowrap"
                 >
                   Property in {city}
                 </button>

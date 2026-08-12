@@ -558,7 +558,11 @@ const Contact = ({ setAlert }) => {
       const { data } = response.data; // Accessing the "data" array from the response
       if (data && data.length > 0) {
         const { address, emaild_id, contact, latitude } = data[0]; // Extracting required fields from the first object
-        setContactInfo({ address, email: emaild_id, phone: contact });
+        setContactInfo({
+  address,
+  email: emaild_id,
+  phone: contact ? `+91 ${contact}` : "",
+});
       }
     } catch (error) {
       setAlert("Error fetching contact information", "error");

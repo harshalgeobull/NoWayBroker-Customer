@@ -60,10 +60,6 @@ const MyProperties = () => {
 
 
   const rentAndPgPriceOptions = [
-    { label: "₹ 1 Thousand", value: 1000 },
-    { label: "₹ 2 Thousand", value: 2000 },
-    { label: "₹ 3 Thousand", value: 3000 },
-    { label: "₹ 4 Thousand", value: 4000 },
     { label: "₹ 5 Thousand", value: 5000 },
     { label: "₹ 6 Thousand", value: 6000 },
     { label: "₹ 7 Thousand", value: 7000 },

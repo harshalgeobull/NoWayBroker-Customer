@@ -33,6 +33,7 @@ import { useCity } from "./SearchContext";
 import { FaWhatsapp, FaPhone } from "react-icons/fa";
 import { FaPhoneAlt } from "react-icons/fa";
 import ContactDetails from "../containers/ContactDetails";
+import { getResultsTitle } from "./getResultsTitle";
 const API_URL = process.env.REACT_APP_API_URL;
 
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
@@ -101,6 +102,21 @@ export default function SearchDashboard() {
   const userLng = locationState?.lng || null;
   const [error, setError] = useState(null);
   const { searchQuery = "", type = "" } = location.state || {};
+  const getHomeSearchTitle = () => {
+  if (isNearMe && type) {
+    return `${type} Properties Near Me`;
+  }
+
+  if (type && searchCity) {
+    return `${type} Properties in ${searchCity}`;
+  }
+
+  if (type) {
+    return `${type} Properties`;
+  }
+
+  return "";
+};
   useEffect(() => {
     if (location.state) {
       setSearch(location.state.searchQuery || "");
@@ -108,6 +124,16 @@ export default function SearchDashboard() {
   }, [location.state]);
   const [search, setSearch] = useState(searchQuery);
   const { searchCity, setSearchCity } = useCity();
+  console.log("COMMON SEARCH DATA:", {
+  searchCity,
+  searchQuery,
+  type,
+});
+  useEffect(() => {
+  if (location.state?.searchCity) {
+    setSearchCity(location.state.searchCity);
+  }
+}, [location.state, setSearchCity]);
   const [propertyType, setPropertyType] = useState("");
   const [bhkType, setBhkType] = useState("");
   const [furnishedStatus, setFurnishedStatus] = useState("");
@@ -131,6 +157,7 @@ export default function SearchDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState();
   const [totalResults, setTotalResults] = useState(0);
+  const [searchLocation, setSearchLocation] = useState("");
   const itemsPerPage = 10;
   const [activeIndexes, setActiveIndexes] = useState({});
   const [priceDropdownOpen, setPriceDropdownOpen] = useState(false);
@@ -399,10 +426,6 @@ export default function SearchDashboard() {
   ];
 
   const rentPriceOptions = [
-    1000,
-    2000,
-    3000,
-    4000,
     5000,
     6000,
     7000,
@@ -433,10 +456,6 @@ export default function SearchDashboard() {
   ];
 
   const pgPriceOptions = [
-    1000,
-    2000,
-    3000,
-    4000,
     5000,
     6000,
     7000,
@@ -566,30 +585,6 @@ export default function SearchDashboard() {
       prev === propertyImages.length - 1 ? 0 : prev + 1,
     );
   };
-  const getResultsTitle = () => {
-    let title = "";
-
-  if (bhkType) {
-    
-    title += bhkType;
-  }
-  if (propertyType2.length > 0) {
-    title += ` ${propertyType2[0]}`;
-  }
-  if (propertyType) {
-    if (propertyType === "Buy") {
-      title += " For Sale";
-    } else if (propertyType === "Rent") {
-      title += " For Rent";
-    } else if (propertyType === "Commercial Buy") {
-      title += " For Sale";
-    } else if (propertyType === "Commercial Lease") {
-      title += " For Lease";
-    }
-  }
-    console.log("Title:", title);
-    return title;
-  };
   const fetchProperties = async (
     searchCity,
     type,
@@ -610,7 +605,10 @@ export default function SearchDashboard() {
         fetchPropertiesFormData.append("radius", 5);
       } else {
         fetchPropertiesFormData.append("city_name", searchCity);
-        fetchPropertiesFormData.append("search_query", searchQuery);
+        fetchPropertiesFormData.append(
+  "search_query",
+  searchQuery || type || ""
+);
         fetchPropertiesFormData.append("building_type", type);
       }
 
@@ -632,9 +630,22 @@ export default function SearchDashboard() {
   setTotalPages(response.data.total_pages || 1);
   setTotalResults(response.data.total_count || 0);
 
+  // if (response.data.parsed_filters) {
+  //   setParsedFilters(response.data.parsed_filters);
+  // }
   if (response.data.parsed_filters) {
-    setParsedFilters(response.data.parsed_filters);
+  const parsed = response.data.parsed_filters;
+
+  setParsedFilters(parsed);
+
+  if (parsed.address_area && parsed.city_name) {
+    setSearchLocation(`${parsed.address_area}, ${parsed.city_name}`);
+  } else if (parsed.city_name) {
+    setSearchLocation(parsed.city_name);
+  } else {
+    setSearchLocation("");
   }
+}
 } else {
   setError("No properties available");
   setProperties([]);
@@ -1055,6 +1066,12 @@ useEffect(() => {
     if (activeApi === "filter") {
       fetchFilteredProperties(currentPage);
     } else {
+      console.log("SEARCH DASHBOARD VALUES:", {
+    searchCity,
+    type,
+    searchQuery,
+  });
+
       fetchProperties(searchCity, type, searchQuery);
     }
 
@@ -2014,10 +2031,12 @@ useEffect(() => {
 
                   // Auto-set building type
                   if (val === "Commercial Buy" || val === "Commercial Lease") {
-                    setBuildingType("Commercial");
-                  } else {
-                    setBuildingType("");
-                  }
+  setBuildingType("Commercial");
+} else if (val === "Buy" || val === "Rent") {
+  setBuildingType("Residential");
+} else {
+  setBuildingType("");
+}
                 }}
                 className="w-full h-16 p-2 border-2 border-gray-300 rounded-md appearance-none"
               >
@@ -2037,6 +2056,8 @@ useEffect(() => {
                 value={buildingType}
                 onChange={(e) => setBuildingType(e.target.value)}
                 disabled={
+                  propertyType === "Buy" ||
+                  propertyType === "Rent" ||
                   propertyType === "Commercial Buy" ||
                   propertyType === "Commercial Lease"
                 }
@@ -3533,10 +3554,18 @@ useEffect(() => {
   <h2 className="text-2xl font-bold text-gray-900">
     <span className="text-[#8B1E3F]">{totalResults}</span> Results
 
-    {(searchQuery || filtersApplied) && (
+    {(searchQuery || type || filtersApplied) && (
   <>
     <span className="mx-3 text-gray-400">|</span>
-    <span>{filtersApplied ? getResultsTitle() : searchQuery}</span>
+    <span>{filtersApplied ? getResultsTitle({
+  bhkType,
+  propertyType,
+  propertyType2,
+  searchLocation: searchLocation || searchCity,
+  filtersApplied,
+  buildingType: type,
+  isNearMe,
+}) : getHomeSearchTitle()}</span>
   </>
 )}
   </h2>

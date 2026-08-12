@@ -60,10 +60,6 @@ const MyProperties = () => {
 
 
   const rentAndPgPriceOptions = [
-    { label: "₹ 1 Thousand", value: 1000 },
-    { label: "₹ 2 Thousand", value: 2000 },
-    { label: "₹ 3 Thousand", value: 3000 },
-    { label: "₹ 4 Thousand", value: 4000 },
     { label: "₹ 5 Thousand", value: 5000 },
     { label: "₹ 6 Thousand", value: 6000 },
     { label: "₹ 7 Thousand", value: 7000 },
@@ -743,14 +739,14 @@ const MyProperties = () => {
             onChange={(e) => setCity(e.target.value)}
           >
             <option value="">City</option>
-            <option value="Mumbai">Mumbai</option>
-            <option value="Pune">Pune</option>
-            <option value="Delhi">Delhi</option>
+            <option value="Ahmedabad">Ahmedabad</option>
             <option value="Bangalore">Bengaluru</option>
             <option value="Chennai">Chennai</option>
+            <option value="Delhi">Delhi</option>
             <option value="Hyderabad">Hyderabad</option>
             <option value="Kolkata">Kolkata</option>
-            <option value="Ahmedabad">Ahmedabad</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Pune">Pune</option>
           </select>
           <div className="w-0 md:w-40"></div>
           {/* <div className="relative md:mt-0">

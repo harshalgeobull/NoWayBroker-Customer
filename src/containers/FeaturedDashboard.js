@@ -41,6 +41,7 @@ import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 import { useCity } from "./SearchContext";
 import ContactDetails from "../containers/ContactDetails";
+import { getResultsTitle } from "./getResultsTitle";
 
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
 
@@ -92,6 +93,7 @@ const FeaturedDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [totalPages, setTotalPages] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
   // Modal open states
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
@@ -376,10 +378,6 @@ const FeaturedDashboard = () => {
   ];
 
   const rentPriceOptions = [
-    1000,
-    2000,
-    3000,
-    4000,
     5000,
     6000,
     7000,
@@ -409,10 +407,6 @@ const FeaturedDashboard = () => {
   ];
 
   const pgPriceOptions = [
-    1000,
-    2000,
-    3000,
-    4000,
     5000,
     6000,
     7000,
@@ -760,6 +754,12 @@ const FeaturedDashboard = () => {
     setError(null);
 
     try {
+      const cityFromSession = sessionStorage.getItem("cityName");
+
+    const cityToUse =
+      searchCity && searchCity.trim() !== ""
+        ? searchCity.trim()
+        : cityFromSession || "";
       let response;
 
       // =========================
@@ -776,7 +776,7 @@ const FeaturedDashboard = () => {
         formData.append("page_size", itemsPerPage);
 
         if (search) formData.append("area", search);
-        if (searchCity) formData.append("city_name", searchCity);
+        if (cityToUse) formData.append("city_name", cityToUse);
         // ====================================
         // SORT BY
         // ====================================
@@ -996,18 +996,25 @@ const FeaturedDashboard = () => {
             ? "building_type"
             : "property_category_type";
 
-        response = await axios.post(
-          `${process.env.REACT_APP_API_URL}/cust_api/get_recommended_properties`,
-          {
-            user_id: userId,
-            [payloadKey]: propertytype,
-            page: currentPage,
-            page_size: itemsPerPage,
-            city_name: searchCity,
-            ...(appliedSortBy ? { sort_by: appliedSortBy } : {}),
-            ...(appliedVerifiedOnly ? { verified: "true" } : {}),
-          },
-        );
+        const formData = new FormData();
+
+formData.append("user_id", userId || "");
+formData.append("page", currentPage);
+formData.append("page_size", itemsPerPage);
+
+if (cityToUse) {
+  formData.append("city_name", cityToUse);
+}
+
+response = await axios.post(
+  `${process.env.REACT_APP_API_URL}/cust_api/get_featured_property`,
+  formData,
+  {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  }
+);
       }
 
       // =========================
@@ -1016,14 +1023,16 @@ const FeaturedDashboard = () => {
       if (response?.status === 200 && response?.data?.status === 1) {
         setProperties(response.data.data || []);
         setTotalPages(response.data.total_pages || 1);
+        setTotalResults(response.data.total_count || 0);
       } else {
         setProperties([]);
         setTotalPages(1);
+        setTotalResults(0);
         setError("No properties available");
       }
     } catch (error) {
       console.error("Error loading properties:", error);
-
+      setTotalResults(0);
       setProperties([]);
       setTotalPages(1);
 
@@ -1970,10 +1979,12 @@ const FeaturedDashboard = () => {
 
                   // Auto-set building type
                   if (val === "Commercial Buy" || val === "Commercial Lease") {
-                    setBuildingType("Commercial");
-                  } else {
-                    setBuildingType("");
-                  }
+  setBuildingType("Commercial");
+} else if (val === "Buy" || val === "Rent") {
+  setBuildingType("Residential");
+} else {
+  setBuildingType("");
+}
                 }}
                 className="w-full h-16 p-2 border-2 border-gray-300 rounded-md appearance-none"
               >
@@ -1993,6 +2004,8 @@ const FeaturedDashboard = () => {
                 value={buildingType}
                 onChange={(e) => setBuildingType(e.target.value)}
                 disabled={
+                  propertyType === "Buy" ||
+                  propertyType === "Rent" ||
                   propertyType === "Commercial Buy" ||
                   propertyType === "Commercial Lease"
                 }
@@ -3483,20 +3496,40 @@ const FeaturedDashboard = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-4 mt-4 sm:flex-row sm:justify-end ">
-          <button
-            onClick={handleButtonClick}
-            className="w-40 p-3 text-rose-700 my-border rounded-md hover:bg-gray-300 focus:outline-none"
-          >
-            {filtersApplied ? "Reset Filters" : "Apply Filter"}
-          </button>
-          <button
-            className="w-40 p-3 my-border rounded-md hover:bg-gray-300 focus:outline-none"
-            onClick={handleSaveSearch}
-          >
-            Save Search
-          </button>
-        </div>
+        <div className="flex items-center justify-between px-6 mt-4 mb-3">
+  {/* Left Side */}
+  <h2 className="text-2xl font-bold text-gray-900">
+    <span className="text-[#8B1E3F]">{totalResults}</span> Results
+    <span className="mx-3 text-gray-400">|</span>
+    <span>
+      {getResultsTitle({
+        bhkType,
+        propertyType,
+        propertyType2,
+        buildingType,
+        filtersApplied,
+        pageTitle: "Featured Properties",
+      })}
+    </span>
+  </h2>
+
+  {/* Right Side */}
+  <div className="flex gap-4">
+    <button
+      onClick={handleButtonClick}
+      className="w-40 p-3 text-rose-700 my-border rounded-md hover:bg-gray-300"
+    >
+      {filtersApplied ? "Reset Filters" : "Apply Filter"}
+    </button>
+
+    <button
+      onClick={handleSaveSearch}
+      className="w-40 p-3 my-border rounded-md hover:bg-gray-300"
+    >
+      Save Search
+    </button>
+  </div>
+</div>
       </div>
 
       {/* Main Content */}

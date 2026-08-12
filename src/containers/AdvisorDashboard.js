@@ -32,6 +32,7 @@ import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
 import ContactDetails from "../containers/ContactDetails";
 import { FaPhoneAlt } from "react-icons/fa";
+import { getResultsTitle } from "./getResultsTitle";
 const userLocation = JSON.parse(sessionStorage.getItem("userLocation"));
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -93,6 +94,7 @@ const AdvisorDashboard = () => {
   const [error, setError] = useState(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const queryParams = new URLSearchParams(location.search);
+  const cityFromState = location.state?.cityName || "";
   const label = queryParams.get("label");
   const [search, setSearch] = useState("");
   const [propertyType, setPropertyType] = useState("");
@@ -110,6 +112,7 @@ const AdvisorDashboard = () => {
   const { searchCity, setSearchCity } = useCity();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
   const itemsPerPage = 10;
   const [priceDropdownOpen, setPriceDropdownOpen] = useState(false);
   const [minPrice, setMinPrice] = useState("");
@@ -384,10 +387,6 @@ const AdvisorDashboard = () => {
   ];
 
   const rentPriceOptions = [
-    1000,
-    2000,
-    3000,
-    4000,
     5000,
     6000,
     7000,
@@ -417,10 +416,6 @@ const AdvisorDashboard = () => {
   ];
 
   const pgPriceOptions = [
-    1000,
-    2000,
-    3000,
-    4000,
     5000,
     6000,
     7000,
@@ -737,6 +732,19 @@ const AdvisorDashboard = () => {
     fetchAmenities();
   }, []);
 
+   useEffect(() => {
+  if (!label) return;
+
+  if (label === "Buy" || label === "Rent") {
+    setPropertyType(label);
+    setBuildingType("Residential");
+  } else if (label === "Commercial Buy" || label === "Commercial Lease") {
+    setPropertyType(label);
+    setBuildingType("Commercial");
+  } else {
+    setPropertyType(label);
+  }
+}, [label]);
   useEffect(() => {
     setError(null);
     const style = document.createElement("style");
@@ -877,23 +885,38 @@ const AdvisorDashboard = () => {
       formData.append("page_size", itemsPerPage);
 
 
-      const categoryValues = ["Buy", "Rent", "Commercial Buy", "Commercial Lease", "PG/Co-living"];
+     // Use selected Property Category when filters are applied.
+// Otherwise use the dashboard label.
+const selectedCategory = filtersApplied ? propertyType : label;
 
-      if (categoryValues.includes(label)) {
-        formData.append("property_category_type", label);
-      } else if (postedBy || label) {
-        formData.append("user_type", postedBy || label);
-      }
+if (selectedCategory === "Commercial Buy") {
+  formData.append("property_category_type", "Buy");
+  formData.append("building_type", "Commercial");
+} else if (selectedCategory === "Commercial Lease") {
+  formData.append("property_category_type", "Rent");
+  formData.append("building_type", "Commercial");
+} else if (selectedCategory === "Buy") {
+  formData.append("property_category_type", "Buy");
+  formData.append("building_type", "Residential");
+} else if (selectedCategory === "Rent") {
+  formData.append("property_category_type", "Rent");
+  formData.append("building_type", "Residential");
+} else if (selectedCategory === "PG/Co-living") {
+  formData.append("property_category_type", "PG/Co-living");
+} else if (!filtersApplied && (postedBy || label)) {
+  formData.append("user_type", postedBy || label);
+}
 
       const cityFromSession = sessionStorage.getItem("cityName");
-      const cityToUse =
-        searchCity && searchCity.trim() !== ""
-          ? searchCity.trim()
-          : cityFromSession || "";
-      if (cityToUse) {
-        formData.append("city_name", cityToUse);
-      }
 
+const cityToUse =
+  searchCity && searchCity.trim() !== ""
+    ? searchCity.trim()
+    : cityFromState || cityFromSession || "";
+
+if (cityToUse) {
+  formData.append("city_name", cityToUse);
+}
       if (appliedSortBy) {
         formData.append("sort_by", appliedSortBy); // newest | oldest | price_low | price_high
       }
@@ -908,17 +931,6 @@ const AdvisorDashboard = () => {
 
         if (buildingType) {
           formData.append("building_type", buildingType);
-        }
-
-        if (propertyType) {
-          const apiPropertyCategory =
-            propertyType === "Commercial Buy"
-              ? "Buy"
-              : propertyType === "Commercial Lease"
-                ? "Rent"
-                : propertyType;
-
-          formData.append("property_category_type", apiPropertyCategory);
         }
 
         if (
@@ -1062,11 +1074,13 @@ const AdvisorDashboard = () => {
       if (response.status === 200 && response.data.status === 1) {
         setProperties(response.data.data || []);
         setTotalPages(response.data.total_pages || 1);
+        setTotalResults(response.data.total_count || 0);
         setError(null);
       }
       else {
         setProperties([]);
         setTotalPages(1);
+        setTotalResults(0);
         setError("No properties available");
       }
     } catch (error) {
@@ -1074,6 +1088,7 @@ const AdvisorDashboard = () => {
 
       setProperties([]);
       setTotalPages(1);
+      setTotalResults(0);
       setError("Failed to load properties.");
     } finally {
       setLoading(false);
@@ -1831,10 +1846,12 @@ const AdvisorDashboard = () => {
                   setPurchaseType("");
 
                   if (val === "Commercial Buy" || val === "Commercial Lease") {
-                    setBuildingType("Commercial");
-                  } else {
-                    setBuildingType("");
-                  }
+  setBuildingType("Commercial");
+} else if (val === "Buy" || val === "Rent") {
+  setBuildingType("Residential");
+} else {
+  setBuildingType("");
+}
                 }}
                 className="w-full h-16 p-2 border-2 border-gray-300 rounded-md appearance-none"
               >
@@ -1854,6 +1871,8 @@ const AdvisorDashboard = () => {
                 value={buildingType}
                 onChange={(e) => setBuildingType(e.target.value)}
                 disabled={
+                  propertyType === "Buy" ||
+                  propertyType === "Rent" ||
                   propertyType === "Commercial Buy" ||
                   propertyType === "Commercial Lease"
                 }
@@ -3344,20 +3363,38 @@ const AdvisorDashboard = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-4 mt-4 sm:flex-row sm:justify-end ">
-          <button
-            onClick={handleButtonClick}
-            className="w-40 p-3 text-rose-700 my-border rounded-md hover:bg-gray-300 focus:outline-none"
-          >
-            {filtersApplied ? "Reset Filters" : "Apply Filter"}
-          </button>
-          <button
-            className="w-40 p-3 my-border rounded-md hover:bg-gray-300 focus:outline-none"
-            onClick={handleSaveSearch}
-          >
-            Save Search
-          </button>
-        </div>
+        <div className="flex items-center justify-between px-6 mt-4 mb-3">
+  <h2 className="text-2xl font-bold text-gray-900">
+    <span className="text-[#8B1E3F]">{totalResults}</span> Results
+    <span className="mx-3 text-gray-400">|</span>
+    <span>
+      {getResultsTitle({
+        bhkType,
+        propertyType,
+        propertyType2,
+        buildingType,
+        postedBy,
+        filtersApplied,
+      })}
+    </span>
+  </h2>
+
+  <div className="flex gap-4">
+    <button
+      onClick={handleButtonClick}
+      className="w-40 p-3 text-rose-700 my-border rounded-md hover:bg-gray-300"
+    >
+      {filtersApplied ? "Reset Filters" : "Apply Filter"}
+    </button>
+
+    <button
+      onClick={handleSaveSearch}
+      className="w-40 p-3 my-border rounded-md hover:bg-gray-300"
+    >
+      Save Search
+    </button>
+  </div>
+</div>
       </div>
 
       {/* Main Content */}
