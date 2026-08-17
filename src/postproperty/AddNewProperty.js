@@ -9580,7 +9580,7 @@ fice Space") ||
           )}
 
           {/* Navigation Buttons - Fixed at Bottom */}
-          <div
+          {/* <div
             className={`fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md flex mx-32 ${activeStep === 0 ? "justify-end" : "justify-between"
               }`}
           >
@@ -9614,6 +9614,50 @@ fice Space") ||
                 }}
                 disabled={isSubmitting}
                 className={`mt-4 px-4 py-2 rounded ${isSubmitting ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"} text-white`}
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
+            )}
+          </div> */}
+          <div
+            className={`fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-md px-3 py-3 sm:px-6 sm:py-4 md:px-10 lg:px-16 xl:px-32 flex items-center gap-3 ${
+              activeStep === 0 ? "justify-end" : "justify-between"
+            }`}
+          >
+            {activeStep > 0 && (
+              <button
+                onClick={prevStep}
+                className="w-full sm:w-auto min-w-[120px] px-5 py-2.5 text-gray-700 bg-gray-300 rounded-lg hover:bg-gray-400"
+              >
+                Back
+              </button>
+            )}
+
+            {activeStep < steps.length - 1 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (validateStepFields()) {
+                    nextStep();
+                  }
+                }}
+                className="w-full sm:w-auto min-w-[120px] px-5 py-2.5 text-white my-bg rounded-lg hover:my-bg"
+              >
+                Continue
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  if (validateStepFields()) {
+                    handleSubmit(e);
+                  }
+                }}
+                disabled={isSubmitting}
+                className={`w-full sm:w-auto min-w-[120px] px-5 py-2.5 rounded ${
+                  isSubmitting
+                    ? "bg-gray-400"
+                    : "bg-green-600 hover:bg-green-700"
+                } text-white`}
               >
                 {isSubmitting ? "Submitting..." : "Submit"}
               </button>

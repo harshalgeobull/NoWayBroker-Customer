@@ -236,7 +236,7 @@ const MyLeads = () => {
         ) : (
           leads.map((lead) => (
             <div key={lead.id} className="bg-white rounded-lg p-3 mb-4 border">
-              <div className="flex justify-between items-center">
+              {/* <div className="flex justify-between items-center">
                 <div className="flex items-center gap-4">
                   <div className="bg-rose-100  rounded-full">
                     {console.log(lead)}
@@ -261,6 +261,44 @@ const MyLeads = () => {
                   className="flex items-center gap-1 mr-20 my-text"
                 >
                   <FiSmartphone /> {lead.phone}
+                </a>
+              </div>
+
+              <hr className="my-4" /> */}
+              <div className="flex items-center justify-between gap-2">
+                {/* Profile */}
+                <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                  <div className="bg-rose-100 rounded-full flex-shrink-0">
+                    {console.log(lead)}
+
+                    {lead?.profile_image ? (
+                      <img
+                        src={`${process.env.REACT_APP_API_URL}/media/${lead.profile_image}`}
+                        alt={sessionStorage.getItem("user_type") || "User"}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="my-text text-4xl" />
+                    )}
+                  </div>
+
+                  <div className="mt-3 min-w-0">
+                    <p className="font-semibold mb-0 truncate">
+                      {lead.name}
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      {lead.type}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <a
+                  href={`tel:${lead.phone}`}
+                  className="flex items-center gap-1 ml-2 my-text flex-shrink-0 whitespace-nowrap text-xs sm:text-sm sm:ml-0 sm:mr-20"
+                >
+                  <FiSmartphone className="flex-shrink-0" />
+                  <span>{lead.phone}</span>
                 </a>
               </div>
 
