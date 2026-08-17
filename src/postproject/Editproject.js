@@ -2293,8 +2293,10 @@ Make it engaging, attractive, and human-like.
                           </button>
                         )}
                       </div>
-                      <div className="grid items-start grid-cols-6 gap-4 p-4 mt-4 rounded-lg">
-                        <div className="col-span-6">
+                      {/* <div className="grid items-start grid-cols-6 gap-4 p-4 mt-4 rounded-lg"> */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 items-start gap-3 sm:gap-4 p-2 sm:p-3 md:p-4 mt-4 rounded-lg">
+                        {/* <div className="col-span-6"> */}
+                        <div className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-6">
                           <div className="mb-4">
                             <label className="block mb-1 font-medium text-gray-700">
                               Project Type{" "}
@@ -2312,7 +2314,7 @@ Make it engaging, attractive, and human-like.
                                     onClick={() =>
                                       handleProjectPropertyChange(index, "project_type", type)
                                     }
-                                    className={`px-4 py-2 rounded-full border ${projectProperty.project_type === type
+                                    className={`px-3 py-2 sm:px-4 rounded-full border ${projectProperty.project_type === type
                                       ? "bg-rose-100 text-rose-700 border-rose-500"
                                       : "border-gray-300 text-gray-600"
                                       }`}
@@ -2334,7 +2336,7 @@ Make it engaging, attractive, and human-like.
                                   <button
                                     key={type}
                                     type="button"
-                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                    className={`px-3 py-2 sm:px-4 rounded-full border transition ${projectProperty.sub_project_type === type
                                       ? "bg-rose-100 text-rose-700 border-rose-500"
                                       : "border-gray-300 text-gray-600 hover:bg-gray-100"
                                       }`}
@@ -2359,7 +2361,7 @@ Make it engaging, attractive, and human-like.
                                   <button
                                     key={type}
                                     type="button"
-                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                    className={`px-3 py-2 sm:px-4 rounded-full border transition ${projectProperty.sub_project_type === type
                                       ? "bg-rose-100 text-rose-700 border-rose-500"
                                       : "border-gray-300 text-gray-600 hover:bg-gray-100"
                                       }`}
@@ -2384,7 +2386,7 @@ Make it engaging, attractive, and human-like.
                                   <button
                                     key={type}
                                     type="button"
-                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                    className={`px-3 py-2 sm:px-4 rounded-full border transition ${projectProperty.sub_project_type === type
                                       ? "bg-rose-100 text-rose-700 border-rose-500"
                                       : "border-gray-300 text-gray-600 hover:bg-gray-100"
                                       }`}
@@ -2409,7 +2411,7 @@ Make it engaging, attractive, and human-like.
                                   <button
                                     key={type}
                                     type="button"
-                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                    className={`px-3 py-2 sm:px-4 rounded-full border transition ${projectProperty.sub_project_type === type
                                       ? "bg-rose-100 text-rose-700 border-rose-500"
                                       : "border-gray-300 text-gray-600 hover:bg-gray-100"
                                       }`}
@@ -2434,7 +2436,7 @@ Make it engaging, attractive, and human-like.
                                   <button
                                     key={type}
                                     type="button"
-                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                    className={`px-3 py-2 sm:px-4 rounded-full border transition ${projectProperty.sub_project_type === type
                                       ? "bg-rose-100 text-rose-700 border-rose-500"
                                       : "border-gray-300 text-gray-600 hover:bg-gray-100"
                                       }`}
@@ -2459,7 +2461,7 @@ Make it engaging, attractive, and human-like.
                                   <button
                                     key={type}
                                     type="button"
-                                    className={`px-4 py-2 rounded-full border transition ${projectProperty.sub_project_type === type
+                                    className={`px-3 py-2 sm:px-4 rounded-full border transition ${projectProperty.sub_project_type === type
                                       ? "bg-rose-100 text-rose-700 border-rose-500"
                                       : "border-gray-300 text-gray-600 hover:bg-gray-100"
                                       }`}
@@ -2485,7 +2487,7 @@ Make it engaging, attractive, and human-like.
                                     <button
                                       key={type}
                                       type="button"
-                                      className={`px-4 py-2 rounded-full border transition ${projectProperty.retail_location === type
+                                      className={`px-3 py-2 sm:px-4 rounded-full border transition ${projectProperty.retail_location === type
                                         ? "bg-rose-100 text-rose-700 border-rose-500"
                                         : "border-gray-300 text-gray-600 hover:bg-gray-100"
                                         }`}
@@ -3464,7 +3466,7 @@ Make it engaging, attractive, and human-like.
                               { ...emptyProjectProperty },
                             ])
                           }
-                          className="flex items-center gap-2 px-4 py-2 text-white rounded-lg bg-rose-600 hover:bg-rose-700"
+                          className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 text-white rounded-lg bg-rose-600 hover:bg-rose-700"
                         >
                           <Plus size={18} />
                           Add Property
@@ -4694,7 +4696,7 @@ Make it engaging, attractive, and human-like.
               </div>
             )}
 
-            {/* Navigation Buttons - Fixed at Bottom */}
+            {/* Navigation Buttons - Fixed at Bottom
             <div
               className={`fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md flex mx-32 ${activeStep === 0 ? "justify-end" : "justify-between"
                 }`}
@@ -4730,7 +4732,51 @@ Make it engaging, attractive, and human-like.
                   {isSubmitting ? "Updating..." : "Update Project"}
                 </button>
               )}
-            </div>
+            </div> */}
+
+            {/* Navigation Buttons - Fixed at Bottom */}
+              <div
+                className={`fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-md px-3 py-3 sm:px-6 sm:py-4 md:px-10 lg:px-16 xl:px-32 flex items-center gap-3 ${
+                  activeStep === 0 ? "justify-end" : "justify-between"
+                }`}
+              >
+                {activeStep > 0 && (
+                  <button
+                    onClick={prevStep}
+                    className="w-full sm:w-auto min-w-[120px] px-5 py-2.5 text-gray-700 bg-gray-300 rounded-lg hover:bg-gray-400"
+                  >
+                    Back
+                  </button>
+                )}
+
+                {activeStep < steps.length - 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const isValid = validateStepFields();
+
+                      if (isValid) {
+                        handleNext();
+                      }
+                    }}
+                    className="w-full sm:w-auto min-w-[120px] px-5 py-2.5 text-white my-bg rounded-lg hover:my-bg"
+                  >
+                    Continue
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className={`w-full sm:w-auto min-w-[120px] px-5 py-2.5 rounded ${
+                      isSubmitting
+                        ? "bg-gray-400"
+                        : "bg-green-600 hover:my-bg"
+                    } text-white`}
+                  >
+                    {isSubmitting ? "Updating..." : "Update Project"}
+                  </button>
+                )}
+             </div>
           </div>
         </div>
       </LoadScript>

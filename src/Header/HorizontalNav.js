@@ -30,8 +30,36 @@ const HorizontalNav = () => {
   const [profileImage, setProfileImage] = useState("");
   const [showLogoPreview, setShowLogoPreview] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const navTabRefs = useRef({});
+  const navTabsContainerRef = useRef(null);
+const [navIndicatorStyle, setNavIndicatorStyle] = useState({
+  left: 0,
+  width: 0,
+  opacity: 0,
+});
+const moveNavIndicator = (key) => {
+  const el = navTabRefs.current[key];
 
+  if (el) {
+    setNavIndicatorStyle({
+      left: el.offsetLeft - 32,
+      top: el.offsetTop + el.offsetHeight + 4,
+      width: el.getBoundingClientRect().width,
+      opacity: 1,
+    });
+  }
+};
 
+const handleNavMouseEnter = (key) => {
+  moveNavIndicator(key);
+};
+
+const handleNavMouseLeave = () => {
+  setNavIndicatorStyle((prev) => ({
+    ...prev,
+    opacity: 0,
+  }));
+};
   const searchBarRoutes = [
     "/property",
     "/advisordashboard",
@@ -244,9 +272,16 @@ const HorizontalNav = () => {
           )}
 
           {!hideTabLinks && (
-            <ul className="flex flex-col items-center w-full p-0 m-0 space-y-4 md:flex-row md:space-y-0 md:space-x-4 lg:space-x-8 md:w-auto">
+            <ul
+  className="relative flex flex-col items-center w-full p-0 m-0 space-y-4 md:flex-row md:space-y-0 md:space-x-4 lg:space-x-8 md:w-auto"
+  onMouseLeave={handleNavMouseLeave}
+>
               <li>
                 <Link
+ ref={(el) => { 
+    navTabRefs.current["buyers"] = el;
+  }}
+  onMouseEnter={() => handleNavMouseEnter("buyers")}
   to={{
     pathname: "/property",
     state: {
@@ -254,53 +289,75 @@ const HorizontalNav = () => {
       cityName: sessionStorage.getItem("cityName") || "",
     },
   }}
-  className="text-base font-medium tracking-wider text-gray-600 no-underline transition lg:text-lg hover:my-text hover:no-underline whitespace-nowrap"
+  className="nav-tab text-base font-medium tracking-wider text-gray-600 no-underline transition lg:text-lg hover:no-underline whitespace-nowrap"
 >
   For Buyers
 </Link>
               </li>
               <li>
                 <Link
-  to={{
-    pathname: "/property",
-    state: {
-      propertyType: "Rent",
-      cityName: sessionStorage.getItem("cityName") || "",
-    },
-  }}
-  className="text-base font-medium tracking-wider text-gray-600 no-underline transition lg:text-lg hover:my-text hover:no-underline whitespace-nowrap"
->
-  For Tenants
-</Link>
+    ref={(el) => {
+      navTabRefs.current["tenants"] = el;
+    }}
+    onMouseEnter={() => handleNavMouseEnter("tenants")}
+    to={{
+      pathname: "/property",
+      state: {
+        propertyType: "Rent",
+        cityName: sessionStorage.getItem("cityName") || "",
+      },
+    }}
+    className="nav-tab text-base font-medium tracking-wider text-gray-600 no-underline transition lg:text-lg hover:no-underline whitespace-nowrap"
+  >
+    For Tenants
+  </Link>
               </li>
               <li>
                <Link
-  to={{
-    pathname: "/advisordashboard",
-    search: "?label=Owner",
-    state: {
-      cityName: sessionStorage.getItem("cityName") || "",
-    },
-  }}
-  className="text-base font-medium tracking-wider text-gray-600 no-underline transition lg:text-lg hover:my-text hover:no-underline whitespace-nowrap"
->
-  For Owners
-</Link>
+    ref={(el) => {
+      navTabRefs.current["owners"] = el;
+    }}
+    onMouseEnter={() => handleNavMouseEnter("owners")}
+    to={{
+      pathname: "/advisordashboard",
+      search: "?label=Owner",
+      state: {
+        cityName: sessionStorage.getItem("cityName") || "",
+      },
+    }}
+    className="nav-tab text-base font-medium tracking-wider text-gray-600 no-underline transition lg:text-lg hover:no-underline whitespace-nowrap"
+  >
+    For Owners
+  </Link>
               </li>
               <li>
                 <Link
-  to={{
-    pathname: "/advisordashboard",
-    search: "?label=Builder",
-    state: {
-      cityName: sessionStorage.getItem("cityName") || "",
-    },
-  }}
-  className="text-base font-medium tracking-wider text-gray-600 no-underline transition lg:text-lg hover:my-text hover:no-underline whitespace-nowrap"
->
-  For Builders
-</Link>
+    ref={(el) => {
+      navTabRefs.current["builders"] = el;
+    }}
+    onMouseEnter={() => handleNavMouseEnter("builders")}
+    to={{
+      pathname: "/advisordashboard",
+      search: "?label=Builder",
+      state: {
+        cityName: sessionStorage.getItem("cityName") || "",
+      },
+    }}
+    className="nav-tab text-base font-medium tracking-wider text-gray-600 no-underline transition lg:text-lg hover:no-underline whitespace-nowrap"
+  >
+    For Builders
+  </Link>
               </li>
+               {/* Add this here */}
+  <span
+    className="navbar-nav-tab-indicator hidden md:block"
+    style={{
+      left: navIndicatorStyle.left,
+      top: navIndicatorStyle.top,
+      width: navIndicatorStyle.width,
+      opacity: navIndicatorStyle.opacity,
+    }}
+  />
             </ul>
           )}
         </div>
@@ -592,6 +649,26 @@ const HorizontalNav = () => {
           </div>
         )
       }
+      <style>{`
+        .nav-tab {
+          position: relative;
+          transition: color 0.3s ease;
+        }
+
+        .nav-tab:hover {
+          color: #8B1E3F;
+        }
+
+        .navbar-nav-tab-indicator {
+          position: absolute;
+          height: 3px;
+          background-color: #8B1E3F;
+          opacity: 0;
+          transition: left 0.3s ease, width 0.3s ease, opacity 0.2s ease;
+          pointer-events: none;
+        }
+      `}</style>
+
     </nav >
   );
 };

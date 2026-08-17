@@ -1125,11 +1125,19 @@ response = await axios.post(
   const createCustomIcon = (property, isActive = false) => {
     // Decide what to display
     let displayValue = "";
-    if (property.property_category_type === "Buy" && property.property_price) {
-      displayValue = formatPrice(property.property_price);
-    } else if (property.property_category_type === "Rent" && property.rent) {
-      displayValue = formatPrice(property.rent);
-    }
+    if (
+  (property.property_category_type === "Buy" ||
+    property.property_category_type === "Commercial Buy") &&
+  property.property_price
+) {
+  displayValue = formatPrice(property.property_price);
+} else if (
+  (property.property_category_type === "Rent" ||
+    property.property_category_type === "Commercial Lease") &&
+  property.rent
+) {
+  displayValue = formatPrice(property.rent);
+}
 
     return L.divIcon({
       className: `custom-marker ${isActive ? "active" : ""}`,
@@ -3005,7 +3013,7 @@ response = await axios.post(
                   <span className="block pr-8 truncate text-left">
                     {investmentOptions.length > 0
                       ? investmentOptions.join(", ")
-                      : "Investment Options"}
+                      : "Property Usage"}
                   </span>
                   <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                 </button>
@@ -3817,7 +3825,7 @@ response = await axios.post(
                               className="flex-shrink-0 m-0 text-xs sm:text-sm font-medium leading-6 text-black md:text-base whitespace-nowrap"
                               title={property.furnished_type}
                             >
-                              {property.furnished_type || "Un-Furnished"}
+                              {property.furnished_type}
                             </span>
                           </div>
 

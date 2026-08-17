@@ -277,7 +277,7 @@ Make it engaging, attractive, and human-like.
 
   const officeOptions = [
     "Ready to Move Office Space",
-    "Bare Sheell Office Space",
+    "Bare Shell Office Space",
     "Co-working Office Space",
   ];
 
@@ -811,7 +811,7 @@ Make it engaging, attractive, and human-like.
     property_description: propertyDescription,
     units: units,
     plot_no: plotNo,
-    available_from: "Immediately",
+    available_from: "",
     available_on: availableOn,
     operating_since: operatingSince,
     furnished_type: furnishedType,
@@ -964,6 +964,18 @@ Make it engaging, attractive, and human-like.
       central_AC: centralAC,
     }));
   }, [centralAC]);
+  useEffect(() => {
+  setFormData((prev) => ({
+    ...prev,
+    pantry_option: pantry,
+  }));
+}, [pantry]);
+useEffect(() => {
+  setFormData((prev) => ({
+    ...prev,
+    reception_area: receptionArea,
+  }));
+}, [receptionArea]);
   // useEffect(() => {
   //   setFormData((prev) => ({
   //     ...prev,
@@ -990,6 +1002,13 @@ Make it engaging, attractive, and human-like.
       type_of_construction: typeOfConstruction,
     }));
   }, [typeOfConstruction]);
+  useEffect(() => {
+  setFormData((prev) => ({
+    ...prev,
+    property_dimensions_length: lengthOfLand,
+    property_dimensions_breadth: breadthOfLand,
+  }));
+}, [lengthOfLand, breadthOfLand]);
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -1182,21 +1201,33 @@ Make it engaging, attractive, and human-like.
       //   updatedData.isImmediateAvailable =
       //     value === "Immediately" ? "Yes" : "No";
 
+      // if (name === "available_from") {
+      //   updatedData.available_from = "Immediately";
+      //   updatedData.isImmediateAvailable = "Yes";
+      //   updatedData.possession_date = new Date().toISOString().split("T")[0];
+
+      //   updatedData.possession_date =
+      //     value === "Immediately"
+      //       ? new Date().toISOString().split("T")[0]
+      //       : prev.possession_date;
+
+      //   // remove available_from when Later selected
+      //   if (value === "Later") {
+      //     delete updatedData.available_from;
+      //   }
+      // }
       if (name === "available_from") {
-        updatedData.available_from = "Immediately";
-        updatedData.isImmediateAvailable = "Yes";
-        updatedData.possession_date = new Date().toISOString().split("T")[0];
+  updatedData.available_from = value;
 
-        updatedData.possession_date =
-          value === "Immediately"
-            ? new Date().toISOString().split("T")[0]
-            : prev.possession_date;
+  updatedData.isImmediateAvailable =
+    value === "Immediately" ? "Yes" : "No";
 
-        // remove available_from when Later selected
-        if (value === "Later") {
-          delete updatedData.available_from;
-        }
-      }
+  if (value === "Immediately") {
+    updatedData.possession_date = new Date()
+      .toISOString()
+      .split("T")[0];
+  }
+}
 
       return updatedData;
     });
@@ -1289,9 +1320,12 @@ Make it engaging, attractive, and human-like.
         buildingType === "Residential" &&
         propertyType === "PG"
       ) {
-        if (!formData.available_for?.trim()) {
-          errors.available_for = "Available For is required";
-        }
+        if (
+  !Array.isArray(formData.available_for) ||
+  formData.available_for.length === 0
+) {
+  errors.available_for = "Available For is required";
+}
         if (!formData.suited_for?.trim()) {
           errors.suited_for = "Suited For is required";
         }
@@ -1490,9 +1524,12 @@ Make it engaging, attractive, and human-like.
             propertyType === "Industry")
         )
       ) {
-        if (!formData.furnished_type?.trim()) {
-          errors.furnished_type = "furnished type is required";
-        }
+        if (
+  !formData.furnished_type &&
+  propertyType !== "Storage"
+) {
+  errors.furnished_type = "furnished type is required";
+}
       }
 
       // if (
@@ -1526,6 +1563,24 @@ Make it engaging, attractive, and human-like.
           errors.bhk_type = "bhk type is required";
         }
       }
+      if (
+  propertyCategory === "Buy" &&
+  !formData.possession_status?.trim()
+) {
+  errors.possession_status = "Possession Status is required";
+}
+
+if (
+  propertyCategory === "Rent" &&
+  !(
+    (buildingType === "Residential" && propertyType === "Plot") ||
+    (buildingType === "Commercial" && propertyType === "Land")
+  ) &&
+  !formData.available_from?.trim()
+) {
+  errors.available_from = "Available From is required";
+}
+
       if (formData.possession_status === "Under Construction") {
         if (!formData.possession_date?.trim()) {
           errors.possession_date = "Possession Date is required";
@@ -3242,20 +3297,35 @@ Make it engaging, attractive, and human-like.
 
               <div className="p-3 mb-3 border border-gray-300 rounded-xl">
                 <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-3">
-                  {propertyCategory === "Buy" && (
+                  {propertyCategory === "Buy" && 
+                    !(
+    (buildingType === "Residential" && propertyType === "Plot") ||
+    (buildingType === "Commercial" && propertyType === "Land")
+  ) && (
                     <div>
                       <label className="font-medium text-gray-700">
                         Possession Status
+                          <span className="text-xl font-bold text-red-500">*</span>
                       </label>
 
                       <select
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            possession_status: e.target.value,
-                          })
-                        }
+                        className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+  formErrors.possession_status
+    ? "border-red-600"
+    : "border-gray-300"
+}`}
+                        onChange={(e) => {
+  const value = e.target.value;
+
+  setFormData((prev) => ({
+    ...prev,
+    possession_status: value,
+    available_from:
+      value === "Ready To Move" ? "Immediately" : "",
+    possession_date:
+      value === "Ready To Move" ? "" : prev.possession_date,
+  }));
+}}
                       >
                         <option value="">Select Status</option>
                         <option value="Ready To Move">Ready To Move</option>
@@ -3263,52 +3333,60 @@ Make it engaging, attractive, and human-like.
                           Under Construction
                         </option>
                       </select>
+                      {formErrors.possession_status && (
+  <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+    <MdErrorOutline className="text-lg" />
+    {formErrors.possession_status}
+  </p>
+)}
                     </div>
                   )}
 
-                  {
-                    /* Existing Rent Conditions */
-                    ((propertyCategory === "Rent" &&
-                      ((buildingType === "Residential" &&
-                        (propertyType === "PG" ||
-                          propertyType === "Independent House/Villa" ||
-                          propertyType === "Service Apartment")) ||
-                        (buildingType === "Commercial" &&
-                          (propertyType === "Office Space" ||
-                            propertyType === "Storage" ||
-                            propertyType === "Industry" ||
-                            propertyType === "Hospitality")))) ||
-                      /* Plot / Land Conditions */
-                      ((propertyCategory === "Buy" ||
-                        propertyCategory === "Rent") &&
-                        ((buildingType === "Residential" &&
-                          propertyType === "Plot") ||
-                          (buildingType === "Commercial" &&
-                            propertyType === "Land"))) ||
-                      /* Paying Guest + Apartment / Builder Floor */
-                      (propertyCategory === "Paying Guest" &&
-                        (propertyType === "Apartment" ||
-                          propertyType === "Builder Floor" ||
-                          propertyType === "1RK/Studio Apartment" ||
-                          propertyType === "Independent House/Villa" ||
-                          propertyType === "Service Apartment"))) && (
+                  {(
+  (
+    propertyCategory === "Rent" &&
+    !(
+      (buildingType === "Residential" && propertyType === "Plot") ||
+      (buildingType === "Commercial" && propertyType === "Land")
+    )
+  ) ||
+  propertyCategory === "Paying Guest"
+) && (
                       <div>
                         <label className="block mb-2 font-medium text-gray-700">
                           Available From
+                          <span className="text-xl font-bold text-red-500">*</span>
                         </label>
 
                         <select
   name="available_from"
-  value={formData.available_from}
+  value={formData.available_from || ""}
   onChange={(e) => {
-    setIsLaterSelected(e.target.value === "Later");
-    handleInputChange(e);
+    const value = e.target.value;
+
+    setIsLaterSelected(value === "Later");
+
+    setFormData((prev) => ({
+      ...prev,
+      available_from: value,
+    }));
   }}
-  className="w-full p-3 mt-1 text-gray-800 bg-white border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+  className={`w-full p-3 mt-1 text-gray-800 bg-white border rounded-lg outline-none focus:ring-2 focus:ring-rose-500 ${
+    formErrors.available_from
+      ? "border-red-600"
+      : "border-gray-300"
+  }`}
 >
+  <option value="">Select availability</option>
   <option value="Immediately">Immediate</option>
   <option value="Later">Later</option>
 </select>
+{formErrors.available_from && (
+  <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+    <MdErrorOutline className="text-lg" />
+    {formErrors.available_from}
+  </p>
+)}
                       </div>
                     )
                   }
@@ -3346,7 +3424,110 @@ Make it engaging, attractive, and human-like.
                         )}
                       </div>
                     )}
+                    {(
+  (propertyCategory === "Buy" &&
+    buildingType === "Residential" &&
+    propertyType === "Plot") ||
 
+  (propertyCategory === "Rent" &&
+    buildingType === "Residential" &&
+    propertyType === "Plot") ||
+
+  (propertyCategory === "Buy" &&
+    buildingType === "Commercial" &&
+    propertyType === "Land") ||
+
+  (propertyCategory === "Rent" &&
+    buildingType === "Commercial" &&
+    propertyType === "Land")
+) && (
+  <div>
+    <label className="font-medium text-gray-700">
+      Possession Status
+      <span className="text-xl font-bold text-red-500">*</span>
+    </label>
+
+    <select
+      className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+        formErrors.possession_status
+          ? "border-red-600"
+          : "border-gray-300"
+      }`}
+      value={formData.possession_status || ""}
+      onChange={(e) => {
+        const value = e.target.value;
+
+        setFormData((prev) => ({
+          ...prev,
+          possession_status: value,
+          possession_date:
+            value === "Ready To Move"
+              ? ""
+              : prev.possession_date,
+        }));
+      }}
+    >
+      <option value="">Select Status</option>
+      <option value="Ready To Move">Ready To Move</option>
+      <option value="Later">Later</option>
+    </select>
+
+    {formErrors.possession_status && (
+      <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+        <MdErrorOutline className="text-lg" />
+        {formErrors.possession_status}
+      </p>
+    )}
+  </div>
+)}
+{(
+  ((
+    (propertyCategory === "Buy" ||
+      propertyCategory === "Rent") &&
+    buildingType === "Residential" &&
+    propertyType === "Plot"
+  ) ||
+  ((
+    propertyCategory === "Buy" ||
+    propertyCategory === "Rent"
+  ) &&
+    buildingType === "Commercial" &&
+    propertyType === "Land")
+  ) &&
+  formData.possession_status === "Later"
+) && (
+  <div>
+    <label className="font-medium text-gray-700">
+      Available Date
+      <span className="text-xl font-bold text-red-500">*</span>
+    </label>
+
+    <input
+      type="date"
+      name="possession_date"
+      className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+        formErrors.possession_date
+          ? "border-red-600"
+          : "border-rose-300"
+      }`}
+      value={formData.possession_date || ""}
+      min={new Date().toISOString().split("T")[0]}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          possession_date: e.target.value,
+        })
+      }
+    />
+
+    {formErrors.possession_date && (
+      <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+        <MdErrorOutline className="text-lg" />
+        {formErrors.possession_date}
+      </p>
+    )}
+  </div>
+)}
                   {/* {!(
                     (propertyCategory === "Buy" &&
                       buildingType === "Residential" &&
@@ -3743,15 +3924,6 @@ Make it engaging, attractive, and human-like.
                       propertyType === "Hospitality") ||
                     (propertyCategory === "Buy" &&
                       buildingType === "Commercial" &&
-                      propertyType === "Storage") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Office Space") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Retail") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
                       propertyType === "Land") ||
                     (propertyCategory === "Buy" &&
                       buildingType === "Commercial" &&
@@ -3828,12 +4000,15 @@ Make it engaging, attractive, and human-like.
                   ) && (
                       <div>
                         <label className="font-medium text-gray-700">
-                          Flat on the Floor
-                        </label>
+  {buildingType === "Residential" &&
+ propertyType !== "Independent House/Villa"
+  ? "Flat on the Floor"
+  : "Property on the Floor"}
+</label>
 
                         <select
-                          name="project_floor"
-                          value={formData.project_floor || ""}
+                          name="property_floor"
+                          value={formData.property_floor || ""}
                           onChange={handleInputChange}
                           className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                         >
@@ -3911,8 +4086,20 @@ Make it engaging, attractive, and human-like.
                   ) && (
                       <div>
                         <label className="font-medium text-gray-700">
-                          Tower/Block Name
-                        </label>
+  {buildingType === "Commercial" && propertyType === "Office Space"
+    ? "Office / Unit Number"
+    : buildingType === "Commercial" && propertyType === "Storage"
+      ? "Unit Number"
+      : buildingType === "Commercial" &&
+        propertyType === "Retail" &&
+        RetailSubType === "Commercial Shops"
+        ? "Shop/Unit Number"
+        : buildingType === "Commercial" &&
+          propertyType === "Retail" &&
+          RetailSubType === "Commercial Showrooms"
+          ? "Showroom/Unit Number"
+          : "Flat/House No"}
+</label>
                         <input
                           type="text"
                           name="block"
@@ -4469,7 +4656,7 @@ Make it engaging, attractive, and human-like.
                         </select>
                       </div>
                     )}
-                  {propertyCategory === "Buy" &&
+                  {/* {propertyCategory === "Buy" &&
                     (propertyType === "Plot" || propertyType === "Land") && (
                       <div>
                         <label className="font-medium text-gray-700">
@@ -4498,7 +4685,7 @@ Make it engaging, attractive, and human-like.
                           <option value="By 2032">By 2032</option>
                         </select>
                       </div>
-                    )}
+                    )} */}
                   {/* Length */}
                   {/* {propertyType === "Land" && (
   <div>
@@ -5602,7 +5789,7 @@ Make it engaging, attractive, and human-like.
                     propertyType === "Hospitality") && (
                       <div>
                         <label className="font-medium text-gray-700">
-                          Investment Option
+                          Property Usage
                         </label>
 
                         <select
@@ -5611,7 +5798,7 @@ Make it engaging, attractive, and human-like.
                           value={formData.investment_options}
                           onChange={handleInputChange}
                         >
-                          <option value="">Select Investment Option</option>
+                          <option value="">Select Property Usage Option</option>
                           <option value="Pre-Leased Spaces">
                             Pre-Leased Spaces
                           </option>
@@ -5627,7 +5814,7 @@ Make it engaging, attractive, and human-like.
                       </div>
                     )}
 
-                  {(propertyType === "Office Space" ||
+                  {/* {(propertyType === "Office Space" ||
                     propertyType === "Retail" ||
                     propertyType === "Storage" ||
                     propertyType === "Industry" ||
@@ -5648,7 +5835,7 @@ Make it engaging, attractive, and human-like.
                           <option value="New Bookings">New Bookings</option>
                         </select>
                       </div>
-                    )}
+                    )} */}
 
                   {!(
                     (propertyCategory === "Buy" &&
@@ -7005,23 +7192,72 @@ fice Space") ||
                               </span>
                             )}
                         </label>
-                        <select
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                          value={formData.available_for}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              available_for: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="">Select Availability</option>
-                          <option value="Girls">Girls</option>
-                          <option value="Boys">Boys</option>
-                          <option value="Family">Family</option>
-                          <option value="Single women">Single women</option>
-                          <option value="Single Men">Single Men</option>
-                        </select>
+                        <Select
+  isMulti
+  name="available_for"
+  options={[
+    { value: "Girls", label: "Girls" },
+    { value: "Boys", label: "Boys" },
+    { value: "Family", label: "Family" },
+    { value: "Single women", label: "Single women" },
+    { value: "Single Men", label: "Single Men" },
+  ]}
+  value={[
+    { value: "Girls", label: "Girls" },
+    { value: "Boys", label: "Boys" },
+    { value: "Family", label: "Family" },
+    { value: "Single women", label: "Single women" },
+    { value: "Single Men", label: "Single Men" },
+  ].filter((opt) =>
+    Array.isArray(formData.available_for)
+      ? formData.available_for.includes(opt.value)
+      : formData.available_for
+          ?.split(",")
+          .map((v) => v.trim())
+          .includes(opt.value)
+  )}
+  onChange={(selectedOptions) => {
+    setFormData((prev) => ({
+      ...prev,
+      available_for: selectedOptions.map((opt) => opt.value),
+    }));
+  }}
+  placeholder="Select Availability"
+  classNamePrefix="react-select"
+  styles={{
+    control: (base, state) => ({
+      ...base,
+      minHeight: "60px",
+      padding: "6px",
+      borderColor: state.isFocused
+        ? "#a855f7"
+        : "#d1d5db",
+      boxShadow: state.isFocused
+        ? "0 0 0 2px #a855f7"
+        : "none",
+      borderRadius: "0.5rem",
+      fontSize: "16px",
+    }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: "#ede9fe",
+      borderRadius: "0.375rem",
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: "#6b21a8",
+      fontWeight: "500",
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: "#6b21a8",
+      ":hover": {
+        backgroundColor: "#ddd6fe",
+        color: "#4c1d95",
+      },
+    }),
+  }}
+/>
                         {formErrors.available_for && (
                           <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
                             <MdErrorOutline className="text-lg" />

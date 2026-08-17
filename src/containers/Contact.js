@@ -650,7 +650,7 @@ const Contact = ({ setAlert }) => {
 
       <div className="container max-w-6xl p-8 mx-auto bg-white rounded-lg shadow-lg">
         <h2 className="mb-3 text-3xl font-bold text-center text-black-500">
-          Feedback Form
+          Rate Us
         </h2>
 
         {alert && (

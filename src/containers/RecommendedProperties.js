@@ -614,7 +614,7 @@ const RecommendedProperties = ({
                               className="flex-shrink-0 m-0 text-xs font-medium leading-6 text-black sm:text-sm whitespace-nowrap"
                               title={property.furnished_type}
                             >
-                              {property.furnished_type || "Un-Furnished"}
+                              {property.furnished_type}
                             </span>
                           </div>
 

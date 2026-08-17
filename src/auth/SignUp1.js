@@ -195,7 +195,7 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
             </h2>
 
             <label className="block mb-2 text-sm font-medium text-gray-700">
-              I am <span className="text-xl font-bold text-red-500">*</span>
+              Select Your Account Type <span className="text-xl font-bold text-red-500">*</span>
             </label>
             <div className="flex mb-4 space-x-4">
               {["Buyer/Tenant/Owner", "Builder/Developer"].map((type, index) => (
@@ -391,7 +391,7 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
               />
               <span>
                 <span className="mr-1 text-xl font-bold text-red-500">*</span>I
-                agree to NoWayBroker{" "}
+                agree to NowayBroker{" "}
                 <span
                   onClick={goToTermsAndConditions}
                   className="mr-2 font-medium my-text cursor-pointer hover:underline"

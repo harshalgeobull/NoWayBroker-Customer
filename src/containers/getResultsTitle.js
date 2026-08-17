@@ -61,9 +61,9 @@ export const getResultsTitle = ({
           : "Commercial Properties For Lease";
 
       case "PG/Co-living":
-        return searchLocation
-          ? `PG/Co-living in ${searchLocation}`
-          : "PG/Co-living";
+  return searchLocation
+    ? `PG/Co-living For Rent in ${searchLocation}`
+    : "PG/Co-living For Rent";
 
       default:
         break;
@@ -83,12 +83,22 @@ if (isNearMe && buildingType === "Residential") {
         : "Commercial Properties";
     }
 
+    if (buildingType === "Residential" && propertyType === "Buy") {
+  return searchLocation
+    ? `Residential Properties For Sale in ${searchLocation}`
+    : "Residential Properties For Sale";
+}
+if (buildingType === "Residential" && propertyType === "Rent") {
+  return searchLocation
+    ? `Residential Properties For Rent in ${searchLocation}`
+    : "Residential Properties For Rent";
+}
+
     if (buildingType === "Residential") {
       return searchLocation
         ? `Residential Properties in ${searchLocation}`
         : "Residential Properties";
     }
-
     // Property Category
     switch (propertyType) {
       case "Buy":
@@ -112,9 +122,9 @@ if (isNearMe && buildingType === "Residential") {
           : "Commercial Properties For Lease";
 
       case "PG/Co-living":
-        return searchLocation
-          ? `PG/Co-living in ${searchLocation}`
-          : "PG/Co-living";
+  return searchLocation
+    ? `PG/Co-living For Rent in ${searchLocation}`
+    : "PG/Co-living For Rent";
 
       default:
         return searchLocation

@@ -2945,7 +2945,7 @@ const PropertyDashboard = () => {
                   <span className="block pr-8 truncate text-left">
                     {investmentOptions.length > 0
                       ? investmentOptions.join(", ")
-                      : "Investment Options"}
+                      : "Property Usage"}
                   </span>
                   <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                 </button>
@@ -3766,7 +3766,7 @@ const PropertyDashboard = () => {
                                 className="flex-shrink-0 m-0 text-[11px] sm:text-sm font-medium leading-6 text-black whitespace-nowrap max-w-[45%] truncate"
                                 title={property.furnished_type}
                               >
-                                {property.furnished_type || "Un-Furnished"}
+                                {property.furnished_type}
                               </span>
                             </div>
 
@@ -3782,9 +3782,10 @@ const PropertyDashboard = () => {
                                 <span className="text-lg sm:text-2xl font-bold whitespace-nowrap">
                                   ₹{" "}
                                   {property.property_category_type === "Rent" ||
-                                    property.property_category_type === "PG/Co-living"
-                                    ? formatPrice(property.rent)
-                                    : formatPrice(property.property_price)}
+  property.property_category_type === "Commercial Lease" ||
+  property.property_category_type === "PG/Co-living"
+  ? formatPrice(property.rent)
+  : formatPrice(property.property_price)}
                                 </span>
 
                                 {(property.property_category_type ===
@@ -4165,10 +4166,10 @@ const PropertyDashboard = () => {
                           parseFloat(property.longitude),
                         ]}
                         icon={createCustomIcon(
-                          property.property_price,
-                          property._id === activePropertyId ||
-                          property._id === hoveredPropertyId,
-                        )}
+  getPropertyPrice(property),
+  property._id === activePropertyId ||
+  property._id === hoveredPropertyId,
+)}
                         eventHandlers={{
                           mouseover: () => setHoveredPropertyId(property._id),
                           mouseout: () => setHoveredPropertyId(null),

@@ -768,6 +768,12 @@ const Detail = ({ propertyData }) => {
     // ["Developer", propertyDetails?.developer || null],
     ["Building Type", propertyDetails?.building_type || null],
     ["Property Type", propertyDetails?.property_type || null],
+    ...(propertyDetails?.property_type === "Plot/Land"
+  ? [["Land Type", propertyDetails?.land_type || null]]
+  : []),
+    ...(propertyDetails?.property_type === "Office"
+  ? [["Office Type", propertyDetails?.office_type || null]]
+  : []),
     [
       "Bhk Type",
       propertyDetails?.bhk_type === "Studio"
@@ -808,14 +814,16 @@ const Detail = ({ propertyData }) => {
     ["PG Services", propertyDetails?.pg_services || null],
     ["Age of Property", propertyDetails?.age_of_property || null],
     ["Office Space Type", propertyDetails?.office_space_type || null],
-    ["Pantry", propertyDetails?.pantry || null],
+    //["Pantry", propertyDetails?.pantry || null],
     ["Personal Washroom", propertyDetails?.personal_washroom || null],
     ["Bathroom", propertyDetails?.bathroom || null],
+    ["Lift Availability", propertyDetails?.lift_availability || null],
+    ["Parking Availability", propertyDetails?.parking_availability || null],
     ["Covered Parking", propertyDetails?.covered_parking || null],
     ["Uncovered Parking", propertyDetails?.uncovered_parking || null],
     ["Balcony", propertyDetails?.balcony || null],
     ["Power Backup", propertyDetails?.power_backup || null],
-    ["Lift Availability", propertyDetails?.lift_availability || null],
+    
     ["Water Source", propertyDetails?.water_source || null],
     ["View", propertyDetails?.view || null],
     ["Flooring", propertyDetails?.flooring || null],
@@ -823,7 +831,7 @@ const Detail = ({ propertyData }) => {
     ["Property Floor", propertyDetails?.property_floor || null],
     ["Facing", propertyDetails?.facing || null],
     ["Ceiling Height", propertyDetails?.ceiling_height || null],
-    ["Parking Availability", propertyDetails?.parking_availability || null],
+    
     ["Min Lockin Period", propertyDetails?.min_lockin_period || null],
     ["Seat Type", propertyDetails?.seat_type || null],
     [
@@ -860,8 +868,88 @@ const Detail = ({ propertyData }) => {
     ["Rent", propertyDetails?.rent || null],
     ["Rent Duration", propertyDetails?.rent_duration || null],
     ["Property Added Date", propertyDetails?.property_added_date ? formatDateToDDMMYYYY(propertyDetails.property_added_date) : null],
-    ["Possession Status", propertyDetails?.possession_status || null],
-    ["Possession Date", propertyDetails?.possession_date ? formatDateToDDMMYYYY(propertyDetails.possession_date) : null],
+    ...(
+  propertyDetails?.property_category_type === "Buy" ||
+  propertyDetails?.property_category_type === "Commercial Buy"
+    ? [
+        [
+          "Possession Status",
+          propertyDetails?.possession_status || null,
+        ],
+      ]
+    : []
+),
+    ...(
+  propertyDetails?.possession_status === "Later"
+    ? [
+        [
+          "Available Date",
+          propertyDetails?.possession_date
+            ? formatDateToDDMMYYYY(propertyDetails.possession_date)
+            : null,
+        ],
+      ]
+    : []
+),
+  ...(
+  !(
+    propertyDetails?.property_category_type === "Rent" &&
+    propertyDetails?.building_type === "Commercial" &&
+    propertyDetails?.property_type === "Plot/Land"
+  )
+    ? propertyDetails?.property_category_type === "Rent"
+      ? [
+          [
+            "Available Status",
+            propertyDetails?.available_from ||
+              propertyDetails?.available_status ||
+              null,
+          ],
+        ]
+      : []
+    : []
+),
+...(
+  !(
+    propertyDetails?.property_category_type === "Rent" &&
+    propertyDetails?.building_type === "Commercial" &&
+    propertyDetails?.property_type === "Plot/Land"
+  )
+    ? propertyDetails?.property_category_type === "Rent" &&
+      propertyDetails?.available_from !== "Immediately"
+      ? [
+          [
+            "Available From",
+            propertyDetails?.possession_date ||
+            propertyDetails?.available_from
+              ? formatDateToDDMMYYYY(
+                  propertyDetails?.possession_date ||
+                    propertyDetails?.available_from,
+                  propertyDetails?.property_added_date
+                )
+              : null,
+          ],
+        ]
+      : []
+    : []
+),
+   ...(
+  (
+    propertyDetails?.property_category_type === "Buy" ||
+    propertyDetails?.property_category_type === "Commercial Buy"
+  ) &&
+  propertyDetails?.possession_status === "Under Construction"
+    ? [
+        [
+          "Possession Date",
+          propertyDetails?.possession_date
+            ? formatDateToDDMMYYYY(propertyDetails.possession_date)
+            : null,
+        ],
+      ]
+    : []
+),
+
 
     ["Area Type", propertyDetails?.area_type || null],
     ["Built up Area", propertyDetails?.area || null],
@@ -876,8 +964,8 @@ const Detail = ({ propertyData }) => {
         ? propertyDetails.carpet_area_unit.toLowerCase()
         : null,
     ],
-    ["Available Status", propertyDetails?.available_status || null],
-    ["Investment Options", propertyDetails?.investment_options || null],
+    ["Property Usage", propertyDetails?.investment_options || null],
+    ["Purchase Type", propertyDetails?.purchase_type || null],
     ["All Inclusive Price", propertyDetails?.all_inclusive_price || null],
     ["Price Onwards", propertyDetails?.price_onwards || null],
     ["Price Negotiable", propertyDetails?.price_negotiable || null],
@@ -928,15 +1016,7 @@ const Detail = ({ propertyData }) => {
     ],
     ["Maintenance Cost", propertyDetails?.maintenance_cost || null],
     ["Available Beds", propertyDetails?.available_beds || null],
-    [
-      "Available From",
-      propertyDetails?.possession_date || propertyDetails?.available_from
-        ? formatDateToDDMMYYYY(
-          propertyDetails?.possession_date || propertyDetails?.available_from,
-          propertyDetails?.property_added_date
-        )
-        : null,
-    ],
+    
     ["Available On", propertyDetails?.available_on ? formatDateToDDMMYYYY(propertyDetails.available_on) : null],
 
     ["No Of Cabines", propertyDetails?.no_of_cabines || null],
@@ -949,6 +1029,7 @@ const Detail = ({ propertyData }) => {
     // ["Conference Room", propertyDetails?.conferenceRoom || null],
     // ["Washroom", propertyDetails?.washroom || null],
     // ["Washroom Check", propertyDetails?.washroom_Check || null],
+    ["Pantry", propertyDetails?.pantry_option || null],
     ["Reception Area", propertyDetails?.reception_area || null],
     // ["Created At",
     //   propertyDetails?.created_at
@@ -987,25 +1068,43 @@ const Detail = ({ propertyData }) => {
       bgColor,
       iconColor,
     });
+    
   };
+  // addStatusItem({
+  //   icon: <HiOutlineBadgeCheck />,
+  //   title: "Availability",
+  //   value: propertyDetails?.available_status,
+  //   bgColor: "bg-green-50",
+  //   iconColor: "text-green-600",
+  // });
+  if (
+     !(
+    propertyDetails?.property_category_type === "Rent" &&
+    propertyDetails?.building_type === "Commercial" &&
+    propertyDetails?.property_type === "Plot/Land"
+  ) &&
+  (
+  propertyDetails?.property_category_type === "Rent" ||
+  (
+    propertyDetails?.property_category_type === "Buy" &&
+    propertyDetails?.possession_status === "Ready To Move"
+  )
+)
+) {
   addStatusItem({
     icon: <HiOutlineBadgeCheck />,
     title: "Availability",
-    value: propertyDetails?.available_status,
+    value:
+      propertyDetails?.available_from ||
+      propertyDetails?.available_status,
     bgColor: "bg-green-50",
     iconColor: "text-green-600",
   });
-  addStatusItem({
-    icon: <HiOutlineCalendar />,
-    title: "Available From",
-    value: formatDateToDDMMYYYY(
-      propertyDetails?.possession_date || propertyDetails?.available_from,
-      propertyDetails?.property_added_date
-    ),
-    bgColor: "bg-blue-50",
-    iconColor: "text-blue-600",
-  });
-
+}
+ if (
+  propertyDetails?.property_category_type === "Buy" ||
+  propertyDetails?.property_category_type === "Commercial Buy"
+) {
   addStatusItem({
     icon: <HiOutlineHome />,
     title: "Possession",
@@ -1013,6 +1112,63 @@ const Detail = ({ propertyData }) => {
     bgColor: "bg-orange-50",
     iconColor: "text-orange-600",
   });
+}
+// Existing timeline logic
+if (
+  !(
+    propertyDetails?.property_category_type === "Rent" &&
+    propertyDetails?.building_type === "Commercial" &&
+    propertyDetails?.property_type === "Plot/Land"
+  ) &&
+  (
+    propertyDetails?.property_category_type === "Rent" &&
+    propertyDetails?.available_from !== "Immediately"
+    ||
+    (
+      (
+  propertyDetails?.property_category_type === "Buy" ||
+  propertyDetails?.property_category_type === "Commercial Buy"
+) &&
+propertyDetails?.possession_status === "Under Construction"
+    )
+  )
+) {
+  addStatusItem({
+    icon: <HiOutlineCalendar />,
+    title: "Available From",
+    value: formatDateToDDMMYYYY(
+      propertyDetails?.possession_date ||
+        propertyDetails?.available_from,
+      propertyDetails?.property_added_date
+    ),
+    bgColor: "bg-blue-50",
+    iconColor: "text-blue-600",
+  });
+}
+
+
+// ADD THIS SEPARATELY
+if (propertyDetails?.possession_status === "Later") {
+  addStatusItem({
+    icon: <HiOutlineCalendar />,
+    title: "Available Date",
+    value: propertyDetails?.possession_date
+      ? formatDateToDDMMYYYY(propertyDetails.possession_date)
+      : null,
+    bgColor: "bg-blue-50",
+    iconColor: "text-blue-600",
+  });
+}
+  // addStatusItem({
+  //   icon: <HiOutlineCalendar />,
+  //   title: "Available From",
+  //   value: formatDateToDDMMYYYY(
+  //     propertyDetails?.possession_date || propertyDetails?.available_from,
+  //     propertyDetails?.property_added_date
+  //   ),
+  //   bgColor: "bg-blue-50",
+  //   iconColor: "text-blue-600",
+  // });
 
   addStatusItem({
     icon: <HiOutlineClock />,
@@ -2122,7 +2278,7 @@ const Detail = ({ propertyData }) => {
                           className="flex-shrink-0 m-0 text-xs font-medium leading-6 text-black sm:text-sm whitespace-nowrap"
                           title={property.furnished_type}
                         >
-                          {property.furnished_type || "Un-Furnished"}
+                          {property.furnished_type}
                         </span>
                       </div>
 

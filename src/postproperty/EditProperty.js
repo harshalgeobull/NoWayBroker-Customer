@@ -6,7 +6,7 @@ import { MdOutlineDriveFolderUpload } from "react-icons/md";
 import axios from "axios";
 import {
   GoogleMap,
-  LoadScript,
+  useJsApiLoader,
   Marker,
   Autocomplete,
 } from "@react-google-maps/api";
@@ -37,7 +37,12 @@ const EditProperty = () => {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const autoCompleteRef = useRef(null);
-  const GOOGLE_MAPS_API_KEY = "AIzaSyAt8bj4UACvakZfiSy-0c1o_ivfplm7jEU";
+  const GOOGLE_MAPS_API_KEY = "AIzaSyAUCNwxnNo52kFWJNGhRVj-AnkoffmzYe0";
+  const GOOGLE_MAPS_LIBRARIES = ["places"];
+  const { isLoaded } = useJsApiLoader({
+  googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+  libraries: GOOGLE_MAPS_LIBRARIES,
+});
   const userId = sessionStorage.getItem("accessToken");
   const userType = sessionStorage.getItem("user_type");
   const user_name = sessionStorage.getItem("user_name");
@@ -252,6 +257,9 @@ Make it engaging, attractive, and human-like.
 
   const fetchPropertyDetails = async () => {
     try {
+      console.log("EDIT PAGE: fetchPropertyDetails started");
+    console.log("EDIT PAGE: property id =", _id);
+
       const res = await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/get_property_details`,
         { property_id: _id },
@@ -295,7 +303,30 @@ Make it engaging, attractive, and human-like.
               : data.property_category_type,
       );
       setBuildingType(data.building_type);
-      setPropertyType(data.property_type);
+
+const normalizedPropertyType =
+  data.property_type === "Office"
+    ? "Office Space"
+    : data.property_type === "Plot/Land"
+      ? data.building_type === "Commercial"
+        ? "Land"
+        : "Plot"
+      : data.property_type;
+
+setPropertyType(normalizedPropertyType);
+
+setOfficeSubType(data.office_type || "");
+setRetailSubType(data.office_type || "");
+setRetailLocation(data.sub_sub_property_type || "");
+setLandType(data.land_type || "");
+setHospitalityType(data.office_type || "");
+setIndustryType(data.office_type || "");
+setStorageType(data.office_type || "");
+setNoOfCabines(data.no_of_cabines || "");
+setNoOfMeetingRooms(data.no_of_meeting_Rooms || "");
+setNoOfConferenceRoom(data.no_of_conference_room || "");
+setReceptionArea(data.reception_area || "");
+setCentralAC(data.central_AC || "");
       setPriceNegotiable(data.price_negotiable === "Yes");
       setElectricityAndWaterCharges(
         data.electricity_and_water_charges === "Yes",
@@ -306,17 +337,22 @@ Make it engaging, attractive, and human-like.
       setRoomType(data.room_type || "");
       setNoOfPeoples(data.no_of_peoples || "");
       setAvailableBeds(data.available_beds || "");
-      setRetailWashroom(data.washroom || "");
+      setRetailWashroom(data.commercial_washroom || "");
       setPropertyPrice(String(data.property_price || ""));
       setBhkType(data.bhk_type || "");
       setBathroom(data.bathroom || "");
+      setWashroom(data.washroom || "");
       setFurnishedType(data.furnished_type || "");
       setTotalFloor(data.total_floor || "");
       setFacing(data.facing || "");
+      setParkingTypes(data.parking_types || "");
       setBuiltUpArea(String(data.area || ""));
       setBuiltUpAreaUnit(data.area_in || "");
       setCarpetArea(String(data.carpet_area || ""));
       setCarpetAreaUnit(data.carpet_area_unit || "");
+      setLengthOfLand(String(data.property_dimensions_length || ""));
+      setBreadthOfLand(String(data.property_dimensions_breadth || ""));
+      setTypeOfConstruction(data.type_of_construction || "");
       //setSelectedAmenities(data.amenities || []);
       const amenitiesArray =
         typeof data.amenities === "string"
@@ -338,6 +374,8 @@ Make it engaging, attractive, and human-like.
         );
       }
     } catch (error) {
+      console.error("EDIT PAGE ERROR:", error);
+  console.error("EDIT PAGE ERROR RESPONSE:", error?.response);
       console.log(error);
     }
   };
@@ -368,7 +406,7 @@ Make it engaging, attractive, and human-like.
 
   const officeOptions = [
     "Ready to Move Office Space",
-    "Bare Sheell Office Space",
+    "Bare Shell Office Space",
     "Co-working Office Space",
   ];
 
@@ -960,7 +998,7 @@ Make it engaging, attractive, and human-like.
     video_url_type: videoSource,
     virtual_tour_availability: virtualTourLink,
     office_type: officeSubType,
-    washroom: retailWashroom,
+    commercial_washroom: retailWashroom,
     conferenceRoom: conferenceRoom,
     // length_of_land: lengthOfLand,
     // breadthOfLand: breadthOfLand,
@@ -1041,7 +1079,7 @@ Make it engaging, attractive, and human-like.
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      washroom: retailWashroom,
+      commercial_washroom: retailWashroom,
     }));
   }, [retailWashroom]);
   useEffect(() => {
@@ -1141,8 +1179,6 @@ Make it engaging, attractive, and human-like.
             value = "Commercial Buy";
           } else if (value === "Rent" && buildingType === "Residential") {
             value = "Rent";
-          } else if (value === "Rent" && buildingType === "Commercial") {
-            value = "Commercial Lease";
           } else if (value === "Paying Guest") {
             value = "PG/Co-living";
           }
@@ -1156,13 +1192,13 @@ Make it engaging, attractive, and human-like.
         if (key === "pantry_option") {
           value = pantry;
         }
-        if (key === "available_from") {
-  if (formData.isImmediateAvailable === "No") {
-    value = "";
-  } else {
-    value = "Immediately";
-  }
-}
+//         if (key === "available_from") {
+//   if (formData.isImmediateAvailable === "No") {
+//     value = "";
+//   } else {
+//     value = "Immediately";
+//   }
+// }
         form.append(key, value ?? "");
       }
 
@@ -1174,7 +1210,8 @@ Make it engaging, attractive, and human-like.
 
       form.append("carpet_area", carpetArea);
       form.append("carpet_area_unit", carpetAreaUnit);
-
+      form.append("property_dimensions_length", lengthOfLand);
+form.append("property_dimensions_breadth", breadthOfLand);
       form.append("address", address);
       form.append("address_area", addressArea);
       form.append("city_name", city);
@@ -1582,9 +1619,12 @@ Make it engaging, attractive, and human-like.
             propertyType === "Industry")
         )
       ) {
-        if (!formData.furnished_type?.trim()) {
-          errors.furnished_type = "furnished type is required";
-        }
+        if (
+  !formData.furnished_type &&
+  propertyType !== "Storage"
+) {
+  errors.furnished_type = "furnished type is required";
+}
       }
 
       if (
@@ -1595,9 +1635,9 @@ Make it engaging, attractive, and human-like.
           buildingType === "Residential" &&
           propertyType === "Plot")
       ) {
-        if (!formData.plot_no?.trim()) {
-          errors.plot_no = "plot no is required";
-        }
+        // if (!formData.plot_no?.trim()) {
+        //   errors.plot_no = "plot no is required";
+        // }
       }
 
       if (
@@ -1666,9 +1706,12 @@ Make it engaging, attractive, and human-like.
   const toWords = new ToWords({
     localeCode: "en-IN",
   });
+  if (!isLoaded) {
+  return <div>Loading Maps...</div>;
+}
   return (
     <>
-      <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={["places"]}>
+      {/* <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={libraries}> */}
         <div className="flex flex-col items-center min-h-screen bg-white">
           {/* Navbar */}
           <nav className="flex items-center justify-center w-full p-4 text-black bg-gray-200">
@@ -2560,7 +2603,7 @@ Make it engaging, attractive, and human-like.
                               <select
                                 name="washroom"
                                 className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                                value={formData.washroom}
+                                value={formData.commercial_washroom || ""}
                                 onChange={handleInputChange}
                               >
                                 <option value="">Select Washrooms</option>
@@ -3327,71 +3370,36 @@ Make it engaging, attractive, and human-like.
 
                 <div className="p-3 mb-3 border border-gray-300 rounded-xl">
                   <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-3">
-                    {!(
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Plot") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Plot") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        propertyType === "PG") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Office Space") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Retail") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Land") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Office Space in IT/SEZ") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Storage") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Warehouse") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Industry") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Hospitality") ||
-                      (propertyCategory === "Paying Guest" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Apartment") ||
-                      (propertyCategory === "Paying Guest" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Builder Floor") ||
-                      (propertyCategory === "Paying Guest" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Independent House/Villa") ||
-                      (propertyCategory === "Paying Guest" &&
-                        buildingType === "Residential" &&
-                        propertyType === "1RK/Studio Apartment") ||
-                      (propertyCategory === "Paying Guest" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Service Apartment") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Land")
-                    ) && (
+                    {propertyCategory === "Buy" &&
+  !(
+    (buildingType === "Residential" && propertyType === "Plot") ||
+    (buildingType === "Commercial" && propertyType === "Land")
+  ) && (
                         <div>
                           <label className="font-medium text-gray-700">
                             Possession Status
                           </label>
                           <select
                             className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                possession_status: e.target.value,
-                              })
-                            }
+                            value={formData.possession_status || ""}
+                            onChange={(e) => {
+  const value = e.target.value;
+
+  setFormData((prev) => ({
+    ...prev,
+    possession_status: value,
+
+    // Only for Buy
+    ...(propertyCategory === "Buy"
+      ? {
+          available_from:
+            value === "Ready To Move" ? "Immediately" : "",
+          possession_date:
+            value === "Ready To Move" ? "" : prev.possession_date,
+        }
+      : {}),
+  }));
+}}
                           >
                             <option value="">Select Status</option>
                             <option value="Ready To Move">Ready To Move</option>
@@ -3402,7 +3410,193 @@ Make it engaging, attractive, and human-like.
                         </div>
                       )}
 
-                    {(formData.possession_status === "Under Construction" ||
+                      {(
+  (
+    propertyCategory === "Rent" &&
+    !(
+      (buildingType === "Residential" && propertyType === "Plot") ||
+      (buildingType === "Commercial" && propertyType === "Land")
+    )
+  ) ||
+  propertyCategory === "Paying Guest"
+) && (
+                        <div>
+                          <label className="block mb-2 font-medium text-gray-700">
+                            Available From
+                          </label>
+
+                          <select
+                            name="available_from"
+                            value={formData.available_from}
+                           onChange={(e) => {
+  const value = e.target.value;
+
+  setFormData((prev) => ({
+    ...prev,
+    available_from: value,
+    ...(propertyCategory === "Rent" && value === "Immediately"
+      ? {
+          possession_date: "",
+        }
+      : {}),
+  }));
+}}
+                            className="w-full p-3 mt-1 text-gray-800 bg-white border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          >
+                            <option value="">Select availability</option>
+                            <option value="Immediately">Immediate</option>
+                            <option value="Later">Later</option>
+                          </select>
+                        </div>
+                      )
+                    }
+                    {(
+  (propertyCategory === "Buy" &&
+    formData.possession_status === "Under Construction") ||
+  ((propertyCategory === "Rent" ||
+    propertyCategory === "Paying Guest") &&
+    isLaterSelected)
+) && (
+  <div>
+    <label className="font-medium text-gray-700">
+      {propertyCategory === "Rent"
+  ? "Available Date"
+  : "Possession Date"}
+      <span className="text-xl font-bold text-red-500">*</span>
+    </label>
+
+    <input
+      type="date"
+      name="possession_date"
+      className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+        formErrors.possession_date
+          ? "border-red-600"
+          : "border-rose-300"
+      }`}
+      value={formData.possession_date || ""}
+      min={new Date().toISOString().split("T")[0]}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          possession_date: e.target.value,
+        })
+      }
+    />
+
+    {formErrors.possession_date && (
+      <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+        <MdErrorOutline className="text-lg" />
+        {formErrors.possession_date}
+      </p>
+    )}
+  </div>
+)} 
+{(
+  (propertyCategory === "Buy" &&
+    buildingType === "Residential" &&
+    propertyType === "Plot") ||
+
+  (propertyCategory === "Rent" &&
+    buildingType === "Residential" &&
+    propertyType === "Plot") ||
+
+  (propertyCategory === "Buy" &&
+    buildingType === "Commercial" &&
+    propertyType === "Land") ||
+
+  (propertyCategory === "Rent" &&
+    buildingType === "Commercial" &&
+    propertyType === "Land")
+) && (
+  <div>
+    <label className="font-medium text-gray-700">
+      Possession Status
+      <span className="text-xl font-bold text-red-500">*</span>
+    </label>
+
+    <select
+      name="possession_status"
+      value={formData.possession_status || ""}
+      onChange={(e) => {
+        const value = e.target.value;
+
+        setFormData((prev) => ({
+          ...prev,
+          possession_status: value,
+          possession_date:
+            value === "Ready To Move"
+              ? ""
+              : prev.possession_date,
+        }));
+      }}
+      className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+        formErrors.possession_status
+          ? "border-red-600"
+          : "border-gray-300"
+      }`}
+    >
+      <option value="">Select Status</option>
+      <option value="Ready To Move">Ready To Move</option>
+      <option value="Later">Later</option>
+    </select>
+
+    {formErrors.possession_status && (
+      <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+        <MdErrorOutline className="text-lg" />
+        {formErrors.possession_status}
+      </p>
+    )}
+  </div>
+)}
+
+{(
+  (
+    (propertyCategory === "Buy" ||
+      propertyCategory === "Rent") &&
+    buildingType === "Residential" &&
+    propertyType === "Plot"
+  ) ||
+  (
+    (propertyCategory === "Buy" ||
+      propertyCategory === "Rent") &&
+    buildingType === "Commercial" &&
+    propertyType === "Land"
+  )
+) &&
+  formData.possession_status === "Later" && (
+    <div>
+      <label className="font-medium text-gray-700">
+        Available Date
+        <span className="text-xl font-bold text-red-500">*</span>
+      </label>
+
+      <input
+        type="date"
+        name="possession_date"
+        className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+          formErrors.possession_date
+            ? "border-red-600"
+            : "border-rose-300"
+        }`}
+        value={formData.possession_date || ""}
+        min={new Date().toISOString().split("T")[0]}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            possession_date: e.target.value,
+          })
+        }
+      />
+
+      {formErrors.possession_date && (
+        <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+          <MdErrorOutline className="text-lg" />
+          {formErrors.possession_date}
+        </p>
+      )}
+    </div>
+  )}
+                    {/* {(formData.possession_status === "Under Construction" ||
                       formData.available_from === "Later") && (
                         <div>
                           <label className="font-medium text-gray-700">
@@ -3434,7 +3628,7 @@ Make it engaging, attractive, and human-like.
                             </p>
                           )}
                         </div>
-                      )}
+                      )} */}
 
                     {/* {!(
                     (propertyCategory === "Buy" &&
@@ -3708,19 +3902,10 @@ Make it engaging, attractive, and human-like.
                         propertyType === "Storage") ||
                       (propertyCategory === "Buy" &&
                         buildingType === "Commercial" &&
-                        propertyType === "Office Space") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Retail") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
                         propertyType === "Land") ||
                       (propertyCategory === "Buy" &&
                         buildingType === "Commercial" &&
                         propertyType === "Office Space in IT/SEZ") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Storage") ||
                       (propertyCategory === "Buy" &&
                         buildingType === "Commercial" &&
                         propertyType === "Warehouse") ||
@@ -3789,8 +3974,11 @@ Make it engaging, attractive, and human-like.
                     ) && (
                         <div>
                           <label className="font-medium text-gray-700">
-                            Flat on the floor
-                          </label>
+  {buildingType === "Residential" &&
+ propertyType !== "Independent House/Villa"
+  ? "Flat on the Floor"
+  : "Property on the Floor"}
+</label>
                           <input
                             type="text"
                             name="property_floor"
@@ -3857,8 +4045,20 @@ Make it engaging, attractive, and human-like.
                     ) && (
                         <div>
                           <label className="font-medium text-gray-700">
-                            Tower/Block Name
-                          </label>
+  {buildingType === "Commercial" && propertyType === "Office Space"
+    ? "Office / Unit Number"
+    : buildingType === "Commercial" && propertyType === "Storage"
+      ? "Unit Number"
+      : buildingType === "Commercial" &&
+        propertyType === "Retail" &&
+        RetailSubType === "Commercial Shops"
+        ? "Shop/Unit Number"
+        : buildingType === "Commercial" &&
+          propertyType === "Retail" &&
+          RetailSubType === "Commercial Showrooms"
+          ? "Showroom/Unit Number"
+          : "Flat/House No"}
+</label>
                           <input
                             type="text"
                             name="block"
@@ -4545,7 +4745,7 @@ Make it engaging, attractive, and human-like.
                           </select>
                         </div>
                       )}
-                    {propertyCategory === "Buy" &&
+                    {/* {propertyCategory === "Buy" &&
                       (propertyType === "Plot" || propertyType === "Land") && (
                         <div>
                           <label className="font-medium text-gray-700">
@@ -4574,7 +4774,7 @@ Make it engaging, attractive, and human-like.
                             <option value="By 2032">By 2032</option>
                           </select>
                         </div>
-                      )}
+                      )} */}
                     {/* Length */}
                     {/* {propertyType === "Land" && (
   <div>
@@ -4735,8 +4935,90 @@ Make it engaging, attractive, and human-like.
                           )}
                         </div>
                       )}
-
                     {!(
+                      (propertyCategory === "Buy" &&
+                        buildingType === "Residential" &&
+                        propertyType === "Plot") ||
+                      // (propertyCategory === "Buy" &&
+                      //   buildingType === "Residential" &&
+                      //   propertyType === "Farmhouse") ||
+                      // (propertyCategory === "Buy" &&
+                      //   buildingType === "Residential" &&
+                      //   propertyType === "Apartment") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Residential" &&
+                        propertyType === "Plot") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Land") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Industry") ||
+                      (propertyCategory === "Buy" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Land") ||
+                      (propertyCategory === "Buy" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Industry") ||
+                      // (propertyCategory === "Rent" &&
+                      //   buildingType === "Residential" &&
+                      //   propertyType === "Apartment") ||
+                      // (propertyCategory === "Buy" &&
+                      //   buildingType === "Residential" &&
+                      //   propertyType === "Independent House/Villa") ||
+                      // (propertyCategory === "Rent" &&
+                      //   buildingType === "Residential" &&
+                      //   propertyType === "Independent House/Villa") ||
+                      // (propertyCategory === "Buy" &&
+                      //   buildingType === "Residential" &&
+                      //   propertyType === "Independent/Builder Floor") ||
+                      // (propertyCategory === "Rent" &&
+                      //   buildingType === "Residential" &&
+                      //   propertyType === "Independent/Builder Floor") ||
+                      // (propertyCategory === "Buy" &&
+                      //   buildingType === "Residential" &&
+                      //   propertyType === "1RK/Studio Apartment") ||
+                      // (propertyCategory === "Rent" &&
+                      //   buildingType === "Residential" &&
+                      //   propertyType === "1RK/Studio Apartment") ||
+                      // (propertyCategory === "Buy" &&
+                      //   buildingType === "Residential" &&
+                      //   propertyType === "Service Apartment") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Retail") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Storage") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Hospitality") 
+                      // (propertyCategory === "Rent" &&
+                      //   buildingType === "Residential" &&
+                      //   propertyType === "Service Apartment")
+                    ) && (
+                        <div>
+                          <label className="font-medium text-gray-700">
+                            Parking Availability
+                          </label>
+                          <select
+                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                            value={formData.parking_availability}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                parking_availability: e.target.value,
+                              })
+                            }
+                          >
+                            <option value="">Select Option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                          </select>
+                        </div>
+                      )}
+                    {formData.parking_availability === "Yes" &&
+                    !(
                       (propertyCategory === "Buy" &&
                         buildingType === "Residential" &&
                         propertyType === "Plot") ||
@@ -4792,7 +5074,8 @@ Make it engaging, attractive, and human-like.
                         </div>
                       )}
 
-                    {!(
+                    {formData.parking_availability === "Yes" &&
+                    !(
                       (propertyCategory === "Buy" &&
                         buildingType === "Residential" &&
                         propertyType === "Plot") ||
@@ -5662,7 +5945,7 @@ Make it engaging, attractive, and human-like.
                       propertyType === "Hospitality") && (
                         <div>
                           <label className="font-medium text-gray-700">
-                            Investment Option
+                            Property Usage
                           </label>
 
                           <select
@@ -5671,7 +5954,7 @@ Make it engaging, attractive, and human-like.
                             value={formData.investment_options}
                             onChange={handleInputChange}
                           >
-                            <option value="">Select Investment Option</option>
+                            <option value="">Select Property Usage Option</option>
                             <option value="Pre-Leased Spaces">
                               Pre-Leased Spaces
                             </option>
@@ -5690,7 +5973,7 @@ Make it engaging, attractive, and human-like.
                         </div>
                       )}
 
-                    {(propertyType === "Office Space" ||
+                    {/* {(propertyType === "Office Space" ||
                       propertyType === "Retail" ||
                       propertyType === "Storage" ||
                       propertyType === "Industry" ||
@@ -5711,7 +5994,7 @@ Make it engaging, attractive, and human-like.
                             <option value="New Bookings">New Bookings</option>
                           </select>
                         </div>
-                      )}
+                      )} */}
 
                     {!(
                       (propertyCategory === "Buy" &&
@@ -7067,23 +7350,95 @@ Make it engaging, attractive, and human-like.
                                 </span>
                               )}
                           </label>
-                          <select
-                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                            value={formData.available_for}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                available_for: e.target.value,
-                              })
-                            }
-                          >
-                            <option value="">Select Availability</option>
-                            <option value="Girls">Girls</option>
-                            <option value="Boys">Boys</option>
-                            <option value="Family">Family</option>
-                            <option value="Single women">Single women</option>
-                            <option value="Single Men">Single Men</option>
-                          </select>
+                          <Select
+  isMulti
+  name="available_for"
+  options={[
+    { value: "Girls", label: "Girls" },
+    { value: "Boys", label: "Boys" },
+    { value: "Family", label: "Family" },
+    { value: "Single women", label: "Single women" },
+    { value: "Single Men", label: "Single Men" },
+  ]}
+  value={[
+    { value: "Girls", label: "Girls" },
+    { value: "Boys", label: "Boys" },
+    { value: "Family", label: "Family" },
+    { value: "Single women", label: "Single women" },
+    { value: "Single Men", label: "Single Men" },
+  ].filter((opt) =>
+    Array.isArray(formData.available_for)
+      ? formData.available_for.includes(opt.value)
+      : formData.available_for
+          ?.split(",")
+          .map((v) => v.trim())
+          .includes(opt.value)
+  )}
+  onChange={(selectedOptions) =>
+    setFormData((prev) => ({
+      ...prev,
+      available_for: selectedOptions.map((opt) => opt.value),
+    }))
+  }
+  components={{ MultiValue: CustomMultiValue }}
+  placeholder="Select Availability"
+  classNamePrefix="react-select"
+  styles={{
+    control: (base, state) => ({
+      ...base,
+      minHeight: "60px",
+      padding: "6px",
+      borderColor: state.isFocused
+        ? "#a855f7"
+        : "#d1d5db",
+      boxShadow: state.isFocused
+        ? "0 0 0 2px #a855f7"
+        : "none",
+      borderRadius: "0.5rem",
+      fontSize: "16px",
+      display: "flex",
+      flexWrap: "nowrap",
+      overflowX: "auto",
+    }),
+    valueContainer: (base) => ({
+      ...base,
+      padding: "0 6px",
+      display: "flex",
+      flexWrap: "nowrap",
+      gap: "6px",
+      overflowX: "auto",
+      scrollbarWidth: "thin",
+      alignItems: "center",
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: "#1f2937",
+      fontSize: "16px",
+    }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: "#ede9fe",
+      borderRadius: "0.375rem",
+      display: "flex",
+      alignItems: "center",
+      padding: "2px 6px",
+      whiteSpace: "nowrap",
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: "#6b21a8",
+      fontWeight: "500",
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: "#6b21a8",
+      ":hover": {
+        backgroundColor: "#ddd6fe",
+        color: "#4c1d95",
+      },
+    }),
+  }}
+/>
                           {formErrors.available_for && (
                             <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
                               <MdErrorOutline className="text-lg" />
@@ -8879,88 +9234,7 @@ Make it engaging, attractive, and human-like.
                     </div>
                   )} */}
 
-                    {!(
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Plot") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Farmhouse") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Apartment") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Plot") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Land") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Industry") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Land") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Industry") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Apartment") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Independent House/Villa") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Independent House/Villa") ||
-                      // (propertyCategory === "Buy" &&
-                      //   buildingType === "Residential" &&
-                      //   propertyType === "Independent/Builder Floor") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Independent/Builder Floor") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "1RK/Studio Apartment") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        propertyType === "1RK/Studio Apartment") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Service Apartment") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Retail") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Storage") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Hospitality") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Service Apartment")
-                    ) && (
-                        <div>
-                          <label className="font-medium text-gray-700">
-                            Parking Availability
-                          </label>
-                          <select
-                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                            value={formData.parking_availability}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                parking_availability: e.target.value,
-                              })
-                            }
-                          >
-                            <option value="">Select Option</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                          </select>
-                        </div>
-                      )}
+                    
 
                     {/* {!(
                     (propertyCategory === "Buy" &&
@@ -9064,84 +9338,8 @@ Make it engaging, attractive, and human-like.
                     </div>
                   )} */}
 
-                    {
-                      /* Existing Rent Conditions */
-                      ((propertyCategory === "Rent" &&
-                        ((buildingType === "Residential" &&
-                          (propertyType === "PG" ||
-                            propertyType === "Independent House/Villa" ||
-                            propertyType === "Service Apartment")) ||
-                          (buildingType === "Commercial" &&
-                            (propertyType === "Office Space" ||
-                              propertyType === "Storage" ||
-                              propertyType === "Industry" ||
-                              propertyType === "Hospitality")))) ||
-                        /* Plot / Land Conditions */
-                        ((propertyCategory === "Buy" ||
-                          propertyCategory === "Rent") &&
-                          ((buildingType === "Residential" &&
-                            propertyType === "Plot") ||
-                            (buildingType === "Commercial" &&
-                              propertyType === "Land"))) ||
-                        /* Paying Guest + Apartment / Builder Floor */
-                        (propertyCategory === "Paying Guest" &&
-                          (propertyType === "Apartment" ||
-                            propertyType === "Builder Floor" ||
-                            propertyType === "1RK/Studio Apartment" ||
-                            propertyType === "Independent House/Villa" ||
-                            propertyType === "Service Apartment"))) && (
-                        <div>
-                          <label className="block mb-2 font-medium text-gray-700">
-                            Available From
-                          </label>
-
-                          <select
-                            name="available_from"
-                            value={formData.available_from}
-                            onChange={handleInputChange}
-                            className="w-full p-3 mt-1 text-gray-800 bg-white border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                          >
-                            <option value="">Select availability</option>
-                            <option value="Immediately">Immediate</option>
-                            <option value="Later">Later</option>
-                          </select>
-                        </div>
-                      )
-                    }
-                    {(formData.possession_status === "Under Construction" ||
-  isLaterSelected) && (
-  <div>
-    <label className="font-medium text-gray-700">
-      {isLaterSelected ? "Available Date" : "Possession Date"}
-      <span className="text-xl font-bold text-red-500">*</span>
-    </label>
-
-    <input
-      type="date"
-      name="possession_date"
-      className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
-        formErrors.possession_date
-          ? "border-red-600"
-          : "border-rose-300"
-      }`}
-      value={formData.possession_date || ""}
-      min={new Date().toISOString().split("T")[0]}
-      onChange={(e) =>
-        setFormData({
-          ...formData,
-          possession_date: e.target.value,
-        })
-      }
-    />
-
-    {formErrors.possession_date && (
-      <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-        <MdErrorOutline className="text-lg" />
-        {formErrors.possession_date}
-      </p>
-    )}
-  </div>
-)}
+                    
+                  
 
                     {propertyCategory === "Rent" &&
                       buildingType === "Residential" &&
@@ -9619,7 +9817,7 @@ Make it engaging, attractive, and human-like.
             </div>
           </div>
         </div>
-      </LoadScript>
+      {/* </LoadScript> */}
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

@@ -102,21 +102,6 @@ export default function SearchDashboard() {
   const userLng = locationState?.lng || null;
   const [error, setError] = useState(null);
   const { searchQuery = "", type = "" } = location.state || {};
-  const getHomeSearchTitle = () => {
-  if (isNearMe && type) {
-    return `${type} Properties Near Me`;
-  }
-
-  if (type && searchCity) {
-    return `${type} Properties in ${searchCity}`;
-  }
-
-  if (type) {
-    return `${type} Properties`;
-  }
-
-  return "";
-};
   useEffect(() => {
     if (location.state) {
       setSearch(location.state.searchQuery || "");
@@ -124,6 +109,12 @@ export default function SearchDashboard() {
   }, [location.state]);
   const [search, setSearch] = useState(searchQuery);
   const { searchCity, setSearchCity } = useCity();
+  const homeSearchTitle =
+  type && searchCity
+    ? `${type} Properties in ${searchCity}`
+    : type
+      ? `${type} Properties`
+      : "";
   console.log("COMMON SEARCH DATA:", {
   searchCity,
   searchQuery,
@@ -1122,11 +1113,19 @@ useEffect(() => {
   const createCustomIcon = (property, isActive = false) => {
     // Decide what to display
     let displayValue = "";
-    if (property.property_category_type === "Buy" && property.property_price) {
-      displayValue = formatPrice(property.property_price);
-    } else if (property.property_category_type === "Rent" && property.rent) {
-      displayValue = formatPrice(property.rent);
-    }
+    if (
+  (property.property_category_type === "Buy" ||
+    property.property_category_type === "Commercial Buy") &&
+  property.property_price
+) {
+  displayValue = formatPrice(property.property_price);
+} else if (
+  (property.property_category_type === "Rent" ||
+    property.property_category_type === "Commercial Lease") &&
+  property.rent
+) {
+  displayValue = formatPrice(property.rent);
+}
 
     return L.divIcon({
       className: `custom-marker ${isActive ? "active" : ""}`,
@@ -3059,7 +3058,7 @@ useEffect(() => {
                   <span className="block pr-8 truncate text-left">
                     {investmentOptions.length > 0
                       ? investmentOptions.join(", ")
-                      : "Investment Options"}
+                      : "Property Usage"}
                   </span>
                   <RiArrowDropDownLine className="absolute text-2xl -translate-y-1/2 pointer-events-none right-3 top-1/2" />
                 </button>
@@ -3554,7 +3553,7 @@ useEffect(() => {
   <h2 className="text-2xl font-bold text-gray-900">
     <span className="text-[#8B1E3F]">{totalResults}</span> Results
 
-    {(searchQuery || type || filtersApplied) && (
+    {(searchQuery || filtersApplied) && (
   <>
     <span className="mx-3 text-gray-400">|</span>
     <span>{filtersApplied ? getResultsTitle({
@@ -3565,10 +3564,18 @@ useEffect(() => {
   filtersApplied,
   buildingType: type,
   isNearMe,
-}) : getHomeSearchTitle()}</span>
+}) : searchQuery}</span>
   </>
 )}
+{!filtersApplied && homeSearchTitle && (
+  <span className="text-2xl font-bold text-gray-900">
+    <span className="mx-3 text-gray-400">|</span>
+    {homeSearchTitle}
+  </span>
+)}
   </h2>
+  
+
 
   <div className="flex gap-4">
     <button
@@ -3860,7 +3867,7 @@ useEffect(() => {
                               className="flex-shrink-0 m-0 text-[10px] xs:text-xs sm:text-sm font-medium leading-5 sm:leading-6 text-black whitespace-nowrap"
                               title={property.furnished_type}
                             >
-                              {property.furnished_type || "Un-Furnished"}
+                              {property.furnished_type}
                             </span>
                           </div>
 
