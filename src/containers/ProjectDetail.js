@@ -993,7 +993,7 @@ const ProjectDetail = () => {
         {project?.rera_id && (
   <div className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-white border border-green-200 rounded-md shadow-sm">
     <span className="text-[10px] font-semibold uppercase text-green-700">
-      RERA ID
+      RERA NUMBER
     </span>
     <span className="text-sm font-bold text-gray-800">
       {project.rera_id}

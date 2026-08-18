@@ -22,7 +22,7 @@ const OffersForYou = ({ data }) => {
   // Slider settings
   const settings = {
     infinite: true,
-    slidesToShow: 1,
+    slidesToShow: 3,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
@@ -34,7 +34,7 @@ const OffersForYou = ({ data }) => {
       {
         breakpoint: 1024,
         settings: {
-          slidesToShow: 1,
+          slidesToShow: 2,
           slidesToScroll: 1,
         },
       },
@@ -49,6 +49,51 @@ const OffersForYou = ({ data }) => {
   };
 
   return (
+    <>
+    <style>
+  {`
+    .offers-slider .slick-slide {
+      margin: 0 !important;
+      padding: 0 12px 0 0 !important;
+    }
+
+    .offers-slider .slick-slide > div {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .offers-slider .slick-list {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .offers-slider .slick-track {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .offers-slider .slick-slide a {
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .offers-slider img {
+      display: block !important;
+      width: 100% !important;
+    }
+
+    /* Keep all offer slides the same height */
+    .offers-slider .slick-slide > div {
+      height: 100% !important;
+    }
+
+    .offers-slider .slick-slide a {
+      height: 100% !important;
+    }
+  `}
+</style>
+
     <div className="bg-white py-4 ml-4 mr-4 sm:ml-10 sm:mr-10 rounded-2xl">
       <div className="flex flex-col sm:flex-row items-center justify-between px-2">
         {/* Title and Subtitle */}
@@ -93,17 +138,22 @@ const OffersForYou = ({ data }) => {
         </div>
       </div>
 
-      <div className="pt-6 px-0">
-        <Slider ref={sliderRef} {...settings}>
+      <div className="pt-6 px-0 overflow-hidden">
+        {/* <Slider ref={sliderRef} {...settings}> */}
+        <Slider
+  ref={sliderRef}
+  {...settings}
+  className="offers-slider"
+>
           {offers.map((offer) => (
             <Link
-              to={{
-                pathname: `/offerdetail/${offer?.property_id || "#"}`,
-                state: { offer },
-              }}
-              key={offer?._id}
-              className="w-full no-underline hover:no-underline"
-            >
+  to={{
+    pathname: `/offerdetail/${offer?.property_id || "#"}`,
+    state: { offer },
+  }}
+  key={offer?._id}
+  className="w-full no-underline hover:no-underline"
+>
               <div className="relative w-full h-64 sm:h-96">
                 <img
                   src={
@@ -118,10 +168,10 @@ const OffersForYou = ({ data }) => {
                   {offer?.offer_name || "Hot Deals, Discount & Offers"}
                 </span>
               </div>
-              <div className="w-full bg-white p-4 text-gray-800 rounded-b-2xl">
-                <h3 className="text-xl font-semibold no-underline hover:no-underline">
-                  {offer?.offer_name || "Hot Deals, Discount & Offers"}
-                </h3>
+              <div className="w-full bg-[#f5f8fc] p-4 text-gray-800 rounded-b-2xl">
+  <h3 className="text-xl font-semibold no-underline hover:no-underline">
+    {offer?.offer_name || "Hot Deals, Discount & Offers"}
+  </h3>
                 {/* <p className="text-md no-underline hover:no-underline">
                   {offer?.offer_description ||
                     "Offers on exclusive properties, Warehouses, Villas, and Independent Houses."}
@@ -132,6 +182,7 @@ const OffersForYou = ({ data }) => {
         </Slider>
       </div>
     </div>
+    </>
   );
 };
 

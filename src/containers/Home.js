@@ -341,7 +341,7 @@ console.log("Spotlight:", homeData.spotlight);
         <Search />
         <FeaturesSection />
 
-        <div className="w-full mx-auto px-2 space-y-6 md:max-w-[97%]">
+        <div className="w-full mx-auto px-2 md:max-w-[97%]">
           <Cities data={homeData?.cities || []} />
 
 

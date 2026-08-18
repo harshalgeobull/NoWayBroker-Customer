@@ -3598,7 +3598,7 @@ Make it engaging, attractive, and human-like.
                         type="text"
                         value={reraId}
                         onChange={(e) => setReraId(e.target.value)}
-                        placeholder="Enter RERA ID"
+                        placeholder="Enter RERA Registration Number"
                         className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                       />
                     </div>

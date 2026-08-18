@@ -650,7 +650,7 @@ const Contact = ({ setAlert }) => {
 
       <div className="container max-w-6xl p-8 mx-auto bg-white rounded-lg shadow-lg">
         <h2 className="mb-3 text-3xl font-bold text-center text-black-500">
-          Rate Us
+          Rate Us & Share Your Feedback
         </h2>
 
         {alert && (
@@ -803,7 +803,7 @@ const Contact = ({ setAlert }) => {
                 <div className="relative w-full mt-1">
                   <textarea
                     name="feedback_msg"
-                    placeholder="Your feedback here..."
+                    placeholder="Your feedback helps us improve NowayBroker and deliver a better property-search experience..."
                     value={feedback_msg}
                     maxLength={555}
                     onChange={(e) => onChange(e)}
