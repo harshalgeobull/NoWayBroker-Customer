@@ -253,21 +253,20 @@ const MyProperties = () => {
 
 
   const handleMaxChange = (e) => {
-    let value = e.target.value;
+  let value = e.target.value;
 
-    if (value === "1000001") {
-      value = "";
+  if (value === "1000001") {
+    value = "";
+  }
 
-      setMaxPrice(value);
-    };
+  setMaxPrice(value);
 
-    if (minPrice && value < minPrice) {
-      setPriceError("Max price should not be less than Min price");
-    } else {
-      setPriceError("");
-    }
-  };
-
+  if (minPrice && value && Number(value) < Number(minPrice)) {
+    setPriceError("Max price should not be less than Min price");
+  } else {
+    setPriceError("");
+  }
+};
   const handleConfirmDelete = async (property_id) => {
     setIsModalOpen(false);
 
