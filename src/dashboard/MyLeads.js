@@ -13,6 +13,7 @@ const MyLeads = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("latest");
   const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("property");
   const user_id = sessionStorage.getItem("accessToken");
   const itemsPerPage = 10;
@@ -66,6 +67,7 @@ const MyLeads = () => {
 
   useEffect(() => {
     const fetchLeads = async () => {
+      setLoading(true);
       const formData = new FormData();
       formData.append("user_id", user_id);
       formData.append("page", currentPage);
@@ -135,7 +137,9 @@ const MyLeads = () => {
         }
       } catch (error) {
         console.error("Error fetching leads:", error);
-      }
+      }finally {
+      setLoading(false);
+    }
     };
 
     fetchLeads();
@@ -227,13 +231,17 @@ const MyLeads = () => {
           </div>
         </div>
 
-        {leads.length === 0 ? (
-          <p className="text-center text-gray-500 mt-10">
-            {search.trim() !== ""
-              ? "No results found for your search."
-              : "No Data Found"}
-          </p>
-        ) : (
+        {loading ? (
+  <div className="flex items-center justify-center py-20">
+    <div className="w-10 h-10 border-4 border-gray-300 rounded-full border-t-[#8B1E3F] animate-spin"></div>
+  </div>
+) : leads.length === 0 ? (
+  <p className="text-center text-gray-500 mt-10">
+    {search.trim() !== ""
+      ? "No results found for your search."
+      : "No Data Found"}
+  </p>
+) : (
           leads.map((lead) => (
             <div key={lead.id} className="bg-white rounded-lg p-3 mb-4 border">
               {/* <div className="flex justify-between items-center">

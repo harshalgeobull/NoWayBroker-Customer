@@ -14,6 +14,7 @@ import { useHistory } from "react-router-dom";
 const MyVirtualTour = () => {
   const [activeTab, setActiveTab] = useState("sent");
   const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const user_id = sessionStorage.getItem("accessToken");
   const [activeFilter, setActiveFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,6 +97,8 @@ const MyVirtualTour = () => {
   };
 
   const fetchAppointments = async () => {
+    setLoading(true);
+
     const formData = new FormData();
 
     // Conditional formData field based on activeTab
@@ -189,12 +192,14 @@ const MyVirtualTour = () => {
       setAppointments([]);
       setTotalPages(0);
       console.error("Error fetching filtered properties:", error);
+    }finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchAppointments();
-  }, [currentPage, user_id, activeFilter]);
+  }, [currentPage, user_id, activeTab]);
 
   // // Sent Invitation API
   const handleCount = async () => {
@@ -361,7 +366,16 @@ const MyVirtualTour = () => {
             </div>
 
             <div className="mt-6 space-y-4">
-              {filteredSentAppointments.map((appointment) => (
+  {loading ? (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-10 h-10 border-4 border-gray-300 rounded-full border-t-[#8B1E3F] animate-spin"></div>
+    </div>
+  ) : filteredSentAppointments.length === 0 ? (
+    <p className="mt-10 text-center text-gray-500">
+      No Data Found
+    </p>
+  ) : (
+    filteredSentAppointments.map((appointment) => (
                 <div
                   key={appointment.id}
                   className={`border-2 ${
@@ -655,7 +669,8 @@ const MyVirtualTour = () => {
                     />
                   )} */}
                 </div>
-              ))}
+              ))
+              )}
             </div>
           </>
         )}
@@ -684,7 +699,16 @@ const MyVirtualTour = () => {
 
             {/* Appointment Cards */}
             <div className="mt-6 space-y-4">
-              {filteredReceivedAppointments.map((appointment) => (
+  {loading ? (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-10 h-10 border-4 border-gray-300 rounded-full border-t-[#8B1E3F] animate-spin"></div>
+    </div>
+  ) : filteredReceivedAppointments.length === 0 ? (
+    <p className="mt-10 text-center text-gray-500">
+      No Data Found
+    </p>
+  ) : (
+    filteredReceivedAppointments.map((appointment) => (
                 <div
                   key={appointment.id}
                   className={`border-2 ${
@@ -981,7 +1005,8 @@ const MyVirtualTour = () => {
                     )}
                   </div>
                 </div>
-              ))}
+    ))
+              )}
             </div>
           </>
         )}

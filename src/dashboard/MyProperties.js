@@ -12,6 +12,7 @@ import { IoMdClose } from "react-icons/io";
 const MyProperties = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
   const userId = sessionStorage.getItem("accessToken");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
@@ -133,6 +134,7 @@ const MyProperties = () => {
   }, [userId]);
 
   const fetchProperties = async () => {
+    setLoading(true);
     const formData = new FormData();
     formData.append("page", currentPage);
     formData.append("page_size", itemsPerPage);
@@ -228,7 +230,9 @@ const MyProperties = () => {
       setProperties([]);
       setTotalPages(0);
       console.error("Failed to fetch property enquiries", err);
-    }
+    }finally {
+    setLoading(false);
+  }
   };
 
   useEffect(() => {
@@ -1410,7 +1414,11 @@ return (
 
       {/* Property Listings */}
 <div className="mt-6 space-y-4">
-  {!properties || properties.length === 0 ? (
+  {loading ? (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-10 h-10 border-4 border-gray-300 rounded-full border-t-[#8B1E3F] animate-spin"></div>
+    </div>
+  ) : !properties || properties.length === 0 ? (
     <p className="mt-10 text-lg text-center text-gray-500">
       No properties found.
     </p>

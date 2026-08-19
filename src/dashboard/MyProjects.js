@@ -13,6 +13,7 @@ import { FaRupeeSign } from "react-icons/fa";
 const MyProjects = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 10;
   const [city, setCity] = useState("");
@@ -234,6 +235,7 @@ const MyProjects = () => {
   };
 
   const fetchProjects = async () => {
+    setLoading(true);
     const formData = new FormData();
     formData.append("user_id", userId);
     formData.append("page", currentPage);
@@ -285,7 +287,9 @@ const MyProjects = () => {
       }
     } catch (err) {
       console.error("Failed to fetch projects", err);
-    }
+    }finally {
+    setLoading(false);
+  }
   };
 
   useEffect(() => {
@@ -870,12 +874,16 @@ const MyProjects = () => {
 
       {/* Property Listings */}
       <div className="mt-5 space-y-3 lg:mt-6 lg:space-y-4">
-        {!currentItems || currentItems.length === 0 ? (
-          <p className="mt-10 text-base text-center text-gray-500 lg:text-lg">
-            No project found.
-          </p>
-        ) : (
-          currentItems.map((project) => (
+  {loading ? (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-10 h-10 border-4 border-gray-300 rounded-full border-t-[#8B1E3F] animate-spin"></div>
+    </div>
+  ) : !currentItems || currentItems.length === 0 ? (
+    <p className="mt-10 text-base text-center text-gray-500 lg:text-lg">
+      No project found.
+    </p>
+  ) : (
+    currentItems.map((project) => (
             <div
               key={project.id}
               className={`relative bg-white shadow-sm rounded-lg p-3 sm:p-4
