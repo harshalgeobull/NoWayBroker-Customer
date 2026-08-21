@@ -176,65 +176,99 @@ const AddNewProperty = () => {
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [isLaterSelected, setIsLaterSelected] = useState(false);
 
-  const buildPrompt = () => {
-    return `
-Write a professional real estate property description.
-
-STRICT INSTRUCTIONS:
-- The description MUST be between 600 and 700 characters ONLY
-- Do NOT exceed 700 characters
-- Do NOT go below 600 characters
-- Write everything in ONE paragraph
-- Do NOT use bullet points or line breaks
-
-Property Details:
-- Property Name: ${propertyName?.trim() || ""}
-- Type: ${propertyType || ""}
-- Category: ${propertyCategory === "Buy" ? "Buy" : propertyCategory === "Rent" ? "Rent" : "PG"}
-- Price: ₹${formData.property_price || formData.rent || ""}
-- City: ${city?.trim() || ""}
-- Area: ${addressArea || ""}
-- BHK: ${formData.bhk_type || ""}
-- Bathrooms: ${formData.bathroom || ""}
-- Built-up Area: ${builtUpArea || ""} ${builtUpAreaUnit || ""}
-- Furnishing: ${formData.furnished_type || ""}
-- Floor: ${formData.property_floor || ""}
-- Total Floors: ${formData.total_floor || ""}
-- Age: ${formData.age_of_property || ""}
-- Facing: ${formData.facing || ""}
-- Balcony: ${formData.balcony || ""}
-
-Make it engaging, attractive, and human-like.
-`;
-  };
+  
 
   const generateDescription = async () => {
-    try {
-      setIsGeneratingDescription(true);
+  try {
+    setIsGeneratingDescription(true);
 
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "user",
-              content: buildPrompt(),
-            },
-          ],
-          temperature: 0.7,
-          max_tokens: 200,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/cust_api/generate-property-description/`,
+      {
+        form_type: "property",
 
-      const description = response?.data?.choices?.[0]?.message?.content || "";
+        property_name: formData?.property_name?.trim() || "",
+        building_type: formData.building_type || "",
+        property_type: propertyType || "",
+        user_type: formData.user_type || "",
+        property_category_type: propertyCategory || "",
 
+        property_price: formData.property_price || "",
+        rent: formData.rent || "",
+
+        address: formData.address || "",
+        address_area: addressArea || "",
+        city_name: city?.trim() || "",
+        state: formData.state || "",
+        country: formData.country || "",
+
+        bhk_type: formData.bhk_type || "",
+        bathroom: formData.bathroom || "",
+
+        area: builtUpArea || "",
+        area_in: builtUpAreaUnit || "",
+
+        carpet_area: carpetArea || "",
+        carpet_area_unit: carpetAreaUnit || "",
+
+        furnished_type: formData.furnished_type || "",
+
+        property_floor: formData.property_floor || "",
+        total_floor: formData.total_floor || "",
+
+        age_of_property: formData.age_of_property || "",
+        facing: formData.facing || "",
+        balcony: formData.balcony || "",
+
+        covered_parking: formData.covered_parking || "",
+        uncovered_parking: formData.uncovered_parking || "",
+        parking_availability: formData.parking_availability || "",
+        parking_types: formData.parking_types || "",
+
+        lift_availability: formData.lift_availability || "",
+        power_backup: formData.power_backup || "",
+
+        possession_status: formData.possession_status || "",
+        additional_rooms: formData.additional_rooms || "",
+
+        developer: formData.developer || "",
+        amenities: formData.amenities || "",
+
+        // Commercial
+        office_type: formData.office_type || "",
+        office_space_type: formData.office_space_type || "",
+        land_type: formData.land_type || "",
+        conferenceRoom: formData.conferenceRoom || "",
+        washroom_Check: formData.washroom_Check || "",
+        reception_area: formData.reception_area || "",
+        pantry: formData.pantry || "",
+        cabines: formData.cabines || "",
+        meeting_rooms: formData.meeting_rooms || "",
+        central_AC: formData.central_AC || "",
+
+        // PG / Co-living
+        room_type: formData.room_type || "",
+        food_available: formData.food_available || "",
+        total_beds: formData.total_beds || "",
+        available_beds: formData.available_beds || "",
+        suited_for: formData.suited_for || "",
+        available_for: formData.available_for || "",
+
+        // Additional
+        ownership: formData.ownership || "",
+        price_onwards: formData.price_onwards || "",
+        price_negotiable: formData.price_negotiable || "",
+        all_inclusive_price: formData.all_inclusive_price || "",
+        tax_and_goverment_charges:
+          formData.tax_and_goverment_charges || "",
+        electricity_and_water_charges:
+          formData.electricity_and_water_charges || "",
+      }
+    );
+
+    const description = response?.data?.description || "";
+
+    if (response?.data?.status === 1) {
       setPropertyDescription(description);
 
       setFormData((prev) => ({
@@ -243,13 +277,18 @@ Make it engaging, attractive, and human-like.
       }));
 
       toast.success("Description generated successfully");
-    } catch (error) {
-      console.error("Generate Description Error:", error);
-      toast.error("Failed to generate description");
-    } finally {
-      setIsGeneratingDescription(false);
+    } else {
+      toast.error(
+        response?.data?.message || "Failed to generate description"
+      );
     }
-  };
+  } catch (error) {
+    console.error("Generate Description Error:", error);
+    toast.error("Failed to generate description");
+  } finally {
+    setIsGeneratingDescription(false);
+  }
+};
 
   useEffect(() => {
     const countries = Country.getAllCountries();
@@ -1581,7 +1620,9 @@ if (
   errors.available_from = "Available From is required";
 }
 
-      if (formData.possession_status === "Under Construction") {
+      if (formData.possession_status === "Under Construction" ||
+        formData.possession_status === "Expected Possession"
+      ) {
         if (!formData.possession_date?.trim()) {
           errors.possession_date = "Possession Date is required";
         }
@@ -3328,10 +3369,11 @@ if (
 }}
                       >
                         <option value="">Select Status</option>
+                        <option value="Expected Possession">Expected Possession</option>
                         <option value="Ready To Move">Ready To Move</option>
-                        <option value="Under Construction">
-                          Under Construction
-                        </option>
+                        <option value="Under Construction">Under Construction</option>
+                        <option value="New Launch">New Launch</option>
+                        <option value="Resale">Resale</option>
                       </select>
                       {formErrors.possession_status && (
   <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -3392,6 +3434,7 @@ if (
                   }
 
                   {(formData.possession_status === "Under Construction" ||
+                    formData.possession_status === "Expected Possession" ||
                     isLaterSelected) && (
                       <div>
                         <label className="font-medium text-gray-700">
@@ -3470,6 +3513,7 @@ if (
       <option value="">Select Status</option>
       <option value="Ready To Move">Ready To Move</option>
       <option value="Later">Later</option>
+      <option value="New Launch">New Launch</option>
     </select>
 
     {formErrors.possession_status && (
@@ -4093,12 +4137,12 @@ if (
       : buildingType === "Commercial" &&
         propertyType === "Retail" &&
         RetailSubType === "Commercial Shops"
-        ? "Shop/Unit Number"
+        ? "Shop / Unit Number"
         : buildingType === "Commercial" &&
           propertyType === "Retail" &&
           RetailSubType === "Commercial Showrooms"
-          ? "Showroom/Unit Number"
-          : "Flat/House No"}
+          ? "Showroom / Unit Number"
+          : "Flat / House No"}
 </label>
                         <input
                           type="text"
@@ -7198,16 +7242,22 @@ fice Space") ||
   options={[
     { value: "Girls", label: "Girls" },
     { value: "Boys", label: "Boys" },
+    { value: "Working", label: "Working" },
     { value: "Family", label: "Family" },
     { value: "Single women", label: "Single women" },
     { value: "Single Men", label: "Single Men" },
+    { value: "Company Guest House", label: "Company Guest House" },
+    { value: "Anyone / No Preference", label: "Anyone / No Preference"},
   ]}
   value={[
     { value: "Girls", label: "Girls" },
     { value: "Boys", label: "Boys" },
+    { value: "Working", label: "Working" },
     { value: "Family", label: "Family" },
     { value: "Single women", label: "Single women" },
     { value: "Single Men", label: "Single Men" },
+    { value: "Company Guest House", label: "Company Guest House" },
+    { value: "Anyone / No Preference", label: "Anyone / No Preference" },
   ].filter((opt) =>
     Array.isArray(formData.available_for)
       ? formData.available_for.includes(opt.value)

@@ -10,7 +10,7 @@ import {
   FaMapMarkerAlt,
   FaHome,
 } from "react-icons/fa";
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiMic } from "react-icons/fi";
 import { MdOutlineAddLocation, MdMyLocation } from "react-icons/md";
 import { RiHomeLine } from "react-icons/ri";
 // import { useContext } from "react";
@@ -34,9 +34,12 @@ const Search = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyAt8bj4UACvakZfiSy-0c1o_ivfplm7jEU";
   const [type, setType] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const [voiceText, setVoiceText] = useState("");
   const [error, setError] = useState("");
   const inputRef = useRef(null);
-
+  const recognitionRef = useRef(null);
+  const searchContainerRef = useRef(null);
   // ==========================================================
   // Shared nav-tab hover indicator.
   // No tab is "active" by default — the underline only appears
@@ -49,7 +52,66 @@ const Search = () => {
     width: 0,
     opacity: 0,
   });
+  const handleMicClick = () => {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 
+  if (!SpeechRecognition) {
+    alert("Voice search is not supported in this browser.");
+    return;
+  }
+
+  if (isListening) {
+    recognitionRef.current?.stop();
+    return;
+  }
+
+  setVoiceText("");
+  
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-IN";
+  recognition.interimResults = true;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    setIsListening(true);
+  };
+
+  recognition.onresult = (event) => {
+  let finalTranscript = "";
+  let interimTranscript = "";
+
+  for (let i = 0; i < event.results.length; i++) {
+    const transcript = event.results[i][0].transcript;
+
+    if (event.results[i].isFinal) {
+      finalTranscript += transcript;
+    } else {
+      interimTranscript += transcript;
+    }
+  }
+
+  const currentText = finalTranscript + interimTranscript;
+
+  setVoiceText(currentText);
+  setSearchQuery(currentText);
+};
+
+  recognition.onerror = (event) => {
+    console.error("Speech recognition error:", event.error);
+    setIsListening(false);
+  };
+
+  recognition.onend = () => {
+    setIsListening(false);
+  };
+
+  recognitionRef.current = recognition;
+
+  recognition.start();
+};
   const moveIndicator = (key) => {
     const el = tabRefs.current[key];
     if (el) {
@@ -85,7 +147,22 @@ const Search = () => {
     return () => clearInterval(intervalId); // cleanup on unmount
   }, []);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      searchContainerRef.current &&
+      !searchContainerRef.current.contains(event.target)
+    ) {
+      setShowSuggestions(false);
+    }
+  };
 
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
   const handleNearMeSearch = async (e) => {
     e.preventDefault();
 
@@ -266,12 +343,43 @@ const Search = () => {
   // }, []);
   console.log(suggestions);
   return (
+    <>
+  {isListening && (
+  <div
+    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30"
+    onClick={() => {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    }}
+  >
+    <div
+      className="w-[400px] rounded-2xl bg-white p-6 shadow-2xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex flex-col items-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-rose-50">
+          <FiMic size={28} className="my-text" />
+        </div>
+
+        <p className="mt-4 text-lg font-semibold text-gray-800">
+          Listening...
+        </p>
+        <div className="mt-4 min-h-[50px] w-full rounded-lg bg-gray-50 px-4 py-3 text-center">
+  <p className="text-gray-700">
+    {voiceText || "Speak now..."}
+  </p>
+</div>
+      </div>
+    </div>
+  </div>
+)}
     <div className="relative flex items-center justify-center m-3 bg-white min-h-[200px] py-9 sm:py-18">
       <div
-        className="absolute top-0 bottom-0 left-0 right-0 w-full h-full bg-center bg-cover rounded-3xl sm:rounded-3xl"
+        className="absolute inset-0 w-full h-full bg-center bg-cover rounded-3xl sm:rounded-3xl"
         style={{
-          backgroundImage: "url('/image/modern.jpg')",
-        }}
+  backgroundImage: "url('/image/modern.jpg')",
+  transform: "translateZ(0)",
+}}
       ></div>
 
       <div className="relative w-full max-w-6xl p-2 bg-transparent rounded-3xl mx-auto sm:p-6">
@@ -353,7 +461,10 @@ const Search = () => {
             <div className="flex flex-col md:flex-row items-stretch md:items-center w-full flex-1 gap-2 md:gap-0 md:divide-x md:divide-gray-100">
 
               {/* Search Field */}
-              <div className="relative flex items-center w-full px-2 py-2 md:py-1 md:pr-1">
+              <div
+  ref={searchContainerRef}
+  className="relative flex items-center flex-1 min-w-0 px-2 py-2 md:py-1 md:pr-1"
+>
                 <button
                   type="button"
                   className="p-1 my-text rounded-full focus:outline-none shrink-0"
@@ -388,11 +499,11 @@ const Search = () => {
               </div>
 
               {/* City Dropdown */}
-              <div className="flex items-center w-full md:w-[230px] lg:w-[240px] px-2 py-2 md:px-3">
+              <div className="flex items-center shrink-0 md:w-[140px] lg:w-[150px] px-2 py-2 md:px-3">
                 <MdOutlineAddLocation className="my-text shrink-0" size={20} />
                 <select
                   id="city"
-                  className="w-full min-w-0 ml-1 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer"
+                  className="w-full min-w-max ml-1 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer whitespace-nowrap"
                   value={searchCity}
                   onChange={handleCityChange}
                 >
@@ -440,12 +551,12 @@ const Search = () => {
 
 
               {/* Type Dropdown */}
-              <div className="flex items-center w-full md:w-[243px] lg:w-[253px] px-2 py-2 md:px-3">
+              <div className="flex items-center shrink-0 md:w-[150px] lg:w-[160px] px-2 py-2 md:px-3">
                 <RiHomeLine className="my-text shrink-0" size={18} />
 
                 <select
                   id="type"
-                  className="w-full min-w-0 ml-1 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer"
+                  className="w-full min-w-max ml-1 text-sm sm:text-base text-gray-600 bg-transparent outline-none border-none cursor-pointer whitespace-nowrap"
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                 >
@@ -474,6 +585,26 @@ const Search = () => {
                   <MdMyLocation size={16} className="mr-1 my-text" /> Search <span className="ml-1 font-bold">Near Me</span>
                 </div>
               </div>
+              {/* Voice Search Button */}
+<div className="flex items-center justify-center p-2 relative group shrink-0">
+  <button
+  type="button"
+  onClick={handleMicClick}
+  className={`flex items-center justify-center p-2 transition rounded-full focus:outline-none ${
+    isListening
+      ? "bg-red-100 text-red-600"
+      : "bg-rose-50 my-text hover:bg-rose-100"
+  }`}
+>
+  <FiMic size={20} />
+</button>
+
+  {/* Tooltip */}
+  <div className="absolute right-0 items-center hidden px-3 py-2 text-sm text-[#0f172a] whitespace-nowrap bg-white border border-gray-100 rounded shadow-lg top-12 group-hover:flex z-50">
+    <FiMic size={16} className="mr-1 my-text" />
+    Voice <span className="ml-1 font-bold">Search</span>
+  </div>
+</div>
             </div>
 
             {/* Subtle Divider Line (Helps match the clean look of your target image) */}
@@ -527,7 +658,7 @@ const Search = () => {
       </div>
     </div>
 
-
+    </>
   );
 };
 

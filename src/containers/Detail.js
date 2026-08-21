@@ -949,7 +949,23 @@ const Detail = ({ propertyData }) => {
       ]
     : []
 ),
-
+// Expected Possession - show possession date
+...(
+  (
+    propertyDetails?.property_category_type === "Buy" ||
+    propertyDetails?.property_category_type === "Commercial Buy"
+  ) &&
+  propertyDetails?.possession_status === "Expected Possession"
+    ? [
+        [
+          "Possession Date",
+          propertyDetails?.possession_date
+            ? formatDateToDDMMYYYY(propertyDetails.possession_date)
+            : null,
+        ],
+      ]
+    : []
+),
 
     ["Area Type", propertyDetails?.area_type || null],
     ["Built up Area", propertyDetails?.area || null],
@@ -1152,6 +1168,22 @@ if (propertyDetails?.possession_status === "Later") {
   addStatusItem({
     icon: <HiOutlineCalendar />,
     title: "Available Date",
+    value: propertyDetails?.possession_date
+      ? formatDateToDDMMYYYY(propertyDetails.possession_date)
+      : null,
+    bgColor: "bg-blue-50",
+    iconColor: "text-blue-600",
+  });
+}
+// Expected Possession - show possession date
+if (
+  (propertyDetails?.property_category_type === "Buy" ||
+    propertyDetails?.property_category_type === "Commercial Buy") &&
+  propertyDetails?.possession_status === "Expected Possession"
+) {
+  addStatusItem({
+    icon: <HiOutlineCalendar />,
+    title: "Possession Date",
     value: propertyDetails?.possession_date
       ? formatDateToDDMMYYYY(propertyDetails.possession_date)
       : null,

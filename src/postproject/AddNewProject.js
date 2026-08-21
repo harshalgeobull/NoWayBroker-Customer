@@ -176,72 +176,67 @@ const AddNewProject = () => {
   };
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
-  const buildPrompt = () => {
-    return `
-Write a professional real estate project description.
-
-STRICT INSTRUCTIONS:
-- The description MUST be between 600 and 700 characters ONLY
-- Do NOT exceed 700 characters
-- Do NOT go below 600 characters
-- Write everything in ONE paragraph
-- Do NOT use bullet points or line breaks
-
-Project Details:
-- Project Name: ${projectName?.trim() || ""}
-- Type: ${propertyType || ""}
-- Building Type: ${buildingType || ""}
-- City: ${city?.trim() || ""}
-- Area: ${addressArea || ""}
-- Average Price: ₹${averagePrice || ""}
-- Configurations: ${configurations || ""}
-- Construction Status: ${constructionStatus || ""}
-- Total Project Size: ${totalProjectSize || ""}
-- Launch Date: ${launchDate || ""}
-- Possession Start: ${possessionStart || ""}
-
-Make it engaging, attractive, and human-like.
-`;
-  };
+  
 
   const generateDescription = async () => {
-    try {
-      setIsGeneratingDescription(true);
+  try {
+    setIsGeneratingDescription(true);
 
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "user",
-              content: buildPrompt(),
-            },
-          ],
-          temperature: 0.7,
-          max_tokens: 200,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/cust_api/generate-property-description/`,
+      {
+        form_type: "project",
 
-      const generatedDescription =
-        response?.data?.choices?.[0]?.message?.content || "";
+        // Project-level information
+        project_name: projectName?.trim() || "",
+        building_type: buildingType || "",
+        project_type: propertyType || "",
 
+        address: address || "",
+        address_area: addressArea || "",
+        city_name: city?.trim() || "",
+        state: state || "",
+        country: country || "",
+        zip_code: zipCode || "",
+
+        total_project_size: totalProjectSize || "",
+        average_project_price: averagePrice || "",
+        configurations: configurations || "",
+
+        launch_date: launchDate || "",
+        possession_start: possessionStart || "",
+        construction_status: constructionStatus || "",
+
+        rera_id: reraId || "",
+
+        parking_types: parkingTypes || "",
+
+        // Individual configurations
+        properties: projectProperties || [],
+      }
+    );
+
+    const generatedDescription =
+      response?.data?.description || "";
+
+    if (response?.data?.status === 1) {
       setDescription(generatedDescription);
 
       toast.success("Description generated successfully");
-    } catch (error) {
-      console.error("Generate Description Error:", error);
-      toast.error("Failed to generate description");
-    } finally {
-      setIsGeneratingDescription(false);
+    } else {
+      toast.error(
+        response?.data?.message ||
+          "Failed to generate description"
+      );
     }
-  };
+  } catch (error) {
+    console.error("Generate Description Error:", error);
+
+    toast.error("Failed to generate description");
+  } finally {
+    setIsGeneratingDescription(false);
+  }
+};
 
   const options = [
     { value: "Pooja Room", label: "Pooja Room" },
@@ -3542,7 +3537,7 @@ Make it engaging, attractive, and human-like.
                   )} */}
                   <div>
                     <label className="block mb-2 font-medium text-gray-700">
-                      RERA ID
+                      RERA Number
                     </label>
 
                     <input
