@@ -753,9 +753,11 @@ useEffect(() => {
 
   formData.append("customer_id", accessToken);
 
-  if (parsedFilters?.city_name) {
-    formData.append("city_name", parsedFilters.city_name);
-  }
+  if (searchCity) {
+  formData.append("city_name", searchCity);
+} else if (parsedFilters?.city_name) {
+  formData.append("city_name", parsedFilters.city_name);
+}
 
   if (parsedFilters?.address_area) {
     formData.append("address_area", parsedFilters.address_area);

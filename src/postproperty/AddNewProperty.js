@@ -9615,8 +9615,17 @@ fice Space") ||
 
                     {/* Dropdown for Yes/No */}
                     <select
-                      value={virtualTourLink}
-                      onChange={(e) => setVirtualTourLink(e.target.value)}
+  value={virtualTourLink}
+  onChange={(e) => {
+    const value = e.target.value;
+
+    setVirtualTourLink(value);
+
+    setFormData((prev) => ({
+      ...prev,
+      virtual_tour_availability: value,
+    }));
+  }}
                       className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
                     >
                       <option value="">Select Virtual Tour Available?</option>

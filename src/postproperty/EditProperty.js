@@ -298,6 +298,7 @@ const EditProperty = () => {
       );
 
       const data = res.data.data.property_details;
+      setVirtualTourLink(data.virtual_tour_availability || "");
       setAddress(data.address || "");
       setAddressArea(data.address_area || "");
       setCity(data.city_name || "");
