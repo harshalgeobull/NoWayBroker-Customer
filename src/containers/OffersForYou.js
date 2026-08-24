@@ -99,9 +99,9 @@ const OffersForYou = ({ data }) => {
         {/* Title and Subtitle */}
         <div className="flex flex-col sm:text-left">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Hot, Deals, Discount & Offers
+            Hot Deals & Exclusive Offers 
           </h2>
-          <p className="text-gray-500 text-md">Go from browsing to buying</p>
+          <p className="text-gray-500 text-md">Limited-time property deals and special savings </p>
         </div>
 
         {/* Navigation Buttons */}

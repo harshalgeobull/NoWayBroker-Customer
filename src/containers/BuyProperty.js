@@ -284,7 +284,7 @@ const BuyProperty = ({
                     <div className="flex flex-col items-start justify-between px-4 pt-3 mb-3 sm:flex-row sm:items-center">
                         <div className="flex flex-col">
                             <h2 className="mb-2 text-xl font-bold tracking-wide text-gray-800 sm:text-2xl lg:text-3xl">
-                                Buy Properties
+                                Discover Your Dream Home
                             </h2>
                             <p className="text-sm text-gray-500 sm:text-base lg:text-lg">
                                 Your dream property is just a few clicks away

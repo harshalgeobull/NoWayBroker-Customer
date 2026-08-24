@@ -312,7 +312,7 @@ const OwnerProperty = ({
           <div className="flex flex-col items-start justify-between px-4 pt-3 mb-3 sm:flex-row sm:items-center">
             <div className="flex flex-col">
               <h2 className="mb-2 text-xl font-bold tracking-wide text-gray-800 sm:text-2xl lg:text-3xl">
-                Owner's Properties
+                Properties by Owner 
               </h2>
               <p className="text-sm text-gray-500 sm:text-base lg:text-lg">
                 Your dream property is just a few clicks away
@@ -432,7 +432,7 @@ const OwnerProperty = ({
                             {allImages.length > 1 ? (
                               <Slider
                                 key={`${property._id}-${allImages.length}-${Date.now()}`}
-                                className="h-40 sm:h-44 md:h-48"
+                                className="h-40 sm:h-44 md:h-48 rounded-t-2xl"
                                 dots
                                 infinite
                                 speed={500}
@@ -481,7 +481,6 @@ const OwnerProperty = ({
                                     {dots}
                                   </div>
                                 )}
-                                className="rounded-t-2xl"
                               >
                                 {allImages.map((imgUrl, idx) => (
                                   <div key={`${property._id}-${idx}`}>

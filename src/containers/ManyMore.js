@@ -255,7 +255,7 @@ const ManyMore = ({
           <div className="flex flex-col gap-4 px-4 pt-4 mb-4 sm:px-6 sm:pt-6 lg:px-8 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col">
               <h2 className="mb-2 text-xl font-bold tracking-wide text-gray-800 sm:text-2xl lg:text-3xl">
-                Exclusive Recommended Properties
+                AI Recommended Properties
               </h2>
               <p className="text-sm text-gray-500 sm:text-base lg:text-lg">
                 Your dream property is just a few clicks away

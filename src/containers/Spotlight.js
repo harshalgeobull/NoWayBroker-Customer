@@ -399,10 +399,10 @@ const Spotlights = ({
       <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col text-center sm:text-left">
           <h2 className="text-2xl font-bold text-gray-800 sm:text-3xl md:text-4xl">
-            Builders Projects
+            New Launch & Builder Projects
           </h2>
           <p className="text-gray-500">
-            Your dream property is just a few clicks away
+            Explore the latest residential and commercial projects from trusted builders
           </p>
         </div>
 
