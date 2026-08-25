@@ -1728,7 +1728,7 @@ const Editproject = () => {
               <>
                 <div className="max-w-3xl p-3 mx-auto mb-20 border border-gray-300 rounded-xl">
                   <h2 className="mb-4 text-xl font-semibold text-gray-800">
-                    Basic Details
+                    Project Basic Information
                   </h2>
 
                   {/* Property Name */}
@@ -1796,7 +1796,7 @@ const Editproject = () => {
                   {/* Building Type */}
                   <div className="mb-4">
                     <label className="block mb-1 font-medium text-gray-700">
-                      Building Type
+                      Project Type
                     </label>
 
                     <div className="flex gap-3">

@@ -58,9 +58,9 @@ const Adviser = ({ data }) => {
   return (
     <div className="bg-white py-6">
       <div className="max-w-9xl mx-auto px-10">
-        <h2 className="text-2xl sm:text-4xl text-gray-900 ">Select Category</h2>
+        <h2 className="text-2xl sm:text-4xl text-gray-900 ">Explore Properties & Projects</h2>
         <p className="text-gray-500 mb-8 text-[18px]">
-          Go from browsing to buying
+          Find verified properties from owners and trusted builders
         </p>
         {/* adviser Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

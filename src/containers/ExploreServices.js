@@ -8,32 +8,32 @@ const ExploreServices = () => {
   const services = [
     {
       image: "/image/plots.jpg",
-      title: "Modern Residences",
-      description: "Beautifully curated residential properties perfect for individuals and families from apartments to villas",
+      title: "Residential Properties",
+      description: "Discover verified apartments, flats, villas, independent houses, and residential properties for sale and rent.",
       link: "/property",
       propertyType: "Residential",
       payloadKey: "building_type",
     },
     {
       image: "/image/leasing.jpg",
-      title: "Smart Spaces for Business",
-      description: "Top commercial spaces for offices, retail, and startups.",
+      title: "Commercial Properties",
+      description: "Find verified shops, offices, showrooms, warehouses, and commercial spaces for your business and investment needs.",
       link: "/property",
       propertyType: "Commercial",
       payloadKey: "building_type",
     },
     {
       image: "/image/commercial.jpg",
-      title: "Industrial and Investment Land",
-      description: "Warehouses, industrial plots, and raw land - perfect for factories, logistics, or future projects.",
+      title: "Plots & Land",
+      description: "Explore residential, commercial, agricultural, and investment plots with location, size, and ownership details.",
       link: "/property",
       propertyType: "Buy",
       payloadKey: "property_category_type",
     },
     {
       image: "/image/pgpg.jpg",
-      title: "PG and Co-living",
-      description: "Affordable and community-style living for students and working professionals with shared amenities.",
+      title: "PG & Co-Living",
+      description: "Find comfortable PGs, shared accommodations, and co-living spaces for students and working professionals.",
       link: "/property",
       propertyType: "PG/Co-living",
       payloadKey: "property_category_type",
@@ -44,9 +44,9 @@ const ExploreServices = () => {
     <div className="bg-white py-8">
       <div className="max-w-9xl mx-auto px-10">
         <h2 className="text-2xl sm:text-4xl text-gray-900">
-          Explore our services
+          Explore Our Real Estate Services
         </h2>
-        <p className="text-gray-500 text-[18px]">Go from browsing to buying</p>
+        <p className="text-gray-500 text-[18px]">Find, buy, rent, sell, and invest in property with confidence</p>
 
         {/* Services Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 ">

@@ -89,9 +89,7 @@ const Footer = () => {
 
             {/* Description */}
             <p className="text-gray-500 text-[14px] sm:text-[15px] leading-relaxed max-w-lg">
-              We offer full-stack services for all real estate needs, including
-              home loans, pay rent, packers and movers, legal assistance,
-              property valuation, and expert advice.
+              NowayBroker is a zero-brokerage real estate platform connecting verified owners, buyers, tenants, and builders directly for a transparent and smarter property experience.
             </p>
           </div>
 
@@ -200,7 +198,7 @@ const Footer = () => {
           <div className="flex flex-col items-start pl-8">
             <div className="mb-2">
               <h4 className="text-gray-700 text-[16px] font-semibold">
-                DOWNLOAD MOBILE APP
+                GET THE NOWAYBROKER APP
               </h4>
 
               <div className="w-10 h-[2px] bg-[#c99a3d] mt-1"></div>
@@ -238,7 +236,7 @@ const Footer = () => {
               />
 
               <p className="text-[14px] text-gray-600 ml-3 translate-y-2">
-    Scan the QR code to download the app.
+    Your property search, right at your fingertips
   </p>
             </div>
           </div>

@@ -76,6 +76,7 @@ const RecommendedPropertiesDashboard = () => {
   const cityName = searchCity || sessionStorage.getItem("cityName") || "";
   const accessToken = sessionStorage.getItem("accessToken");
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [mapImageIndexes, setMapImageIndexes] = useState({});
   const [propertyImages, setPropertyImages] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -533,6 +534,30 @@ const RecommendedPropertiesDashboard = () => {
       prev === propertyImages.length - 1 ? 0 : prev + 1,
     );
   };
+  // MAP POPUP SLIDER
+const handleMapPrev = (propertyId, totalImages) => {
+  setMapImageIndexes((prev) => {
+    const currentIndex = prev[propertyId] || 0;
+
+    return {
+      ...prev,
+      [propertyId]:
+        currentIndex === 0 ? totalImages - 1 : currentIndex - 1,
+    };
+  });
+};
+
+const handleMapNext = (propertyId, totalImages) => {
+  setMapImageIndexes((prev) => {
+    const currentIndex = prev[propertyId] || 0;
+
+    return {
+      ...prev,
+      [propertyId]:
+        currentIndex === totalImages - 1 ? 0 : currentIndex + 1,
+    };
+  });
+};
 
   const fetchAmenities = async () => {
     try {
@@ -1098,35 +1123,41 @@ const RecommendedPropertiesDashboard = () => {
   };
 
   const createCustomIcon = (property, isActive = false) => {
-    let displayValue = "";
-    if (
-  (property.property_category_type === "Buy" ||
-    property.property_category_type === "Commercial Buy") &&
-  property.property_price
-) {
-  displayValue = formatPrice(property.property_price);
-} else if (
-  (property.property_category_type === "Rent" ||
-    property.property_category_type === "Commercial Lease") &&
-  property.rent
-) {
-  displayValue = formatPrice(property.rent);
-}
+  let displayValue = "";
 
-    return L.divIcon({
-      className: `custom-marker ${isActive ? "active" : ""}`,
-      html: `
-        <div class="marker-wrapper">
-          <div class="price-tooltip">
-            ${displayValue}
-            <div class="pointer"></div>
-          </div>
+  const category = property.property_category_type?.toLowerCase() || "";
+
+  if (
+    (category === "buy" || category === "commercial buy") &&
+    property.property_price
+  ) {
+    displayValue = formatPrice(property.property_price);
+  } else if (
+    category === "rent" ||
+    category === "commercial lease" ||
+    category.includes("pg") ||
+    category.includes("co-living") ||
+    category.includes("coliving")
+  ) {
+    if (property.rent) {
+      displayValue = formatPrice(property.rent);
+    }
+  }
+
+  return L.divIcon({
+    className: `custom-marker ${isActive ? "active" : ""}`,
+    html: `
+      <div class="marker-wrapper">
+        <div class="price-tooltip">
+          ${displayValue}
+          <div class="pointer"></div>
         </div>
-      `,
-      iconSize: [50, 60],
-      iconAnchor: [25, 60],
-    });
-  };
+      </div>
+    `,
+    iconSize: [50, 60],
+    iconAnchor: [25, 60],
+  });
+};
 
   const handleButtonClick = async () => {
     setError(null);
@@ -5787,97 +5818,114 @@ const RecommendedPropertiesDashboard = () => {
                         }}
                       >
                         <Popup>
-                          <div className="w-full sm:w-[300px] relative">
-                            {/* Heart Button */}
-                            <button
-                              className="absolute z-10 top-2 right-2"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (!accessToken) {
-                                  setIsLoginModalOpen(true);
-                                  return;
-                                }
-                                if (property.is_favorite) {
-                                  removeFromFavorites(
-                                    property.favorite_id,
-                                    property._id,
-                                  );
-                                } else {
-                                  addToFavorites(property._id);
-                                }
-                              }}
-                            >
-                              <Heart
-                                size={18}
-                                color={property.is_favorite ? "red" : "white"}
-                                fill={property.is_favorite ? "red" : "white"}
-                              />
-                            </button>
+  <Link
+    to={`/propertydetails/${property._id}`}
+    className="block w-full sm:w-[300px] relative no-underline text-black hover:no-underline"
+  >
+    <div className="w-full relative">
 
-                            {/* Slider Implementation */}
-                            <div className="relative">
-                              <img
-                                src={
-                                  propertyImages[currentIndex]?.image
-                                    ? `${process.env.REACT_APP_API_URL}${propertyImages[currentIndex]?.image}`
-                                    : `${property.cover_image}`
-                                }
-                                alt={`Property Image ${currentIndex + 1}`}
-                                className="w-full h-[200px] object-cover"
-                              />
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handlePrev();
-                                }}
-                                className="absolute p-1 transform -translate-y-1/2 bg-white rounded top-1/2 left-1 pe-2"
-                              >
-                                <b>&#x3008;</b>
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleNext();
-                                }}
-                                className="absolute p-1 transform -translate-y-1/2 bg-white rounded top-1/2 right-1 ps-2"
-                              >
-                                <b>&#x232A;</b>
-                              </button>
-                            </div>
+      {/* Heart Button */}
+      <button
+        className="absolute z-10 top-2 right-2"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
 
-                            {/* Property Info */}
-                            <div className="px-2">
-                              <div className="flex items-center justify-between text-lg font-semibold text-black">
-                                <div className="flex items-center">
-                                  <BiRupee className="mr-1 text-black bg-white" />
-                                  <span>
-                                    {property.property_category_type === "Rent"
-                                      ? formatPrice(property.rent)
-                                      : formatPrice(property.property_price)}
-                                  </span>
-                                </div>
-                                <Link
-                                  key={property._id}
-                                  to={`/propertydetails/${property._id}`}
-                                  className="block no-underline bg-white border-2 rounded-lg hover:no-underline"
-                                >
-                                  <button className="flex items-center text-white rounded-full btn btn-secondary">
-                                    <b>
-                                      <AiOutlineInfo />
-                                    </b>
-                                  </button>
-                                </Link>
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                <p className="m-0">
-                                  <strong>{property.bhk_type}</strong> |{" "}
-                                  {property.city_name} | {property.area_sq} sq ft
-                                </p>
-                                <p className="m-0">{property.address}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </Popup>
+          if (!accessToken) {
+            setIsLoginModalOpen(true);
+            return;
+          }
+
+          if (property.is_favorite) {
+            removeFromFavorites(
+              property.favorite_id,
+              property._id,
+            );
+          } else {
+            addToFavorites(property._id);
+          }
+        }}
+      >
+        <Heart
+          size={18}
+          color={property.is_favorite ? "red" : "white"}
+          fill={property.is_favorite ? "red" : "white"}
+        />
+      </button>
+
+      {/* Slider Implementation */}
+      <div className="relative">
+        <img
+          src={
+            propertyImages[currentIndex]?.image
+              ? `${process.env.REACT_APP_API_URL}${propertyImages[currentIndex]?.image}`
+              : `${property.cover_image}`
+          }
+          alt={`Property Image ${currentIndex + 1}`}
+          className="w-full h-[200px] object-cover"
+        />
+
+        {/* Previous Image */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handlePrev();
+          }}
+          className="absolute p-1 transform -translate-y-1/2 bg-white rounded top-1/2 left-1 pe-2"
+        >
+          <b>&#x3008;</b>
+        </button>
+
+        {/* Next Image */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleNext();
+          }}
+          className="absolute p-1 transform -translate-y-1/2 bg-white rounded top-1/2 right-1 ps-2"
+        >
+          <b>&#x232A;</b>
+        </button>
+      </div>
+
+      {/* Property Info */}
+      <div className="px-2">
+        <div className="flex items-center text-lg font-semibold text-black">
+          
+          {/* Price */}
+          <div className="flex items-center">
+            <BiRupee className="mr-1 text-black bg-white" />
+
+            <span>
+  {property.property_category_type === "Rent" ||
+  property.property_category_type?.toLowerCase().includes("pg") ||
+  property.property_category_type?.toLowerCase().includes("co-living") ||
+  property.property_category_type?.toLowerCase().includes("coliving")
+    ? formatPrice(property.rent).replace("₹ ", "")
+    : formatPrice(property.property_price).replace("₹ ", "")}
+</span>
+          </div>
+
+        </div>
+
+        {/* Property Details */}
+        <div className="text-sm text-gray-600">
+          <p className="m-0">
+            <strong>{property.bhk_type}</strong> |{" "}
+            {property.city_name} | {property.area_sq} sq ft
+          </p>
+
+          <p className="m-0">
+            {property.address}
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </Link>
+</Popup>
                       </Marker>
                     ))}
                 </MapContainer>
