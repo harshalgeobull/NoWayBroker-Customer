@@ -5,7 +5,7 @@ import axios from "axios";
 const Download = () => {
   const [socialLinks, setSocialLinks] = useState({
     appstore: "#",
-    playstore: "#",
+    playstore: "https://play.google.com/store/apps/details?id=com.nowaybroker.user",
   });
   const [mobileNumber, setMobileNumber] = useState("");
   useEffect(() => {
@@ -22,7 +22,7 @@ const Download = () => {
           const data = response.data.data[0];
           setSocialLinks({
             appstore: data.appstore || "#",
-            playstore: data.playstore || "#",
+            playstore: "https://play.google.com/store/apps/details?id=com.nowaybroker.user",
           });
         }
       } catch (error) {

@@ -97,6 +97,13 @@ const OtpVerification_Login = ({
         sessionStorage.setItem("user_name", user.full_name || "N/A");
         sessionStorage.setItem("user_email", user.email || "N/A");
 
+        // Also save login permanently
+localStorage.setItem("accessToken", user?._id || "N/A");
+localStorage.setItem("Country_code", user.country_code || "N/A");
+localStorage.setItem("Mobile_Number", user.mobile_number || "N/A");
+localStorage.setItem("user_type", user.user_type || "N/A");
+localStorage.setItem("user_name", user.full_name || "N/A");
+localStorage.setItem("user_email", user.email || "N/A");
         onClose();
         setShowOverlay(true);
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useHistory } from "react-router-dom";
 import Slider from "react-slick";
-
+const LIVE_CITIES = ["Chennai"];
 const Cities = React.memo(({ data }) => {
   const [citiesData, setCitiesData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,12 +50,26 @@ useEffect(() => {
           (apiCity) => apiCity.city_name === city.name
         );
         return {
-          ...city,
-          propertyCount: cityData ? cityData.property_count : 0, // keep raw number
-          properties: cityData ? `${cityData.property_count}+` : city.properties,
-        };
+  ...city,
+  propertyCount: cityData ? cityData.property_count : 0,
+  properties: LIVE_CITIES.includes(city.name)
+    ? cityData
+      ? `${cityData.property_count}+ properties`
+      : "0"
+    : "Coming Soon...",
+};
       })
-      .sort((a, b) => b.propertyCount - a.propertyCount); // sort descending
+      .sort((a, b) => {
+  const aLive = LIVE_CITIES.includes(a.name);
+  const bLive = LIVE_CITIES.includes(b.name);
+
+  // Live cities first
+  if (aLive && !bLive) return -1;
+  if (!aLive && bLive) return 1;
+
+  // Both same status → alphabetical
+  return a.name.localeCompare(b.name);
+}); // sort descending
   }, [cities, citiesData]);
 
   // const handleCityClick = useCallback((cityName) => {
@@ -64,12 +78,18 @@ useEffect(() => {
   //   });
   // }, [history]);
 
- const handleCityClick = useCallback((cityName) => {
-  sessionStorage.setItem("selectedCity", cityName);
+ const handleCityClick = useCallback((city) => {
+  if (LIVE_CITIES.includes(city.name)) {
+    sessionStorage.setItem("selectedCity", city.name);
 
-  history.push({
-    pathname: `/citywiseproperties/${encodeURIComponent(cityName)}`
-  });
+    history.push({
+      pathname: `/citywiseproperties/${encodeURIComponent(city.name)}`
+    });
+  } else {
+    history.push({
+      pathname: `/coming-soon/${encodeURIComponent(city.name)}`
+    });
+  }
 }, [history]);
   const sliderSettings = {
     dots: true,
@@ -103,7 +123,7 @@ useEffect(() => {
             <div
               key={city.name}
               className="flex items-center min-w-0 p-3 transition-shadow bg-white cursor-pointer rounded-2xl hover:shadow-lg"
-              onClick={() => handleCityClick(city.name)}
+              onClick={() => handleCityClick(city)}
             >
               <div className="flex-shrink-0 w-24 h-20 xl:w-32 xl:h-24 2xl:w-36 2xl:h-28">
                 <img
@@ -118,7 +138,7 @@ useEffect(() => {
                   {city.name}
                 </h3>
                 <p className="text-xs xl:text-sm text-gray-600 truncate">
-                  {loading ? "Loading..." : `${city.properties} properties`}
+                  {loading ? "Loading..." : city.properties}
                 </p>
               </div>
             </div>
@@ -132,7 +152,7 @@ useEffect(() => {
               <div key={city.name} className="px-1.5 sm:px-2">
                 <div
                   className="flex flex-col items-center h-full p-3 sm:p-4 transition-shadow bg-white rounded-lg cursor-pointer hover:shadow-lg"
-                  onClick={() => handleCityClick(city.name)}
+                  onClick={() => handleCityClick(city)}
                 >
                   <div className="w-full h-32 sm:h-40 mb-3 sm:mb-4 overflow-hidden">
                     <img

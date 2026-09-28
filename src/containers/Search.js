@@ -26,6 +26,8 @@ const NAV_TABS = [
   { label: "COMMERCIAL", key: "Commercial", type: "Commercial" },
 ];
 
+const LIVE_CITIES = ["Chennai"];
+
 const Search = () => {
   const history = useHistory();
   const { searchCity, setSearchCity } = useContext(SearchContext);
@@ -263,23 +265,46 @@ const Search = () => {
       console.error(error);
     }
   };
+const handleCityNavigation = (cityName) => {
+  if (!cityName) {
+    return;
+  }
 
-  const handleSearch = () => {
-    if (!searchQuery && !searchCity && !type) {
-      setError("Please enter what you're looking for.");
-      return;
-    }
+  if (LIVE_CITIES.includes(cityName)) {
+    sessionStorage.setItem("selectedCity", cityName);
+    sessionStorage.setItem("cityName", cityName);
 
-    setError("");
     history.push({
-      pathname: "/searchdashboard",
-      state: {
-        searchCity,
-        searchQuery,
-        type,
-      },
+      pathname: `/citywiseproperties/${encodeURIComponent(cityName)}`,
     });
-  };
+  } else {
+    history.push({
+      pathname: `/coming-soon/${encodeURIComponent(cityName)}`,
+    });
+  }
+};
+  const handleSearch = () => {
+  if (!searchQuery && !searchCity && !type) {
+    setError("Please enter what you're looking for.");
+    return;
+  }
+
+  setError("");
+
+  if (searchCity && !LIVE_CITIES.includes(searchCity)) {
+    handleCityNavigation(searchCity);
+    return;
+  }
+
+  history.push({
+    pathname: "/searchdashboard",
+    state: {
+      searchCity,
+      searchQuery,
+      type,
+    },
+  });
+};
 
   // useEffect(() => {
   //   const loadGoogleMapsScript = () => {
@@ -644,13 +669,14 @@ const Search = () => {
             </h3>
             {["Ahmedabad", "Bengaluru", "Chennai", "Delhi", "Hyderabad", "Kolkata", "Mumbai", "Pune",].map(
               (location) => (
-                <Link
-                  key={location}
-                  to={`/citywiseproperties/${location}`}
-                  className="px-3 py-2 text-sm text-white no-underline rounded-full cursor-pointer bg-gray-900/20 backdrop-blur-sm bg-transparnt/70 bg-opacity-70 hover:bg-gray-600 hover:no-underline"
-                >
-                  {location}
-                </Link>
+                <button
+  key={location}
+  type="button"
+  onClick={() => handleCityNavigation(location)}
+  className="px-3 py-2 text-sm text-white no-underline rounded-full cursor-pointer bg-gray-900/20 backdrop-blur-sm bg-transparnt/70 bg-opacity-70 hover:bg-gray-600 hover:no-underline"
+>
+  {location}
+</button>
               ),
             )}
           </div>

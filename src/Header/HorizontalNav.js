@@ -764,10 +764,44 @@ const handleNavMouseLeave = () => {
   //   }
   // }, [location.pathname]);
 
+  // const checkLoginStatus = () => {
+  //   const userId = sessionStorage.getItem("accessToken");
+  //   setIsLoggedIn(!!userId);
+  // };
   const checkLoginStatus = () => {
-    const userId = sessionStorage.getItem("accessToken");
-    setIsLoggedIn(!!userId);
-  };
+  let userId = sessionStorage.getItem("accessToken");
+
+  // Restore login from localStorage if sessionStorage is empty
+  if (!userId) {
+    userId = localStorage.getItem("accessToken");
+
+    if (userId) {
+      sessionStorage.setItem("accessToken", userId);
+      sessionStorage.setItem(
+        "Country_code",
+        localStorage.getItem("Country_code") || "N/A"
+      );
+      sessionStorage.setItem(
+        "Mobile_Number",
+        localStorage.getItem("Mobile_Number") || "N/A"
+      );
+      sessionStorage.setItem(
+        "user_type",
+        localStorage.getItem("user_type") || "N/A"
+      );
+      sessionStorage.setItem(
+        "user_name",
+        localStorage.getItem("user_name") || "N/A"
+      );
+      sessionStorage.setItem(
+        "user_email",
+        localStorage.getItem("user_email") || "N/A"
+      );
+    }
+  }
+
+  setIsLoggedIn(!!userId);
+};
   useEffect(() => {
     if (isContactOpen) {
       const timer = setTimeout(() => {
@@ -787,14 +821,22 @@ const handleNavMouseLeave = () => {
     setShowModal(true); // open custom modal
   };
 
+  // const confirmLogout = () => {
+  //   sessionStorage.clear();
+  //   setShowModal(false);
+  //   toast.success("Logout Successfully");
+  //   setIsLoggedIn(false);
+  //   history.push("/");
+  // };
   const confirmLogout = () => {
-    sessionStorage.clear();
-    setShowModal(false);
-    toast.success("Logout Successfully");
-    setIsLoggedIn(false);
-    history.push("/");
-  };
+  sessionStorage.clear();
+  localStorage.clear();
 
+  setShowModal(false);
+  toast.success("Logout Successfully");
+  setIsLoggedIn(false);
+  history.push("/");
+};
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (

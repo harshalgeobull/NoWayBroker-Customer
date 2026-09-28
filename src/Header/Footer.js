@@ -13,6 +13,8 @@ import { FaHouse } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 
+const LIVE_CITIES = ["Chennai"];
+
 const Footer = () => {
   const history = useHistory();
 
@@ -20,10 +22,18 @@ const Footer = () => {
     history.push(path);
   };
 
-  const handleCityClick = (cityName) => {
-    window.scrollTo(0, 0);
-    history.push(`/citywiseproperties/${cityName}`);
-  };
+ const handleCityClick = (cityName) => {
+  window.scrollTo(0, 0);
+
+  if (LIVE_CITIES.includes(cityName)) {
+    sessionStorage.setItem("selectedCity", cityName);
+    sessionStorage.setItem("cityName", cityName);
+
+    history.push(`/citywiseproperties/${encodeURIComponent(cityName)}`);
+  } else {
+    history.push(`/coming-soon/${encodeURIComponent(cityName)}`);
+  }
+};
 
   const [socialLinks, setSocialLinks] = useState({
     facebook: "#",
@@ -31,7 +41,7 @@ const Footer = () => {
     linkedin: "#",
     instagram: "#",
     appstore: "#",
-    playstore: "#",
+    playstore: "https://play.google.com/store/apps/details?id=com.nowaybroker.user",
     twitter: "#",
   });
 
@@ -49,7 +59,7 @@ const Footer = () => {
             linkedin: data.linkedin || "#",
             instagram: data.instagram || "#",
             appstore: data.appstore || "#",
-            playstore: data.playstore || "#",
+            playstore: "https://play.google.com/store/apps/details?id=com.nowaybroker.user",
             twitter: data.twitter || "#",
           });
         }
@@ -88,7 +98,7 @@ const Footer = () => {
             </div>
 
             {/* Description */}
-            <p className="text-gray-500 text-[14px] sm:text-[15px] leading-relaxed max-w-lg">
+            <p className="text-gray-500 text-[14px] sm:text-[15px] leading-relaxed max-w-lg font-bold">
               NowayBroker is a zero-brokerage real estate platform connecting verified owners, buyers, tenants, and builders directly for a transparent and smarter property experience.
             </p>
           </div>
@@ -205,7 +215,7 @@ const Footer = () => {
             </div>
             <div className="flex items-center space-x-4">
               <a
-                // href={socialLinks.playstore}
+                href={socialLinks.playstore}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -235,7 +245,7 @@ const Footer = () => {
                 className="object-cover h-16 w-16"
               />
 
-              <p className="text-[14px] text-gray-600 ml-3 translate-y-2">
+              <p className="text-[14px] text-gray-600 ml-3 translate-y-2 font-bold">
     Your property search, right at your fingertips
   </p>
             </div>
