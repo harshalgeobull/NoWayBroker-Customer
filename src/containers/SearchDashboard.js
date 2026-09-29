@@ -23,7 +23,7 @@ import { PiShareNetworkLight } from "react-icons/pi";
 import { PiCubeFocus } from "react-icons/pi";
 import ShareModal from "../containers/ShareModal";
 import Slider from "react-slick";
-import { Heart } from "lucide-react";
+//import { Heart } from "lucide-react";
 import { toast } from "react-toastify";
 import Login1 from "../auth/Login1";
 import SignUp1 from "../auth/SignUp1";
