@@ -262,7 +262,10 @@ const Footer = () => {
             </div>
 
             <p className="text-gray-700 text-[16px] font-medium mb-1">
-              Toll Free - +91 8600199570
+              Toll Free -{" "}
+              <a href="tel:+918600199570" className="text-gray-700 no-underline hover:underline">
+                +91 8600199570
+              </a>
             </p>
 
             <p className="text-gray-500 text-[14px] mb-3">

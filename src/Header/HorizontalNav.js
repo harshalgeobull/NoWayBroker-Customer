@@ -1298,14 +1298,26 @@ const handleNavMouseLeave = () => {
                       <p className="mb-1 text-[13px] font-medium text-gray-500 leading-tight">
                         Toll Free | 9:30 AM to 6:30 PM <br /> (Mon-Sun)
                       </p>
-                      <p className="text-[19px] font-bold text-[#1e293b]">
+                      {/* NWB-BUG-024: clickable number - dials on phones / opens the calling app on desktop */}
+                      <a
+                        href="tel:+918600199570"
+                        className="text-[19px] font-bold text-[#1e293b] no-underline hover:underline hover:text-[#4064d7]"
+                      >
                         +91 8600199570
-                      </p>
+                      </a>
                     </div>
                   </div>
 
                   {/* Call Back Button */}
-                  <button className="flex items-center justify-center w-full py-2.5 mb-4 text-[15px] font-bold text-[#4064d7] transition bg-white border-[1.5px] border-[#4064d7] rounded-[4px] hover:bg-blue-50">
+                  {/* NWB-BUG-025: opens the Contact page (form) and closes the popover */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsContactOpen(false);
+                      history.push("/contact");
+                    }}
+                    className="flex items-center justify-center w-full py-2.5 mb-4 text-[15px] font-bold text-[#4064d7] transition bg-white border-[1.5px] border-[#4064d7] rounded-[4px] hover:bg-blue-50"
+                  >
                     <FiPhoneCall className="mr-2 text-lg" /> Request a Call Back
                   </button>
 

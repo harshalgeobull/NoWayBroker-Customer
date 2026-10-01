@@ -22,11 +22,17 @@ const NAV_TABS = [
   { label: "BUY", key: "Buy", type: "Buy" },
   { label: "RENT", key: "Rent", type: "Rent" },
   { label: "PG", key: "PG", type: "PG/Co-living" },
-  { label: "Plots/Land", key: "Plot", type: "Plot/Land" },
+  { label: "PLOTS/LAND", key: "Plot", type: "Plot/Land" },
   { label: "COMMERCIAL", key: "Commercial", type: "Commercial" },
 ];
 
 const LIVE_CITIES = ["Chennai"];
+
+// Letters (any language) and spaces only
+const VALID_SEARCH_TEXT = /^[\p{L}\p{M}\s]+$/u;
+const EMPTY_SEARCH_MSG = "Please enter what you're looking for.";
+const INVALID_SEARCH_MSG =
+  "Please enter only letters. Numbers and special characters are not allowed.";
 
 const Search = () => {
   const history = useHistory();
@@ -97,8 +103,13 @@ const Search = () => {
 
   const currentText = finalTranscript + interimTranscript;
 
-  setVoiceText(currentText);
-  setSearchQuery(currentText);
+  const cleanedText = currentText.replace(/[^\p{L}\p{M}\s]/gu, "");
+
+  setVoiceText(cleanedText);
+  setSearchQuery(cleanedText);
+
+  // setVoiceText(currentText);
+  // setSearchQuery(currentText);
 };
 
   recognition.onerror = (event) => {
@@ -284,8 +295,20 @@ const handleCityNavigation = (cityName) => {
   }
 };
   const handleSearch = () => {
-  if (!searchQuery && !searchCity && !type) {
-    setError("Please enter what you're looking for.");
+  // if (!searchQuery && !searchCity && !type) {
+  //   setError("Please enter what you're looking for.");
+  //   return;
+  // }
+
+  const trimmedQuery = searchQuery.trim();
+
+  if (!trimmedQuery && !searchCity && !type) {
+    setError(EMPTY_SEARCH_MSG);
+    return;
+  }
+
+  if (trimmedQuery && !VALID_SEARCH_TEXT.test(trimmedQuery)) {
+    setError(INVALID_SEARCH_MSG);
     return;
   }
 
@@ -648,7 +671,7 @@ const handleCityNavigation = (cityName) => {
         {/* Error Message */}
         {error && (
           <div className="mt-3 text-center">
-            <span className="px-4 mt-4 text-sm text-center text-white bg-gray-800 rounded">
+            <span className="px-4 py-1 mt-4 text-base font-medium text-center text-white bg-gray-800 rounded">
               {error}
             </span>
           </div>

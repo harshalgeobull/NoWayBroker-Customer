@@ -10,6 +10,25 @@ import "react-toastify/dist/ReactToastify.css";
 import { useHistory } from "react-router-dom";
 import Login1 from "../auth/Login1";
 import { IoAlertCircleOutline } from "react-icons/io5";
+import {
+  NAME_MIN,
+  NAME_MAX,
+  CITY_MIN,
+  CITY_MAX,
+  COMPANY_MAX,
+  sanitizeCompanyInput,
+  validateCompanyName,
+  EMAIL_MAX,
+  cleanSpaces,
+  sanitizeNameInput,
+  sanitizeCityInput,
+  LETTERS_ONLY_REGEX,
+  isValidEmail,
+  getMobileRule,
+  validateMobile,
+  EMAIL_EXISTS_MSG,
+  friendlyServerMessage,
+} from "../utils/Signupvalidation";
 
 const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
   const [userType, setUserType] = useState("Owner");
@@ -50,6 +69,19 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
 
   if (!isOpen) return null;
 
+  // Shows duplicate email / mobile messages under the right field,
+  // anything else as a toast. Returns nothing.
+  const showServerError = (rawMessage, baseErrors) => {
+    const message = friendlyServerMessage(rawMessage);
+    if (message === EMAIL_EXISTS_MSG) {
+      setErrors({ ...baseErrors, email: EMAIL_EXISTS_MSG });
+    } else if (/mobile number already registered/i.test(rawMessage || "")) {
+      setErrors({ ...baseErrors, mobile: "Mobile number already registered." });
+    } else {
+      toast.error(message || "Something went wrong.");
+    }
+  };
+
   const handleSignUp = async () => {
     let hasError = false;
     const newErrors = {
@@ -60,37 +92,67 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
       companyName: "",
     };
 
-    if (!name.trim()) {
+    // Trim leading/trailing spaces and collapse repeated spaces BEFORE validating / sending
+    const cleanName = cleanSpaces(name);
+    const cleanCity = cleanSpaces(city);
+    const cleanEmail = email.trim();
+    const cleanCompany = cleanSpaces(companyName);
+    const cleanMobile = mobile.trim();
+
+    // FULL NAME
+    if (!cleanName) {
       newErrors.name = "Name is required";
+      hasError = true;
+    } else if (!LETTERS_ONLY_REGEX.test(cleanName)) {
+      newErrors.name = "Name can contain letters only";
+      hasError = true;
+    } else if (cleanName.length < NAME_MIN) {
+      newErrors.name = `Name must be at least ${NAME_MIN} characters`;
+      hasError = true;
+    } else if (cleanName.length > NAME_MAX) {
+      newErrors.name = `Name cannot exceed ${NAME_MAX} characters`;
       hasError = true;
     }
 
-    if (!mobile.trim()) {
+    // MOBILE (rules depend on the selected country)
+    if (!cleanMobile) {
       newErrors.mobile = "Mobile number is required";
       hasError = true;
-    } else if (mobile.trim().length < 10) {
-      newErrors.mobile = "Mobile number must be at least 10 digits";
-      hasError = true;
+    } else {
+      const mobileError = validateMobile(countryCode, cleanMobile);
+      if (mobileError) {
+        newErrors.mobile = mobileError;
+        hasError = true;
+      }
     }
 
     // EMAIL VALIDATION
-    if (!email.trim()) {
+    if (!cleanEmail) {
       newErrors.email = "Email is required";
       hasError = true;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Enter valid email";
+    } else if (!isValidEmail(cleanEmail)) {
+      newErrors.email = "Enter a valid email address (e.g. name@example.com)";
       hasError = true;
     }
 
     // CITY VALIDATION
-    if (!city.trim()) {
+    if (!cleanCity) {
       newErrors.city = "City is required";
+      hasError = true;
+    } else if (!LETTERS_ONLY_REGEX.test(cleanCity)) {
+      newErrors.city = "City can contain letters only";
+      hasError = true;
+    } else if (cleanCity.length < CITY_MIN || cleanCity.length > CITY_MAX) {
+      newErrors.city = `City must be ${CITY_MIN} to ${CITY_MAX} characters`;
       hasError = true;
     }
 
-    if (userType === "Builder/Developer" && !companyName.trim()) {
-      newErrors.companyName = "Company Name is required";
-      hasError = true;
+    if (userType === "Builder/Developer") {
+      const companyError = validateCompanyName(cleanCompany);
+      if (companyError) {
+        newErrors.companyName = companyError;
+        hasError = true;
+      }
     }
 
     if (!agreed) {
@@ -102,15 +164,21 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
 
     if (hasError) return;
 
+    // show the cleaned values in the form and pass them on to the OTP step
+    setName(cleanName);
+    setCity(cleanCity);
+    setEmail(cleanEmail);
+    setCompanyName(cleanCompany);
+
     setIsSubmitting(true);
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/cust_api/generate-otp`,
         {
-          mobile_number: mobile,
+          mobile_number: cleanMobile,
           country_code: countryCode,
-          email: email,
-          city: city,
+          email: cleanEmail,
+          city: cleanCity,
         },
       );
 
@@ -120,24 +188,12 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
         toast.success("OTP sent successfully!");
         setShowOtpModal(true);
       } else {
-        toast.error(data.message || "Something went wrong.");
+        showServerError(data.message, newErrors);
       }
     } catch (error) {
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message === "Mobile number already registered."
-      ) {
-        setErrors({
-          ...newErrors,
-          mobile: "Mobile number already registered.",
-        });
-      } else if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        toast.error(error.response.data.message);
+      const serverMessage = error.response?.data?.message;
+      if (serverMessage) {
+        showServerError(serverMessage, newErrors);
       } else {
         toast.error("Error generating OTP. Please try again.");
       }
@@ -210,9 +266,22 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                     checked={
                       userType === (type === "Buyer/Tenant/Owner" ? "Owner" : type)
                     }
-                    onChange={() =>
-                      setUserType(type === "Buyer/Tenant/Owner" ? "Owner" : type)
-                    }
+                    onChange={() => {
+                      const newType = type === "Buyer/Tenant/Owner" ? "Owner" : type;
+                      if (newType !== userType) {
+                        // NWB-BUG-023: start the other account form fresh
+                        setUserType(newType);
+                        setName("");
+                        setCompanyName("");
+                        setErrors({
+                          name: "",
+                          mobile: "",
+                          email: "",
+                          city: "",
+                          companyName: "",
+                        });
+                      }
+                    }}
                     className="accent-rose-600"
                   />
                   <span className="text-gray-700">{type}</span>
@@ -229,10 +298,10 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                 type="text"
                 placeholder="Name"
                 value={name}
+                maxLength={NAME_MAX}
                 onChange={(e) => {
-                  const input = e.target.value;
-                  const alphabetOnly = input.replace(/[^a-zA-Z\s]/g, "");
-                  setName(alphabetOnly);
+                  // letters + single spaces only, no leading space
+                  setName(sanitizeNameInput(e.target.value));
                   setErrors({ ...errors, name: "" });
                 }}
                 className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${errors.name ? "border-red-500" : "border-gray-300"
@@ -257,8 +326,10 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                     type="text"
                     placeholder="Company Name"
                     value={companyName}
+                    maxLength={COMPANY_MAX}
                     onChange={(e) => {
-                      setCompanyName(e.target.value);
+                      // no leading spaces, no unsupported symbols, max length
+                      setCompanyName(sanitizeCompanyInput(e.target.value));
                       setErrors({
                         ...errors,
                         companyName: "",
@@ -291,8 +362,10 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                   type="email"
                   placeholder="Email Address"
                   value={email}
+                  maxLength={EMAIL_MAX}
                   onChange={(e) => {
-                    setEmail(e.target.value);
+                    // emails never contain spaces
+                    setEmail(e.target.value.replace(/\s/g, ""));
                     setErrors({ ...errors, email: "" });
                   }}
                   className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${errors.email ? "border-red-500" : "border-gray-300"
@@ -317,13 +390,15 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                   type="text"
                   placeholder="City"
                   value={city}
+                  maxLength={CITY_MAX}
                   onChange={(e) => {
-                    setCity(e.target.value);
+                    // letters + single spaces only (no numbers / special characters)
+                    setCity(sanitizeCityInput(e.target.value));
                     setErrors({ ...errors, city: "" });
                   }}
                   className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${errors.city ? "border-red-500" : "border-gray-300"
                     }`}
-                  readOnly={!!sessionStorage.getItem("cityName")}
+                  // readOnly={!!sessionStorage.getItem("cityName")}
                 />
 
                 {errors.city && (
@@ -344,7 +419,13 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                 <select
                   className="w-1/3 p-3 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none"
                   value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value)}
+                  onChange={(e) => {
+                    const newCode = e.target.value;
+                    setCountryCode(newCode);
+                    // keep only as many digits as the new country allows and clear the old error
+                    setMobile((prev) => prev.slice(0, getMobileRule(newCode).maxLength));
+                    setErrors({ ...errors, mobile: "" });
+                  }}
                 >
                   <option value="+91">IN +91</option>
                   <option value="+1">US +1</option>
@@ -360,11 +441,18 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                 <div className="w-2/3">
                   <input
                     type="text"
-                    placeholder="Mobile Number"
+                    placeholder={
+                      getMobileRule(countryCode).example
+                        ? `e.g. ${getMobileRule(countryCode).example}`
+                        : "Mobile Number"
+                    }
                     value={mobile}
+                    maxLength={getMobileRule(countryCode).maxLength}
                     onChange={(e) => {
                       const value = e.target.value;
-                      if (/^\d{0,10}$/.test(value)) {
+                      // digits only, max length depends on the selected country
+                      const { maxLength } = getMobileRule(countryCode);
+                      if (/^\d*$/.test(value) && value.length <= maxLength) {
                         setMobile(value);
                         setErrors({ ...errors, mobile: "" });
                       }
