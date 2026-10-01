@@ -32,8 +32,12 @@ export const LETTERS_ONLY_REGEX = /^[a-zA-Z]+(?: [a-zA-Z]+)*$/;
 export const EMAIL_REGEX =
   /^[A-Za-z0-9]+(?:[._%+-][A-Za-z0-9]+)*@[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*\.[A-Za-z]{2,}$/;
 
+export const EMAIL_LOCAL_MAX = 64; // standard limit for the part before the @
+
 export const isValidEmail = (email = "") =>
-  email.length <= EMAIL_MAX && EMAIL_REGEX.test(email);
+  email.length <= EMAIL_MAX &&
+  email.split("@")[0].length <= EMAIL_LOCAL_MAX &&
+  EMAIL_REGEX.test(email);
 
 /* ---------- Mobile : rules depend on the selected country ---------- */
 // digits are entered WITHOUT the country code and WITHOUT a leading 0
@@ -95,5 +99,25 @@ export const validateCompanyName = (value = "") => {
     return "Company Name must contain letters (numbers or symbols alone are not allowed)";
   if (value.length < 2) return "Company Name must be at least 2 characters";
   if (value.length > COMPANY_MAX) return `Company Name cannot exceed ${COMPANY_MAX} characters`;
+  return "";
+};
+
+/* ---------- International phone (forms without a country dropdown) ---------- */
+// E.164, the international standard, allows at most 15 digits including the country code.
+// 7 is used as the practical minimum. Countries differ in length, so a range is used,
+// not one fixed length. (Confirm the minimum with the product requirement.)
+export const PHONE_MIN_DIGITS = 7;
+export const PHONE_MAX_DIGITS = 15;
+
+// keeps digits and one leading "+"; strips spaces, dashes, brackets; caps the length
+export const sanitizePhoneInput = (value = "") => {
+  const plus = value.trimStart().startsWith("+") ? "+" : "";
+  return plus + value.replace(/\D/g, "").slice(0, PHONE_MAX_DIGITS);
+};
+
+export const validateInternationalPhone = (value = "") => {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length < PHONE_MIN_DIGITS || digits.length > PHONE_MAX_DIGITS)
+    return `Enter a valid phone number with country code (${PHONE_MIN_DIGITS} to ${PHONE_MAX_DIGITS} digits)`;
   return "";
 };

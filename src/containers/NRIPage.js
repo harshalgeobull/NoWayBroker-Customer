@@ -1,4 +1,14 @@
 import { useState, useRef } from "react";
+import {
+  NAME_MIN,
+  EMAIL_MAX,
+  cleanSpaces,
+  sanitizeNameInput,
+  LETTERS_ONLY_REGEX,
+  isValidEmail,
+  sanitizePhoneInput,
+  validateInternationalPhone,
+} from "../utils/Signupvalidation";
 import { FaMoneyBillWave, FaFileAlt, FaChartBar, FaIdCard, FaCalendarAlt } from "react-icons/fa";
 import {
     FaBuilding,
@@ -10,6 +20,13 @@ import {
 export default function NRIPage() {
   // ================= STATES =================
   const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    service: "",
+  });
+  // field-level validation messages (NWB-BUG-044)
+  const [errors, setErrors] = useState({
     name: "",
     phone: "",
     email: "",
@@ -83,11 +100,19 @@ export default function NRIPage() {
 
   // ================= HANDLERS =================
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    let next = value;
+    if (name === "name") next = sanitizeNameInput(value); // letters + single spaces, max length (038, 039, 040)
+    if (name === "phone") next = sanitizePhoneInput(value); // digits / leading +, max 15 digits (041)
+    if (name === "email") next = value.replace(/\s/g, "").slice(0, EMAIL_MAX); // no spaces, max length (043)
+
+    setForm({ ...form, [name]: next });
+    if (errors[name]) setErrors({ ...errors, [name]: "" });
   };
 
   const handleServiceSelect = (option) => {
     setForm({ ...form, service: option });
+    setErrors({ ...errors, service: "" });
     setIsDropdownOpen(false);
   };
 
@@ -106,10 +131,41 @@ export default function NRIPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.name || !form.phone || !form.email || !form.service) {
-      setSubmitMessage({ type: "error", text: "Please fill all the fields before submitting." });
+    const REQUIRED = "This field is required";
+    const cleanName = cleanSpaces(form.name);
+    const cleanPhone = form.phone.trim();
+    const cleanEmail = form.email.trim();
+
+    const newErrors = {
+      name: !cleanName
+        ? REQUIRED
+        : !LETTERS_ONLY_REGEX.test(cleanName)
+          ? "Name can contain letters only"
+          : cleanName.length < NAME_MIN
+            ? `Name must be at least ${NAME_MIN} characters`
+            : "",
+      phone: !cleanPhone ? REQUIRED : validateInternationalPhone(cleanPhone),
+      email: !cleanEmail
+        ? REQUIRED
+        : isValidEmail(cleanEmail)
+          ? ""
+          : "Enter a valid email address (e.g. name@example.com)",
+      service: form.service ? "" : "Please select a service",
+    };
+
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).some(Boolean)) {
+      setSubmitMessage({ type: "", text: "" });
       return;
     }
+
+    const payload = {
+      ...form,
+      name: cleanName,
+      phone: cleanPhone,
+      email: cleanEmail,
+    };
 
     setIsLoading(true);
     setSubmitMessage({ type: "", text: "" });
@@ -120,14 +176,26 @@ export default function NRIPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
         setSubmitMessage({ type: "success", text: "Thank you! Our experts will contact you soon." });
-        setForm({ name: "", phone: "", email: "", service: "" }); 
+        setForm({ name: "", phone: "", email: "", service: "" });
+        setErrors({ name: "", phone: "", email: "", service: "" });
       } else {
-        setSubmitMessage({ type: "error", text: "Something went wrong. Please try again later." });
+        // show the server's own message when it sends one
+        let serverMessage = "";
+        try {
+          const errorBody = await response.json();
+          serverMessage = errorBody?.message || "";
+        } catch (parseError) {
+          // response was not JSON
+        }
+        setSubmitMessage({
+          type: "error",
+          text: serverMessage || "Something went wrong. Please try again later.",
+        });
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -501,40 +569,57 @@ export default function NRIPage() {
 
             {/* FORM STARTS HERE */}
             <form className="space-y-4" onSubmit={handleSubmit}>
-              <input
-                name="name"
-                value={form.name}
-                placeholder="Name"
-                className="w-full border border-gray-300 p-3 rounded-lg text-[14px] outline-none focus:border-[#42998b] focus:ring-1 focus:ring-[#42998b] transition bg-white"
-                onChange={handleChange}
-              />
+              <div>
+                <input
+                  name="name"
+                  value={form.name}
+                  placeholder="Name"
+                  maxLength={50}
+                  className={`w-full border p-3 rounded-lg text-[14px] outline-none focus:ring-1 transition bg-white ${errors.name ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-[#42998b] focus:ring-[#42998b]"}`}
+                  onChange={handleChange}
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-[12px] mt-1">{errors.name}</p>
+                )}
+              </div>
 
               <div>
-                <div className="flex border border-gray-300 rounded-lg overflow-hidden focus-within:border-[#42998b] focus-within:ring-1 focus-within:ring-[#42998b] bg-white transition">
+                <div className={`flex border rounded-lg overflow-hidden focus-within:ring-1 bg-white transition ${errors.phone ? "border-red-500 focus-within:border-red-500 focus-within:ring-red-500" : "border-gray-300 focus-within:border-[#42998b] focus-within:ring-[#42998b]"}`}>
                   <input
                     name="phone"
                     value={form.phone}
                     placeholder="Phone Number"
+                    inputMode="tel"
+                    maxLength={16}
                     className="w-full p-3 text-[14px] outline-none bg-white"
                     onChange={handleChange}
                   />
                 </div>
+                {errors.phone && (
+                  <p className="text-red-500 text-[12px] mt-1">{errors.phone}</p>
+                )}
                 <p className="text-[10px] sm:text-[11px] font-medium text-gray-500 mt-1.5">*Enter your international number. We'll call you at no extra cost.</p>
               </div>
 
-              <input
-                name="email"
-                value={form.email}
-                placeholder="Email ID"
-                className="w-full border border-gray-300 p-3 rounded-lg text-[14px] outline-none focus:border-[#42998b] focus:ring-1 focus:ring-[#42998b] transition bg-white"
-                onChange={handleChange}
-              />
+              <div>
+                <input
+                  name="email"
+                  value={form.email}
+                  placeholder="Email ID"
+                  maxLength={EMAIL_MAX}
+                  className={`w-full border p-3 rounded-lg text-[14px] outline-none focus:ring-1 transition bg-white ${errors.email ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-[#42998b] focus:ring-[#42998b]"}`}
+                  onChange={handleChange}
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-[12px] mt-1">{errors.email}</p>
+                )}
+              </div>
 
               <div className="pt-2">
                 <label className="text-[12px] sm:text-[13px] font-bold text-gray-800 block mb-2">Are you looking for</label>
                 <div className="relative">
                   <div
-                    className={`w-full border p-3 rounded-lg text-[14px] cursor-pointer flex justify-between items-center transition bg-white min-h-[46px] ${isDropdownOpen ? 'border-[#42998b] ring-1 ring-[#42998b]' : 'border-gray-300'}`}
+                    className={`w-full border p-3 rounded-lg text-[14px] cursor-pointer flex justify-between items-center transition bg-white min-h-[46px] ${isDropdownOpen ? 'border-[#42998b] ring-1 ring-[#42998b]' : errors.service ? 'border-red-500' : 'border-gray-300'}`}
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   >
                     <span className={form.service !== "" ? "text-gray-800" : "text-gray-400"}>
@@ -563,6 +648,9 @@ export default function NRIPage() {
                     </>
                   )}
                 </div>
+                {errors.service && (
+                  <p className="text-red-500 text-[12px] mt-1">{errors.service}</p>
+                )}
               </div>
 
               <button
