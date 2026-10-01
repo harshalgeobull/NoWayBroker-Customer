@@ -274,6 +274,7 @@ const PlanPurchase = () => {
   const renderSlider = (plansToDisplay) => {
     const settings = {
       infinite: true,
+      lazyLoad: "ondemand",
       speed: 500,
       slidesToShow: 4,
       slidesToScroll: 1,

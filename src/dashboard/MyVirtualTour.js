@@ -14,6 +14,7 @@ import { useHistory } from "react-router-dom";
 const MyVirtualTour = () => {
   const [activeTab, setActiveTab] = useState("sent");
   const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const user_id = sessionStorage.getItem("accessToken");
   const [activeFilter, setActiveFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,6 +97,8 @@ const MyVirtualTour = () => {
   };
 
   const fetchAppointments = async () => {
+    setLoading(true);
+
     const formData = new FormData();
 
     // Conditional formData field based on activeTab
@@ -189,12 +192,14 @@ const MyVirtualTour = () => {
       setAppointments([]);
       setTotalPages(0);
       console.error("Error fetching filtered properties:", error);
+    }finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchAppointments();
-  }, [currentPage, user_id, activeFilter]);
+  }, [currentPage, user_id, activeTab]);
 
   // // Sent Invitation API
   const handleCount = async () => {
@@ -305,12 +310,14 @@ const MyVirtualTour = () => {
 
   return (
     <>
-      <div className="max-w-6xl p-6 mx-auto">
+      {/* <div className="max-w-6xl p-6 mx-auto"> */}
+      <div className="max-w-6xl p-3 mx-auto sm:p-4 md:p-6">
         <h2 className="text-2xl font-semibold">Virtual Appointment</h2>
 
-        <div className="flex gap-6 mt-4 border-b">
+        {/* <div className="flex gap-6 mt-4 border-b"> */}
+        <div className="flex gap-4 mt-4 overflow-x-auto border-b sm:gap-6">
           <button
-            className={`pb-2 font-medium text-lg ${
+            className={`pb-2 text-sm sm:text-base md:text-lg font-medium whitespace-nowrap ${
               activeTab === "sent"
                 ? "my-text border-b-2 border-rose-600"
                 : "text-gray-500"
@@ -324,7 +331,7 @@ const MyVirtualTour = () => {
             </span>
           </button>
           <button
-            className={`pb-2 font-medium text-lg ${
+            className={`pb-2 text-sm sm:text-base md:text-lg font-medium whitespace-nowrap ${
               activeTab === "received"
                 ? "my-text border-b-2 border-rose-600"
                 : "text-gray-500"
@@ -340,12 +347,12 @@ const MyVirtualTour = () => {
 
         {activeTab === "sent" && (
           <>
-            <div className="flex gap-4 mt-4">
+            <div className="flex flex-wrap gap-2 mt-4 sm:gap-3 md:gap-4">
               {["All", "Pending", "Accepted", "Rejected", "Expired"].map(
                 (filter) => (
                   <button
                     key={filter}
-                    className={`px-4 py-2 rounded-3xl ${
+                    className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-3xl whitespace-nowrap ${
                       activeFilter === filter.toLowerCase()
                         ? "bg-rose-100 my-text"
                         : "bg-gray-100 text-gray-500"
@@ -359,7 +366,16 @@ const MyVirtualTour = () => {
             </div>
 
             <div className="mt-6 space-y-4">
-              {filteredSentAppointments.map((appointment) => (
+  {loading ? (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-10 h-10 border-4 border-gray-300 rounded-full border-t-[#8B1E3F] animate-spin"></div>
+    </div>
+  ) : filteredSentAppointments.length === 0 ? (
+    <p className="mt-10 text-center text-gray-500">
+      No Data Found
+    </p>
+  ) : (
+    filteredSentAppointments.map((appointment) => (
                 <div
                   key={appointment.id}
                   className={`border-2 ${
@@ -370,10 +386,10 @@ const MyVirtualTour = () => {
                         : appointment.status === "Expired"
                           ? "border-blue-400"
                           : "border-yellow-400"
-                  } bg-white p-6 rounded-lg shadow-md`}
+                  } bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-md`}
                 >
                   {/* Top Section: Name, Role, Phone, Email in a Row */}
-                  <div className="flex flex-wrap items-center justify-between pb-3 border-b">
+                  <div className="flex flex-col items-start justify-between gap-3 pb-3 border-b sm:flex-row sm:items-center">
                     {/* Name & Role with User Icon */}
                     <div className="flex items-center gap-3">
                       {appointment.property_owner_image ? (
@@ -398,7 +414,7 @@ const MyVirtualTour = () => {
                     </div>
 
                     {/* Contact Details */}
-                    <div className="flex items-center gap-20 text-sm">
+                    <div className="flex items-center gap-2 text-sm sm:gap-6 md:gap-20">
                       {/* Phone */}
                       <div className="flex items-center gap-2">
                         <FiSmartphone className="text-lg my-text" />
@@ -445,7 +461,7 @@ const MyVirtualTour = () => {
                     {/* Left Column: Property Details */}
                     <div className="flex items-start gap-4">
                       {/* Image Wrapper */}
-                      <div className="relative w-32 h-24">
+                      <div className="relative w-24 h-20 shrink-0 sm:w-28 sm:h-22 md:w-32 md:h-24">
                         <Link
                           to={{
                             pathname:
@@ -462,7 +478,7 @@ const MyVirtualTour = () => {
                                 : `${process.env.REACT_APP_API_URL}/${appointment.image}`
                             }
                             alt="Property Cover"
-                            className="object-cover w-32 h-24 rounded-md cursor-pointer"
+                            className="object-cover w-24 h-20 rounded-md cursor-pointer sm:w-28 sm:h-22 md:w-32 md:h-24"
                           />
                         </Link>
                         <span
@@ -483,10 +499,10 @@ const MyVirtualTour = () => {
                       </div>
                       {/* Property Details */}
                       <div>
-                        <h4 className="mb-0 font-semibold">
+                        <h4 className="mb-0 text-sm font-semibold break-words sm:text-base">
                           {appointment.property_name}
                         </h4>
-                        <p className="text-gray-500">{appointment.location}</p>
+                        <p className="text-sm text-gray-500 break-words sm:text-base">{appointment.location}</p>
                         <p className="font-bold">
                           {appointment.type === "Rent" ? (
                             <>
@@ -653,7 +669,8 @@ const MyVirtualTour = () => {
                     />
                   )} */}
                 </div>
-              ))}
+              ))
+              )}
             </div>
           </>
         )}
@@ -661,13 +678,14 @@ const MyVirtualTour = () => {
         {activeTab === "received" && (
           <>
             {/* Filter Buttons */}
-            <div className="flex gap-4 mt-4">
+            <div className="flex flex-wrap gap-2 mt-4 sm:gap-3 md:gap-4">
               {["All", "Pending", "Accepted", "Rejected", "Expired"].map(
                 (filter) => (
                   <button
                     key={filter}
-                    className={`px-4 py-2 rounded-3xl ${
-                      activeFilter === filter.toLowerCase()
+                    // className={`px-4 py-2 rounded-3xl text-sm sm:text-base whitespace-nowrap ${
+                    className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-3xl whitespace-nowrap ${  
+                    activeFilter === filter.toLowerCase()
                         ? "bg-rose-100 my-text"
                         : "bg-gray-100 text-gray-500"
                     }`}
@@ -681,7 +699,16 @@ const MyVirtualTour = () => {
 
             {/* Appointment Cards */}
             <div className="mt-6 space-y-4">
-              {filteredReceivedAppointments.map((appointment) => (
+  {loading ? (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-10 h-10 border-4 border-gray-300 rounded-full border-t-[#8B1E3F] animate-spin"></div>
+    </div>
+  ) : filteredReceivedAppointments.length === 0 ? (
+    <p className="mt-10 text-center text-gray-500">
+      No Data Found
+    </p>
+  ) : (
+    filteredReceivedAppointments.map((appointment) => (
                 <div
                   key={appointment.id}
                   className={`border-2 ${
@@ -692,12 +719,13 @@ const MyVirtualTour = () => {
                         : appointment.status === "Expired"
                           ? "border-blue-400"
                           : "border-yellow-400"
-                  } bg-white p-6 rounded-lg shadow-md`}
+                  } bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-md`}
                 >
+              
                   {/* Top Section: Name, Role, Phone, Email */}
-                  <div className="flex flex-wrap items-center justify-between pb-3 border-b">
+                  <div className="flex flex-col items-start justify-between gap-3 pb-3 border-b sm:flex-row sm:items-center">
                     {/* Name & Role */}
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-3">
                       {/* <div className="p-2 bg-rose-100 rounded-full">
                         <User className="text-4xl my-text" />
                       </div> */}
@@ -726,7 +754,7 @@ const MyVirtualTour = () => {
                     </div>
 
                     {/* Contact Details */}
-                    <div className="flex items-center gap-20 text-sm">
+                    <div className="flex items-center gap-2 text-sm sm:gap-6 md:gap-20">
                       {/* Phone */}
                       {/* <div className="flex items-center gap-2">
                         <FiSmartphone className="text-lg my-text" />
@@ -793,7 +821,7 @@ const MyVirtualTour = () => {
                     {/* Left Column: Property Details */}
                     <div className="flex items-start gap-4">
                       {/* Image Wrapper */}
-                      <div className="relative h-24 w-44">
+                      <div className="relative w-24 h-20 shrink-0 sm:w-28 sm:h-22 md:w-32 md:h-24">
                         <Link
                           to={{
                             pathname:
@@ -810,7 +838,7 @@ const MyVirtualTour = () => {
                                 : `${process.env.REACT_APP_API_URL}/${appointment.image}`
                             }
                             alt="Property Cover"
-                            className="object-cover w-32 h-24 rounded-md"
+                            className="object-cover w-24 h-20 rounded-md sm:w-28 sm:h-22 md:w-32 md:h-24"
                           />
                         </Link>
                         <span
@@ -831,10 +859,10 @@ const MyVirtualTour = () => {
                       </div>
                       {/* Property Details */}
                       <div>
-                        <h4 className="mb-0 font-semibold">
+                        <h4 className="mb-0 text-sm font-semibold break-words sm:text-base">
                           {appointment.property_name}
                         </h4>
-                        <p className="text-gray-500">{appointment.location}</p>
+                        <p className="text-sm text-gray-500 break-words sm:text-base">{appointment.location}</p>
                         <p className="font-bold">
                           {appointment.type === "Rent" ? (
                             <>
@@ -929,11 +957,11 @@ const MyVirtualTour = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex justify-end gap-4 mt-4">
+                  <div className="flex flex-wrap justify-end gap-2 mt-4 sm:gap-4">
                     {appointment.status === "Pending" ? (
                       <>
                         <button
-                          className="px-4 py-2 text-white bg-green-500 rounded-md"
+                          className="px-3 py-1.5 text-sm text-white bg-green-500 rounded-md sm:px-4 sm:py-2 sm:text-base"
                           onClick={() => {
                             setPendingAction({
                               id: appointment.id,
@@ -946,7 +974,7 @@ const MyVirtualTour = () => {
                         </button>
 
                         <button
-                          className="px-4 py-2 text-white bg-red-500 rounded-md"
+                          className="px-3 py-1.5 text-sm text-white bg-red-500 rounded-md sm:px-4 sm:py-2 sm:text-base"
                           onClick={() => {
                             setPendingAction({
                               id: appointment.id,
@@ -977,7 +1005,8 @@ const MyVirtualTour = () => {
                     )}
                   </div>
                 </div>
-              ))}
+    ))
+              )}
             </div>
           </>
         )}

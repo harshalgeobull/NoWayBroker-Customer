@@ -5,9 +5,9 @@ import axios from "axios";
 const Download = () => {
   const [socialLinks, setSocialLinks] = useState({
     appstore: "#",
-    playstore: "#",
+    playstore: "https://play.google.com/store/apps/details?id=com.nowaybroker.user",
   });
-
+  const [mobileNumber, setMobileNumber] = useState("");
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -22,7 +22,7 @@ const Download = () => {
           const data = response.data.data[0];
           setSocialLinks({
             appstore: data.appstore || "#",
-            playstore: data.playstore || "#",
+            playstore: "https://play.google.com/store/apps/details?id=com.nowaybroker.user",
           });
         }
       } catch (error) {
@@ -55,11 +55,17 @@ const Download = () => {
                 Enter Mobile Number
               </label>
               <input
-                id="mobileNumber"
-                type="text"
-                placeholder="Enter your mobile number"
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-rose-600 focus:outline-none"
-              />
+  id="mobileNumber"
+  type="tel"
+  placeholder="Enter your mobile number"
+  maxLength={10}
+  value={mobileNumber}
+  onChange={(e) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+    setMobileNumber(value);
+  }}
+  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-rose-600 focus:outline-none"
+/>
             </div>
 
             {/* Button aligned to the bottom of the label */}
@@ -71,7 +77,7 @@ const Download = () => {
           </div>
           <div className="flex gap-4 mt-8">
             <a
-              // href={socialLinks.appstore}
+              href={socialLinks.appstore}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -83,7 +89,7 @@ const Download = () => {
             </a>
 
             <a
-              // href={socialLinks.playstore}
+              href={socialLinks.playstore}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -96,13 +102,18 @@ const Download = () => {
           </div>
         </div>
 
-        {/* Right Section - Image */}
+        {/* Right Section - Video */}
         <div className="flex justify-center lg:w-3/4">
-          <img
-            src="/image/app3.png"
-            alt="Mobile App Preview"
-            className="shadow-lg w-96 lg:w-full lg:h-[425px] rounded-2xl"
-          />
+          <video
+            src="/app-video.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="shadow-lg w-96 lg:w-full lg:h-[425px] rounded-2xl object-cover"
+          >
+            Your browser does not support the video tag.
+          </video>
         </div>
       </div>
     </div>

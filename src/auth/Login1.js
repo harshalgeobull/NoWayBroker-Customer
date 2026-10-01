@@ -185,9 +185,8 @@ const Login1 = ({ onClose, isOpen, defaultMobile }) => {
                       setErrors({ ...errors, mobile: "" });
                     }
                   }}
-                  className={`w-full p-3 pr-10 border rounded-lg text-gray-700 bg-white focus:outline-none ${
-                    errors.mobile ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full p-3 pr-10 border rounded-lg text-gray-700 bg-white focus:outline-none ${errors.mobile ? "border-red-500" : "border-gray-300"
+                    }`}
                 />
               </div>
               {errors.mobile && (
@@ -201,11 +200,10 @@ const Login1 = ({ onClose, isOpen, defaultMobile }) => {
             {/* Login Button */}
             <button
               onClick={handleLogin}
-              className={`w-full py-3 mt-3 rounded-lg text-lg font-medium transition ${
-                isSubmitting
-                  ? "bg-gray-400 text-white cursor-not-allowed"
-                  : "my-bg text-white hover:my-bg"
-              }`}
+              className={`w-full py-3 mt-3 rounded-lg text-lg font-medium transition ${isSubmitting
+                ? "bg-gray-400 text-white cursor-not-allowed"
+                : "my-bg text-white hover:my-bg"
+                }`}
               disabled={isSubmitting}
             >
               {isSubmitting ? "Sending OTP..." : "Login"}

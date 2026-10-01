@@ -13,45 +13,35 @@ const MyLeads = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("latest");
   const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("property");
   const user_id = sessionStorage.getItem("accessToken");
   const itemsPerPage = 10;
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   const formatPrice = (price) => {
-    if (!price) return "";
-    price = parseInt(price);
+  if (!price) return "";
 
-    if (price >= 10000000) {
-      return parseFloat((price / 10000000).toFixed(1)) + " Cr";
-    } else if (price >= 100000) {
-      return parseFloat((price / 100000).toFixed(1)) + " L";
-    } else if (price >= 1000) {
-      return parseFloat((price / 1000).toFixed(1)) + " K";
-    } else {
-      return price.toString();
-    }
-  };
+  price = Number(price);
+
+  if (price >= 10000000) {
+    return `${(price / 10000000).toFixed(2).replace(/\.?0+$/, "")} Cr`;
+  } else if (price >= 100000) {
+    return `${(price / 100000).toFixed(2).replace(/\.?0+$/, "")} L`;
+  } else if (price >= 1000) {
+    return `${(price / 1000).toFixed(2).replace(/\.?0+$/, "")} K`;
+  } else {
+    return price.toString();
+  }
+};
 
   const formatAverageProjectPrice = (price) => {
     if (!price) return "";
 
     const formatValue = (val) => {
-      if (val === null || val === undefined) return "";
-      const numericStr = String(val).replace(/[^\d.-]/g, "");
-      const n = parseFloat(numericStr);
-      if (Number.isNaN(n)) return "";
-
-      if (n >= 10000000)
-        return (n / 10000000).toFixed(1).replace(/\.0$/, "") + " Cr";
-      if (n >= 100000)
-        return (n / 100000).toFixed(1).replace(/\.0$/, "") + " L";
-      if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + " K";
-
-      // 👇 NEW: treat any value below 1000 as K
-      return n.toFixed(1).replace(/\.0$/, "") + " K";
-    };
-
+  if (val === null || val === undefined) return "";
+  return formatPrice(Number(val));
+};
     let values;
     if (typeof price === "string" && /[-–—]/.test(price)) {
       values = price
@@ -77,6 +67,7 @@ const MyLeads = () => {
 
   useEffect(() => {
     const fetchLeads = async () => {
+      setLoading(true);
       const formData = new FormData();
       formData.append("user_id", user_id);
       formData.append("page", currentPage);
@@ -121,47 +112,10 @@ const MyLeads = () => {
                 item?.project_details?.address_area ||
                 "Not provided",
               price: isProperty
-                ? `₹${
-                    Number(item.enquiry_property_price) >= 10000000
-                      ? (Number(item.enquiry_property_price) / 10000000)
-                          .toFixed(1)
-                          .replace(/\.0$/, "") + " Cr"
-                      : Number(item.enquiry_property_price) >= 100000
-                        ? (Number(item.enquiry_property_price) / 100000)
-                            .toFixed(1)
-                            .replace(/\.0$/, "") + " L"
-                        : Number(item.enquiry_property_price) >= 1000
-                          ? (Number(item.enquiry_property_price) / 1000)
-                              .toFixed(1)
-                              .replace(/\.0$/, "") + " K"
-                          : item.enquiry_property_price
-                  }`
-                : isProject
-                  ? `₹${
-                      Number(item.enquiry_average_project_price) >= 10000000
-                        ? (
-                            Number(item.enquiry_average_project_price) /
-                            10000000
-                          )
-                            .toFixed(1)
-                            .replace(/\.0$/, "") + " Cr"
-                        : Number(item.enquiry_average_project_price) >= 100000
-                          ? (
-                              Number(item.enquiry_average_project_price) /
-                              100000
-                            )
-                              .toFixed(1)
-                              .replace(/\.0$/, "") + " L"
-                          : Number(item.enquiry_average_project_price) >= 1000
-                            ? (
-                                Number(item.enquiry_average_project_price) /
-                                1000
-                              )
-                                .toFixed(1)
-                                .replace(/\.0$/, "") + " K"
-                            : item.enquiry_average_project_price
-                    }`
-                  : "N/A",
+  ? `₹ ${formatPrice(item.enquiry_property_price)}`
+  : isProject
+    ? `₹ ${formatPrice(item.enquiry_average_project_price)}`
+    : "N/A",
               rent: item.rent,
               rent_duration: item.rent_duration,
               receivedOn: new Date(item.created_at).toLocaleDateString(
@@ -183,7 +137,9 @@ const MyLeads = () => {
         }
       } catch (error) {
         console.error("Error fetching leads:", error);
-      }
+      }finally {
+      setLoading(false);
+    }
     };
 
     fetchLeads();
@@ -275,16 +231,20 @@ const MyLeads = () => {
           </div>
         </div>
 
-        {leads.length === 0 ? (
-          <p className="text-center text-gray-500 mt-10">
-            {search.trim() !== ""
-              ? "No results found for your search."
-              : "No Data Found"}
-          </p>
-        ) : (
+        {loading ? (
+  <div className="flex items-center justify-center py-20">
+    <div className="w-10 h-10 border-4 border-gray-300 rounded-full border-t-[#8B1E3F] animate-spin"></div>
+  </div>
+) : leads.length === 0 ? (
+  <p className="text-center text-gray-500 mt-10">
+    {search.trim() !== ""
+      ? "No results found for your search."
+      : "No Data Found"}
+  </p>
+) : (
           leads.map((lead) => (
             <div key={lead.id} className="bg-white rounded-lg p-3 mb-4 border">
-              <div className="flex justify-between items-center">
+              {/* <div className="flex justify-between items-center">
                 <div className="flex items-center gap-4">
                   <div className="bg-rose-100  rounded-full">
                     {console.log(lead)}
@@ -309,6 +269,44 @@ const MyLeads = () => {
                   className="flex items-center gap-1 mr-20 my-text"
                 >
                   <FiSmartphone /> {lead.phone}
+                </a>
+              </div>
+
+              <hr className="my-4" /> */}
+              <div className="flex items-center justify-between gap-2">
+                {/* Profile */}
+                <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                  <div className="bg-rose-100 rounded-full flex-shrink-0">
+                    {console.log(lead)}
+
+                    {lead?.profile_image ? (
+                      <img
+                        src={`${process.env.REACT_APP_API_URL}/media/${lead.profile_image}`}
+                        alt={sessionStorage.getItem("user_type") || "User"}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="my-text text-4xl" />
+                    )}
+                  </div>
+
+                  <div className="mt-3 min-w-0">
+                    <p className="font-semibold mb-0 truncate">
+                      {lead.name}
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      {lead.type}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <a
+                  href={`tel:${lead.phone}`}
+                  className="flex items-center gap-1 ml-2 my-text flex-shrink-0 whitespace-nowrap text-xs sm:text-sm sm:ml-0 sm:mr-20"
+                >
+                  <FiSmartphone className="flex-shrink-0" />
+                  <span>{lead.phone}</span>
                 </a>
               </div>
 

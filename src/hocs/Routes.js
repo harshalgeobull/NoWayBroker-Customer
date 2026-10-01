@@ -79,6 +79,7 @@ import ShareModal from "../containers/ShareModal";
 import ContactDetails from "../containers/ContactDetails";
 import { useHistory } from 'react-router-dom'
 import NRIPage from '../containers/NRIPage';
+import ComingSoon from "../containers/ComingSoon";
 
 
 
@@ -98,6 +99,7 @@ const Routes = () => {
         <Route exact path="/signup" component={Signup} />
 
         <Route exact path="/nri" component={NRIPage} />
+        <Route exact path="/coming-soon/:city_name" component={ComingSoon} />
 
         <Route exact path="/profile" component={Profile} />
         <Route exact path="/dashboard" component={Dashboard} />

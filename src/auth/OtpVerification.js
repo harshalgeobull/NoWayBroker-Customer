@@ -4,6 +4,7 @@ import {
   IoArrowBackCircleOutline,
 } from "react-icons/io5";
 import axios from "axios";
+import { friendlyServerMessage } from "../utils/Signupvalidation";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useHistory } from "react-router-dom";
@@ -116,7 +117,9 @@ const OtpVerification = ({
       );
 
       if (registerData?.status !== 1) {
-        toast.error(registerData?.message || "Registration failed.");
+        toast.error(
+          friendlyServerMessage(registerData?.message) || "Registration failed.",
+        );
         return;
       }
 
@@ -189,7 +192,7 @@ const OtpVerification = ({
       console.error(err);
       onClose();
       toast.error(
-        err.response?.data?.message ||
+        friendlyServerMessage(err.response?.data?.message) ||
           "Something went wrong. Please try again.",
       );
     } finally {

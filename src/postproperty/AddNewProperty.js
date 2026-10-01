@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
+// File ke top mein, component function ke BAHAR
+
 import { IoIosInformationCircle } from "react-icons/io";
+import { ToWords } from "to-words";
 import { Trash } from "lucide-react"; // Using Lucide Icons for delete button
 import { MdOutlineDriveFolderUpload } from "react-icons/md";
 import axios from "axios";
@@ -19,6 +22,7 @@ import "primeicons/primeicons.css";
 import { MdErrorOutline } from "react-icons/md";
 import Select, { components } from "react-select";
 import { Country, State } from "country-state-city";
+const GOOGLE_MAPS_LIBRARIES = ["places"];
 
 const AddNewProperty = () => {
   const [mapCenter, setMapCenter] = useState({ lat: 18.5204, lng: 73.8567 });
@@ -27,6 +31,8 @@ const AddNewProperty = () => {
   const [address, setAddress] = useState("");
   const [addressArea, setAddressArea] = useState("");
   const [city, setCity] = useState("");
+  const [locality, setLocality] = useState("");
+  const [subLocality, setSubLocality] = useState("");
   const [state, setState] = useState("");
   const [country, setCountry] = useState("");
   const [zipCode, setZipCode] = useState("");
@@ -34,10 +40,15 @@ const AddNewProperty = () => {
   const [longitude, setLongitude] = useState(null);
   const autoCompleteRef = useRef(null);
   const GOOGLE_MAPS_API_KEY = "AIzaSyAUCNwxnNo52kFWJNGhRVj-AnkoffmzYe0";
+  // const { isLoaded } = useJsApiLoader({
+  //   googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+  //   libraries: ["places"],
+  // });
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: ["places"],
+    libraries: GOOGLE_MAPS_LIBRARIES,
   });
+
   const userId = sessionStorage.getItem("accessToken");
   const userType = sessionStorage.getItem("user_type");
   const user_name = sessionStorage.getItem("user_name");
@@ -46,7 +57,7 @@ const AddNewProperty = () => {
   const [virtualTourLink, setVirtualTourLink] = useState("");
   const [propertyName, setPropertyName] = useState("");
   const [markAsFeatured, setMarkAsFeatured] = useState("No");
-  const [adminApproval, setAdminApproval] = useState("Approved");
+  const [adminApproval, setAdminApproval] = useState("Pending");
   const [propertyPrice, setPropertyPrice] = useState("");
   const [bhkType, setBhkType] = useState("");
   const [bathroom, setBathroom] = useState("");
@@ -152,6 +163,7 @@ const AddNewProperty = () => {
   const [totalNumberOfRooms, setTotalNumberOfRooms] = useState("");
   const [qualityRating, setQualityRating] = useState("");
   const [totalNumberParking, setTotalNumberParking] = useState("");
+  //const [priceOnwards, setPriceOnwards] = useState(false);
   const [priceNegotiable, setPriceNegotiable] = useState(false);
   const [electricityAndWaterCharges, setElectricityAndWaterCharges] =
     useState(false);
@@ -164,65 +176,99 @@ const AddNewProperty = () => {
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [isLaterSelected, setIsLaterSelected] = useState(false);
 
-  const buildPrompt = () => {
-    return `
-Write a professional real estate property description.
-
-STRICT INSTRUCTIONS:
-- The description MUST be between 600 and 700 characters ONLY
-- Do NOT exceed 700 characters
-- Do NOT go below 600 characters
-- Write everything in ONE paragraph
-- Do NOT use bullet points or line breaks
-
-Property Details:
-- Property Name: ${propertyName?.trim() || ""}
-- Type: ${propertyType || ""}
-- Category: ${propertyCategory === "Buy" ? "Buy" : propertyCategory === "Rent" ? "Rent" : "PG"}
-- Price: ₹${formData.property_price || formData.rent || ""}
-- City: ${city?.trim() || ""}
-- Area: ${addressArea || ""}
-- BHK: ${formData.bhk_type || ""}
-- Bathrooms: ${formData.bathroom || ""}
-- Built-up Area: ${builtUpArea || ""} ${builtUpAreaUnit || ""}
-- Furnishing: ${formData.furnished_type || ""}
-- Floor: ${formData.property_floor || ""}
-- Total Floors: ${formData.total_floor || ""}
-- Age: ${formData.age_of_property || ""}
-- Facing: ${formData.facing || ""}
-- Balcony: ${formData.balcony || ""}
-
-Make it engaging, attractive, and human-like.
-`;
-  };
+  
 
   const generateDescription = async () => {
-    try {
-      setIsGeneratingDescription(true);
+  try {
+    setIsGeneratingDescription(true);
 
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "user",
-              content: buildPrompt(),
-            },
-          ],
-          temperature: 0.7,
-          max_tokens: 200,
-        },
-        {
-          headers: {
-           Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/cust_api/generate-property-description/`,
+      {
+        form_type: "property",
 
-      const description = response?.data?.choices?.[0]?.message?.content || "";
+        property_name: formData?.property_name?.trim() || "",
+        building_type: formData.building_type || "",
+        property_type: propertyType || "",
+        user_type: formData.user_type || "",
+        property_category_type: propertyCategory || "",
 
+        property_price: formData.property_price || "",
+        rent: formData.rent || "",
+
+        address: formData.address || "",
+        address_area: addressArea || "",
+        city_name: city?.trim() || "",
+        state: formData.state || "",
+        country: formData.country || "",
+
+        bhk_type: formData.bhk_type || "",
+        bathroom: formData.bathroom || "",
+
+        area: builtUpArea || "",
+        area_in: builtUpAreaUnit || "",
+
+        carpet_area: carpetArea || "",
+        carpet_area_unit: carpetAreaUnit || "",
+
+        furnished_type: formData.furnished_type || "",
+
+        property_floor: formData.property_floor || "",
+        total_floor: formData.total_floor || "",
+
+        age_of_property: formData.age_of_property || "",
+        facing: formData.facing || "",
+        balcony: formData.balcony || "",
+
+        covered_parking: formData.covered_parking || "",
+        uncovered_parking: formData.uncovered_parking || "",
+        parking_availability: formData.parking_availability || "",
+        parking_types: formData.parking_types || "",
+
+        lift_availability: formData.lift_availability || "",
+        power_backup: formData.power_backup || "",
+
+        possession_status: formData.possession_status || "",
+        additional_rooms: formData.additional_rooms || "",
+
+        developer: formData.developer || "",
+        amenities: formData.amenities || "",
+
+        // Commercial
+        office_type: formData.office_type || "",
+        office_space_type: formData.office_space_type || "",
+        land_type: formData.land_type || "",
+        conferenceRoom: formData.conferenceRoom || "",
+        washroom_Check: formData.washroom_Check || "",
+        reception_area: formData.reception_area || "",
+        pantry: formData.pantry || "",
+        cabines: formData.cabines || "",
+        meeting_rooms: formData.meeting_rooms || "",
+        central_AC: formData.central_AC || "",
+
+        // PG / Co-living
+        room_type: formData.room_type || "",
+        food_available: formData.food_available || "",
+        total_beds: formData.total_beds || "",
+        available_beds: formData.available_beds || "",
+        suited_for: formData.suited_for || "",
+        available_for: formData.available_for || "",
+
+        // Additional
+        ownership: formData.ownership || "",
+        price_onwards: formData.price_onwards || "",
+        price_negotiable: formData.price_negotiable || "",
+        all_inclusive_price: formData.all_inclusive_price || "",
+        tax_and_goverment_charges:
+          formData.tax_and_goverment_charges || "",
+        electricity_and_water_charges:
+          formData.electricity_and_water_charges || "",
+      }
+    );
+
+    const description = response?.data?.description || "";
+
+    if (response?.data?.status === 1) {
       setPropertyDescription(description);
 
       setFormData((prev) => ({
@@ -231,13 +277,18 @@ Make it engaging, attractive, and human-like.
       }));
 
       toast.success("Description generated successfully");
-    } catch (error) {
-      console.error("Generate Description Error:", error);
-      toast.error("Failed to generate description");
-    } finally {
-      setIsGeneratingDescription(false);
+    } else {
+      toast.error(
+        response?.data?.message || "Failed to generate description"
+      );
     }
-  };
+  } catch (error) {
+    console.error("Generate Description Error:", error);
+    toast.error("Failed to generate description");
+  } finally {
+    setIsGeneratingDescription(false);
+  }
+};
 
   useEffect(() => {
     const countries = Country.getAllCountries();
@@ -265,7 +316,7 @@ Make it engaging, attractive, and human-like.
 
   const officeOptions = [
     "Ready to Move Office Space",
-    "Bare Sheell Office Space",
+    "Bare Shell Office Space",
     "Co-working Office Space",
   ];
 
@@ -671,6 +722,7 @@ Make it engaging, attractive, and human-like.
 
   const handlePlaceChanged = () => {
     const place = autoCompleteRef.current.getPlace();
+
     if (!place.geometry || !place.address_components) return;
 
     const location = place.geometry.location;
@@ -688,7 +740,8 @@ Make it engaging, attractive, and human-like.
     let extractedState = "";
     let extractedCity = "";
     let extractedZip = "";
-    let extractedArea = "";
+    let extractedLocality = "";
+    let extractedSubLocality = "";
 
     place.address_components.forEach((component) => {
       const types = component.types;
@@ -709,23 +762,25 @@ Make it engaging, attractive, and human-like.
         extractedZip = component.long_name;
       }
 
-      if (
-        types.includes("sublocality") ||
-        types.includes("sublocality_level_1") ||
-        types.includes("neighborhood")
-      ) {
-        extractedArea = component.long_name; // Extract area (e.g., neighborhood or sublocality)
+      if (types.includes("sublocality_level_1")) {
+        extractedLocality = component.long_name;
+      }
+
+      if (types.includes("sublocality_level_2")) {
+        extractedSubLocality = component.long_name;
       }
     });
 
     // Set address fields
     setCity(extractedCity);
     setZipCode(extractedZip);
+    setLocality(extractedLocality);
+    setSubLocality(extractedSubLocality);
 
     const addressArea =
-      extractedArea && extractedCity
-        ? `${extractedArea}, ${extractedCity}`
-        : extractedCity || extractedArea || "";
+      extractedLocality && extractedCity
+        ? `${extractedLocality}, ${extractedCity}`
+        : extractedCity || extractedLocality || "";
     setAddressArea(addressArea);
 
     // Match the country from allCountries by ISO code
@@ -764,6 +819,7 @@ Make it engaging, attractive, and human-like.
     property_type: propertyType,
     ownership: "",
     all_inclusive_price: "No",
+    price_onwards: "No",
     price_negotiable: "No",
     tax_and_goverment_charges: "No",
     property_dimensions_length: lengthOfLand,
@@ -794,7 +850,7 @@ Make it engaging, attractive, and human-like.
     property_description: propertyDescription,
     units: units,
     plot_no: plotNo,
-    available_from: availableFrom,
+    available_from: "",
     available_on: availableOn,
     operating_since: operatingSince,
     furnished_type: furnishedType,
@@ -859,7 +915,8 @@ Make it engaging, attractive, and human-like.
     video_url_type: videoSource,
     virtual_tour_availability: virtualTourLink,
     office_type: officeSubType,
-    washroom: retailWashroom,
+    washroom: "No",
+    commercial_washroom: "",
     conferenceRoom: conferenceRoom,
     // length_of_land: lengthOfLand,
     // breadthOfLand: breadthOfLand,
@@ -934,25 +991,36 @@ Make it engaging, attractive, and human-like.
     }));
   }, [parkingTypes]);
 
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      washroom: retailWashroom,
-    }));
-  }, [retailWashroom]);
+  // useEffect(() => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     washroom: retailWashroom,
+  //   }));
+  // }, [retailWashroom]);
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       central_AC: centralAC,
     }));
   }, [centralAC]);
-
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      reception_area: receptionArea,
-    }));
-  }, [receptionArea]);
+  setFormData((prev) => ({
+    ...prev,
+    pantry_option: pantry,
+  }));
+}, [pantry]);
+useEffect(() => {
+  setFormData((prev) => ({
+    ...prev,
+    reception_area: receptionArea,
+  }));
+}, [receptionArea]);
+  // useEffect(() => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     commercial_washroom: retailWashroom,
+  //   }));
+  // }, [retailWashroom]);
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -974,6 +1042,13 @@ Make it engaging, attractive, and human-like.
     }));
   }, [typeOfConstruction]);
   useEffect(() => {
+  setFormData((prev) => ({
+    ...prev,
+    property_dimensions_length: lengthOfLand,
+    property_dimensions_breadth: breadthOfLand,
+  }));
+}, [lengthOfLand, breadthOfLand]);
+  useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       conferenceRoom: conferenceRoom,
@@ -982,7 +1057,7 @@ Make it engaging, attractive, and human-like.
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      washroom: washroom,
+      commercial_washroom: washroom,
     }));
   }, [washroom]);
   useEffect(() => {
@@ -1161,20 +1236,37 @@ Make it engaging, attractive, and human-like.
         [name]: value,
       };
 
+      // if (name === "available_from") {
+      //   updatedData.isImmediateAvailable =
+      //     value === "Immediately" ? "Yes" : "No";
+
+      // if (name === "available_from") {
+      //   updatedData.available_from = "Immediately";
+      //   updatedData.isImmediateAvailable = "Yes";
+      //   updatedData.possession_date = new Date().toISOString().split("T")[0];
+
+      //   updatedData.possession_date =
+      //     value === "Immediately"
+      //       ? new Date().toISOString().split("T")[0]
+      //       : prev.possession_date;
+
+      //   // remove available_from when Later selected
+      //   if (value === "Later") {
+      //     delete updatedData.available_from;
+      //   }
+      // }
       if (name === "available_from") {
-        updatedData.isImmediateAvailable =
-          value === "Immediately" ? "Yes" : "No";
+  updatedData.available_from = value;
 
-        updatedData.possession_date =
-          value === "Immediately"
-            ? new Date().toISOString().split("T")[0]
-            : prev.possession_date;
+  updatedData.isImmediateAvailable =
+    value === "Immediately" ? "Yes" : "No";
 
-        // remove available_from when Later selected
-        if (value === "Later") {
-          delete updatedData.available_from;
-        }
-      }
+  if (value === "Immediately") {
+    updatedData.possession_date = new Date()
+      .toISOString()
+      .split("T")[0];
+  }
+}
 
       return updatedData;
     });
@@ -1267,9 +1359,12 @@ Make it engaging, attractive, and human-like.
         buildingType === "Residential" &&
         propertyType === "PG"
       ) {
-        if (!formData.available_for?.trim()) {
-          errors.available_for = "Available For is required";
-        }
+        if (
+  !Array.isArray(formData.available_for) ||
+  formData.available_for.length === 0
+) {
+  errors.available_for = "Available For is required";
+}
         if (!formData.suited_for?.trim()) {
           errors.suited_for = "Suited For is required";
         }
@@ -1468,23 +1563,26 @@ Make it engaging, attractive, and human-like.
             propertyType === "Industry")
         )
       ) {
-        if (!formData.furnished_type?.trim()) {
-          errors.furnished_type = "furnished type is required";
-        }
+        if (
+  !formData.furnished_type &&
+  propertyType !== "Storage"
+) {
+  errors.furnished_type = "furnished type is required";
+}
       }
 
-      if (
-        (propertyCategory === "Buy" &&
-          buildingType === "Residential" &&
-          propertyType === "Plot") ||
-        (propertyCategory === "Rent" &&
-          buildingType === "Residential" &&
-          propertyType === "Plot")
-      ) {
-        if (!formData.plot_no?.trim()) {
-          errors.plot_no = "plot no is required";
-        }
-      }
+      // if (
+      //   (propertyCategory === "Buy" &&
+      //     buildingType === "Residential" &&
+      //     propertyType === "Plot") ||
+      //   (propertyCategory === "Rent" &&
+      //     buildingType === "Residential" &&
+      //     propertyType === "Plot")
+      // ) {
+      //   if (!formData.plot_no?.trim()) {
+      //     errors.plot_no = "plot no is required";
+      //   }
+      // }
 
       if (
         !(
@@ -1504,7 +1602,27 @@ Make it engaging, attractive, and human-like.
           errors.bhk_type = "bhk type is required";
         }
       }
-      if (formData.possession_status === "Under Construction") {
+      if (
+  propertyCategory === "Buy" &&
+  !formData.possession_status?.trim()
+) {
+  errors.possession_status = "Possession Status is required";
+}
+
+if (
+  propertyCategory === "Rent" &&
+  !(
+    (buildingType === "Residential" && propertyType === "Plot") ||
+    (buildingType === "Commercial" && propertyType === "Land")
+  ) &&
+  !formData.available_from?.trim()
+) {
+  errors.available_from = "Available From is required";
+}
+
+      if (formData.possession_status === "Under Construction" ||
+        formData.possession_status === "Expected Possession"
+      ) {
         if (!formData.possession_date?.trim()) {
           errors.possession_date = "Possession Date is required";
         }
@@ -1557,13 +1675,19 @@ Make it engaging, attractive, and human-like.
   if (!isLoaded) {
     return <div>Loading Maps...</div>;
   }
+  const toWords = new ToWords({
+    localeCode: "en-IN",
+  });
+  if (!isLoaded) {
+    return <div>Loading Google Maps...</div>;
+  }
 
   return (
     <>
       <div className="flex flex-col items-center min-h-screen bg-white">
         {/* Navbar */}
         <nav className="flex items-center justify-center w-full p-4 text-black bg-gray-200">
-          <h1 className="text-xl">Add New Property</h1>
+          <h1 className="text-xl">Post Your Property</h1>
         </nav>
 
         {/* Stepper Navigation */}
@@ -1571,13 +1695,12 @@ Make it engaging, attractive, and human-like.
           {steps.map((step, index) => (
             <button
               key={index}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                activeStep === index
-                  ? "bg-gray-200 my-text"
-                  : completedSteps.includes(index)
-                    ? "text-green-600"
-                    : "text-gray-600"
-              }`}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition ${activeStep === index
+                ? "bg-gray-200 my-text"
+                : completedSteps.includes(index)
+                  ? "text-green-600"
+                  : "text-gray-600"
+                }`}
               onClick={() => {
                 if (completedSteps.includes(index)) {
                   setActiveStep(index);
@@ -1601,7 +1724,7 @@ Make it engaging, attractive, and human-like.
               {/* Property Name */}
               <div className="mb-4">
                 <label className="block mb-1 font-medium text-gray-700">
-                  Property Name{" "}
+                  Building/Society/Project Name{" "}
                   <span className="text-xl font-bold text-red-500">*</span>
                 </label>
 
@@ -1609,11 +1732,10 @@ Make it engaging, attractive, and human-like.
                   type="text"
                   placeholder="Enter Name"
                   name="property_name"
-                  className={`w-full p-3 rounded-lg outline-none focus:ring-2 focus:ring-rose-500 ${
-                    formErrors.property_name
-                      ? "border border-red-600"
-                      : "border border-gray-300"
-                  }`}
+                  className={`w-full p-3 rounded-lg outline-none focus:ring-2 focus:ring-rose-500 ${formErrors.property_name
+                    ? "border border-red-600"
+                    : "border border-gray-300"
+                    }`}
                   value={formData.property_name}
                   onChange={handleInputChange}
                 />
@@ -1625,6 +1747,7 @@ Make it engaging, attractive, and human-like.
                   </p>
                 )}
               </div>
+
 
               {/* Featured Checkbox */}
               <div className="flex items-center mb-4">
@@ -1665,11 +1788,10 @@ Make it engaging, attractive, and human-like.
                   {propertyCategories.map((category) => (
                     <button
                       key={category}
-                      className={`px-4 py-2 rounded-full border transition ${
-                        propertyCategory === category
-                          ? "bg-rose-100 text-rose-700 border-rose-500"
-                          : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                      }`}
+                      className={`px-4 py-2 rounded-full border transition ${propertyCategory === category
+                        ? "bg-rose-100 text-rose-700 border-rose-500"
+                        : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                        }`}
                       onClick={() => {
                         setPropertyCategory(category);
                         setFormData({
@@ -1700,11 +1822,10 @@ Make it engaging, attractive, and human-like.
                     .map((type) => (
                       <button
                         key={type}
-                        className={`px-4 py-2 rounded-full border transition ${
-                          buildingType === type
-                            ? "bg-rose-100 text-rose-700 border-rose-500"
-                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                        }`}
+                        className={`px-4 py-2 rounded-full border transition ${buildingType === type
+                          ? "bg-rose-100 text-rose-700 border-rose-500"
+                          : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                          }`}
                         onClick={() => handleBuildingTypeChange(type)}
                       >
                         {type}
@@ -1723,11 +1844,10 @@ Make it engaging, attractive, and human-like.
                   {propertyTypes.map((type) => (
                     <button
                       key={type}
-                      className={`px-4 py-2 rounded-full border transition ${
-                        propertyType === type
-                          ? "bg-rose-100 text-rose-700 border-rose-500"
-                          : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                      }`}
+                      className={`px-4 py-2 rounded-full border transition ${propertyType === type
+                        ? "bg-rose-100 text-rose-700 border-rose-500"
+                        : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                        }`}
                       onClick={() => {
                         setPropertyType(type);
                         setFormData({ ...formData, property_type: type });
@@ -1748,11 +1868,10 @@ Make it engaging, attractive, and human-like.
                         <button
                           key={type}
                           type="button"
-                          className={`px-4 py-2 rounded-full border transition ${
-                            hospitalityType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                          }`}
+                          className={`px-4 py-2 rounded-full border transition ${hospitalityType === type
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                           onClick={() => {
                             setHospitalityType(type);
                           }}
@@ -1774,11 +1893,10 @@ Make it engaging, attractive, and human-like.
                         <button
                           key={type}
                           type="button"
-                          className={`px-4 py-2 rounded-full border transition ${
-                            landType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                          }`}
+                          className={`px-4 py-2 rounded-full border transition ${landType === type
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                           onClick={() => {
                             setLandType(type);
                             setFormData({ ...formData, land_type: type });
@@ -1801,11 +1919,10 @@ Make it engaging, attractive, and human-like.
                         <button
                           key={type}
                           type="button"
-                          className={`px-4 py-2 rounded-full border transition ${
-                            industryType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                          }`}
+                          className={`px-4 py-2 rounded-full border transition ${industryType === type
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                           onClick={() => {
                             setIndustryType(type);
                           }}
@@ -1827,11 +1944,10 @@ Make it engaging, attractive, and human-like.
                         <button
                           key={type}
                           type="button"
-                          className={`px-4 py-2 rounded-full border transition ${
-                            storageType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                          }`}
+                          className={`px-4 py-2 rounded-full border transition ${storageType === type
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                           onClick={() => {
                             setStorageType(type);
                           }}
@@ -1853,11 +1969,10 @@ Make it engaging, attractive, and human-like.
                         <button
                           key={type}
                           type="button"
-                          className={`px-4 py-2 rounded-full border transition ${
-                            officeSubType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                          }`}
+                          className={`px-4 py-2 rounded-full border transition ${officeSubType === type
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                           onClick={() => {
                             setOfficeSubType(type);
                             setFormData({ ...formData, office_sub_type: type });
@@ -1880,11 +1995,10 @@ Make it engaging, attractive, and human-like.
                         <button
                           key={type}
                           type="button"
-                          className={`px-4 py-2 rounded-full border transition ${
-                            RetailSubType === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                          }`}
+                          className={`px-4 py-2 rounded-full border transition ${RetailSubType === type
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                           onClick={() => {
                             setRetailSubType(type);
                             setFormData({
@@ -1910,11 +2024,10 @@ Make it engaging, attractive, and human-like.
                         <button
                           key={type}
                           type="button"
-                          className={`px-4 py-2 rounded-full border transition ${
-                            retailLocation === type
-                              ? "bg-rose-100 text-rose-700 border-rose-500"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-100"
-                          }`}
+                          className={`px-4 py-2 rounded-full border transition ${retailLocation === type
+                            ? "bg-rose-100 text-rose-700 border-rose-500"
+                            : "border-gray-300 text-gray-600 hover:bg-gray-100"
+                            }`}
                           onClick={() => {
                             setRetailLocation(type);
                             setFormData({
@@ -1936,7 +2049,7 @@ Make it engaging, attractive, and human-like.
           {activeStep === 1 && (
             <>
               <div className="max-w-5xl mx-auto mb-32 bg-white rounded-xl">
-                <h2 className="text-2xl text-gray-900">Project Address</h2>
+                <h2 className="text-2xl text-gray-900">Property Address</h2>
                 <p className="mt-1 text-gray-500">
                   Place the listing pin on the map
                 </p>
@@ -1964,28 +2077,35 @@ Make it engaging, attractive, and human-like.
                           *
                         </span>
                       </label>
-
-                      <Autocomplete
-                        onLoad={(ac) => (autoCompleteRef.current = ac)}
-                        onPlaceChanged={handlePlaceChanged}
-                      >
-                        <input
-                          type="text"
-                          value={address}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            const isValid = /^[a-zA-Z0-9\s]*$/.test(value);
-                            if (isValid) {
-                              setAddress(value);
-                            }
-                          }}
-                          className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                            formErrors.address
+                      {isLoaded ? (
+                        <Autocomplete
+                          onLoad={(ac) => (autoCompleteRef.current = ac)}
+                          onPlaceChanged={handlePlaceChanged}
+                        >
+                          <input
+                            type="text"
+                            value={address}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              const isValid = /^[a-zA-Z0-9\s]*$/.test(value);
+                              if (isValid) {
+                                setAddress(value);
+                              }
+                            }}
+                            className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.address
                               ? "border-red-600"
                               : "border-gray-300"
-                          }`}
+                              }`}
+                          />
+                        </Autocomplete>
+                      ) : (
+                        <input
+                          type="text"
+                          disabled
+                          placeholder="Loading Google Maps..."
+                          className={`w-full border rounded-md p-3 text-gray-700 border-gray-300`}
                         />
-                      </Autocomplete>
+                      )}
 
                       {formErrors.address && (
                         <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -2009,11 +2129,10 @@ Make it engaging, attractive, and human-like.
                           setCountry(e.target.value);
                           setState("");
                         }}
-                        className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                          formErrors.country
-                            ? "border-red-600"
-                            : "border-gray-300"
-                        }`}
+                        className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.country
+                          ? "border-red-600"
+                          : "border-gray-300"
+                          }`}
                       >
                         <option value="">Select Country</option>
                         {allCountries.map((c) => (
@@ -2041,11 +2160,10 @@ Make it engaging, attractive, and human-like.
                       <select
                         value={state}
                         onChange={(e) => setState(e.target.value)}
-                        className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                          formErrors.state
-                            ? "border-red-600"
-                            : "border-gray-300"
-                        }`}
+                        className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.state
+                          ? "border-red-600"
+                          : "border-gray-300"
+                          }`}
                       >
                         <option value="">Select State</option>
                         {allStates.map((s) => (
@@ -2080,9 +2198,8 @@ Make it engaging, attractive, and human-like.
                           }
                         }}
                         placeholder="Enter City"
-                        className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                          formErrors.city ? "border-red-600" : "border-gray-300"
-                        }`}
+                        className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.city ? "border-red-600" : "border-gray-300"
+                          }`}
                       />
                       {formErrors.city && (
                         <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -2091,6 +2208,42 @@ Make it engaging, attractive, and human-like.
                         </p>
                       )}
                     </div>
+
+                    {/* Locality */}
+                    {/* <div>
+                      <label className="font-medium text-gray-700">
+                        Locality{" "}
+                        <span className="invisible text-xl font-bold">*</span> */}
+                    {/* <span className="text-xl font-bold text-red-500">
+                          *
+                        </span> */}
+                    {/* </label>
+                      <input
+                        type="text"
+                        value={locality}
+                        onChange={(e) => setLocality(e.target.value)}
+                        placeholder="Enter Locality"
+                        className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
+                      />
+                    </div> */}
+
+                    {/* Sub Locality */}
+                    {/* <div>
+                      <label className="font-medium text-gray-700">
+                        Sub Locality{" "}
+                        <span className="invisible text-xl font-bold">*</span> */}
+                    {/* <span className="text-xl font-bold text-red-500">
+                          *
+                        </span> */}
+                    {/* </label>
+                      <input
+                        type="text"
+                        value={subLocality}
+                        onChange={(e) => setSubLocality(e.target.value)}
+                        placeholder="Enter Sub Locality"
+                        className="w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none border-gray-300"
+                      />
+                    </div> */}
 
                     {/* Zip Code */}
                     <div>
@@ -2107,11 +2260,10 @@ Make it engaging, attractive, and human-like.
                             setZipCode(value);
                           }
                         }}
-                        className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${
-                          formErrors.zipCode
-                            ? "border-red-600"
-                            : "border-gray-300"
-                        }`}
+                        className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.zipCode
+                          ? "border-red-600"
+                          : "border-gray-300"
+                          }`}
                       />
                       {formErrors.zipCode && (
                         <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
@@ -2144,122 +2296,135 @@ Make it engaging, attractive, and human-like.
                 //   buildingType === "Commercial" &&
                 //   propertyType === "Industry")
               ) && (
-                <div className="p-3 mb-3 border border-gray-300 rounded-xl">
-                  <h2 className="text-2xl text-gray-900">Property Details</h2>
-                  <p className="mt-1 text-gray-500">
-                    Enter and manage essential information related to your
-                    property.
-                  </p>
+                  <div className="p-3 mb-3 border border-gray-300 rounded-xl">
+                    <h2 className="text-2xl text-gray-900">Property Details</h2>
+                    <p className="mt-1 text-gray-500">
+                      Enter and manage essential information related to your
+                      property.
+                    </p>
 
-                  <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-3 ">
-                    {!(
-                      propertyCategory === "Rent" ||
-                      propertyCategory === "Paying Guest"
-                    ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Property Price{" "}
-                          <span className="text-xl font-bold text-red-500">
-                            *
-                          </span>
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="₹ Expected Price"
-                          name="property_price"
-                          value={formData.property_price}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^\d*$/.test(value)) {
-                              handleInputChange(e);
-                            }
-                          }}
-                          className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
-                            formErrors.property_price || !propertyPrice
-                              ? "border-red-600"
-                              : "border-gray-300"
-                          }`}
-                        />
-                        {formErrors.property_price && (
-                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                            <MdErrorOutline className="text-lg" />
-                            {formErrors.property_price}
-                          </p>
-                        )}
-
-                        {/* Suggested Price Card */}
-                        <div className="flex items-center p-1 mt-4 space-x-1 bg-pink-100 rounded-lg">
-                          <span className="my-text">✨</span>
+                    <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-3 ">
+                      {!(
+                        propertyCategory === "Rent" ||
+                        propertyCategory === "Paying Guest"
+                      ) && (
                           <div>
-                            <p className="font-semibold text-gray-800">
-                              {formData.property_price}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              Suggested price for your area
-                            </p>
+                            <label className="font-medium text-gray-700">
+                              Property Price{" "}
+                              <span className="text-xl font-bold text-red-500">
+                                *
+                              </span>
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="₹ Expected Price"
+                              name="property_price"
+                              value={
+                                formData.property_price
+                                  ? Number(formData.property_price).toLocaleString(
+                                    "en-IN",
+                                  )
+                                  : ""
+                              }
+                              onChange={(e) => {
+                                const rawValue = e.target.value.replace(/,/g, "");
+                                if (/^\d*$/.test(rawValue)) {
+                                  handleInputChange({
+                                    target: {
+                                      name: "property_price",
+                                      value: rawValue,
+                                    },
+                                  });
+                                }
+                              }}
+                              className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.property_price || !propertyPrice
+                                ? "border-red-600"
+                                : "border-gray-300"
+                                }`}
+                            />
+                            {formErrors.property_price && (
+                              <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                                <MdErrorOutline className="text-lg" />
+                                {formErrors.property_price}
+                              </p>
+                            )}
+
+                            {/* Suggested Price Card */}
+                            <div className="flex items-center p-1 mt-4 space-x-1 bg-pink-100 rounded-lg">
+                              <span className="my-text">✨</span>
+                              <div>
+                                <p className="font-semibold text-gray-800">
+                                  {formData.property_price
+                                    ? toWords.convert(
+                                      Number(formData.property_price),
+                                    )
+                                    : ""}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  Suggested price for your area
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {!(
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Plot") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Plot") ||
-                      buildingType === "Commercial" ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        propertyType === "PG") ||
-                      propertyType === "1RK/Studio Apartment"
-                    ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          BHK{" "}
-                          <span className="text-xl font-bold text-red-500">
-                            *
-                          </span>
-                        </label>
-                        <select
-                          className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
-                            formErrors.bhk_type || !propertyPrice
-                              ? "border-red-600"
-                              : "border-gray-300"
-                          }`}
-                          value={formData.bhk_type}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              bhk_type: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="">Select Configuration</option>
-                          <option value="Studio">Studio</option>
-                          <option value="1 RK">1 RK</option>
-                          <option value="1 BHK">1 BHK</option>
-                          <option value="1.5 BHK">1.5 BHK</option>
-                          <option value="2 BHK">2 BHK</option>
-                          <option value="2.5 BHK">2.5 BHK</option>
-                          <option value="3 BHK">3 BHK</option>
-                          <option value="3.5 BHK">3.5 BHK</option>
-                          <option value="4 BHK">4 BHK</option>
-                          <option value="5 BHK">5 BHK</option>
-                          <option value="6 BHK">6 BHK</option>
-                          <option value="6+ BHK">6+ BHK</option>
-                        </select>
-                        {formErrors.bhk_type && (
-                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                            <MdErrorOutline className="text-lg" />
-                            {formErrors.bhk_type}
-                          </p>
                         )}
-                      </div>
-                    )}
 
-                    {/* {!(
+                      {!(
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Plot") ||
+                        (propertyCategory === "Rent" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Plot") ||
+                        buildingType === "Commercial" ||
+                        (propertyCategory === "Rent" &&
+                          buildingType === "Residential" &&
+                          propertyType === "PG") ||
+                        propertyType === "1RK/Studio Apartment"
+                      ) && (
+                          <div>
+                            <label className="font-medium text-gray-700">
+                              BHK{" "}
+                              <span className="text-xl font-bold text-red-500">
+                                *
+                              </span>
+                            </label>
+                            <select
+                              className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.bhk_type || !propertyPrice
+                                ? "border-red-600"
+                                : "border-gray-300"
+                                }`}
+                              value={formData.bhk_type}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  bhk_type: e.target.value,
+                                })
+                              }
+                            >
+                              <option value="">Select Configuration</option>
+                              <option value="Studio/Single Room">Studio/Single Room</option>
+                              <option value="1 RK">1 RK</option>
+                              <option value="1 BHK">1 BHK</option>
+                              <option value="1.5 BHK">1.5 BHK</option>
+                              <option value="2 BHK">2 BHK</option>
+                              <option value="2.5 BHK">2.5 BHK</option>
+                              <option value="3 BHK">3 BHK</option>
+                              <option value="3.5 BHK">3.5 BHK</option>
+                              <option value="4 BHK">4 BHK</option>
+                              <option value="5 BHK">5 BHK</option>
+                              <option value="6 BHK">6 BHK</option>
+                              <option value="6+ BHK">6+ BHK</option>
+                            </select>
+                            {formErrors.bhk_type && (
+                              <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                                <MdErrorOutline className="text-lg" />
+                                {formErrors.bhk_type}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                      {/* {!(
                       (propertyCategory === "Buy" &&
                         buildingType === "Residential" &&
                         propertyType === "Plot") ||
@@ -2306,219 +2471,235 @@ Make it engaging, attractive, and human-like.
                       </div>
                     )} */}
 
-                    {!(
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Plot") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Plot") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Land") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Storage") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Hospitality") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Industry") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Retail") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Land") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Warehouse") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Retail") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Storage") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Hospitality") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Industry")
-                    ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Bathroom
-                        </label>
+                      {!(
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Plot") ||
+                        (propertyCategory === "Rent" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Plot") ||
+                        (propertyCategory === "Rent" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Land") ||
+                        (propertyCategory === "Rent" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Storage") ||
+                        (propertyCategory === "Rent" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Hospitality") ||
+                        (propertyCategory === "Rent" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Industry") ||
+                        (propertyCategory === "Rent" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Retail") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Land") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Warehouse") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Retail") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Storage") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Hospitality") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Industry")
+                      ) && (
+                          <div>
+                            <label className="font-medium text-gray-700">
+                              Bathroom
+                            </label>
 
-                        <select
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                          value={formData.bathroom}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              bathroom: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="">Select Bathrooms</option>
-                          <option value="0">0</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
-                          <option value="4+">4+</option>
-                        </select>
-                      </div>
-                    )}
-                    {(propertyCategory === "Buy" ||
-                      propertyCategory === "Rent") &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Retail" && (
-                        <div>
-                          <label className="font-medium text-gray-700">
-                            Washroom
-                          </label>
+                            <select
+                              className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              value={formData.bathroom}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  bathroom: e.target.value,
+                                })
+                              }
+                            >
+                              <option value="">Select Bathrooms</option>
+                              <option value="0">0</option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                              <option value="3">3</option>
+                              <option value="4">4</option>
+                              <option value="4">4+</option>
+                            </select>
+                          </div>
+                        )}
+                      {(propertyCategory === "Buy" ||
+                        propertyCategory === "Rent") &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Retail" && (
+                          <div>
+                            <label className="font-medium text-gray-700">
+                              Washroom
+                            </label>
 
-                          <select
-                            value={retailWashroom}
-                            onChange={(e) => setRetailWashroom(e.target.value)}
-                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                          >
-                            <option value="">Select Washroom</option>
-                            <option value="Private Washrooms">
-                              Private Washrooms
-                            </option>
-                            <option value="Public Washrooms">
-                              Public Washrooms
-                            </option>
-                            <option value="Not Available">Not Available</option>
-                          </select>
-                        </div>
-                      )}
-                    {/* Washrooms for Storage */}
-                    {(propertyType === "Storage" ||
-                      propertyType === "Industry" ||
-                      propertyType === "Hospitality") && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Washrooms
-                        </label>
+                            <select
+                              name="commercial_washroom"
+                              value={formData.commercial_washroom}
+                              onChange={handleInputChange}
+                              className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                            >
+                              <option value="">Select Washroom</option>
+                              <option value="Private Washrooms">
+                                Private Washrooms
+                              </option>
+                              <option value="Public Washrooms">
+                                Public Washrooms
+                              </option>
+                              <option value="Not Available">Not Available</option>
+                            </select>
+                          </div>
+                        )}
+                      {/* Washrooms for Storage */}
+                      {(propertyType === "Storage" ||
+                        propertyType === "Industry" ||
+                        propertyType === "Hospitality") && (
+                          <div>
+                            <label className="font-medium text-gray-700">
+                              Washrooms
+                            </label>
 
-                        <select
-                          name="washroom"
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                          value={formData.washroom}
-                          onChange={handleInputChange}
-                        >
-                          <option value="">Select Washrooms</option>
-                          <option value="None">None</option>
-                          <option value="Shared">Shared</option>
-                          <option value="1">1</option>
-                          <option value="2">2</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
-                          <option value="4+">4+</option>
-                        </select>
-                      </div>
-                    )}
-                    {propertyCategory === "Buy" &&
-                      buildingType === "Residential" && (
-                        <div>
-                          <label className="font-medium text-gray-700">
-                            Ownership <span className="text-red-500">*</span>
-                          </label>
+                            <select
+                              name="commercial_washroom"
+                              className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              value={formData.commercial_washroom}
+                              onChange={handleInputChange}
+                            >
+                              <option value="">Select Washrooms</option>
+                              <option value="None">None</option>
+                              <option value="Shared">Shared</option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                              <option value="3">3</option>
+                              <option value="4">4</option>
+                              <option value="4">4+</option>
+                            </select>
+                          </div>
+                        )}
+                      {propertyCategory === "Buy" &&
+                        buildingType === "Residential" && (
+                          <div>
+                            <label className="font-medium text-gray-700">
+                              Ownership <span className="text-red-500">*</span>
+                            </label>
 
-                          <select
-                            name="ownership"
-                            className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                            value={formData.ownership}
-                            onChange={handleInputChange}
-                          >
-                            <option value="">Select Ownership</option>
-                            <option value="Freehold">Freehold</option>
-                            <option value="Leasehold">Leasehold</option>
-                            <option value="Co-operative Society">
-                              Co-operative Society
-                            </option>
-                            <option value="Power of Attorney">
-                              Power of Attorney
-                            </option>
-                          </select>
+                            <select
+                              name="ownership"
+                              className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              value={formData.ownership}
+                              onChange={handleInputChange}
+                            >
+                              <option value="">Select Ownership</option>
+                              <option value="Freehold">Freehold</option>
+                              <option value="Leasehold">Leasehold</option>
+                              <option value="Co-operative Society">
+                                Co-operative Society
+                              </option>
+                              <option value="Power of Attorney">
+                                Power of Attorney
+                              </option>
+                            </select>
 
-                          {formErrors.ownership && (
-                            <p className="text-sm text-red-500 mt-1">
-                              {formErrors.ownership}
-                            </p>
-                          )}
-                        </div>
-                      )}
+                            {formErrors.ownership && (
+                              <p className="text-sm text-red-500 mt-1">
+                                {formErrors.ownership}
+                              </p>
+                            )}
+                          </div>
+                        )}
 
-                    {propertyCategory === "Buy" && (
-                      <div className="md:col-span-3 mt-2">
-                        {/* <label className="font-medium text-gray-700">
+                      {propertyCategory === "Buy" && (
+                        <div className="md:col-span-3 mt-2">
+                          {/* <label className="font-medium text-gray-700">
       Price Details
     </label> */}
 
-                        <div className="flex flex-wrap gap-4 mt-2">
-                          {/* All Inclusive Price */}
-                          {/* All Inclusive Price */}
-                          <label className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={formData.all_inclusive_price === "Yes"}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  all_inclusive_price: e.target.checked
-                                    ? "Yes"
-                                    : "No",
-                                })
-                              }
-                            />
-                            All Inclusive Price
-                          </label>
+                          <div className="flex flex-wrap gap-4 mt-2">
+                            {/* All Inclusive Price */}
+                            {/* All Inclusive Price */}
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={formData.all_inclusive_price === "Yes"}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    all_inclusive_price: e.target.checked
+                                      ? "Yes"
+                                      : "No",
+                                  })
+                                }
+                              />
+                              All Inclusive Price
+                            </label>
+                            {/* Price Onwards */}
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={formData.price_onwards === "Yes"}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    price_onwards: e.target.checked
+                                      ? "Yes"
+                                      : "No",
+                                  })
+                                }
+                              />
+                              Price Onwards
+                            </label>
+                            {/* Price Negotiable */}
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={formData.price_negotiable === "Yes"}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    price_negotiable: e.target.checked
+                                      ? "Yes"
+                                      : "No",
+                                  })
+                                }
+                              />
+                              Price Negotiable
+                            </label>
 
-                          {/* Price Negotiable */}
-                          <label className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={formData.price_negotiable === "Yes"}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  price_negotiable: e.target.checked
-                                    ? "Yes"
-                                    : "No",
-                                })
-                              }
-                            />
-                            Price Negotiable
-                          </label>
-
-                          {/* Tax & Govt Charges */}
-                          <label className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={
-                                formData.tax_and_goverment_charges === "Yes"
-                              }
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  tax_and_goverment_charges: e.target.checked
-                                    ? "Yes"
-                                    : "No",
-                                })
-                              }
-                            />
-                            Tax & Government Charges Excluded
-                          </label>
+                            {/* Tax & Govt Charges */}
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.tax_and_goverment_charges === "Yes"
+                                }
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    tax_and_goverment_charges: e.target.checked
+                                      ? "Yes"
+                                      : "No",
+                                  })
+                                }
+                              />
+                              Tax & Government Charges Excluded
+                            </label>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    {/* {propertyType === "Office Space" && (
+                      )}
+                      {/* {propertyType === "Office Space" && (
                       <div className="mt-4">
                         <label className="block mb-2 font-medium text-gray-700">
                           Conference Room
@@ -2542,320 +2723,379 @@ Make it engaging, attractive, and human-like.
                         </div>
                       </div>
                     )} */}
-                    {!(
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        (propertyType === "Apartment" ||
-                          propertyType === "Independent House/Villa" ||
-                          propertyType === "Plot")) ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Independent/Builder Floor") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "1RK/Studio Apartment") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Service Apartment") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Storage ") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Office Space") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Retail") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Office Space in IT/SEZ") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Storage") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Warehouse") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Industry") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Hospitality") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Land") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Farmhouse")
-                    ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Rent{" "}
-                          <span className="text-xl font-bold text-red-500">
-                            *
-                          </span>
-                        </label>
-                        <input
-                          type="text"
-                          name="rent"
-                          className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
-                            formErrors.rent
-                              ? "border-red-600"
-                              : "border-gray-300"
-                          }`}
-                          value={formData.rent}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
-                              handleInputChange(e);
-                            }
-                          }}
-                        />
-                        {formErrors.rent && (
-                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                            <MdErrorOutline className="text-lg" />
-                            {formErrors.rent}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    {!(
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        (propertyType === "Apartment" ||
-                          propertyType === "Independent House/Villa" ||
-                          propertyType === "Plot")) ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Independent/Builder Floor") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "1RK/Studio Apartment") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Industry") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Service Apartment") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Farmhouse") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Storage") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Office Space") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Retail") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Land") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Office Space in IT/SEZ") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Storage") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Warehouse") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Industry") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Hospitality") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Hospitality") ||
-                      (propertyCategory === "Paying Guest" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Builder Floor") ||
-                      (propertyCategory === "Paying Guest" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Apartment") ||
-                      (propertyCategory === "Paying Guest" &&
-                        buildingType === "Residential" &&
-                        propertyType === "1RK/Studio Apartment") ||
-                      (propertyCategory === "Paying Guest" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Independent House/Villa") ||
-                      (propertyCategory === "Paying Guest" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Service Apartment") ||
-                      (propertyCategory === "Rent" &&
-                        buildingType === "Residential" &&
-                        (propertyType === "Apartment" ||
-                          propertyType === "Independent House/Villa" ||
-                          propertyType === "Independent/Builder Floor" ||
-                          propertyType === "1RK/Studio Apartment" ||
-                          propertyType === "Service Apartment" ||
-                          propertyType === "Plot" ||
-                          propertyType === "PG"))
-                    ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Rent Duration{" "}
-                          <span className="text-xl font-bold text-red-500">
-                            *
-                          </span>
-                        </label>
-                        <select
-                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                          value={formData.rent_duration}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              rent_duration: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="">Select Rent Duration</option>
-                          <option value="Per Month">Per Month</option>
-                          <option value="Per Year">Per Year</option>
-                        </select>
-                        {formErrors.rent_duration && (
-                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                            <MdErrorOutline className="text-lg" />
-                            {formErrors.rent_duration}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    {!(
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        (propertyType === "Apartment" ||
-                          propertyType === "Independent House/Villa" ||
-                          propertyType === "Plot")) ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Independent/Builder Floor") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "1RK/Studio Apartment") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Service Apartment") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Residential" &&
-                        propertyType === "Farmhouse") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Storage") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Office Space") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Retail") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Land") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Office Space in IT/SEZ") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Storage") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Warehouse") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Industry") ||
-                      (propertyCategory === "Buy" &&
-                        buildingType === "Commercial" &&
-                        propertyType === "Hospitality")
-                    ) && (
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Security Deposit Amount{" "}
-                          <span className="text-xl font-bold text-red-500">
-                            *
-                          </span>
-                        </label>
-
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          value={formData.custom_deposit_amount || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (/^\d*$/.test(value)) {
-                              setFormData({
-                                ...formData,
-                                custom_deposit_amount: value,
-                              });
-                            }
-                          }}
-                          className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
-                            formErrors.security_deposit_amount
-                              ? "border-red-600"
-                              : "border-gray-300"
-                          }`}
-                        />
-
-                        {formErrors.custom_deposit_amount && (
-                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                            <MdErrorOutline className="text-lg" />
-                            {formErrors.custom_deposit_amount}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    {(propertyCategory === "Rent" ||
-                      propertyCategory === "Paying Guest") && (
-                      <div className="md:col-span-3 mt-2">
-                        <div className="flex flex-wrap gap-4 mt-2">
-                          {/* Price Negotiable */}
-                          <label className="flex items-center gap-2">
+                      {!(
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          (propertyType === "Apartment" ||
+                            propertyType === "Independent House/Villa" ||
+                            propertyType === "Plot")) ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Independent/Builder Floor") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "1RK/Studio Apartment") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Service Apartment") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Storage ") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Office Space") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Retail") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Office Space in IT/SEZ") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Storage") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Warehouse") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Industry") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Hospitality") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Land") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Farmhouse")
+                      ) && (
+                          <div>
+                            <label className="font-medium text-gray-700">
+                              Rent{" "}
+                              <span className="text-xl font-bold text-red-500">
+                                *
+                              </span>
+                            </label>
                             <input
-                              type="checkbox"
-                              checked={formData.price_negotiable === "Yes"}
+                              type="text"
+                              name="rent"
+                              className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.rent
+                                ? "border-red-600"
+                                : "border-gray-300"
+                                }`}
+                              value={
+                                formData.rent
+                                  ? Number(formData.rent).toLocaleString("en-IN")
+                                  : ""
+                              }
+                              onChange={(e) => {
+                                const rawValue = e.target.value.replace(/,/g, "");
+
+                                if (/^\d*$/.test(rawValue)) {
+                                  handleInputChange({
+                                    target: {
+                                      name: "rent",
+                                      value: rawValue,
+                                    },
+                                  });
+                                }
+                              }}
+                            />
+                            {formData.rent && (
+                              <p className="mt-2 text-sm font-medium text-gray-600">
+                                {toWords.convert(Number(formData.rent))}
+                              </p>
+                            )}
+                            {formErrors.rent && (
+                              <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                                <MdErrorOutline className="text-lg" />
+                                {formErrors.rent}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                      {!(
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          (propertyType === "Apartment" ||
+                            propertyType === "Independent House/Villa" ||
+                            propertyType === "Plot")) ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Independent/Builder Floor") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "1RK/Studio Apartment") ||
+                        (propertyCategory === "Rent" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Industry") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Service Apartment") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Farmhouse") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Storage") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Office Space") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Retail") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Land") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Office Space in IT/SEZ") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Storage") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Warehouse") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Industry") ||
+                        (propertyCategory === "Rent" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Hospitality") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Hospitality") ||
+                        (propertyCategory === "Paying Guest" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Builder Floor") ||
+                        (propertyCategory === "Paying Guest" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Apartment") ||
+                        (propertyCategory === "Paying Guest" &&
+                          buildingType === "Residential" &&
+                          propertyType === "1RK/Studio Apartment") ||
+                        (propertyCategory === "Paying Guest" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Independent House/Villa") ||
+                        (propertyCategory === "Paying Guest" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Service Apartment") ||
+                        (propertyCategory === "Rent" &&
+                          buildingType === "Residential" &&
+                          (propertyType === "Apartment" ||
+                            propertyType === "Independent House/Villa" ||
+                            propertyType === "Independent/Builder Floor" ||
+                            propertyType === "1RK/Studio Apartment" ||
+                            propertyType === "Service Apartment" ||
+                            propertyType === "Plot" ||
+                            propertyType === "PG"))
+                      ) && (
+                          <div>
+                            <label className="font-medium text-gray-700">
+                              Rent Duration{" "}
+                              <span className="text-xl font-bold text-red-500">
+                                *
+                              </span>
+                            </label>
+                            <select
+                              className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                              value={formData.rent_duration}
                               onChange={(e) =>
                                 setFormData({
                                   ...formData,
-                                  price_negotiable: e.target.checked
-                                    ? "Yes"
-                                    : "No",
+                                  rent_duration: e.target.value,
                                 })
                               }
-                            />
-                            Price Negotiable
-                          </label>
+                            >
+                              <option value="">Select Rent Duration</option>
+                              <option value="Per Month">Per Month</option>
+                              <option value="Per Year">Per Year</option>
+                            </select>
+                            {formErrors.rent_duration && (
+                              <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                                <MdErrorOutline className="text-lg" />
+                                {formErrors.rent_duration}
+                              </p>
+                            )}
+                          </div>
+                        )}
 
-                          {/* Electricity & Water Charges Included */}
-                          <label className="flex items-center gap-2">
+                      {!(
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          (propertyType === "Apartment" ||
+                            propertyType === "Independent House/Villa" ||
+                            propertyType === "Plot")) ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Independent/Builder Floor") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "1RK/Studio Apartment") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Service Apartment") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Residential" &&
+                          propertyType === "Farmhouse") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Storage") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Office Space") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Retail") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Land") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Office Space in IT/SEZ") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Storage") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Warehouse") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Industry") ||
+                        (propertyCategory === "Buy" &&
+                          buildingType === "Commercial" &&
+                          propertyType === "Hospitality")
+                      ) && (
+                          <div>
+                            <label className="font-medium text-gray-700">
+                              Security Deposit Amount{" "}
+                              <span className="text-xl font-bold text-red-500">
+                                *
+                              </span>
+                            </label>
+
                             <input
-                              type="checkbox"
-                              checked={
-                                formData.electricity_and_water_charges === "Yes"
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              value={
+                                formData.custom_deposit_amount
+                                  ? Number(
+                                    formData.custom_deposit_amount,
+                                  ).toLocaleString("en-IN")
+                                  : ""
                               }
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  electricity_and_water_charges: e.target
-                                    .checked
-                                    ? "Yes"
-                                    : "No",
-                                })
-                              }
+                              onChange={(e) => {
+                                const rawValue = e.target.value.replace(/,/g, "");
+
+                                if (/^\d*$/.test(rawValue)) {
+                                  setFormData({
+                                    ...formData,
+                                    custom_deposit_amount: rawValue,
+                                  });
+                                }
+                              }}
+                              className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.security_deposit_amount
+                                ? "border-red-600"
+                                : "border-gray-300"
+                                }`}
                             />
-                            Electricity & Water Charges Included
-                          </label>
-                        </div>
-                      </div>
-                    )}
+                            {formData.custom_deposit_amount && (
+                              <p className="mt-2 text-sm font-medium text-gray-600">
+                                {toWords.convert(
+                                  Number(formData.custom_deposit_amount),
+                                )}
+                              </p>
+                            )}
+
+                            {formErrors.custom_deposit_amount && (
+                              <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                                <MdErrorOutline className="text-lg" />
+                                {formErrors.custom_deposit_amount}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                      {(propertyCategory === "Rent" ||
+                        propertyCategory === "Paying Guest") && (
+                          <div className="md:col-span-3 mt-2">
+                            <div className="flex flex-wrap gap-4 mt-2">
+                              {/* Price Negotiable */}
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.price_negotiable === "Yes"}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      price_negotiable: e.target.checked
+                                        ? "Yes"
+                                        : "No",
+                                    })
+                                  }
+                                />
+                                Price Negotiable
+                              </label>
+
+                              {/* Electricity & Water Charges Included */}
+                              {/* All Inclusive Price */}
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={formData.all_inclusive_price === "Yes"}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    all_inclusive_price: e.target.checked
+                                      ? "Yes"
+                                      : "No",
+                                  })
+                                }
+                              />
+                              All Inclusive Price
+                            </label>
+                            {/* Price Onwards */}
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={formData.price_onwards === "Yes"}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    price_onwards: e.target.checked
+                                      ? "Yes"
+                                      : "No",
+                                  })
+                                }
+                              />
+                              Price Onwards
+                            </label>
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={
+                                    formData.electricity_and_water_charges === "Yes"
+                                  }
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      electricity_and_water_charges: e.target
+                                        .checked
+                                        ? "Yes"
+                                        : "No",
+                                    })
+                                  }
+                                />
+                                Electricity & Water Charges Included
+                              </label>
+                            </div>
+                          </div>
+                        )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Area Details Section */}
               <div className="p-3 mb-3 border border-gray-300 rounded-xl">
@@ -2866,53 +3106,6 @@ Make it engaging, attractive, and human-like.
                 </p>
 
                 <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-4">
-                  {/* Built-up Area */}
-                  <div>
-                    <label className="font-medium text-gray-700">
-                      Built-up Area <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={builtUpArea}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d{0,10}$/.test(value)) {
-                          setBuiltUpArea(value);
-                        }
-                      }}
-                      className="w-full mt-1 p-3 border rounded-lg"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-medium text-gray-700">Unit</label>
-                    <select
-                      value={builtUpAreaUnit}
-                      onChange={(e) => setBuiltUpAreaUnit(e.target.value)}
-                      className="w-full mt-1 p-3 border rounded-lg"
-                    >
-                      <option value="">Select</option>
-                      <option value="sq.ft">Sq.ft</option>
-                      <option value="sq.yards">Sq.yards</option>
-                      <option value="sq.m">Sq.m</option>
-                      <option value="acre">Acre</option>
-                      <option value="marla">Marla</option>
-                      <option value="cents">Cents</option>
-                      <option value="bigha">Bigha</option>
-                      <option value="kottah">Kottah</option>
-                      <option value="kanal">Kanal</option>
-                      <option value="grounds">Grounds</option>
-                      <option value="ares">Ares</option>
-                      <option value="biswa">Biswa</option>
-                      <option value="guntha">Guntha</option>
-                      <option value="aankadam">Aankadam</option>
-                      <option value="hectares">Hectares</option>
-                      <option value="rood">Rood</option>
-                      <option value="chataks">Chataks</option>
-                      <option value="perch">Perch</option>
-                    </select>
-                  </div>
-
                   {/* Carpet Area */}
                   <div>
                     <label className="font-medium text-gray-700">
@@ -2939,24 +3132,70 @@ Make it engaging, attractive, and human-like.
                       className="w-full mt-1 p-3 border rounded-lg"
                     >
                       <option value="">Select</option>
-                      <option value="sq.ft">Sq.ft</option>
-                      <option value="sq.yards">Sq.yards</option>
-                      <option value="sq.m">Sq.m</option>
-                      <option value="acre">Acre</option>
-                      <option value="marla">Marla</option>
-                      <option value="cents">Cents</option>
-                      <option value="bigha">Bigha</option>
-                      <option value="kottah">Kottah</option>
-                      <option value="kanal">Kanal</option>
-                      <option value="grounds">Grounds</option>
-                      <option value="ares">Ares</option>
-                      <option value="biswa">Biswa</option>
-                      <option value="guntha">Guntha</option>
-                      <option value="aankadam">Aankadam</option>
-                      <option value="hectares">Hectares</option>
-                      <option value="rood">Rood</option>
-                      <option value="chataks">Chataks</option>
-                      <option value="perch">Perch</option>
+                      <option value="sq.ft">sq.ft</option>
+                      <option value="sq.yards">sq.yards</option>
+                      <option value="sq.m">sq.m</option>
+                      <option value="acre">acre</option>
+                      <option value="marla">marla</option>
+                      <option value="cents">cents</option>
+                      <option value="bigha">bigha</option>
+                      <option value="kottah">kottah</option>
+                      <option value="kanal">kanal</option>
+                      <option value="grounds">grounds</option>
+                      <option value="ares">ares</option>
+                      <option value="biswa">biswa</option>
+                      <option value="guntha">guntha</option>
+                      <option value="aankadam">aankadam</option>
+                      <option value="hectares">hectares</option>
+                      <option value="rood">rood</option>
+                      <option value="chataks">chataks</option>
+                      <option value="perch">perch</option>
+                    </select>
+                  </div>
+                  {/* Built-up Area */}
+                  <div>
+                    <label className="font-medium text-gray-700">
+                      Built-up Area <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={builtUpArea}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d{0,10}$/.test(value)) {
+                          setBuiltUpArea(value);
+                        }
+                      }}
+                      className="w-full mt-1 p-3 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-medium text-gray-700">Unit</label>
+                    <select
+                      value={builtUpAreaUnit}
+                      onChange={(e) => setBuiltUpAreaUnit(e.target.value)}
+                      className="w-full mt-1 p-3 border rounded-lg"
+                    >
+                      <option value="">Select</option>
+                      <option value="sq.ft">sq.ft</option>
+                      <option value="sq.yards">sq.yards</option>
+                      <option value="sq.m">sq.m</option>
+                      <option value="acre">acre</option>
+                      <option value="marla">marla</option>
+                      <option value="cents">cents</option>
+                      <option value="bigha">bigha</option>
+                      <option value="kottah">kottah</option>
+                      <option value="kanal">kanal</option>
+                      <option value="grounds">grounds</option>
+                      <option value="ares">ares</option>
+                      <option value="biswa">biswa</option>
+                      <option value="guntha">guntha</option>
+                      <option value="aankadam">aankadam</option>
+                      <option value="hectares">hectares</option>
+                      <option value="rood">rood</option>
+                      <option value="chataks">chataks</option>
+                      <option value="perch">perch</option>
                     </select>
                   </div>
                 </div>
@@ -3099,113 +3338,240 @@ Make it engaging, attractive, and human-like.
 
               <div className="p-3 mb-3 border border-gray-300 rounded-xl">
                 <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-3">
-                  {propertyCategory === "Buy" && (
+                  {propertyCategory === "Buy" && 
+                    !(
+    (buildingType === "Residential" && propertyType === "Plot") ||
+    (buildingType === "Commercial" && propertyType === "Land")
+  ) && (
                     <div>
                       <label className="font-medium text-gray-700">
                         Possession Status
+                          <span className="text-xl font-bold text-red-500">*</span>
                       </label>
 
                       <select
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            possession_status: e.target.value,
-                          })
-                        }
+                        className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+  formErrors.possession_status
+    ? "border-red-600"
+    : "border-gray-300"
+}`}
+                        onChange={(e) => {
+  const value = e.target.value;
+
+  setFormData((prev) => ({
+    ...prev,
+    possession_status: value,
+    available_from:
+      value === "Ready To Move" ? "Immediately" : "",
+    possession_date:
+      value === "Ready To Move" ? "" : prev.possession_date,
+  }));
+}}
                       >
                         <option value="">Select Status</option>
+                        <option value="Expected Possession">Expected Possession</option>
                         <option value="Ready To Move">Ready To Move</option>
-                        <option value="Under Construction">
-                          Under Construction
-                        </option>
+                        <option value="Under Construction">Under Construction</option>
+                        <option value="New Launch">New Launch</option>
+                        <option value="Resale">Resale</option>
                       </select>
+                      {formErrors.possession_status && (
+  <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+    <MdErrorOutline className="text-lg" />
+    {formErrors.possession_status}
+  </p>
+)}
                     </div>
                   )}
 
-                  {
-                    /* Existing Rent Conditions */
-                    ((propertyCategory === "Rent" &&
-                      ((buildingType === "Residential" &&
-                        (propertyType === "PG" ||
-                          propertyType === "Independent House/Villa" ||
-                          propertyType === "Service Apartment")) ||
-                        (buildingType === "Commercial" &&
-                          (propertyType === "Office Space" ||
-                            propertyType === "Storage" ||
-                            propertyType === "Industry" ||
-                            propertyType === "Hospitality")))) ||
-                      /* Plot / Land Conditions */
-                      ((propertyCategory === "Buy" ||
-                        propertyCategory === "Rent") &&
-                        ((buildingType === "Residential" &&
-                          propertyType === "Plot") ||
-                          (buildingType === "Commercial" &&
-                            propertyType === "Land"))) ||
-                      /* Paying Guest + Apartment / Builder Floor */
-                      (propertyCategory === "Paying Guest" &&
-                        (propertyType === "Apartment" ||
-                          propertyType === "Builder Floor" ||
-                          propertyType === "1RK/Studio Apartment" ||
-                          propertyType === "Independent House/Villa" ||
-                          propertyType === "Service Apartment"))) && (
+                  {(
+  (
+    propertyCategory === "Rent" &&
+    !(
+      (buildingType === "Residential" && propertyType === "Plot") ||
+      (buildingType === "Commercial" && propertyType === "Land")
+    )
+  ) ||
+  propertyCategory === "Paying Guest"
+) && (
                       <div>
                         <label className="block mb-2 font-medium text-gray-700">
                           Available From
+                          <span className="text-xl font-bold text-red-500">*</span>
                         </label>
 
                         <select
-                          name="available_from"
-                          value={formData.available_from}
-                          onChange={(e) => {
-                            setIsLaterSelected(e.target.value === "Later");
-                            handleInputChange(e);
-                          }}
-                          className="w-full p-3 mt-1 text-gray-800 bg-white border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        >
-                          <option value="">Select availability</option>
-                          <option value="Immediately">Immediate</option>
-                          <option value="Later">Later</option>
-                        </select>
+  name="available_from"
+  value={formData.available_from || ""}
+  onChange={(e) => {
+    const value = e.target.value;
+
+    setIsLaterSelected(value === "Later");
+
+    setFormData((prev) => ({
+      ...prev,
+      available_from: value,
+    }));
+  }}
+  className={`w-full p-3 mt-1 text-gray-800 bg-white border rounded-lg outline-none focus:ring-2 focus:ring-rose-500 ${
+    formErrors.available_from
+      ? "border-red-600"
+      : "border-gray-300"
+  }`}
+>
+  <option value="">Select availability</option>
+  <option value="Immediately">Immediate</option>
+  <option value="Later">Later</option>
+</select>
+{formErrors.available_from && (
+  <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+    <MdErrorOutline className="text-lg" />
+    {formErrors.available_from}
+  </p>
+)}
                       </div>
                     )
                   }
 
                   {(formData.possession_status === "Under Construction" ||
+                    formData.possession_status === "Expected Possession" ||
                     isLaterSelected) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        {isLaterSelected ? "Available Date" : "Possession Date"}
-                        <span className="text-xl font-bold text-red-500">
-                          *
-                        </span>
-                      </label>
-                      <input
-                        type="date"
-                        name="possession_date"
-                        className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
-                          formErrors.possession_date
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          {isLaterSelected ? "Available Date" : "Possession Date"}
+                          <span className="text-xl font-bold text-red-500">
+                            *
+                          </span>
+                        </label>
+                        <input
+                          type="date"
+                          name="possession_date"
+                          className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.possession_date
                             ? "border-red-600"
                             : "border-rose-300"
-                        }`}
-                        value={formData.possession_date || ""}
-                        min={new Date().toISOString().split("T")[0]}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            possession_date: e.target.value,
-                          })
-                        }
-                      />
-                      {formErrors.possession_date && (
-                        <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                          <MdErrorOutline className="text-lg" />
-                          {formErrors.possession_date}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                            }`}
+                          value={formData.possession_date || ""}
+                          min={new Date().toISOString().split("T")[0]}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              possession_date: e.target.value,
+                            })
+                          }
+                        />
+                        {formErrors.possession_date && (
+                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <MdErrorOutline className="text-lg" />
+                            {formErrors.possession_date}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {(
+  (propertyCategory === "Buy" &&
+    buildingType === "Residential" &&
+    propertyType === "Plot") ||
 
+  (propertyCategory === "Rent" &&
+    buildingType === "Residential" &&
+    propertyType === "Plot") ||
+
+  (propertyCategory === "Buy" &&
+    buildingType === "Commercial" &&
+    propertyType === "Land") ||
+
+  (propertyCategory === "Rent" &&
+    buildingType === "Commercial" &&
+    propertyType === "Land")
+) && (
+  <div>
+    <label className="font-medium text-gray-700">
+      Possession Status
+      <span className="text-xl font-bold text-red-500">*</span>
+    </label>
+
+    <select
+      className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+        formErrors.possession_status
+          ? "border-red-600"
+          : "border-gray-300"
+      }`}
+      value={formData.possession_status || ""}
+      onChange={(e) => {
+        const value = e.target.value;
+
+        setFormData((prev) => ({
+          ...prev,
+          possession_status: value,
+          possession_date:
+            value === "Ready To Move"
+              ? ""
+              : prev.possession_date,
+        }));
+      }}
+    >
+      <option value="">Select Status</option>
+      <option value="Ready To Move">Ready To Move</option>
+      <option value="Later">Later</option>
+      <option value="New Launch">New Launch</option>
+    </select>
+
+    {formErrors.possession_status && (
+      <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+        <MdErrorOutline className="text-lg" />
+        {formErrors.possession_status}
+      </p>
+    )}
+  </div>
+)}
+{(
+  ((
+    (propertyCategory === "Buy" ||
+      propertyCategory === "Rent") &&
+    buildingType === "Residential" &&
+    propertyType === "Plot"
+  ) ||
+  ((
+    propertyCategory === "Buy" ||
+    propertyCategory === "Rent"
+  ) &&
+    buildingType === "Commercial" &&
+    propertyType === "Land")
+  ) &&
+  formData.possession_status === "Later"
+) && (
+  <div>
+    <label className="font-medium text-gray-700">
+      Available Date
+      <span className="text-xl font-bold text-red-500">*</span>
+    </label>
+
+    <input
+      type="date"
+      name="possession_date"
+      className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${
+        formErrors.possession_date
+          ? "border-red-600"
+          : "border-rose-300"
+      }`}
+      value={formData.possession_date || ""}
+      min={new Date().toISOString().split("T")[0]}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          possession_date: e.target.value,
+        })
+      }
+    />
+
+    {formErrors.possession_date && (
+      <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+        <MdErrorOutline className="text-lg" />
+        {formErrors.possession_date}
+      </p>
+    )}
+  </div>
+)}
                   {/* {!(
                     (propertyCategory === "Buy" &&
                       buildingType === "Residential" &&
@@ -3449,7 +3815,7 @@ Make it engaging, attractive, and human-like.
                     </div>
                   )} */}
 
-                  {(propertyType === "Apartment" ||
+                  {/* {(propertyType === "Apartment" ||
                     propertyType === "1RK/Studio Apartment" ||
                     propertyType === "Service Apartment" ||
                     propertyType === "Office Space") &&
@@ -3477,7 +3843,7 @@ Make it engaging, attractive, and human-like.
                           className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                         />
                       </div>
-                    )}
+                    )} */}
                   {(propertyCategory === "Buy" ||
                     propertyCategory === "Rent") &&
                     buildingType === "Commercial" &&
@@ -3574,6 +3940,144 @@ Make it engaging, attractive, and human-like.
                         </select>
                       </div>
                     )}
+
+                  {!(
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Residential" &&
+                      propertyType === "Plot") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Residential" &&
+                      propertyType === "Plot") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Residential" &&
+                      propertyType === "PG") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Land") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Office Space in IT/SEZ") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Warehouse") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Industry") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Hospitality") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Land") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Office Space in IT/SEZ") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Storage") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Warehouse") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Industry") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Storage") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Hospitality")
+                  ) && (
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Total Floor
+                        </label>
+
+                        <input
+                          type="text"
+                          name="total_floor"
+                          value={formData.total_floor}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
+                              handleInputChange(e);
+                            }
+                          }}
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                        />
+                      </div>
+                    )}
+                  {!(
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Residential" &&
+                      propertyType === "Plot") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Residential" &&
+                      propertyType === "Plot") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Residential" &&
+                      propertyType === "PG") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Land") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Warehouse") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Industry") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Land") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Warehouse") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Storage") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Hospitality") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Industry")
+                  ) && (
+                      <div>
+                        <label className="font-medium text-gray-700">
+  {buildingType === "Residential" &&
+ propertyType !== "Independent House/Villa"
+  ? "Flat on the Floor"
+  : "Property on the Floor"}
+</label>
+
+                        <select
+                          name="property_floor"
+                          value={formData.property_floor || ""}
+                          onChange={handleInputChange}
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                        >
+                          <option value="">Select Floor</option>
+
+                          <option value="Lower Basement">Lower Basement</option>
+
+                          <option value="Basement">Basement</option>
+
+                          <option value="Lower Ground">Lower Ground</option>
+
+                          <option value="Ground">Ground</option>
+
+                          {[...Array(Number(formData.total_floor) || 0)].map(
+                            (_, index) => (
+                              <option key={index + 1} value={`${index + 1}`}>
+                                {index + 1}
+                              </option>
+                            ),
+                          )}
+
+                          <option value="Rooftop/Terrace">Rooftop/Terrace</option>
+                        </select>
+                      </div>
+                    )}
                   {!(
                     (propertyCategory === "Buy" &&
                       buildingType === "Residential" &&
@@ -3624,168 +4128,36 @@ Make it engaging, attractive, and human-like.
                       buildingType === "Commercial" &&
                       propertyType === "Industry")
                   ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Tower/Block Name
-                      </label>
-                      <input
-                        type="text"
-                        name="block"
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.block}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
-                            handleInputChange(e);
-                          }
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {!(
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Residential" &&
-                      propertyType === "PG") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Land") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Office Space in IT/SEZ") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Warehouse") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Industry") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Hospitality") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Storage") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Office Space") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Retail") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Land") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Office Space in IT/SEZ") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Storage") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Warehouse") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Industry") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Storage") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Hospitality")
-                  ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Total Floor
-                      </label>
-
-                      <input
-                        type="text"
-                        name="total_floor"
-                        value={formData.total_floor}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
-                            handleInputChange(e);
-                          }
-                        }}
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      />
-                    </div>
-                  )}
-                  {!(
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Residential" &&
-                      propertyType === "PG") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Land") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Warehouse") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Industry") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Land") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Warehouse") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Storage") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Hospitality") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Industry")
-                  ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Floor Number
-                      </label>
-
-                      <select
-                        name="project_floor"
-                        value={formData.project_floor || ""}
-                        onChange={handleInputChange}
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Floor</option>
-
-                        <option value="Lower Basement">Lower Basement</option>
-
-                        <option value="Basement">Basement</option>
-
-                        <option value="Lower Ground">Lower Ground</option>
-
-                        <option value="Ground">Ground</option>
-
-                        {[...Array(Number(formData.total_floor) || 0)].map(
-                          (_, index) => (
-                            <option key={index + 1} value={`${index + 1}`}>
-                              {index + 1}
-                            </option>
-                          ),
-                        )}
-
-                        <option value="Rooftop/Terrace">Rooftop/Terrace</option>
-                      </select>
-                    </div>
-                  )}
+                      <div>
+                        <label className="font-medium text-gray-700">
+  {buildingType === "Commercial" && propertyType === "Office Space"
+    ? "Office / Unit Number"
+    : buildingType === "Commercial" && propertyType === "Storage"
+      ? "Unit Number"
+      : buildingType === "Commercial" &&
+        propertyType === "Retail" &&
+        RetailSubType === "Commercial Shops"
+        ? "Shop / Unit Number"
+        : buildingType === "Commercial" &&
+          propertyType === "Retail" &&
+          RetailSubType === "Commercial Showrooms"
+          ? "Showroom / Unit Number"
+          : "Flat / House No"}
+</label>
+                        <input
+                          type="text"
+                          name="block"
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={formData.block}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^[a-zA-Z0-9\s\-_/().,#@&]{0,20}$/.test(value)) {
+                              handleInputChange(e);
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
                   {propertyType === "Hospitality" && (
                     <div>
                       <label className="font-medium text-gray-700">
@@ -4038,86 +4410,86 @@ Make it engaging, attractive, and human-like.
                       buildingType === "Commercial" &&
                       propertyType === "Hospitality")
                   ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Additional Rooms
-                      </label>
-                      <Select
-                        isMulti
-                        name="additional_rooms"
-                        options={options}
-                        value={options.filter((opt) =>
-                          formData.additional_rooms.includes(opt.value),
-                        )}
-                        onChange={(selectedOptions) =>
-                          handleInputChange({
-                            target: {
-                              name: "additional_rooms",
-                              value: selectedOptions.map((opt) => opt.value),
-                            },
-                          })
-                        }
-                        components={{ MultiValue: CustomMultiValue }}
-                        placeholder="Select Additional Room"
-                        classNamePrefix="react-select"
-                        styles={{
-                          control: (base, state) => ({
-                            ...base,
-                            minHeight: "60px",
-                            padding: "6px",
-                            borderColor: state.isFocused
-                              ? "#a855f7"
-                              : "#d1d5db",
-                            boxShadow: state.isFocused
-                              ? "0 0 0 2px #a855f7"
-                              : "none",
-                            borderRadius: "0.5rem",
-                            fontSize: "16px",
-                            display: "flex",
-                            flexWrap: "nowrap",
-                            overflowX: "auto",
-                          }),
-                          valueContainer: (base) => ({
-                            ...base,
-                            padding: "0 6px",
-                            display: "flex",
-                            flexWrap: "nowrap",
-                            gap: "6px",
-                            overflowX: "auto",
-                            scrollbarWidth: "thin",
-                            alignItems: "center",
-                          }),
-                          placeholder: (base) => ({
-                            ...base,
-                            color: "#1f2937",
-                            fontSize: "16px",
-                          }),
-                          multiValue: (base) => ({
-                            ...base,
-                            backgroundColor: "#ede9fe",
-                            borderRadius: "0.375rem",
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "2px 6px",
-                            whiteSpace: "nowrap",
-                          }),
-                          multiValueLabel: (base) => ({
-                            ...base,
-                            color: "#6b21a8",
-                            fontWeight: "500",
-                          }),
-                          multiValueRemove: (base) => ({
-                            ...base,
-                            color: "#6b21a8",
-                            ":hover": {
-                              backgroundColor: "#ddd6fe",
-                              color: "#4c1d95",
-                            },
-                          }),
-                        }}
-                      />
-                    </div>
-                  )}
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Additional Rooms
+                        </label>
+                        <Select
+                          isMulti
+                          name="additional_rooms"
+                          options={options}
+                          value={options.filter((opt) =>
+                            formData.additional_rooms.includes(opt.value),
+                          )}
+                          onChange={(selectedOptions) =>
+                            handleInputChange({
+                              target: {
+                                name: "additional_rooms",
+                                value: selectedOptions.map((opt) => opt.value),
+                              },
+                            })
+                          }
+                          components={{ MultiValue: CustomMultiValue }}
+                          placeholder="Select Additional Room"
+                          classNamePrefix="react-select"
+                          styles={{
+                            control: (base, state) => ({
+                              ...base,
+                              minHeight: "60px",
+                              padding: "6px",
+                              borderColor: state.isFocused
+                                ? "#a855f7"
+                                : "#d1d5db",
+                              boxShadow: state.isFocused
+                                ? "0 0 0 2px #a855f7"
+                                : "none",
+                              borderRadius: "0.5rem",
+                              fontSize: "16px",
+                              display: "flex",
+                              flexWrap: "nowrap",
+                              overflowX: "auto",
+                            }),
+                            valueContainer: (base) => ({
+                              ...base,
+                              padding: "0 6px",
+                              display: "flex",
+                              flexWrap: "nowrap",
+                              gap: "6px",
+                              overflowX: "auto",
+                              scrollbarWidth: "thin",
+                              alignItems: "center",
+                            }),
+                            placeholder: (base) => ({
+                              ...base,
+                              color: "#1f2937",
+                              fontSize: "16px",
+                            }),
+                            multiValue: (base) => ({
+                              ...base,
+                              backgroundColor: "#ede9fe",
+                              borderRadius: "0.375rem",
+                              display: "flex",
+                              alignItems: "center",
+                              padding: "2px 6px",
+                              whiteSpace: "nowrap",
+                            }),
+                            multiValueLabel: (base) => ({
+                              ...base,
+                              color: "#6b21a8",
+                              fontWeight: "500",
+                            }),
+                            multiValueRemove: (base) => ({
+                              ...base,
+                              color: "#6b21a8",
+                              ":hover": {
+                                backgroundColor: "#ddd6fe",
+                                color: "#4c1d95",
+                              },
+                            }),
+                          }}
+                        />
+                      </div>
+                    )}
 
                   {!(
                     (propertyCategory === "Rent" &&
@@ -4163,32 +4535,32 @@ Make it engaging, attractive, and human-like.
                       buildingType === "Commercial" &&
                       propertyType === "Industry")
                   ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Facing
-                      </label>
-                      <select
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.facing}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            facing: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">Select Facing</option>
-                        <option value="East">East</option>
-                        <option value="West">West</option>
-                        <option value="North">North</option>
-                        <option value="South">South</option>
-                        <option value="North East">North East</option>
-                        <option value="North West">North West</option>
-                        <option value="South East">South East</option>
-                        <option value="South West">South West</option>
-                      </select>
-                    </div>
-                  )}
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Facing
+                        </label>
+                        <select
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={formData.facing}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              facing: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="">Select Facing</option>
+                          <option value="East">East</option>
+                          <option value="West">West</option>
+                          <option value="North">North</option>
+                          <option value="South">South</option>
+                          <option value="North East">North East</option>
+                          <option value="North West">North West</option>
+                          <option value="South East">South East</option>
+                          <option value="South West">South West</option>
+                        </select>
+                      </div>
+                    )}
 
                   {propertyType === "Independent/Builder Floor" && (
                     <div>
@@ -4328,7 +4700,7 @@ Make it engaging, attractive, and human-like.
                         </select>
                       </div>
                     )}
-                  {propertyCategory === "Buy" &&
+                  {/* {propertyCategory === "Buy" &&
                     (propertyType === "Plot" || propertyType === "Land") && (
                       <div>
                         <label className="font-medium text-gray-700">
@@ -4357,7 +4729,7 @@ Make it engaging, attractive, and human-like.
                           <option value="By 2032">By 2032</option>
                         </select>
                       </div>
-                    )}
+                    )} */}
                   {/* Length */}
                   {/* {propertyType === "Land" && (
   <div>
@@ -4397,65 +4769,6 @@ Make it engaging, attractive, and human-like.
     />
   </div>
 )} */}
-                  {!(
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Land") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Warehouse") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Industry") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Land") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Warehouse") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Storage") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Industry")
-                  ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Furnishing Type{" "}
-                        <span className="text-xl font-bold text-red-500">
-                          *
-                        </span>
-                      </label>
-                      <select
-                        className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.furnished_type ? "border-red-600" : "border-gray-300"}`}
-                        value={formData.furnished_type}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            furnished_type: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">Select Furnishing Type</option>
-                        <option value="Furnished">Furnished</option>
-                        <option value="Unfurnished">UnFurnished</option>
-                        <option value="Semi-Furnished">SemiFurnished</option>
-                      </select>
-                      {formErrors.furnished_type && (
-                        <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                          <MdErrorOutline className="text-lg" />
-                          {formErrors.furnished_type}
-                        </p>
-                      )}
-                    </div>
-                  )}
 
                   {!(
                     (propertyCategory === "Buy" &&
@@ -4495,29 +4808,88 @@ Make it engaging, attractive, and human-like.
                       buildingType === "Commercial" &&
                       propertyType === "Land")
                   ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Age of Property
-                      </label>
-                      <select
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.age_of_property}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            age_of_property: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">Select Age of Property</option>
-                        <option value="0-1">0-1</option>
-                        <option value="2-4">2-4</option>
-                        <option value="5-7">5-7</option>
-                        <option value="8-10">8-10</option>
-                        <option value="10+">10+</option>
-                      </select>
-                    </div>
-                  )}
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Age of Property
+                        </label>
+                        <select
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={formData.age_of_property}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              age_of_property: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="">Select Age of Property</option>
+                          <option value="0-1">0-1</option>
+                          <option value="2-4">2-4</option>
+                          <option value="5-7">5-7</option>
+                          <option value="8-10">8-10</option>
+                          <option value="10+">10+</option>
+                        </select>
+                      </div>
+                    )}
+                  {!(
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Residential" &&
+                      propertyType === "Plot") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Residential" &&
+                      propertyType === "Plot") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Land") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Warehouse") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Industry") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Land") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Warehouse") ||
+                    (propertyCategory === "Rent" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Storage") ||
+                    (propertyCategory === "Buy" &&
+                      buildingType === "Commercial" &&
+                      propertyType === "Industry")
+                  ) && (
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Furnishing Type{" "}
+                          <span className="text-xl font-bold text-red-500">
+                            *
+                          </span>
+                        </label>
+                        <select
+                          className={`w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.furnished_type ? "border-red-600" : "border-gray-300"}`}
+                          value={formData.furnished_type}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              furnished_type: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="">Select Furnishing Type</option>
+                          <option value="Furnished">Furnished</option>
+                          <option value="Unfurnished">Unfurnished</option>
+                          <option value="Semi-Furnished">Semi-Furnished</option>
+                        </select>
+                        {formErrors.furnished_type && (
+                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <MdErrorOutline className="text-lg" />
+                            {formErrors.furnished_type}
+                          </p>
+                        )}
+                      </div>
+                    )}
 
                   {!hideParkingSection && (
                     <div>
@@ -4548,7 +4920,7 @@ Make it engaging, attractive, and human-like.
                         {/* Covered Parking */}
                         <div>
                           <label className="font-medium text-gray-700">
-                            Covered Parking
+                            Covered Car Parking
                           </label>
 
                           <div className="flex items-center gap-2 mt-2">
@@ -4600,7 +4972,7 @@ Make it engaging, attractive, and human-like.
                         {/* Uncovered Parking */}
                         <div>
                           <label className="font-medium text-gray-700">
-                            Uncovered Parking
+                            Open Car Parking
                           </label>
 
                           <div className="flex items-center gap-2 mt-2">
@@ -4650,69 +5022,70 @@ Make it engaging, attractive, and human-like.
                         </div>
                       </>
                     )}
-                  {!(
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Residential" &&
-                      propertyType === "Plot") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Land") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Storage") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Warehouse") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Industry") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Hospitality") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Storage") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Retail") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Land") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Storage") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Warehouse") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Industry") ||
-                    (propertyCategory === "Buy" &&
-                      buildingType === "Commercial" &&
-                      propertyType === "Hospitality") ||
-                    (propertyCategory === "Rent" &&
-                      buildingType === "Residential" &&
-                      propertyType === "Plot")
-                  ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Balcony
-                      </label>
-                      <select
-                        name="balcony"
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.balcony}
-                        onChange={handleInputChange}
-                      >
-                        <option value="">Select No. of Balconies</option>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="more than 3">more than 3</option>
-                      </select>
-                    </div>
-                  )}
+                  {buildingType === "Residential" &&
+                    !(
+                      (propertyCategory === "Buy" &&
+                        buildingType === "Residential" &&
+                        propertyType === "Plot") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Land") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Storage") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Warehouse") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Industry") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Hospitality") ||
+                      (propertyCategory === "Buy" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Storage") ||
+                      (propertyCategory === "Buy" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Retail") ||
+                      (propertyCategory === "Buy" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Land") ||
+                      (propertyCategory === "Buy" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Storage") ||
+                      (propertyCategory === "Buy" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Warehouse") ||
+                      (propertyCategory === "Buy" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Industry") ||
+                      (propertyCategory === "Buy" &&
+                        buildingType === "Commercial" &&
+                        propertyType === "Hospitality") ||
+                      (propertyCategory === "Rent" &&
+                        buildingType === "Residential" &&
+                        propertyType === "Plot")
+                    ) && (
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Balcony
+                        </label>
+                        <select
+                          name="balcony"
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={formData.balcony}
+                          onChange={handleInputChange}
+                        >
+                          <option value="">Select No. of Balconies</option>
+                          <option value="0">0</option>
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                          <option value="more than 3">More than 3</option>
+                        </select>
+                      </div>
+                    )}
 
                   {/* {!(
                     (propertyCategory === "Buy" &&
@@ -5033,26 +5406,26 @@ Make it engaging, attractive, and human-like.
                       buildingType === "Commercial" &&
                       propertyType === "Industry")
                   ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Lift Availability
-                      </label>
-                      <select
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.lift_availability}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            lift_availability: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">Select Lift Availability</option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                      </select>
-                    </div>
-                  )}
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Lift Availability
+                        </label>
+                        <select
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={formData.lift_availability}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              lift_availability: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="">Select Lift Availability</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                    )}
 
                   {/* {!(
                     (propertyCategory === "Buy" &&
@@ -5400,22 +5773,22 @@ Make it engaging, attractive, and human-like.
                       buildingType === "Commercial" &&
                       propertyType === "Industry")
                   ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Pantry
-                      </label>
-                      <select
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={pantry}
-                        onChange={(e) => setPantry(e.target.value)}
-                      >
-                        <option value="">Select Pantry</option>
-                        <option value="Wet">Wet</option>
-                        <option value="Dry">Dry</option>
-                        <option value="None">None</option>
-                      </select>
-                    </div>
-                  )}
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Pantry
+                        </label>
+                        <select
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={pantry}
+                          onChange={(e) => setPantry(e.target.value)}
+                        >
+                          <option value="">Select Pantry</option>
+                          <option value="Wet">Wet</option>
+                          <option value="Dry">Dry</option>
+                          <option value="None">None</option>
+                        </select>
+                      </div>
+                    )}
                   {buildingType === "Commercial" &&
                     propertyType === "Office Space" && (
                       <div>
@@ -5458,53 +5831,55 @@ Make it engaging, attractive, and human-like.
                     propertyType === "Storage" ||
                     propertyType === "Industry" ||
                     propertyType === "Hospitality") && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Investment Option
-                      </label>
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Property Usage
+                        </label>
 
-                      <select
-                        name="investment_options"
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.investment_options}
-                        onChange={handleInputChange}
-                      >
-                        <option value="">Select Investment Option</option>
-                        <option value="Pre-Leased Spaces">
-                          Pre-Leased Spaces
-                        </option>
-                        <option value="Restaurants">Restaurants</option>
-                        <option value="SCO Plots">SCO Plots</option>
-                        <option value="Business Center">Business Center</option>
-                        <option value="Food Court">Food Court</option>
-                        <option value="Multiplex">Multiplex</option>
-                        <option value="Co-working">Co-working</option>
-                      </select>
-                    </div>
-                  )}
+                        <select
+                          name="investment_options"
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={formData.investment_options}
+                          onChange={handleInputChange}
+                        >
+                          <option value="">Select Property Usage Option</option>
+                          <option value="Pre-Leased Spaces">
+                            Pre-Leased Spaces
+                          </option>
+                          <option value="Restaurants">Restaurants</option>
+                          <option value="SCO Plots">SCO Plots</option>
+                          <option value="Business Center">Business Center</option>
+                          <option value="Food Court">Food Court</option>
+                          <option value="Multiplex">Multiplex</option>
+                          <option value="Co-working">Co-working</option>
+                          <option value="Corner Shop">Corner Shop</option>
+                          <option value="Main Road Shop">Main Road Shop</option>
+                        </select>
+                      </div>
+                    )}
 
-                  {(propertyType === "Office Space" ||
+                  {/* {(propertyType === "Office Space" ||
                     propertyType === "Retail" ||
                     propertyType === "Storage" ||
                     propertyType === "Industry" ||
                     propertyType === "Hospitality") && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Purchase Type
-                      </label>
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Purchase Type
+                        </label>
 
-                      <select
-                        name="purchase_type"
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.purchase_type}
-                        onChange={handleInputChange}
-                      >
-                        <option value="">Select Purchase Type</option>
-                        <option value="Resale">Resale</option>
-                        <option value="New Bookings">New Bookings</option>
-                      </select>
-                    </div>
-                  )}
+                        <select
+                          name="purchase_type"
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={formData.purchase_type}
+                          onChange={handleInputChange}
+                        >
+                          <option value="">Select Purchase Type</option>
+                          <option value="Resale">Resale</option>
+                          <option value="New Bookings">New Bookings</option>
+                        </select>
+                      </div>
+                    )} */}
 
                   {!(
                     (propertyCategory === "Buy" &&
@@ -5595,22 +5970,22 @@ Make it engaging, attractive, and human-like.
                       buildingType === "Commercial" &&
                       propertyType === "Industry")
                   ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Personal Washroom
-                      </label>
-                      <select
-                        name="personal_washroom"
-                        value={formData.personal_washroom}
-                        onChange={handleInputChange}
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select</option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                      </select>
-                    </div>
-                  )}
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Personal Washroom
+                        </label>
+                        <select
+                          name="personal_washroom"
+                          value={formData.personal_washroom}
+                          onChange={handleInputChange}
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                        >
+                          <option value="">Select</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                    )}
 
                   {/* {!(
                     (propertyCategory === "Buy" &&
@@ -5965,24 +6340,24 @@ fice Space") ||
                       buildingType === "Residential" &&
                       propertyType === "PG")
                   ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Number of Seats Available
-                      </label>
-                      <input
-                        type="text"
-                        name="number_of_seats_available"
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.number_of_seats_available}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
-                            handleInputChange(e);
-                          }
-                        }}
-                      />
-                    </div>
-                  )}
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Number of Seats Available
+                        </label>
+                        <input
+                          type="text"
+                          name="number_of_seats_available"
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={formData.number_of_seats_available}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
+                              handleInputChange(e);
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
 
                   {/* {!(
                     (propertyCategory === "Buy" &&
@@ -6850,42 +7225,97 @@ fice Space") ||
                       buildingType === "Commercial" &&
                       propertyType === "Hospitality")
                   ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Available For{" "}
-                        {propertyCategory === "Rent" &&
-                          buildingType === "Residential" &&
-                          propertyType === "PG" && (
-                            <span className="text-xl font-bold text-red-500">
-                              *
-                            </span>
-                          )}
-                      </label>
-                      <select
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.available_for}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            available_for: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">Select Availability</option>
-                        <option value="Girls">Girls</option>
-                        <option value="Boys">Boys</option>
-                        <option value="Family">Family</option>
-                        <option value="Single women">Single women</option>
-                        <option value="Single Men">Single Men</option>
-                      </select>
-                      {formErrors.available_for && (
-                        <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                          <MdErrorOutline className="text-lg" />
-                          {formErrors.available_for}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Available For{" "}
+                          {propertyCategory === "Rent" &&
+                            buildingType === "Residential" &&
+                            propertyType === "PG" && (
+                              <span className="text-xl font-bold text-red-500">
+                                *
+                              </span>
+                            )}
+                        </label>
+                        <Select
+  isMulti
+  name="available_for"
+  options={[
+    { value: "Girls", label: "Girls" },
+    { value: "Boys", label: "Boys" },
+    { value: "Working", label: "Working" },
+    { value: "Family", label: "Family" },
+    { value: "Single women", label: "Single women" },
+    { value: "Single Men", label: "Single Men" },
+    { value: "Company Guest House", label: "Company Guest House" },
+    { value: "Anyone / No Preference", label: "Anyone / No Preference"},
+  ]}
+  value={[
+    { value: "Girls", label: "Girls" },
+    { value: "Boys", label: "Boys" },
+    { value: "Working", label: "Working" },
+    { value: "Family", label: "Family" },
+    { value: "Single women", label: "Single women" },
+    { value: "Single Men", label: "Single Men" },
+    { value: "Company Guest House", label: "Company Guest House" },
+    { value: "Anyone / No Preference", label: "Anyone / No Preference" },
+  ].filter((opt) =>
+    Array.isArray(formData.available_for)
+      ? formData.available_for.includes(opt.value)
+      : formData.available_for
+          ?.split(",")
+          .map((v) => v.trim())
+          .includes(opt.value)
+  )}
+  onChange={(selectedOptions) => {
+    setFormData((prev) => ({
+      ...prev,
+      available_for: selectedOptions.map((opt) => opt.value),
+    }));
+  }}
+  placeholder="Select Availability"
+  classNamePrefix="react-select"
+  styles={{
+    control: (base, state) => ({
+      ...base,
+      minHeight: "60px",
+      padding: "6px",
+      borderColor: state.isFocused
+        ? "#a855f7"
+        : "#d1d5db",
+      boxShadow: state.isFocused
+        ? "0 0 0 2px #a855f7"
+        : "none",
+      borderRadius: "0.5rem",
+      fontSize: "16px",
+    }),
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: "#ede9fe",
+      borderRadius: "0.375rem",
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: "#6b21a8",
+      fontWeight: "500",
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: "#6b21a8",
+      ":hover": {
+        backgroundColor: "#ddd6fe",
+        color: "#4c1d95",
+      },
+    }),
+  }}
+/>
+                        {formErrors.available_for && (
+                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <MdErrorOutline className="text-lg" />
+                            {formErrors.available_for}
+                          </p>
+                        )}
+                      </div>
+                    )}
 
                   {/* {!(
                     (propertyCategory === "Buy" &&
@@ -7124,130 +7554,130 @@ fice Space") ||
                       buildingType === "Commercial" &&
                       propertyType === "Hospitality")
                   ) && (
-                    // Replace button UI with dropdown UI
+                      // Replace button UI with dropdown UI
 
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Room Type <span className="text-red-500">*</span>
-                      </label>
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Room Type <span className="text-red-500">*</span>
+                        </label>
 
-                      <select
-                        value={roomType}
-                        onChange={(e) => {
-                          setRoomType(e.target.value);
+                        <select
+                          value={roomType}
+                          onChange={(e) => {
+                            setRoomType(e.target.value);
 
-                          setFormData({
-                            ...formData,
-                            room_type: e.target.value,
-                          });
-                        }}
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      >
-                        <option value="">Select Room Type</option>
-                        <option value="Private">Private</option>
-                        <option value="Sharing">Sharing</option>
-                      </select>
+                            setFormData({
+                              ...formData,
+                              room_type: e.target.value,
+                            });
+                          }}
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                        >
+                          <option value="">Select Room Type</option>
+                          <option value="Private">Private</option>
+                          <option value="Sharing">Sharing</option>
+                        </select>
 
-                      {formErrors.room_type && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {formErrors.room_type}
-                        </p>
-                      )}
-                    </div>
-                    // <div>
-                    //   <label className="block mb-2 font-medium text-gray-700">
-                    //     Room Type{" "}
-                    //     {propertyCategory === "Rent" &&
-                    //       buildingType === "Residential" &&
-                    //       propertyType === "PG" && (
-                    //         <span className="text-xl font-bold text-red-500">
-                    //           *
-                    //         </span>
-                    //       )}
-                    //   </label>
+                        {formErrors.room_type && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {formErrors.room_type}
+                          </p>
+                        )}
+                      </div>
+                      // <div>
+                      //   <label className="block mb-2 font-medium text-gray-700">
+                      //     Room Type{" "}
+                      //     {propertyCategory === "Rent" &&
+                      //       buildingType === "Residential" &&
+                      //       propertyType === "PG" && (
+                      //         <span className="text-xl font-bold text-red-500">
+                      //           *
+                      //         </span>
+                      //       )}
+                      //   </label>
 
-                    //   <Select
-                    //     isMulti
-                    //     name="room_type"
-                    //     options={roomOptions}
-                    //     value={roomOptions.filter((opt) =>
-                    //       formData.room_type.includes(opt.value),
-                    //     )}
-                    //     onChange={(selectedOptions) =>
-                    //       handleInputChange({
-                    //         target: {
-                    //           name: "room_type",
-                    //           value: selectedOptions.map((opt) => opt.value),
-                    //         },
-                    //       })
-                    //     }
-                    //     components={{ MultiValue: CustomMultiValue }}
-                    //     placeholder="Select Room Types"
-                    //     classNamePrefix="react-select"
-                    //     styles={{
-                    //       control: (base, state) => ({
-                    //         ...base,
-                    //         minHeight: "60px",
-                    //         padding: "6px",
-                    //         borderColor: state.isFocused
-                    //           ? "#a855f7"
-                    //           : "#d1d5db",
-                    //         boxShadow: state.isFocused
-                    //           ? "0 0 0 2px #a855f7"
-                    //           : "none",
-                    //         borderRadius: "0.5rem",
-                    //         fontSize: "16px",
-                    //         display: "flex",
-                    //         flexWrap: "nowrap",
-                    //         overflowX: "auto",
-                    //       }),
-                    //       valueContainer: (base) => ({
-                    //         ...base,
-                    //         padding: "0 6px",
-                    //         display: "flex",
-                    //         flexWrap: "nowrap",
-                    //         gap: "6px",
-                    //         overflowX: "auto",
-                    //         scrollbarWidth: "thin",
-                    //         alignItems: "center",
-                    //       }),
-                    //       placeholder: (base) => ({
-                    //         ...base,
-                    //         color: "#1f2937",
-                    //         fontSize: "16px",
-                    //       }),
-                    //       multiValue: (base) => ({
-                    //         ...base,
-                    //         backgroundColor: "#ede9fe",
-                    //         borderRadius: "0.375rem",
-                    //         display: "flex",
-                    //         alignItems: "center",
-                    //         padding: "2px 6px",
-                    //         whiteSpace: "nowrap",
-                    //       }),
-                    //       multiValueLabel: (base) => ({
-                    //         ...base,
-                    //         color: "#6b21a8",
-                    //         fontWeight: "500",
-                    //       }),
-                    //       multiValueRemove: (base) => ({
-                    //         ...base,
-                    //         color: "#6b21a8",
-                    //         ":hover": {
-                    //           backgroundColor: "#ddd6fe",
-                    //           color: "#4c1d95",
-                    //         },
-                    //       }),
-                    //     }}
-                    //   />
-                    //   {formErrors.room_type && (
-                    //     <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
-                    //       <MdErrorOutline className="text-lg" />
-                    //       {formErrors.room_type}
-                    //     </p>
-                    //   )}
-                    // </div>
-                  )}
+                      //   <Select
+                      //     isMulti
+                      //     name="room_type"
+                      //     options={roomOptions}
+                      //     value={roomOptions.filter((opt) =>
+                      //       formData.room_type.includes(opt.value),
+                      //     )}
+                      //     onChange={(selectedOptions) =>
+                      //       handleInputChange({
+                      //         target: {
+                      //           name: "room_type",
+                      //           value: selectedOptions.map((opt) => opt.value),
+                      //         },
+                      //       })
+                      //     }
+                      //     components={{ MultiValue: CustomMultiValue }}
+                      //     placeholder="Select Room Types"
+                      //     classNamePrefix="react-select"
+                      //     styles={{
+                      //       control: (base, state) => ({
+                      //         ...base,
+                      //         minHeight: "60px",
+                      //         padding: "6px",
+                      //         borderColor: state.isFocused
+                      //           ? "#a855f7"
+                      //           : "#d1d5db",
+                      //         boxShadow: state.isFocused
+                      //           ? "0 0 0 2px #a855f7"
+                      //           : "none",
+                      //         borderRadius: "0.5rem",
+                      //         fontSize: "16px",
+                      //         display: "flex",
+                      //         flexWrap: "nowrap",
+                      //         overflowX: "auto",
+                      //       }),
+                      //       valueContainer: (base) => ({
+                      //         ...base,
+                      //         padding: "0 6px",
+                      //         display: "flex",
+                      //         flexWrap: "nowrap",
+                      //         gap: "6px",
+                      //         overflowX: "auto",
+                      //         scrollbarWidth: "thin",
+                      //         alignItems: "center",
+                      //       }),
+                      //       placeholder: (base) => ({
+                      //         ...base,
+                      //         color: "#1f2937",
+                      //         fontSize: "16px",
+                      //       }),
+                      //       multiValue: (base) => ({
+                      //         ...base,
+                      //         backgroundColor: "#ede9fe",
+                      //         borderRadius: "0.375rem",
+                      //         display: "flex",
+                      //         alignItems: "center",
+                      //         padding: "2px 6px",
+                      //         whiteSpace: "nowrap",
+                      //       }),
+                      //       multiValueLabel: (base) => ({
+                      //         ...base,
+                      //         color: "#6b21a8",
+                      //         fontWeight: "500",
+                      //       }),
+                      //       multiValueRemove: (base) => ({
+                      //         ...base,
+                      //         color: "#6b21a8",
+                      //         ":hover": {
+                      //           backgroundColor: "#ddd6fe",
+                      //           color: "#4c1d95",
+                      //         },
+                      //       }),
+                      //     }}
+                      //   />
+                      //   {formErrors.room_type && (
+                      //     <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                      //       <MdErrorOutline className="text-lg" />
+                      //       {formErrors.room_type}
+                      //     </p>
+                      //   )}
+                      // </div>
+                    )}
                   {roomType === "Sharing" && (
                     <div>
                       <label className="block mb-1 font-medium text-gray-700">
@@ -7269,7 +7699,7 @@ fice Space") ||
                         <option value="2">2</option>
                         <option value="3">3</option>
                         <option value="4">4</option>
-                        <option value="4+">4+</option>
+                        <option value="4">4+</option>
                       </select>
                     </div>
                   )}
@@ -7949,24 +8379,24 @@ fice Space") ||
                       buildingType === "Commercial" &&
                       propertyType === "Hospitality")
                   ) && (
-                    <div>
-                      <label className="font-medium text-gray-700">
-                        Total Beds
-                      </label>
-                      <input
-                        type="text"
-                        name="total_beds"
-                        className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                        value={formData.total_beds}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
-                            handleInputChange(e);
-                          }
-                        }}
-                      />
-                    </div>
-                  )}
+                      <div>
+                        <label className="font-medium text-gray-700">
+                          Total Beds
+                        </label>
+                        <input
+                          type="text"
+                          name="total_beds"
+                          className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
+                          value={formData.total_beds}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
+                              handleInputChange(e);
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
                   {propertyCategory === "Paying Guest" &&
                     (propertyType === "Apartment" ||
                       propertyType === "Builder Floor" ||
@@ -8804,7 +9234,7 @@ fice Space") ||
                 {/* Header Section */}
                 <div className="mb-6">
                   <h2 className="text-2xl font-semibold text-gray-900">
-                    Property Info
+                    Generate Property Information with AI
                   </h2>
                   <p className="text-gray-500">
                     Details about the property, including an overview and
@@ -8833,14 +9263,20 @@ fice Space") ||
                           : "Generate with AI"}
                       </button>
                     </div>
-
-                    <textarea
-                      name="property_description"
-                      className="w-full h-40 p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
-                      value={formData.property_description}
-                      onChange={handleInputChange}
-                      placeholder="Enter Property Description"
-                    />
+                    {/* Relative wrapper for Textarea and Live Counter */}
+                    <div className="relative w-full mt-1">
+                      <textarea
+                        name="property_description"
+                        maxLength={800}
+                        className="w-full h-40 p-3 pb-7 pr-16 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-rose-500 resize-none block"
+                        value={formData?.property_description || ""}
+                        onChange={handleInputChange}
+                        placeholder="Enter Property Description"
+                      />
+                      <span className="absolute bottom-2 right-3 text-xs text-gray-400 pointer-events-none select-none z-10">
+                        {(formData?.property_description || "").length}/800
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -8877,11 +9313,10 @@ fice Space") ||
                       className="w-5 h-5 my-text border-gray-300 form-checkbox focus:ring-rose-500"
                     />
                     <span
-                      className={`text-gray-700 ${
-                        selectedAmenities.includes(amenity._id)
-                          ? "my-text font-medium"
-                          : ""
-                      }`}
+                      className={`text-gray-700 ${selectedAmenities.includes(amenity._id)
+                        ? "my-text font-medium"
+                        : ""
+                        }`}
                     >
                       {amenity.amenity_name}
                     </span>
@@ -9180,8 +9615,17 @@ fice Space") ||
 
                     {/* Dropdown for Yes/No */}
                     <select
-                      value={virtualTourLink}
-                      onChange={(e) => setVirtualTourLink(e.target.value)}
+  value={virtualTourLink}
+  onChange={(e) => {
+    const value = e.target.value;
+
+    setVirtualTourLink(value);
+
+    setFormData((prev) => ({
+      ...prev,
+      virtual_tour_availability: value,
+    }));
+  }}
                       className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
                     >
                       <option value="">Select Virtual Tour Available?</option>
@@ -9195,10 +9639,9 @@ fice Space") ||
           )}
 
           {/* Navigation Buttons - Fixed at Bottom */}
-          <div
-            className={`fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md flex mx-32 ${
-              activeStep === 0 ? "justify-end" : "justify-between"
-            }`}
+          {/* <div
+            className={`fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md flex mx-32 ${activeStep === 0 ? "justify-end" : "justify-between"
+              }`}
           >
             {" "}
             {activeStep > 0 && (
@@ -9230,6 +9673,50 @@ fice Space") ||
                 }}
                 disabled={isSubmitting}
                 className={`mt-4 px-4 py-2 rounded ${isSubmitting ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"} text-white`}
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
+            )}
+          </div> */}
+          <div
+            className={`fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-md px-3 py-3 sm:px-6 sm:py-4 md:px-10 lg:px-16 xl:px-32 flex items-center gap-3 ${
+              activeStep === 0 ? "justify-end" : "justify-between"
+            }`}
+          >
+            {activeStep > 0 && (
+              <button
+                onClick={prevStep}
+                className="w-full sm:w-auto min-w-[120px] px-5 py-2.5 text-gray-700 bg-gray-300 rounded-lg hover:bg-gray-400"
+              >
+                Back
+              </button>
+            )}
+
+            {activeStep < steps.length - 1 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (validateStepFields()) {
+                    nextStep();
+                  }
+                }}
+                className="w-full sm:w-auto min-w-[120px] px-5 py-2.5 text-white my-bg rounded-lg hover:my-bg"
+              >
+                Continue
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  if (validateStepFields()) {
+                    handleSubmit(e);
+                  }
+                }}
+                disabled={isSubmitting}
+                className={`w-full sm:w-auto min-w-[120px] px-5 py-2.5 rounded ${
+                  isSubmitting
+                    ? "bg-gray-400"
+                    : "bg-green-600 hover:bg-green-700"
+                } text-white`}
               >
                 {isSubmitting ? "Submitting..." : "Submit"}
               </button>
