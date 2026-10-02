@@ -2271,7 +2271,7 @@ const Editproject = () => {
                     >
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold">
-                          Property {index + 1}
+                          Project Configuration
                         </h3>
 
                         {projectProperties.length > 1 && (
@@ -2681,7 +2681,7 @@ const Editproject = () => {
                           </select>
                         </div>
 
-                        {!(
+                        {/* {!(
                           (buildingType === "Residential" &&
                             projectProperty.project_type === "Plot/Land") ||
                           (buildingType === "Commercial" &&
@@ -2716,8 +2716,8 @@ const Editproject = () => {
                                 <option value="4">+4</option>
                               </select>
                             </div>
-                          )}
-                        {buildingType === "Commercial" &&
+                          )} */}
+                        {/* {buildingType === "Commercial" &&
                           projectProperty.project_type === "Retail" && (
                             <div>
                               <label className="font-medium text-gray-700">
@@ -2745,8 +2745,8 @@ const Editproject = () => {
                                 <option value="Not Available">Not Available</option>
                               </select>
                             </div>
-                          )}
-                        {buildingType === "Commercial" &&
+                          )} */}
+                        {/* {buildingType === "Commercial" &&
                           ["Storage", "Industry", "Hospitality"].includes(
                             projectProperty.project_type
                           ) && (
@@ -2776,7 +2776,7 @@ const Editproject = () => {
                                 <option value="4+">4+</option>
                               </select>
                             </div>
-                          )}
+                          )} */}
                         {!(
                           (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
                           (buildingType === "Commercial" &&
@@ -2808,7 +2808,7 @@ const Editproject = () => {
                               />
                             </div>
                           )}
-                        {!(
+                        {/* {!(
                           (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
                           (buildingType === "Commercial" &&
                             [
@@ -2852,8 +2852,8 @@ const Editproject = () => {
                                 )}
                               </select>
                             </div>
-                          )}
-                        {buildingType === "Commercial" &&
+                          )} */}
+                        {/* {buildingType === "Commercial" &&
                           projectProperty.project_type === "Office" && (
                             <div>
                               <label className="font-medium text-gray-700">
@@ -2880,8 +2880,8 @@ const Editproject = () => {
                                 <option value="10+">10+</option>
                               </select>
                             </div>
-                          )}
-                        {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                          )} */}
+                        {/* {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
                           <div>
                             <label className="font-medium text-gray-700">
                               No. of Meeting Rooms
@@ -2906,8 +2906,8 @@ const Editproject = () => {
                               <option value="5+">5+</option>
                             </select>
                           </div>
-                        )}
-                        {buildingType === "Commercial" &&
+                        )} */}
+                        {/* {buildingType === "Commercial" &&
                           projectProperty.project_type === "Office" && (
                             <div>
                               <label className="font-medium text-gray-700">
@@ -2932,7 +2932,7 @@ const Editproject = () => {
                                 <option value="3+">3+</option>
                               </select>
                             </div>
-                          )}
+                          )} */}
 
                         {buildingType === "Commercial" &&
                           projectProperty.project_type === "Hospitality" && (
@@ -3059,7 +3059,7 @@ const Editproject = () => {
                               </div>
                             </>
                           )}
-                        {!(
+                        {/* {!(
                           (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
                           (buildingType === "Commercial" &&
                             [
@@ -3095,8 +3095,8 @@ const Editproject = () => {
                                 <option value="10+">10+</option>
                               </select>
                             </div>
-                          )}
-                        {projectProperty.project_type !== "Plot/Land" && (
+                          )} */}
+                        {/* {projectProperty.project_type !== "Plot/Land" && (
                           <div>
                             <label className="font-medium text-gray-700">
                               Furnishing Type{" "}
@@ -3127,7 +3127,7 @@ const Editproject = () => {
                               </p>
                             )}
                           </div>
-                        )}
+                        )} */}
                         {buildingType === "Residential" && projectProperty.project_type !== "Plot" && (
                           <div>
                             <label className="font-medium text-gray-700">Balcony</label>
@@ -3183,7 +3183,7 @@ const Editproject = () => {
                             </div>
                           )}
 
-                        {buildingType === "Commercial" &&
+                        {/* {buildingType === "Commercial" &&
                           projectProperty.project_type === "Office" && (
                             <div>
                               <label className="font-medium text-gray-700">
@@ -3220,8 +3220,8 @@ const Editproject = () => {
                                 )}
                               </select>
                             </div>
-                          )}
-                        {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                          )} */}
+                        {/* {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
                           <div>
                             <label className="font-medium text-gray-700">
                               Reception Area
@@ -3243,8 +3243,8 @@ const Editproject = () => {
                               <option value="No">No</option>
                             </select>
                           </div>
-                        )}
-                        {buildingType === "Commercial" &&
+                        )} */}
+                        {/* {buildingType === "Commercial" &&
                           projectProperty.project_type === "Office" && (
                             <div>
                               <label className="font-medium text-gray-700">
@@ -3268,7 +3268,7 @@ const Editproject = () => {
                                 <option value="No">No</option>
                               </select>
                             </div>
-                          )}
+                          )} */}
                         {buildingType === "Commercial" &&
                           projectProperty.project_type === "Retail" && (
                             <div>
@@ -3398,7 +3398,7 @@ const Editproject = () => {
                               </select>
                             </div>
                           )}
-                        {(buildingType === "Commercial" ||
+                        {/* {(buildingType === "Commercial" ||
                           (buildingType === "Residential" &&
                             projectProperty.project_type === "Other")) && (
                             <div>
@@ -3422,8 +3422,8 @@ const Editproject = () => {
                                 <option value="New bookings">New Bookings</option>
                               </select>
                             </div>
-                          )}
-                        {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                          )} */}
+                        {/* {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
                           <div>
                             <label className="font-medium text-gray-700">
                               Number of Seats Available
@@ -3446,7 +3446,7 @@ const Editproject = () => {
                               className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                             />
                           </div>
-                        )}
+                        )} */}
                       </div>
                       <div className="flex justify-end mt-4">
                         <button

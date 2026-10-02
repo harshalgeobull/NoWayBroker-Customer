@@ -1771,7 +1771,7 @@ const AddNewProject = () => {
                   >
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold">
-                        Property {index + 1}
+                        Project Configuration
                       </h3>
 
                       {projectProperties.length > 1 && (
@@ -2206,7 +2206,7 @@ const AddNewProject = () => {
                         </select>
                       </div>
 
-                      {!(
+                      {/* {!(
                         (buildingType === "Residential" &&
                           projectProperty.project_type === "Plot/Land") ||
                         (buildingType === "Commercial" &&
@@ -2241,8 +2241,8 @@ const AddNewProject = () => {
                               <option value="4">+4</option>
                             </select>
                           </div>
-                        )}
-                      {buildingType === "Commercial" &&
+                        )} */}
+                      {/* {buildingType === "Commercial" &&
                         projectProperty.project_type === "Retail" && (
                           <div>
                             <label className="font-medium text-gray-700">
@@ -2270,8 +2270,8 @@ const AddNewProject = () => {
                               <option value="Not Available">Not Available</option>
                             </select>
                           </div>
-                        )}
-                      {buildingType === "Commercial" &&
+                        )} */}
+                      {/* {buildingType === "Commercial" &&
                         ["Storage", "Industry", "Hospitality"].includes(
                           projectProperty.project_type
                         ) && (
@@ -2301,7 +2301,7 @@ const AddNewProject = () => {
                               <option value="4+">4+</option>
                             </select>
                           </div>
-                        )}
+                        )} */}
                       {!(
                         (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
                         (buildingType === "Commercial" &&
@@ -2333,7 +2333,7 @@ const AddNewProject = () => {
                             />
                           </div>
                         )}
-                      {!(
+                      {/* {!(
                         (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
                         (buildingType === "Commercial" &&
                           [
@@ -2377,8 +2377,8 @@ const AddNewProject = () => {
                               )}
                             </select>
                           </div>
-                        )}
-                      {buildingType === "Commercial" &&
+                        )} */}
+                      {/* {buildingType === "Commercial" &&
                         projectProperty.project_type === "Office" && (
                           <div>
                             <label className="font-medium text-gray-700">
@@ -2405,8 +2405,8 @@ const AddNewProject = () => {
                               <option value="10+">10+</option>
                             </select>
                           </div>
-                        )}
-                      {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                        )} */}
+                      {/* {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
                         <div>
                           <label className="font-medium text-gray-700">
                             No. of Meeting Rooms
@@ -2431,8 +2431,8 @@ const AddNewProject = () => {
                             <option value="5+">5+</option>
                           </select>
                         </div>
-                      )}
-                      {buildingType === "Commercial" &&
+                      )} */}
+                      {/* {buildingType === "Commercial" &&
                         projectProperty.project_type === "Office" && (
                           <div>
                             <label className="font-medium text-gray-700">
@@ -2457,7 +2457,7 @@ const AddNewProject = () => {
                               <option value="3+">3+</option>
                             </select>
                           </div>
-                        )}
+                        )} */}
 
                       {buildingType === "Commercial" &&
                         projectProperty.project_type === "Hospitality" && (
@@ -2584,7 +2584,7 @@ const AddNewProject = () => {
                             </div>
                           </>
                         )}
-                      {!(
+                      {/* {!(
                         (buildingType === "Residential" && projectProperty.project_type === "Plot/Land") ||
                         (buildingType === "Commercial" &&
                           [
@@ -2618,16 +2618,16 @@ const AddNewProject = () => {
                               <option value="5-7">5-7</option>
                               <option value="8-10">8-10</option>
                               <option value="10+">10+</option>
-                              {/* <option value="0-1">1 to 5 Years</option>
+                              <option value="0-1">1 to 5 Years</option>
                       <option value="2-4">5 to 10 Years</option>
                       <option value="5-7">10 to 15 Years</option>
                       <option value="8-10">15 to 20 Years</option>
                       <option value="10+">Above 20 Years</option>
-                      <option value="10+">New Construction</option> */}
+                      <option value="10+">New Construction</option>
                             </select>
                           </div>
-                        )}
-                      {projectProperty.project_type !== "Plot/Land" && (
+                        )} */}
+                      {/* {projectProperty.project_type !== "Plot/Land" && (
                         <div>
                           <label className="font-medium text-gray-700">
                             Furnishing Type{" "}
@@ -2658,7 +2658,7 @@ const AddNewProject = () => {
                             </p>
                           )}
                         </div>
-                      )}
+                      )} */}
                       {buildingType === "Residential" && projectProperty.project_type !== "Plot" && (
                         <div>
                           <label className="font-medium text-gray-700">Balcony</label>
@@ -2714,7 +2714,7 @@ const AddNewProject = () => {
                           </div>
                         )}
 
-                      {buildingType === "Commercial" &&
+                      {/* {buildingType === "Commercial" &&
                         projectProperty.project_type === "Office" && (
                           <div>
                             <label className="font-medium text-gray-700">
@@ -2751,8 +2751,8 @@ const AddNewProject = () => {
                               )}
                             </select>
                           </div>
-                        )}
-                      {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                        )} */}
+                      {/* {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
                         <div>
                           <label className="font-medium text-gray-700">
                             Reception Area
@@ -2774,8 +2774,8 @@ const AddNewProject = () => {
                             <option value="No">No</option>
                           </select>
                         </div>
-                      )}
-                      {buildingType === "Commercial" &&
+                      )} */}
+                      {/* {buildingType === "Commercial" &&
                         projectProperty.project_type === "Office" && (
                           <div>
                             <label className="font-medium text-gray-700">
@@ -2799,7 +2799,7 @@ const AddNewProject = () => {
                               <option value="No">No</option>
                             </select>
                           </div>
-                        )}
+                        )} */}
                       {buildingType === "Commercial" &&
                         projectProperty.project_type === "Retail" && (
                           <div>
@@ -2929,7 +2929,7 @@ const AddNewProject = () => {
                             </select>
                           </div>
                         )}
-                      {(buildingType === "Commercial" ||
+                      {/* {(buildingType === "Commercial" ||
                         (buildingType === "Residential" &&
                           projectProperty.project_type === "Other")) && (
                           <div>
@@ -2953,8 +2953,8 @@ const AddNewProject = () => {
                               <option value="New bookings">New Bookings</option>
                             </select>
                           </div>
-                        )}
-                      {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
+                        )} */}
+                      {/* {buildingType === "Commercial" && projectProperty.project_type === "Office" && (
                         <div>
                           <label className="font-medium text-gray-700">
                             Number of Seats Available
@@ -2977,7 +2977,7 @@ const AddNewProject = () => {
                             className="w-full p-3 mt-1 border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
                           />
                         </div>
-                      )}
+                      )} */}
                       {/* <div className="md:col-span-3 mt-2"> */}
                       {/* <label className="font-medium text-gray-700">
                       Price Details
