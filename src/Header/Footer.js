@@ -99,7 +99,7 @@ const Footer = () => {
 
             {/* Description */}
             <p className="text-gray-500 text-[14px] sm:text-[15px] leading-relaxed max-w-lg font-bold">
-              NowayBroker is a zero-brokerage real estate platform connecting verified owners, buyers, tenants, and builders directly for a transparent and smarter property experience.
+              NoWayBroker is a zero-brokerage real estate platform connecting verified owners, buyers, tenants, and builders directly for a transparent and smarter property experience.
             </p>
           </div>
 

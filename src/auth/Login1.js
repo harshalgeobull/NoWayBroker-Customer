@@ -158,10 +158,15 @@ const Login1 = ({ onClose, isOpen, defaultMobile }) => {
             <>
               <div className="flex gap-2 mb-1">
                 <div className="w-1/3">
-                  <select
-                    className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 bg-white focus:outline-none"
+                  {/* <select
+                    className="w-full p-1 border border-gray-300 rounded-lg text-gray-700 bg-white focus:outline-none"
                     value={countryCode}
                     onChange={(e) => setCountryCode(e.target.value)}
+                  > */}
+                  <select
+                  className="w-full h-12 px-1 border border-gray-300 rounded-lg text-gray-700 bg-white focus:outline-none"
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
                   >
                     <option value="+91">IN +91</option>
                     <option value="+1">US +1</option>
@@ -174,7 +179,7 @@ const Login1 = ({ onClose, isOpen, defaultMobile }) => {
                     <option value="+27">ZA +27</option>
                   </select>
                 </div>
-                <input
+                {/* <input
                   type="text"
                   placeholder="Mobile Number"
                   value={mobile}
@@ -187,7 +192,22 @@ const Login1 = ({ onClose, isOpen, defaultMobile }) => {
                   }}
                   className={`w-full p-3 pr-10 border rounded-lg text-gray-700 bg-white focus:outline-none ${errors.mobile ? "border-red-500" : "border-gray-300"
                     }`}
-                />
+                /> */}
+                <input
+  type="text"
+  placeholder="Mobile Number"
+  value={mobile}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^\d{0,10}$/.test(value)) {
+      setMobile(value);
+      setErrors({ ...errors, mobile: "" });
+    }
+  }}
+  className={`w-full h-12 px-1 pr-10 border rounded-lg text-gray-700 bg-white focus:outline-none ${
+    errors.mobile ? "border-red-500" : "border-gray-300"
+  }`}
+/>
               </div>
               {errors.mobile && (
                 <p className="text-sm text-red-500 mt-1 flex items-center gap-1">
