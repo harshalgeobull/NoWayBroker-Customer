@@ -520,6 +520,20 @@ import LocationOn from "@mui/icons-material/LocationOn";
 import Phone from "@mui/icons-material/Phone";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
+import {
+  NAME_MIN,
+  EMAIL_MAX,
+  cleanSpaces,
+  sanitizeNameInput,
+  LETTERS_ONLY_REGEX,
+  isValidEmail,
+  sanitizePropertyNameInput,
+  validatePropertyName,
+  sanitizeTenDigitPhone,
+  validateTenDigitPhone,
+  validateFeedback,
+  PROPERTY_NAME_MAX,
+} from "../utils/Signupvalidation";
 
 const Contact = ({ setAlert }) => {
   useEffect(() => {
@@ -540,6 +554,16 @@ const Contact = ({ setAlert }) => {
 
   const [loading, setLoading] = useState(false);
   const [alert, setLocalAlert] = useState(null);
+
+  // field-level validation messages (NWB-BUG-029 to 038)
+  const emptyErrors = {
+    name: "",
+    contact_number: "",
+    email: "",
+    property_name: "",
+    feedback_msg: "",
+  };
+  const [errors, setErrors] = useState(emptyErrors);
 
   // State for contact information
   const [contactInfo, setContactInfo] = useState({
@@ -573,8 +597,17 @@ const Contact = ({ setAlert }) => {
     }
   };
 
-  const onChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const onChange = (e) => {
+    const { name: field, value } = e.target;
+    let next = value;
+    if (field === "name") next = sanitizeNameInput(value); // letters + single spaces, max length (029, 030, 031)
+    if (field === "contact_number") next = sanitizeTenDigitPhone(value); // digits only, max 10 (032, 033)
+    if (field === "email") next = value.replace(/\s/g, "").slice(0, EMAIL_MAX); // no spaces, max length (034)
+    if (field === "property_name") next = sanitizePropertyNameInput(value); // no unsupported symbols, max length (035, 036)
+
+    setFormData({ ...formData, [field]: next });
+    if (errors[field]) setErrors({ ...errors, [field]: "" });
+  };
 
   const handleStarClick = (newRating) => {
     setFormData({ ...formData, rating: newRating });
@@ -582,6 +615,37 @@ const Contact = ({ setAlert }) => {
 
   const onSubmit = (e) => {
     e.preventDefault();
+
+    // clean spaces, then validate every field before anything is sent (NWB-BUG-038)
+    const cleanName = cleanSpaces(name);
+    const cleanPhone = contact_number.trim();
+    const cleanEmail = email.trim();
+    const cleanProperty = cleanSpaces(property_name);
+    const cleanFeedback = feedback_msg.trim();
+
+    const newErrors = {
+      name: !cleanName
+        ? "Name is required"
+        : !LETTERS_ONLY_REGEX.test(cleanName)
+          ? "Name can contain letters only"
+          : cleanName.length < NAME_MIN
+            ? `Name must be at least ${NAME_MIN} characters`
+            : "",
+      contact_number: !cleanPhone
+        ? "Phone number is required"
+        : validateTenDigitPhone(cleanPhone),
+      email: !cleanEmail
+        ? "Email is required"
+        : isValidEmail(cleanEmail)
+          ? ""
+          : "Enter a valid email address (e.g. name@example.com)",
+      property_name: validatePropertyName(cleanProperty),
+      feedback_msg: validateFeedback(cleanFeedback),
+    };
+
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).some(Boolean)) return; // block submission
 
     const config = {
       headers: {
@@ -593,7 +657,14 @@ const Contact = ({ setAlert }) => {
     axios
       .post(
         `${process.env.REACT_APP_API_URL}/cust_api/give_us_feedback`,
-        { name, contact_number, email, property_name, rating, feedback_msg },
+        {
+          name: cleanName,
+          contact_number: cleanPhone,
+          email: cleanEmail,
+          property_name: cleanProperty,
+          rating,
+          feedback_msg: cleanFeedback,
+        },
         config,
       )
       .then((res) => {
@@ -611,14 +682,19 @@ const Contact = ({ setAlert }) => {
           rating: 1,
           feedback_msg: "",
         });
+        setErrors(emptyErrors);
         window.scrollTo(0, 0);
         setTimeout(() => {
           setLocalAlert(null);
         }, 3000);
       })
       .catch((err) => {
+        const serverMessage = err?.response?.data?.message;
         setAlert("Error Submitting Feedback", "error");
-        setLocalAlert({ msg: "Error Submitting Feedback", type: "danger" });
+        setLocalAlert({
+          msg: serverMessage || "Error Submitting Feedback",
+          type: "danger",
+        });
         setLoading(false);
         window.scrollTo(0, 0);
         setTimeout(() => {
@@ -700,7 +776,7 @@ const Contact = ({ setAlert }) => {
             </div>
           </div>
           <div>
-            <form className="form" onSubmit={(e) => onSubmit(e)}>
+            <form className="form" onSubmit={(e) => onSubmit(e)} noValidate>
               <div className="mb-4 form-group">
                 <label
                   className="block mb-2 text-sm font-bold text-gray-700"
@@ -715,8 +791,12 @@ const Contact = ({ setAlert }) => {
                   placeholder="Full Name"
                   onChange={(e) => onChange(e)}
                   value={name}
+                  maxLength={50}
                   required
                 />
+                {errors.name && (
+                  <p className="mt-1 text-xs text-red-500">{errors.name}</p>
+                )}
               </div>
               <div className="mb-4 form-group">
                 <label
@@ -729,32 +809,16 @@ const Contact = ({ setAlert }) => {
                   className="w-full px-3 py-2 leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
                   name="contact_number"
                   type="tel"
-                  placeholder="+91 1234567890"
-                  onChange={(e) => {
-                    const currentValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters (digits only)
-                    if (currentValue.length < 7 || currentValue.length > 15) {
-                      e.target.setCustomValidity(
-                        "Phone number must be between 7 and 15 digits",
-                      );
-                    } else {
-                      e.target.setCustomValidity(""); // Clear the message if valid
-                    }
-                    onChange(e); // Call your original onChange handler
-                  }}
+                  inputMode="numeric"
+                  placeholder="10-digit mobile number"
+                  onChange={(e) => onChange(e)}
                   value={contact_number}
+                  maxLength={10}
                   required
-                  onKeyPress={(e) => {
-                    const currentValue = e.target.value.replace(/\D/g, ""); // Get only digits from current value
-                    const key = e.key;
-                    if (!/[0-9\s+]/.test(key)) {
-                      e.preventDefault();
-                    }
-                    if (currentValue.length >= 15 && /[0-9]/.test(key)) {
-                      e.preventDefault();
-                    }
-                  }}
-                  title="Please enter a valid phone number"
                 />
+                {errors.contact_number && (
+                  <p className="mt-1 text-xs text-red-500">{errors.contact_number}</p>
+                )}
               </div>
 
               <div className="mb-4 form-group">
@@ -771,8 +835,12 @@ const Contact = ({ setAlert }) => {
                   placeholder="example@gmail.com"
                   onChange={(e) => onChange(e)}
                   value={email}
+                  maxLength={EMAIL_MAX}
                   required
                 />
+                {errors.email && (
+                  <p className="mt-1 text-xs text-red-500">{errors.email}</p>
+                )}
               </div>
 
               <div className="mb-4 form-group">
@@ -789,8 +857,12 @@ const Contact = ({ setAlert }) => {
                   placeholder="Property Name"
                   onChange={(e) => onChange(e)}
                   value={property_name}
+                  maxLength={PROPERTY_NAME_MAX}
                   required
                 />
+                {errors.property_name && (
+                  <p className="mt-1 text-xs text-red-500">{errors.property_name}</p>
+                )}
               </div>
 
               <div className="mb-4 form-group">
@@ -803,7 +875,7 @@ const Contact = ({ setAlert }) => {
                 <div className="relative w-full mt-1">
                   <textarea
                     name="feedback_msg"
-                    placeholder="Your feedback helps us improve NowayBroker and deliver a better property-search experience..."
+                    placeholder="Your feedback helps us improve NoWayBroker and deliver a better property-search experience..."
                     value={feedback_msg}
                     maxLength={555}
                     onChange={(e) => onChange(e)}
@@ -814,6 +886,9 @@ const Contact = ({ setAlert }) => {
                     {(feedback_msg || "").length}/555
                   </span>
                 </div>
+                {errors.feedback_msg && (
+                  <p className="mt-1 text-xs text-red-500">{errors.feedback_msg}</p>
+                )}
               </div>
 
               <div className="mb-4 form-group">

@@ -112,133 +112,167 @@ const Subscription = () => {
   //   }
   // };
 
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
-
-  const handlePlanPurchase = async (plan, user_id) => {
-    try {
-      // Step 0: Load Razorpay SDK dynamically
-      const loaded = await loadRazorpayScript();
-      if (!loaded) {
-        toast.error(
-          "Razorpay SDK failed to load. Check your internet connection.",
-        );
-        return;
-      }
-
-      // Step 1: Create Razorpay order via backend
-      const orderResponse = await axios.post(
-        `${BASE_URL}/cust_api/create_razorpay_order`,
-        {
-          user_id,
-          plan_auto_id: plan._id,
-        },
-      );
-
-      if (orderResponse.data.status !== 1) {
-        toast.error("Failed to create Razorpay order");
-        return;
-      }
-
-      const { order, key_id } = orderResponse.data;
-
-      // Step 2: Open Razorpay payment modal
-      const options = {
-        key: key_id,
-        amount: order.amount,
-        currency: order.currency,
-        name: "Your App Name",
-        description: plan.plan_name,
-        order_id: order.id,
-        handler: async function (response) {
-          try {
-            // Step 3: Verify payment
-            const verifyRes = await axios.post(
-              `${BASE_URL}/cust_api/verify_payment`,
-              {
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature,
-              },
-            );
-
-            if (verifyRes.data.status !== 1) {
-              toast.error("Payment verification failed");
-              return;
-            }
-
-            // Step 4: Save plan purchase in DB
-            const today = moment();
-            const expiryDate = moment().add(
-              parseInt(plan.validity),
-              plan.validity_unit.toLowerCase(),
-            );
-
-            const formData = new FormData();
-            formData.append("user_id", user_id);
-            formData.append("plan_auto_id", plan._id);
-            formData.append("plan_name", plan.plan_name);
-            formData.append("category_type", plan.category_type);
-            formData.append("no_of_units", plan.no_of_units);
-            formData.append("payment_mode", "Razorpay");
-            formData.append("transaction_id", verifyRes.data.transaction_id);
-            formData.append(
-              "transaction_status",
-              verifyRes.data.transaction_status,
-            );
-            formData.append("plan_purchase_date", today.format("YYYY-MM-DD"));
-            formData.append(
-              "plan_expiry_date",
-              expiryDate.format("YYYY-MM-DD"),
-            );
-            formData.append("plan_status", "Active");
-
-            const purchaseRes = await axios.post(
-              `${BASE_URL}/cust_api/purchase_plan`,
-              formData,
-            );
-
-            if (purchaseRes.data.status === 1) {
-              toast.success("Plan purchased successfully!");
-              fetchMyPlans(); // Refresh user's purchased plans
-            } else {
-              toast.error(
-                "Purchase failed: " +
-                  (purchaseRes.data.message || "Try again."),
-              );
-            }
-          } catch (err) {
-            console.error(
-              "Error in payment verification or plan purchase:",
-              err,
-            );
-            toast.error("Something went wrong after payment. Contact support.");
-          }
-        },
-        prefill: {
-          name: "",
-          email: "",
-          contact: "",
-        },
-        theme: {
-          color: "#4f46e5",
-        },
-      };
-
-      const rzp1 = new window.Razorpay(options);
-      rzp1.open();
-    } catch (error) {
-      console.error("Error initiating payment:", error);
-      toast.error("Payment initiation failed. Try again.");
+ const loadCashfreeScript = () => {
+  return new Promise((resolve) => {
+    if (window.Cashfree) {
+      resolve(true);
+      return;
     }
-  };
+
+    const script = document.createElement("script");
+    script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+
+    document.body.appendChild(script);
+  });
+};
+
+ const handlePlanPurchase = async (plan, user_id) => {
+  try {
+    // Step 1: Load Cashfree SDK
+    const loaded = await loadCashfreeScript();
+
+    if (!loaded) {
+      toast.error(
+        "Cashfree SDK failed to load. Check your internet connection."
+      );
+      return;
+    }
+
+    // Step 2: Create Cashfree order through backend
+    const orderResponse = await axios.post(
+      `${BASE_URL}/cust_api/create_razorpay_order`,
+      {
+        user_id: user_id,
+        plan_auto_id: plan._id,
+      }
+    );
+
+    console.log("Cashfree order response:", orderResponse.data);
+
+    if (orderResponse.data.status !== 1) {
+      toast.error(
+        orderResponse.data.msg || "Failed to create payment order"
+      );
+      return;
+    }
+
+    const {
+      payment_session_id,
+      order_id,
+    } = orderResponse.data;
+
+    if (!payment_session_id || !order_id) {
+      toast.error("Payment session was not created.");
+      return;
+    }
+
+    // Step 3: Initialize Cashfree
+    const cashfree = window.Cashfree({
+      mode: "sandbox",
+    });
+
+    // Step 4: Open Cashfree payment popup
+    const result = await cashfree.checkout({
+      paymentSessionId: payment_session_id,
+      redirectTarget: "_modal",
+    });
+
+    console.log("Cashfree checkout result:", result);
+
+    // Step 5: Verify payment through backend
+    const verifyRes = await axios.post(
+      `${BASE_URL}/cust_api/verify_payment`,
+      {
+        cashfree_order_id: order_id,
+      }
+    );
+
+    console.log("Cashfree verification response:", verifyRes.data);
+
+    if (verifyRes.data.status !== 1) {
+      toast.error(
+        verifyRes.data.msg || "Payment verification failed"
+      );
+      return;
+    }
+
+    // Step 6: Save plan purchase in DB
+    const today = moment();
+
+    const expiryDate = moment().add(
+      parseInt(plan.validity),
+      plan.validity_unit.toLowerCase()
+    );
+
+    const formData = new FormData();
+
+    formData.append("user_id", user_id);
+    formData.append("plan_auto_id", plan._id);
+    formData.append("plan_name", plan.plan_name);
+    formData.append("category_type", plan.category_type);
+    formData.append("no_of_units", plan.no_of_units);
+
+    // IMPORTANT: Changed from Razorpay to Cashfree
+    formData.append("payment_mode", "Cashfree");
+
+    formData.append(
+      "transaction_id",
+      verifyRes.data.transaction_id
+    );
+
+    formData.append(
+      "transaction_status",
+      verifyRes.data.transaction_status
+    );
+
+    formData.append(
+      "plan_purchase_date",
+      today.format("YYYY-MM-DD")
+    );
+
+    formData.append(
+      "plan_expiry_date",
+      expiryDate.format("YYYY-MM-DD")
+    );
+
+    formData.append("plan_status", "Active");
+
+    // Step 7: Save purchase
+    const purchaseRes = await axios.post(
+      `${BASE_URL}/cust_api/purchase_plan`,
+      formData
+    );
+
+    console.log("Purchase response:", purchaseRes.data);
+
+    if (purchaseRes.data.status === 1) {
+      toast.success("Plan purchased successfully!");
+
+      // Refresh user's plans
+      fetchMyPlans();
+    } else {
+      toast.error(
+        "Purchase failed: " +
+          (purchaseRes.data.message || "Try again.")
+      );
+    }
+  } catch (error) {
+    console.error("Cashfree payment error:", error);
+
+    console.error(
+      "Cashfree error response:",
+      error.response?.data
+    );
+
+    toast.error(
+      error.response?.data?.msg ||
+        "Payment failed. Please try again."
+    );
+  }
+};
 
   const totalPagesForAllPlans = Math.ceil(allPlans.length / itemsPerPage);
   const totalPagesForMyPlans = Math.ceil(myPlans.length / itemsPerPage);

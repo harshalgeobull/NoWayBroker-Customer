@@ -26,10 +26,14 @@ const NAV_TABS = [
   { label: "COMMERCIAL", key: "Commercial", type: "Commercial" },
 ];
 
+
+
 const LIVE_CITIES = ["Chennai"];
 
 // Letters (any language) and spaces only
-const VALID_SEARCH_TEXT = /^[\p{L}\p{M}\s]+$/u;
+// const VALID_SEARCH_TEXT = /^[\p{L}\p{M}\s]+$/u;
+// const VALID_SEARCH_TEXT = /^[\p{L}\p{M}0-9\s]+$/u;
+const VALID_SEARCH_TEXT =/^(?=.*[\p{L}\p{M}])[\p{L}\p{M}0-9\s]+$/u;
 const EMPTY_SEARCH_MSG = "Please enter what you're looking for.";
 const INVALID_SEARCH_MSG =
   "Please enter only letters. Numbers and special characters are not allowed.";
@@ -519,7 +523,7 @@ const handleCityNavigation = (cityName) => {
                 >
                   <FiSearch size={22} />
                 </button>
-                <input
+                {/* <input
                   ref={inputRef}
                   type="text"
                   id="search"
@@ -527,7 +531,22 @@ const handleCityNavigation = (cityName) => {
                   className="w-full min-w-0 px-2 ml-2 text-sm text-gray-600 bg-transparent outline-none border-none sm:text-base"
                   value={searchQuery}
                   onChange={handleSearchChange}
-                />
+                /> */}
+                <input
+                ref={inputRef}
+                type="text"
+                id="search"
+                placeholder={placeholderTexts[placeholderIndex]}
+                className="w-full min-w-0 px-2 ml-2 text-sm text-gray-600 bg-transparent outline-none border-none sm:text-base"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSearch();
+                  }
+                }}
+/>
                 {showSuggestions && suggestions.length > 0 && (
                   <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
                     {suggestions.map((item, index) => (

@@ -131,7 +131,7 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
       newErrors.email = "Email is required";
       hasError = true;
     } else if (!isValidEmail(cleanEmail)) {
-      newErrors.email = "Enter a valid email address (e.g. name@example.com)";
+      newErrors.email = "Enter a valid email address (e.g. name@gmail.com)";
       hasError = true;
     }
 
@@ -367,6 +367,15 @@ const SignUp1 = ({ onClose, isOpen, defaultMobile }) => {
                     // emails never contain spaces
                     setEmail(e.target.value.replace(/\s/g, ""));
                     setErrors({ ...errors, email: "" });
+                  }}
+                  onBlur={() => {
+                    // show the error as soon as the user leaves the field
+                    if (email && !isValidEmail(email)) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        email: "Enter a valid email address (e.g. name@gmail.com)",
+                      }));
+                    }
                   }}
                   className={`w-full p-3 border rounded-lg text-gray-700 bg-white focus:outline-none ${errors.email ? "border-red-500" : "border-gray-300"
                     }`}
