@@ -33,10 +33,21 @@ const LIVE_CITIES = ["Chennai"];
 // Letters (any language) and spaces only
 // const VALID_SEARCH_TEXT = /^[\p{L}\p{M}\s]+$/u;
 // const VALID_SEARCH_TEXT = /^[\p{L}\p{M}0-9\s]+$/u;
-const VALID_SEARCH_TEXT =/^(?=.*[\p{L}\p{M}])[\p{L}\p{M}0-9\s]+$/u;
+
+// const VALID_SEARCH_TEXT =/^(?=.*[\p{L}\p{M}])[\p{L}\p{M}0-9\s]+$/u;
+// const EMPTY_SEARCH_MSG = "Please enter what you're looking for.";
+// const INVALID_SEARCH_MSG =
+//   "Please enter only letters. Numbers and special characters are not allowed.";
+
+// Allows letters, numbers, spaces and special characters.
+// At least one letter is required.
+const VALID_SEARCH_TEXT =
+  /^(?=.*[\p{L}\p{M}])[\p{L}\p{M}0-9\s\p{P}\p{S}]+$/u;
+
 const EMPTY_SEARCH_MSG = "Please enter what you're looking for.";
+
 const INVALID_SEARCH_MSG =
-  "Please enter only letters. Numbers and special characters are not allowed.";
+  "Please enter a valid search.";
 
 const Search = () => {
   const history = useHistory();

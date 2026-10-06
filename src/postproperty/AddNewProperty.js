@@ -1,4 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
+import {
+  ADDRESS_MAX,
+  PG_COMMERCIAL_MSG,
+  PG_PROPERTY_TYPES,
+  cleanSpaces,
+  getZipMaxLength,
+  sanitizeCityTyping,
+  validateAddress,
+  validateBuildingName,
+  validateCity,
+  validateZip,
+} from "../utils/propertyFormValidation";
 // File ke top mein, component function ke BAHAR
 
 import { IoIosInformationCircle } from "react-icons/io";
@@ -550,7 +562,7 @@ const AddNewProperty = () => {
         "Hospitality",
         "Other",
       ]);
-      setPropertyType("Office Space 18");
+      setPropertyType("Office Space");
     } else if (propertyCategory === "Rent" && buildingType === "Residential") {
       setPropertyTypes([
         "Apartment",
@@ -564,6 +576,17 @@ const AddNewProperty = () => {
         "Other",
       ]);
       setPropertyType("Apartment");
+    }
+  }, [propertyCategory, buildingType]);
+
+  // Paying Guest supports Residential only. If Commercial was selected before switching,
+  // clear it (and the Property Type) and prompt the user to choose a valid Building Type.
+  useEffect(() => {
+    if (propertyCategory === "Paying Guest" && buildingType === "Commercial") {
+      setBuildingType("");
+      setPropertyType("");
+      setPropertyTypes(PG_PROPERTY_TYPES);
+      setFormErrors((prev) => ({ ...prev, building_type: PG_COMMERCIAL_MSG }));
     }
   }, [propertyCategory, buildingType]);
 
@@ -1275,6 +1298,7 @@ useEffect(() => {
   const handleBuildingTypeChange = (type) => {
     setBuildingType(type);
     setFormData({ ...formData, building_type: type });
+    setFormErrors((prev) => ({ ...prev, building_type: "" }));
   };
 
   useEffect(() => {
@@ -1294,16 +1318,23 @@ useEffect(() => {
     const errors = {};
 
     if (activeStep === 0) {
-      if (!formData.property_name?.trim()) {
-        errors.property_name = "Property Name is required";
-      } else if (!/^[a-zA-Z0-9\s]+$/.test(formData.property_name)) {
-        errors.property_name = "Alphanumeric fields only";
+      const nameError = validateBuildingName(formData.property_name);
+      if (nameError) {
+        errors.property_name = nameError;
+      }
+      // Building Type and Property Type are mandatory (NWB-BUG-046, 047, 048, 049)
+      if (!buildingType) {
+        errors.building_type = "Please select a Building Type";
+      }
+      if (!propertyType) {
+        errors.property_type = "Please select a Property Type";
       }
     }
 
     if (activeStep === 1) {
-      if (!address?.trim()) {
-        errors.address = "Address is required";
+      const addressError = validateAddress(address);
+      if (addressError) {
+        errors.address = addressError;
       }
       if (!country?.trim()) {
         errors.country = "country is required";
@@ -1311,11 +1342,24 @@ useEffect(() => {
       if (!state?.trim()) {
         errors.state = "state is required";
       }
-      if (!zipCode?.trim()) {
-        errors.zipCode = "zip code is required";
+      const zipError = validateZip(country, zipCode);
+      if (zipError) {
+        errors.zipCode = zipError;
       }
-      if (!city?.trim()) {
-        errors.city = "city name is required";
+      const cityError = validateCity(city);
+      if (cityError) {
+        errors.city = cityError;
+      }
+
+      // keep the trimmed values (leading / trailing / repeated spaces removed)
+      if (!errors.address && cleanSpaces(address) !== address) {
+        setAddress(cleanSpaces(address));
+      }
+      if (!errors.city && cleanSpaces(city) !== city) {
+        setCity(cleanSpaces(city));
+      }
+      if (!errors.zipCode && zipCode !== String(zipCode).trim()) {
+        setZipCode(String(zipCode).trim());
       }
     }
 
@@ -1794,6 +1838,7 @@ if (
                         }`}
                       onClick={() => {
                         setPropertyCategory(category);
+                        setFormErrors((prev) => ({ ...prev, building_type: "", property_type: "" })); // old prompts are re-evaluated for the new category
                         setFormData({
                           ...formData,
                           property_category_type: category,
@@ -1832,6 +1877,12 @@ if (
                       </button>
                     ))}
                 </div>
+                {formErrors.building_type && (
+                  <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                    <MdErrorOutline className="text-lg" />
+                    {formErrors.building_type}
+                  </p>
+                )}
               </div>
 
               {/* Property Type */}
@@ -1851,12 +1902,19 @@ if (
                       onClick={() => {
                         setPropertyType(type);
                         setFormData({ ...formData, property_type: type });
+                        setFormErrors((prev) => ({ ...prev, property_type: "" }));
                       }}
                     >
                       {getPropertyTypeLabel(type)} {/*  shows Plot/Land */}
                     </button>
                   ))}
                 </div>
+                {formErrors.property_type && (
+                  <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                    <MdErrorOutline className="text-lg" />
+                    {formErrors.property_type}
+                  </p>
+                )}
                 {propertyType === "Hospitality" && (
                   <div className="mt-4">
                     <label className="block mb-1 font-medium text-gray-700">
@@ -2086,8 +2144,8 @@ if (
                             type="text"
                             value={address}
                             onChange={(e) => {
-                              const value = e.target.value;
-                              const isValid = /^[a-zA-Z0-9\s]*$/.test(value);
+                              const value = e.target.value.replace(/^\s+/, ""); // no leading space
+                              const isValid = /^[a-zA-Z0-9\s]*$/.test(value) && value.length <= ADDRESS_MAX;
                               if (isValid) {
                                 setAddress(value);
                               }
@@ -2190,13 +2248,7 @@ if (
                       <input
                         type="text"
                         value={city}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          const isValid = /^[a-zA-Z0-9\s]*$/.test(value);
-                          if (isValid) {
-                            setCity(value);
-                          }
-                        }}
+                        onChange={(e) => setCity(sanitizeCityTyping(e.target.value))}
                         placeholder="Enter City"
                         className={`w-full border rounded-md p-3 text-gray-700 focus:ring-2 focus:ring-rose-500 outline-none ${formErrors.city ? "border-red-600" : "border-gray-300"
                           }`}
@@ -2256,7 +2308,7 @@ if (
                         value={zipCode}
                         onChange={(e) => {
                           const value = e.target.value;
-                          if (/^\d{0,10}$/.test(value)) {
+                          if (/^\d*$/.test(value) && value.length <= getZipMaxLength(country)) {
                             setZipCode(value);
                           }
                         }}
