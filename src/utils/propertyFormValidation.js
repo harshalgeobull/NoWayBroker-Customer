@@ -97,3 +97,108 @@ export const PG_PROPERTY_TYPES = [
 ];
 export const PG_COMMERCIAL_MSG =
   "Commercial is not available for Paying Guest. Please select Residential.";
+
+/* =====================================================================
+ * Property Details / Amenities / Photos & Videos  (NWB-BUG-061 to 083)
+ * Limits and conversion values below are NOT in the QA data - confirm with product.
+ * ===================================================================== */
+
+/* ---------- Property Price (NWB-BUG-061, 065) ---------- */
+export const PRICE_MAX_DIGITS = 12;
+
+export const validatePropertyPrice = (raw = "") => {
+  const value = String(raw ?? "").replace(/,/g, "").trim();
+  if (!value) return "Property Price is required";
+  if (!/^\d+$/.test(value)) return "Enter a valid price (numbers only)";
+  if (value.length > PRICE_MAX_DIGITS)
+    return `Property Price cannot exceed ${PRICE_MAX_DIGITS} digits`;
+  return "";
+};
+
+/* ---------- Carpet / Built-up area (NWB-BUG-066 to 077) ---------- */
+// Approximate sq.ft in one unit, as [smallest, largest]. Units that differ from region to
+// region (bigha, kottah, biswa) have a range, so a combination is flagged only when it is
+// impossible under EVERY possible meaning of the unit.
+export const AREA_UNIT_SQFT = {
+  "sq.ft": [1, 1],
+  "sq.yards": [9, 9],
+  "sq.m": [10.7639, 10.7639],
+  acre: [43560, 43560],
+  marla: [272.25, 272.25],
+  cents: [435.6, 435.6],
+  bigha: [3000, 27500],
+  kottah: [720, 3645],
+  kanal: [5445, 5445],
+  grounds: [2400, 2400],
+  ares: [1076.39, 1076.39],
+  biswa: [435, 1400],
+  guntha: [1089, 1089],
+  aankadam: [72, 72],
+  hectares: [107639, 107639],
+  rood: [10890, 10890],
+  chataks: [45, 45],
+  perch: [272.25, 272.25],
+};
+
+export const MIN_AREA_SQFT = 10; // smaller than this is "unrealistically small" (NWB-BUG-074, 075)
+export const MAX_BUILTUP_TO_CARPET_RATIO = 3; // built-up more than 3x carpet is unrealistic (NWB-BUG-076)
+
+const sqftRange = (value, unit) => {
+  // matching ignores capital letters, so saved values like "Acre" still work
+  const [low, high] =
+    AREA_UNIT_SQFT[String(unit ?? "").trim().toLowerCase()] || [1, 1]; // no unit chosen yet: treat as sq.ft
+  return [value * low, value * high];
+};
+
+// label is "Carpet area" or "Built-up area"
+export const validateAreaValue = (label, raw, unit) => {
+  const text = String(raw ?? "").trim();
+  if (!text) return `${label} is required`;
+  const number = Number(text);
+  if (!Number.isFinite(number) || number <= 0) return `${label} must be greater than 0`;
+  const [, largestSqft] = sqftRange(number, unit);
+  if (largestSqft < MIN_AREA_SQFT)
+    return `${label} is too small. Please enter a realistic area`;
+  return "";
+};
+
+export const validateAreaUnit = (label, unit) =>
+  String(unit ?? "").trim() ? "" : `${label} unit is required`;
+
+// Carpet area can never be bigger than built-up area, and built-up area can't be absurdly bigger.
+export const validateAreaPair = ({ carpet, carpetUnit, builtUp, builtUpUnit }) => {
+  const c = Number(carpet);
+  const b = Number(builtUp);
+  if (!(c > 0) || !(b > 0) || !carpetUnit || !builtUpUnit) return {};
+  const [carpetLow, carpetHigh] = sqftRange(c, carpetUnit);
+  const [builtLow, builtHigh] = sqftRange(b, builtUpUnit);
+  if (carpetLow > builtHigh)
+    return {
+      carpetArea:
+        "Carpet area cannot be larger than Built-up area. Please check the values and units",
+    };
+  if (builtLow > MAX_BUILTUP_TO_CARPET_RATIO * carpetHigh)
+    return {
+      builtUpArea:
+        "Built-up area is unrealistically large compared to Carpet area. Please check the values and units",
+    };
+  return {};
+};
+
+/* ---------- Video URL (NWB-BUG-080, 081, 083) ---------- */
+// optional http(s)://, a real domain with a dot and an ending, optional port/path
+const VIDEO_URL_REGEX = /^(https?:\/\/)?([A-Za-z0-9-]+\.)+[A-Za-z]{2,}(:\d{1,5})?(\/\S*)?$/;
+
+export const validateVideoUrl = (raw = "") => {
+  const value = String(raw ?? "").trim();
+  if (!value) return "";
+  return VIDEO_URL_REGEX.test(value)
+    ? ""
+    : "Enter a valid video URL (e.g. https://www.youtube.com/watch?v=...)";
+};
+
+/* ---------- Photos (NWB-BUG-082) ---------- */
+export const MAX_PROPERTY_PHOTOS = 20; // stated in the bug; confirm with business
+
+/* ---------- Amenity label typo coming from the amenities list (NWB-BUG-078) ---------- */
+export const fixAmenityLabel = (name = "") => String(name).replace(/Chidren/g, "Children");

@@ -10,6 +10,14 @@ import {
   validateBuildingName,
   validateCity,
   validateZip,
+  PRICE_MAX_DIGITS,
+  MAX_PROPERTY_PHOTOS,
+  fixAmenityLabel,
+  validateAreaPair,
+  validateAreaUnit,
+  validateAreaValue,
+  validatePropertyPrice,
+  validateVideoUrl,
 } from "../utils/propertyFormValidation";
 import { IoIosInformationCircle } from "react-icons/io";
 import { ToWords } from "to-words";
@@ -330,6 +338,8 @@ const EditProperty = () => {
       setFormData((prev) => ({
         ...prev,
         ...data,
+        // a bathroom count of 0 is no longer a valid choice; the user selects 1 or more
+        ...(String(data.bathroom) === "0" ? { bathroom: "" } : {}),
         property_price: String(data.property_price || ""),
         rent: String(data.rent || ""),
         custom_deposit_amount: String(data.custom_deposit_amount || ""),
@@ -751,7 +761,7 @@ setCentralAC(data.central_AC || "");
     }
 
     const maxSize = 50 * 1024 * 1024; // 50MB
-    const maxImages = 5;
+    const maxImages = MAX_PROPERTY_PHOTOS;
 
     let oversizeFound = false;
     let oversizedFiles = [];
@@ -775,7 +785,10 @@ setCentralAC(data.central_AC || "");
     }
 
     if (propertyimages.length + newImages.length > maxImages) {
-      toast.error("You can only upload a maximum of 5 images.");
+      toast.error(`You can only upload a maximum of ${MAX_PROPERTY_PHOTOS} images.`);
+      if (input.target) {
+        input.target.value = "";
+      }
       return;
     }
 
@@ -813,6 +826,10 @@ setCentralAC(data.central_AC || "");
 
     const updated = propertyimages.filter((_, i) => i !== index);
     setPropertyImages(updated);
+    // a removed new photo must not be uploaded either
+    if (!image.old) {
+      setFileData2((prev) => prev.filter((f) => f !== image.file));
+    }
   };
 
   // Video Upload Section -
@@ -1345,7 +1362,9 @@ form.append("property_dimensions_breadth", breadthOfLand);
     } catch (error) {
       console.error(error);
 
-      toast.error("Failed to update property.");
+      toast.error(
+        error?.response?.data?.message || "Failed to update property.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -1353,6 +1372,9 @@ form.append("property_dimensions_breadth", breadthOfLand);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if (["property_price", "ownership", "video_url", "video_url_type"].includes(name)) {
+      clearFormError(name);
+    }
 
     setFormData((prev) => {
       const updatedData = {
@@ -1378,6 +1400,10 @@ form.append("property_dimensions_breadth", breadthOfLand);
       return updatedData;
     });
   };
+
+  // clears one field's error message as soon as the user edits that field
+  const clearFormError = (key) =>
+    setFormErrors((prev) => (prev[key] ? { ...prev, [key]: "" } : prev));
 
   const handleBuildingTypeChange = (type) => {
     typesTouchedByUser.current = true;
@@ -1733,7 +1759,7 @@ form.append("property_dimensions_breadth", breadthOfLand);
         )
       ) {
         if (!formData.bhk_type?.trim()) {
-          errors.bhk_type = "bhk type is required";
+          errors.bhk_type = "BHK is required";
         }
       }
       if (formData.possession_status === "Under Construction" ||
@@ -1751,15 +1777,63 @@ form.append("property_dimensions_breadth", breadthOfLand);
       }
     }
 
-    if (activeStep === 3) {
-      if (selectedAmenities.length === 0) {
-        errors.amenities = "Please select at least one amenity";
+    if (activeStep === 2) {
+      // Area details: required, greater than 0, not unrealistically small, units required
+      const carpetValueError = validateAreaValue("Carpet area", carpetArea, carpetAreaUnit);
+      if (carpetValueError) errors.carpetArea = carpetValueError;
+      const builtUpValueError = validateAreaValue("Built-up area", builtUpArea, builtUpAreaUnit);
+      if (builtUpValueError) errors.builtUpArea = builtUpValueError;
+
+      const carpetUnitError = validateAreaUnit("Carpet area", carpetAreaUnit);
+      if (carpetUnitError) errors.carpetAreaUnit = carpetUnitError;
+      const builtUpUnitError = validateAreaUnit("Built-up area", builtUpAreaUnit);
+      if (builtUpUnitError) errors.builtUpAreaUnit = builtUpUnitError;
+
+      // Carpet vs Built-up must make sense once both are in the same unit.
+      // (Plot / Land listings are skipped: their "built-up" area is not a building area.)
+      if (propertyType !== "Plot" && propertyType !== "Land") {
+        const pair = validateAreaPair({
+          carpet: carpetArea,
+          carpetUnit: carpetAreaUnit,
+          builtUp: builtUpArea,
+          builtUpUnit: builtUpAreaUnit,
+        });
+        if (pair.carpetArea && !errors.carpetArea) errors.carpetArea = pair.carpetArea;
+        if (pair.builtUpArea && !errors.builtUpArea) errors.builtUpArea = pair.builtUpArea;
+      }
+
+      // Property Price (shown for Buy): required and not longer than the maximum
+      if (propertyCategory === "Buy") {
+        const priceError = validatePropertyPrice(formData.property_price);
+        if (priceError) errors.property_price = priceError;
+      }
+
+      // Ownership (shown and mandatory for Buy + Residential)
+      if (
+        propertyCategory === "Buy" &&
+        buildingType === "Residential" &&
+        !String(formData.ownership || "").trim()
+      ) {
+        errors.ownership = "Ownership is required";
       }
     }
+
+    // Amenities are optional (NWB-BUG-079): nothing to validate on this step.
 
     if (activeStep === 4) {
       if (!coverImage) {
         errors.cover_image = "Please upload a cover image";
+      }
+
+      // Video link: a source must be chosen first, and the link must be a valid URL
+      const videoUrl = String(formData.video_url || "").trim();
+      if (videoUrl) {
+        if (!String(formData.video_url_type || "").trim()) {
+          errors.video_url_type = "Select a video source for the video URL";
+        } else {
+          const videoUrlError = validateVideoUrl(videoUrl);
+          if (videoUrlError) errors.video_url = videoUrlError;
+        }
       }
     }
 
@@ -2450,7 +2524,7 @@ form.append("property_dimensions_breadth", breadthOfLand);
                                 }
                                 onChange={(e) => {
                                   const rawValue = e.target.value.replace(/,/g, "");
-                                  if (/^\d*$/.test(rawValue)) {
+                                  if (/^\d*$/.test(rawValue) && rawValue.length <= PRICE_MAX_DIGITS) {
                                     handleInputChange({
                                       target: {
                                         name: "property_price",
@@ -2538,7 +2612,7 @@ form.append("property_dimensions_breadth", breadthOfLand);
                                 <option value="6+ BHK">6+ BHK</option>
                               </select>
                               {formErrors.bhk_type && (
-                                <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                                <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
                                   <MdErrorOutline className="text-lg" />
                                   {formErrors.bhk_type}
                                 </p>
@@ -2650,7 +2724,6 @@ form.append("property_dimensions_breadth", breadthOfLand);
                                 }
                               >
                                 <option value="">Select Bathrooms</option>
-                                <option value="0">0</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -3241,24 +3314,44 @@ form.append("property_dimensions_breadth", breadthOfLand);
                         Carpet Area <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="text"
-                        value={carpetArea}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^\d{0,10}$/.test(value)) {
-                            setCarpetArea(value);
-                          }
-                        }}
-                        className="w-full mt-1 p-3 border rounded-lg"
-                      />
+                    type="text"
+                    value={carpetArea}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d{0,10}$/.test(value)) {
+                        setCarpetArea(value);
+                        clearFormError("carpetArea");
+                      }
+                    }}
+                    onBlur={() => {
+                      // check right away when the user leaves a filled-in field
+                      if (String(carpetArea || "").trim()) {
+                        const msg = validateAreaValue("Carpet area", carpetArea, carpetAreaUnit);
+                        if (msg) setFormErrors((prev) => ({ ...prev, carpetArea: msg }));
+                      }
+                    }}
+                    className={`w-full mt-1 p-3 border rounded-lg ${formErrors.carpetArea ? "border-red-600" : ""}`}
+                  />
+                  {formErrors.carpetArea && (
+                    <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                      <MdErrorOutline className="text-lg" />
+                      {formErrors.carpetArea}
+                    </p>
+                  )}
                     </div>
 
                     <div>
-                      <label className="font-medium text-gray-700">Unit</label>
+                      <label className="font-medium text-gray-700">
+                        Unit <span className="text-red-500">*</span>
+                      </label>
                       <select
                         value={carpetAreaUnit}
-                        onChange={(e) => setCarpetAreaUnit(e.target.value)}
-                        className="w-full mt-1 p-3 border rounded-lg"
+                        onChange={(e) => {
+                          setCarpetAreaUnit(e.target.value);
+                          clearFormError("carpetAreaUnit");
+                          clearFormError("carpetArea");
+                        }}
+                        className={`w-full mt-1 p-3 border rounded-lg ${formErrors.carpetAreaUnit ? "border-red-600" : ""}`}
                       >
                         <option value="">Select</option>
                         <option value="sq.ft">sq.ft</option>
@@ -3280,6 +3373,12 @@ form.append("property_dimensions_breadth", breadthOfLand);
                         <option value="chataks">chataks</option>
                         <option value="perch">perch</option>
                       </select>
+                      {formErrors.carpetAreaUnit && (
+                        <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                          <MdErrorOutline className="text-lg" />
+                          {formErrors.carpetAreaUnit}
+                        </p>
+                      )}
                     </div>
                     {/* Built-up Area */}
                     <div>
@@ -3287,24 +3386,44 @@ form.append("property_dimensions_breadth", breadthOfLand);
                         Built-up Area <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="text"
-                        value={builtUpArea}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^\d{0,10}$/.test(value)) {
-                            setBuiltUpArea(value);
-                          }
-                        }}
-                        className="w-full mt-1 p-3 border rounded-lg"
-                      />
+                    type="text"
+                    value={builtUpArea}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d{0,10}$/.test(value)) {
+                        setBuiltUpArea(value);
+                        clearFormError("builtUpArea");
+                      }
+                    }}
+                    onBlur={() => {
+                      // check right away when the user leaves a filled-in field
+                      if (String(builtUpArea || "").trim()) {
+                        const msg = validateAreaValue("Built-up area", builtUpArea, builtUpAreaUnit);
+                        if (msg) setFormErrors((prev) => ({ ...prev, builtUpArea: msg }));
+                      }
+                    }}
+                    className={`w-full mt-1 p-3 border rounded-lg ${formErrors.builtUpArea ? "border-red-600" : ""}`}
+                  />
+                  {formErrors.builtUpArea && (
+                    <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                      <MdErrorOutline className="text-lg" />
+                      {formErrors.builtUpArea}
+                    </p>
+                  )}
                     </div>
 
                     <div>
-                      <label className="font-medium text-gray-700">Unit</label>
+                      <label className="font-medium text-gray-700">
+                        Unit <span className="text-red-500">*</span>
+                      </label>
                       <select
                         value={builtUpAreaUnit}
-                        onChange={(e) => setBuiltUpAreaUnit(e.target.value)}
-                        className="w-full mt-1 p-3 border rounded-lg"
+                        onChange={(e) => {
+                          setBuiltUpAreaUnit(e.target.value);
+                          clearFormError("builtUpAreaUnit");
+                          clearFormError("builtUpArea");
+                        }}
+                        className={`w-full mt-1 p-3 border rounded-lg ${formErrors.builtUpAreaUnit ? "border-red-600" : ""}`}
                       >
                         <option value="">Select</option>
                         <option value="sq.ft">sq.ft</option>
@@ -3326,6 +3445,12 @@ form.append("property_dimensions_breadth", breadthOfLand);
                         <option value="chataks">chataks</option>
                         <option value="perch">perch</option>
                       </select>
+                      {formErrors.builtUpAreaUnit && (
+                        <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                          <MdErrorOutline className="text-lg" />
+                          {formErrors.builtUpAreaUnit}
+                        </p>
+                      )}
                     </div>
                   </div>
                   {/* <div>
@@ -9559,7 +9684,7 @@ form.append("property_dimensions_breadth", breadthOfLand);
                           : ""
                           }`}
                       >
-                        {amenity.amenity_name}
+                        {fixAmenityLabel(amenity.amenity_name)}
                       </span>
                     </label>
                   ))}
@@ -9741,7 +9866,13 @@ form.append("property_dimensions_breadth", breadthOfLand);
                           <select
                             name="video_url_type"
                             value={formData.video_url_type}
-                            onChange={handleInputChange}
+                            onChange={(e) => {
+                              handleInputChange(e);
+                              // no source = no link: clear any link typed before
+                              if (!e.target.value) {
+                                handleInputChange({ target: { name: "video_url", value: "" } });
+                              }
+                            }}
                             className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
                           >
                             <option value="">Select Video Source</option>
@@ -9749,6 +9880,12 @@ form.append("property_dimensions_breadth", breadthOfLand);
                             <option value="Vimeo">Vimeo</option>
                             <option value="Other">Other</option>
                           </select>
+                          {formErrors.video_url_type && (
+                            <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                              <MdErrorOutline className="text-lg" />
+                              {formErrors.video_url_type}
+                            </p>
+                          )}
                         </div>
 
                         <div className="w-1/2">
@@ -9760,8 +9897,16 @@ form.append("property_dimensions_breadth", breadthOfLand);
                             name="video_url"
                             value={formData.video_url}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+                            disabled={!formData.video_url_type}
+                            placeholder={formData.video_url_type ? "Paste the video link" : "Select a video source first"}
+                            className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           />
+                          {formErrors.video_url && (
+                            <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                              <MdErrorOutline className="text-lg" />
+                              {formErrors.video_url}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
