@@ -10,6 +10,14 @@ import {
   validateBuildingName,
   validateCity,
   validateZip,
+  PRICE_MAX_DIGITS,
+  MAX_PROPERTY_PHOTOS,
+  fixAmenityLabel,
+  validateAreaPair,
+  validateAreaUnit,
+  validateAreaValue,
+  validatePropertyPrice,
+  validateVideoUrl,
 } from "../utils/propertyFormValidation";
 // File ke top mein, component function ke BAHAR
 
@@ -692,6 +700,14 @@ const AddNewProperty = () => {
       );
     }
 
+    if (propertyimages.length + newImages.length > MAX_PROPERTY_PHOTOS) {
+      toast.error(`You can only upload a maximum of ${MAX_PROPERTY_PHOTOS} images.`);
+      if (input.target) {
+        input.target.value = "";
+      }
+      return;
+    }
+
     setPropertyImages((prev) => [...prev, ...newImages]);
     setFileData2((prev) => [...prev, ...newFiles]);
 
@@ -704,6 +720,8 @@ const AddNewProperty = () => {
   const handleDelete2 = (index) => {
     const updatedImages = propertyimages.filter((_, i) => i !== index);
     setPropertyImages(updatedImages);
+    // keep the files that will be uploaded in step with the previews that are shown
+    setFileData2((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Video Upload Section -
@@ -1224,12 +1242,27 @@ useEffect(() => {
         imageForm.append("property_id", property_id);
         imageForm.append("property_image", fileData2[i]);
 
-        const res = await fetch(
-          `${process.env.REACT_APP_API_URL}/cust_api/add_property_images`,
-          {
-            method: "POST",
-            body: imageForm,
-          },
+        try {
+          const res = await fetch(
+            `${process.env.REACT_APP_API_URL}/cust_api/add_property_images`,
+            {
+              method: "POST",
+              body: imageForm,
+            },
+          );
+          if (res.ok) {
+            imagesSuccess += 1;
+          } else {
+            imagesFailure += 1;
+          }
+        } catch (uploadError) {
+          imagesFailure += 1;
+        }
+      }
+
+      if (imagesFailure > 0) {
+        toast.warning(
+          `${imagesFailure} of ${fileData2.length} photos could not be uploaded. You can add them again by editing the property.`,
         );
       }
 
@@ -1240,7 +1273,9 @@ useEffect(() => {
       });
     } catch (error) {
       console.error("Error posting property:", error);
-      toast.error("Failed to post property.");
+      toast.error(
+        error?.response?.data?.message || "Failed to post property.",
+      );
       history.push({
         pathname: "/dashboard",
         state: { page: "myProperties" },
@@ -1252,6 +1287,9 @@ useEffect(() => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if (["property_price", "ownership", "video_url", "video_url_type"].includes(name)) {
+      clearFormError(name);
+    }
 
     setFormData((prev) => {
       const updatedData = {
@@ -1294,6 +1332,10 @@ useEffect(() => {
       return updatedData;
     });
   };
+
+  // clears one field's error message as soon as the user edits that field
+  const clearFormError = (key) =>
+    setFormErrors((prev) => (prev[key] ? { ...prev, [key]: "" } : prev));
 
   const handleBuildingTypeChange = (type) => {
     setBuildingType(type);
@@ -1643,7 +1685,7 @@ useEffect(() => {
         )
       ) {
         if (!formData.bhk_type?.trim()) {
-          errors.bhk_type = "bhk type is required";
+          errors.bhk_type = "BHK is required";
         }
       }
       if (
@@ -1679,15 +1721,63 @@ if (
       }
     }
 
-    if (activeStep === 3) {
-      if (selectedAmenities.length === 0) {
-        errors.amenities = "Please select at least one amenity";
+    if (activeStep === 2) {
+      // Area details: required, greater than 0, not unrealistically small, units required
+      const carpetValueError = validateAreaValue("Carpet area", carpetArea, carpetAreaUnit);
+      if (carpetValueError) errors.carpetArea = carpetValueError;
+      const builtUpValueError = validateAreaValue("Built-up area", builtUpArea, builtUpAreaUnit);
+      if (builtUpValueError) errors.builtUpArea = builtUpValueError;
+
+      const carpetUnitError = validateAreaUnit("Carpet area", carpetAreaUnit);
+      if (carpetUnitError) errors.carpetAreaUnit = carpetUnitError;
+      const builtUpUnitError = validateAreaUnit("Built-up area", builtUpAreaUnit);
+      if (builtUpUnitError) errors.builtUpAreaUnit = builtUpUnitError;
+
+      // Carpet vs Built-up must make sense once both are in the same unit.
+      // (Plot / Land listings are skipped: their "built-up" area is not a building area.)
+      if (propertyType !== "Plot" && propertyType !== "Land") {
+        const pair = validateAreaPair({
+          carpet: carpetArea,
+          carpetUnit: carpetAreaUnit,
+          builtUp: builtUpArea,
+          builtUpUnit: builtUpAreaUnit,
+        });
+        if (pair.carpetArea && !errors.carpetArea) errors.carpetArea = pair.carpetArea;
+        if (pair.builtUpArea && !errors.builtUpArea) errors.builtUpArea = pair.builtUpArea;
+      }
+
+      // Property Price (shown for Buy): required and not longer than the maximum
+      if (propertyCategory === "Buy") {
+        const priceError = validatePropertyPrice(formData.property_price);
+        if (priceError) errors.property_price = priceError;
+      }
+
+      // Ownership (shown and mandatory for Buy + Residential)
+      if (
+        propertyCategory === "Buy" &&
+        buildingType === "Residential" &&
+        !String(formData.ownership || "").trim()
+      ) {
+        errors.ownership = "Ownership is required";
       }
     }
+
+    // Amenities are optional (NWB-BUG-079): nothing to validate on this step.
 
     if (activeStep === 4) {
       if (!coverImage) {
         errors.cover_image = "Please upload a cover image";
+      }
+
+      // Video link: a source must be chosen first, and the link must be a valid URL
+      const videoUrl = String(formData.video_url || "").trim();
+      if (videoUrl) {
+        if (!String(formData.video_url_type || "").trim()) {
+          errors.video_url_type = "Select a video source for the video URL";
+        } else {
+          const videoUrlError = validateVideoUrl(videoUrl);
+          if (videoUrlError) errors.video_url = videoUrlError;
+        }
       }
     }
 
@@ -2380,7 +2470,7 @@ if (
                               }
                               onChange={(e) => {
                                 const rawValue = e.target.value.replace(/,/g, "");
-                                if (/^\d*$/.test(rawValue)) {
+                                if (/^\d*$/.test(rawValue) && rawValue.length <= PRICE_MAX_DIGITS) {
                                   handleInputChange({
                                     target: {
                                       name: "property_price",
@@ -2468,7 +2558,7 @@ if (
                               <option value="6+ BHK">6+ BHK</option>
                             </select>
                             {formErrors.bhk_type && (
-                              <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                              <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
                                 <MdErrorOutline className="text-lg" />
                                 {formErrors.bhk_type}
                               </p>
@@ -2580,7 +2670,6 @@ if (
                               }
                             >
                               <option value="">Select Bathrooms</option>
-                              <option value="0">0</option>
                               <option value="1">1</option>
                               <option value="2">2</option>
                               <option value="3">3</option>
@@ -3164,24 +3253,44 @@ if (
                       Carpet Area <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="text"
-                      value={carpetArea}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d{0,10}$/.test(value)) {
-                          setCarpetArea(value);
-                        }
-                      }}
-                      className="w-full mt-1 p-3 border rounded-lg"
-                    />
+                    type="text"
+                    value={carpetArea}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d{0,10}$/.test(value)) {
+                        setCarpetArea(value);
+                        clearFormError("carpetArea");
+                      }
+                    }}
+                    onBlur={() => {
+                      // check right away when the user leaves a filled-in field
+                      if (String(carpetArea || "").trim()) {
+                        const msg = validateAreaValue("Carpet area", carpetArea, carpetAreaUnit);
+                        if (msg) setFormErrors((prev) => ({ ...prev, carpetArea: msg }));
+                      }
+                    }}
+                    className={`w-full mt-1 p-3 border rounded-lg ${formErrors.carpetArea ? "border-red-600" : ""}`}
+                  />
+                  {formErrors.carpetArea && (
+                    <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                      <MdErrorOutline className="text-lg" />
+                      {formErrors.carpetArea}
+                    </p>
+                  )}
                   </div>
 
                   <div>
-                    <label className="font-medium text-gray-700">Unit</label>
+                    <label className="font-medium text-gray-700">
+                        Unit <span className="text-red-500">*</span>
+                      </label>
                     <select
                       value={carpetAreaUnit}
-                      onChange={(e) => setCarpetAreaUnit(e.target.value)}
-                      className="w-full mt-1 p-3 border rounded-lg"
+                      onChange={(e) => {
+                          setCarpetAreaUnit(e.target.value);
+                          clearFormError("carpetAreaUnit");
+                          clearFormError("carpetArea");
+                        }}
+                      className={`w-full mt-1 p-3 border rounded-lg ${formErrors.carpetAreaUnit ? "border-red-600" : ""}`}
                     >
                       <option value="">Select</option>
                       <option value="sq.ft">sq.ft</option>
@@ -3203,6 +3312,12 @@ if (
                       <option value="chataks">chataks</option>
                       <option value="perch">perch</option>
                     </select>
+                      {formErrors.carpetAreaUnit && (
+                        <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                          <MdErrorOutline className="text-lg" />
+                          {formErrors.carpetAreaUnit}
+                        </p>
+                      )}
                   </div>
                   {/* Built-up Area */}
                   <div>
@@ -3210,24 +3325,44 @@ if (
                       Built-up Area <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="text"
-                      value={builtUpArea}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d{0,10}$/.test(value)) {
-                          setBuiltUpArea(value);
-                        }
-                      }}
-                      className="w-full mt-1 p-3 border rounded-lg"
-                    />
+                    type="text"
+                    value={builtUpArea}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d{0,10}$/.test(value)) {
+                        setBuiltUpArea(value);
+                        clearFormError("builtUpArea");
+                      }
+                    }}
+                    onBlur={() => {
+                      // check right away when the user leaves a filled-in field
+                      if (String(builtUpArea || "").trim()) {
+                        const msg = validateAreaValue("Built-up area", builtUpArea, builtUpAreaUnit);
+                        if (msg) setFormErrors((prev) => ({ ...prev, builtUpArea: msg }));
+                      }
+                    }}
+                    className={`w-full mt-1 p-3 border rounded-lg ${formErrors.builtUpArea ? "border-red-600" : ""}`}
+                  />
+                  {formErrors.builtUpArea && (
+                    <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                      <MdErrorOutline className="text-lg" />
+                      {formErrors.builtUpArea}
+                    </p>
+                  )}
                   </div>
 
                   <div>
-                    <label className="font-medium text-gray-700">Unit</label>
+                    <label className="font-medium text-gray-700">
+                        Unit <span className="text-red-500">*</span>
+                      </label>
                     <select
                       value={builtUpAreaUnit}
-                      onChange={(e) => setBuiltUpAreaUnit(e.target.value)}
-                      className="w-full mt-1 p-3 border rounded-lg"
+                      onChange={(e) => {
+                          setBuiltUpAreaUnit(e.target.value);
+                          clearFormError("builtUpAreaUnit");
+                          clearFormError("builtUpArea");
+                        }}
+                      className={`w-full mt-1 p-3 border rounded-lg ${formErrors.builtUpAreaUnit ? "border-red-600" : ""}`}
                     >
                       <option value="">Select</option>
                       <option value="sq.ft">sq.ft</option>
@@ -3249,6 +3384,12 @@ if (
                       <option value="chataks">chataks</option>
                       <option value="perch">perch</option>
                     </select>
+                      {formErrors.builtUpAreaUnit && (
+                        <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                          <MdErrorOutline className="text-lg" />
+                          {formErrors.builtUpAreaUnit}
+                        </p>
+                      )}
                   </div>
                 </div>
                 {/* <div>
@@ -9370,7 +9511,7 @@ fice Space") ||
                         : ""
                         }`}
                     >
-                      {amenity.amenity_name}
+                      {fixAmenityLabel(amenity.amenity_name)}
                     </span>
                   </label>
                 ))}
@@ -9548,7 +9689,13 @@ fice Space") ||
                         <select
                           name="video_url_type"
                           value={formData.video_url_type}
-                          onChange={handleInputChange}
+                          onChange={(e) => {
+                              handleInputChange(e);
+                              // no source = no link: clear any link typed before
+                              if (!e.target.value) {
+                                handleInputChange({ target: { name: "video_url", value: "" } });
+                              }
+                            }}
                           className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
                         >
                           <option value="">Select Video Source</option>
@@ -9556,6 +9703,12 @@ fice Space") ||
                           <option value="Vimeo">Vimeo</option>
                           <option value="Other">Other</option>
                         </select>
+                          {formErrors.video_url_type && (
+                            <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                              <MdErrorOutline className="text-lg" />
+                              {formErrors.video_url_type}
+                            </p>
+                          )}
                       </div>
 
                       <div className="w-1/2">
@@ -9563,12 +9716,20 @@ fice Space") ||
                           Enter Video URL
                         </label>
                         <input
-                          type="text"
-                          name="video_url"
-                          value={formData.video_url}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-                        />
+                            type="text"
+                            name="video_url"
+                            value={formData.video_url}
+                            onChange={handleInputChange}
+                            disabled={!formData.video_url_type}
+                            placeholder={formData.video_url_type ? "Paste the video link" : "Select a video source first"}
+                            className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          />
+                          {formErrors.video_url && (
+                            <p className="flex items-center gap-1 mt-1 text-sm text-red-500 normal-case">
+                              <MdErrorOutline className="text-lg" />
+                              {formErrors.video_url}
+                            </p>
+                          )}
                       </div>
                     </div>
                   </div>
