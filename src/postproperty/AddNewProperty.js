@@ -18,6 +18,11 @@ import {
   validateAreaValue,
   validatePropertyPrice,
   validateVideoUrl,
+  capitalizeFirst,
+  PARKING_MAX,
+  sanitizeParkingCount,
+  validateFlatNo,
+  validatePossessionDate,
 } from "../utils/propertyFormValidation";
 // File ke top mein, component function ke BAHAR
 
@@ -304,7 +309,11 @@ const AddNewProperty = () => {
     }
   } catch (error) {
     console.error("Generate Description Error:", error);
-    toast.error("Failed to generate description");
+    toast.error(
+      error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Failed to generate description",
+    );
   } finally {
     setIsGeneratingDescription(false);
   }
@@ -1685,7 +1694,7 @@ useEffect(() => {
         )
       ) {
         if (!formData.bhk_type?.trim()) {
-          errors.bhk_type = "BHK is required";
+          errors.bhk_type = "BHK type is required";
         }
       }
       if (
@@ -1734,8 +1743,7 @@ if (
       if (builtUpUnitError) errors.builtUpAreaUnit = builtUpUnitError;
 
       // Carpet vs Built-up must make sense once both are in the same unit.
-      // (Plot / Land listings are skipped: their "built-up" area is not a building area.)
-      if (propertyType !== "Plot" && propertyType !== "Land") {
+      {
         const pair = validateAreaPair({
           carpet: carpetArea,
           carpetUnit: carpetAreaUnit,
@@ -1760,6 +1768,14 @@ if (
       ) {
         errors.ownership = "Ownership is required";
       }
+
+      // Possession / available date must be a real date with a sensible year
+      const possessionDateError = validatePossessionDate(formData.possession_date);
+      if (possessionDateError) errors.possession_date = possessionDateError;
+
+      // Flat / House No: special characters alone are not accepted
+      const flatNoError = validateFlatNo(formData.block);
+      if (flatNoError) errors.block = flatNoError;
     }
 
     // Amenities are optional (NWB-BUG-079): nothing to validate on this step.
@@ -1780,6 +1796,11 @@ if (
         }
       }
     }
+
+    // every validation message starts with a capital letter
+    Object.keys(errors).forEach((key) => {
+      errors[key] = capitalizeFirst(errors[key]);
+    });
 
     setFormErrors(errors);
 
@@ -4192,7 +4213,7 @@ if (
                           value={formData.total_floor}
                           onChange={(e) => {
                             const value = e.target.value;
-                            if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
+                            if (/^\d{0,3}$/.test(value)) {
                               handleInputChange(e);
                             }
                           }}
@@ -4349,6 +4370,12 @@ if (
                             }
                           }}
                         />
+                        {formErrors.block && (
+                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <MdErrorOutline className="text-lg" />
+                            {formErrors.block}
+                          </p>
+                        )}
                       </div>
                     )}
                   {propertyType === "Hospitality" && (
@@ -5140,7 +5167,7 @@ if (
                               onChange={(e) =>
                                 setFormData({
                                   ...formData,
-                                  covered_parking: e.target.value,
+                                  covered_parking: sanitizeParkingCount(e.target.value),
                                 })
                               }
                               className="w-16 p-2 text-center border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
@@ -5152,8 +5179,10 @@ if (
                               onClick={() =>
                                 setFormData({
                                   ...formData,
-                                  covered_parking:
-                                    Number(formData.covered_parking || 0) + 1,
+                                  covered_parking: Math.min(
+                                      PARKING_MAX,
+                                      Number(formData.covered_parking || 0) + 1,
+                                    ),
                                 })
                               }
                             >
@@ -5192,7 +5221,7 @@ if (
                               onChange={(e) =>
                                 setFormData({
                                   ...formData,
-                                  uncovered_parking: e.target.value,
+                                  uncovered_parking: sanitizeParkingCount(e.target.value),
                                 })
                               }
                               className="w-16 p-2 text-center border rounded-lg outline-none focus:ring-2 focus:ring-rose-500"
@@ -5204,8 +5233,10 @@ if (
                               onClick={() =>
                                 setFormData({
                                   ...formData,
-                                  uncovered_parking:
-                                    Number(formData.uncovered_parking || 0) + 1,
+                                  uncovered_parking: Math.min(
+                                      PARKING_MAX,
+                                      Number(formData.uncovered_parking || 0) + 1,
+                                    ),
                                 })
                               }
                             >
