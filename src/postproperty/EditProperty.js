@@ -18,6 +18,11 @@ import {
   validateAreaValue,
   validatePropertyPrice,
   validateVideoUrl,
+  capitalizeFirst,
+  PARKING_MAX,
+  sanitizeParkingCount,
+  validateFlatNo,
+  validatePossessionDate,
 } from "../utils/propertyFormValidation";
 import { IoIosInformationCircle } from "react-icons/io";
 import { ToWords } from "to-words";
@@ -297,7 +302,11 @@ const EditProperty = () => {
     }
   } catch (error) {
     console.error("Generate Description Error:", error);
-    toast.error("Failed to generate description");
+    toast.error(
+      error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Failed to generate description",
+    );
   } finally {
     setIsGeneratingDescription(false);
   }
@@ -1759,7 +1768,7 @@ form.append("property_dimensions_breadth", breadthOfLand);
         )
       ) {
         if (!formData.bhk_type?.trim()) {
-          errors.bhk_type = "BHK is required";
+          errors.bhk_type = "BHK type is required";
         }
       }
       if (formData.possession_status === "Under Construction" ||
@@ -1790,8 +1799,7 @@ form.append("property_dimensions_breadth", breadthOfLand);
       if (builtUpUnitError) errors.builtUpAreaUnit = builtUpUnitError;
 
       // Carpet vs Built-up must make sense once both are in the same unit.
-      // (Plot / Land listings are skipped: their "built-up" area is not a building area.)
-      if (propertyType !== "Plot" && propertyType !== "Land") {
+      {
         const pair = validateAreaPair({
           carpet: carpetArea,
           carpetUnit: carpetAreaUnit,
@@ -1816,6 +1824,14 @@ form.append("property_dimensions_breadth", breadthOfLand);
       ) {
         errors.ownership = "Ownership is required";
       }
+
+      // Possession / available date must be a real date with a sensible year
+      const possessionDateError = validatePossessionDate(formData.possession_date);
+      if (possessionDateError) errors.possession_date = possessionDateError;
+
+      // Flat / House No: special characters alone are not accepted
+      const flatNoError = validateFlatNo(formData.block);
+      if (flatNoError) errors.block = flatNoError;
     }
 
     // Amenities are optional (NWB-BUG-079): nothing to validate on this step.
@@ -1836,6 +1852,11 @@ form.append("property_dimensions_breadth", breadthOfLand);
         }
       }
     }
+
+    // every validation message starts with a capital letter
+    Object.keys(errors).forEach((key) => {
+      errors[key] = capitalizeFirst(errors[key]);
+    });
 
     setFormErrors(errors);
 
@@ -4155,7 +4176,7 @@ form.append("property_dimensions_breadth", breadthOfLand);
                             value={formData.total_floor}
                             onChange={(e) => {
                               const value = e.target.value;
-                              if (/^[a-zA-Z0-9]{0,10}$/.test(value)) {
+                              if (/^\d{0,3}$/.test(value)) {
                                 handleInputChange(e);
                               }
                             }}
@@ -4298,6 +4319,12 @@ form.append("property_dimensions_breadth", breadthOfLand);
                               }
                             }}
                           />
+                        {formErrors.block && (
+                          <p className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <MdErrorOutline className="text-lg" />
+                            {formErrors.block}
+                          </p>
+                        )}
                         </div>
                       )}
 

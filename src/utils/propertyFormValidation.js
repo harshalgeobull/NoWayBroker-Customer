@@ -198,7 +198,57 @@ export const validateVideoUrl = (raw = "") => {
 };
 
 /* ---------- Photos (NWB-BUG-082) ---------- */
-export const MAX_PROPERTY_PHOTOS = 20; // stated in the bug; confirm with business
+export const MAX_PROPERTY_PHOTOS = 5; // stated in the bug; confirm with business
 
 /* ---------- Amenity label typo coming from the amenities list (NWB-BUG-078) ---------- */
 export const fixAmenityLabel = (name = "") => String(name).replace(/Chidren/g, "Children");
+
+/* =====================================================================
+ * Plot/Land Property Details round  (NWB-BUG-084 to 105)
+ * Limits below are NOT in the QA data - confirm with product.
+ * ===================================================================== */
+
+/* ---------- Error messages start with a capital letter (NWB-BUG-102) ---------- */
+export const capitalizeFirst = (text = "") =>
+  typeof text === "string" && text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
+
+/* ---------- Total Floor: digits only (NWB-BUG-099) ---------- */
+// 3 digits: the form builds a list of floors from this number, so it must stay small
+export const TOTAL_FLOOR_MAX_DIGITS = 3;
+
+/* ---------- Parking counts: limited number of digits (NWB-BUG-103, 104) ---------- */
+export const PARKING_MAX_DIGITS = 2;
+export const PARKING_MAX = Math.pow(10, PARKING_MAX_DIGITS) - 1; // 99
+
+export const sanitizeParkingCount = (value = "") =>
+  String(value ?? "").replace(/\D/g, "").slice(0, PARKING_MAX_DIGITS);
+
+/* ---------- Flat / House No (NWB-BUG-100, 101) ---------- */
+// Letters, digits, spaces and the usual symbols stay allowed, and the 20-character limit is
+// already enforced while typing. Only input made of special characters alone is rejected.
+export const validateFlatNo = (raw = "") => {
+  const value = String(raw ?? "").trim();
+  if (!value) return "";
+  if (!/[A-Za-z0-9]/.test(value))
+    return "Must contain letters or numbers (special characters alone are not allowed)";
+  return "";
+};
+
+/* ---------- Possession / available date (NWB-BUG-098) ---------- */
+export const POSSESSION_YEAR_MIN = 2000;
+export const POSSESSION_YEARS_AHEAD = 20;
+
+export const validatePossessionDate = (raw = "") => {
+  const value = String(raw ?? "").trim().split("T")[0];
+  if (!value) return "";
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return "Enter a valid date";
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day)
+    return "Enter a valid date";
+  const maxYear = new Date().getFullYear() + POSSESSION_YEARS_AHEAD;
+  if (year < POSSESSION_YEAR_MIN || year > maxYear)
+    return `Enter a valid date (year between ${POSSESSION_YEAR_MIN} and ${maxYear})`;
+  return "";
+};
